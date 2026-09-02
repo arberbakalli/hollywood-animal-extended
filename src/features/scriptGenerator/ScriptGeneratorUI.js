@@ -29,6 +29,7 @@ export class ScriptGeneratorUI {
         this._getAllTags = getAllTags;
         this._getLockedTagIds = getLockedTagIds;
         this._listFilter = new ScriptSearch();
+        this._sortOrder = 'alpha'; // 'alpha' | 'reverse' | 'recent'
     }
 
     mount() {
@@ -46,12 +47,18 @@ export class ScriptGeneratorUI {
             <div class="excl-filter-row" id="excl-filter-row" style="display:none;">
                 <input type="text" id="excl-filter-input" class="excl-filter-input"
                     placeholder="Filter banned tags...">
+                <div class="excl-sort-controls">
+                    <button class="sort-btn active" data-sort="alpha" title="Sort A→Z">A→Z</button>
+                    <button class="sort-btn" data-sort="reverse" title="Sort Z→A">Z→A</button>
+                    <button class="sort-btn" data-sort="recent" title="Recently added">Recent</button>
+                </div>
             </div>
             <div id="excl-list"></div>
         `;
 
         this._setupBanSearch();
         this._setupListFilter();
+        this._setupSortControls();
         this._manager.setOnChange(() => this.render());
         this.render();
     }
@@ -108,6 +115,19 @@ export class ScriptGeneratorUI {
             });
     }
 
+    // ── Sort controls ─────────────────────────────────────────────────────────
+
+    _setupSortControls() {
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this._sortOrder = e.target.dataset.sort;
+                this.render();
+            });
+        });
+    }
+
     // ── Render ────────────────────────────────────────────────────────────────
 
     render() {
@@ -120,10 +140,13 @@ export class ScriptGeneratorUI {
         if (badge) badge.textContent = all.length ? `${all.length} banned` : '';
         if (filterRow) filterRow.style.display = all.length > 4 ? 'flex' : 'none';
 
-        const visible = this._listFilter.filter(
+        let visible = this._listFilter.filter(
             all,
             id => `${this._getTagName(id)} ${this._getCategoryLabel(id)}`
         );
+
+        // Apply sorting
+        visible = this._applySorting(visible);
 
         list.innerHTML = '';
 
@@ -150,6 +173,16 @@ export class ScriptGeneratorUI {
             fragment.appendChild(row);
         });
         list.appendChild(fragment);
+    }
+
+    _applySorting(ids) {
+        if (this._sortOrder === 'alpha') {
+            return [...ids].sort((a, b) => this._getTagName(a).localeCompare(this._getTagName(b)));
+        } else if (this._sortOrder === 'reverse') {
+            return [...ids].sort((a, b) => this._getTagName(b).localeCompare(this._getTagName(a)));
+        }
+        // 'recent' - keep original order (insertion order from Set)
+        return ids;
     }
 
     _getCategoryLabel(id) {
