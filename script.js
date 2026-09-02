@@ -355,24 +355,38 @@ function beautifyTagName(rawId) {
 
 function initializeSelectors(context) {
     const container = document.getElementById(`selectors-container-${context}`);
-    container.innerHTML = ''; 
+    container.innerHTML = '';
     GAME_DATA.categories.forEach(category => {
-        const tagsInCategory = Object.values(GAME_DATA.tags).filter(t => 
+        const tagsInCategory = Object.values(GAME_DATA.tags).filter(t =>
             t.category === category
         ).sort((a, b) => a.name.localeCompare(b.name));
         if (tagsInCategory.length === 0) return;
-        
+
         const groupDiv = document.createElement('div');
         groupDiv.className = 'category-group';
         groupDiv.id = `group-${category.replace(/\s/g, '-')}-${context}`;
-        
+
         const header = document.createElement('div');
         header.className = 'category-header';
         const label = document.createElement('div');
         label.className = 'category-label';
         label.innerText = category;
         header.appendChild(label);
-        
+
+        // Add search input for excluded context (to filter options within category)
+        if (context === 'excluded' && tagsInCategory.length > 5) {
+            const searchWrapper = document.createElement('div');
+            searchWrapper.className = 'category-search-wrapper';
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'category-search-input';
+            searchInput.placeholder = `Search ${category}...`;
+            searchInput.dataset.category = category;
+            searchInput.dataset.context = context;
+            searchWrapper.appendChild(searchInput);
+            header.appendChild(searchWrapper);
+        }
+
         // Excluded list is always multi-select for all categories
         if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
             const addBtn = document.createElement('button');
@@ -382,14 +396,40 @@ function initializeSelectors(context) {
             header.appendChild(addBtn);
         }
         groupDiv.appendChild(header);
-        
+
         const inputsContainer = document.createElement('div');
         inputsContainer.className = 'inputs-container';
         inputsContainer.id = `inputs-${category.replace(/\s/g, '-')}-${context}`;
         groupDiv.appendChild(inputsContainer);
-        
+
         container.appendChild(groupDiv);
         addDropdown(category, null, context);
+    });
+
+    // Setup search filtering for excluded context
+    if (context === 'excluded') {
+        setupExcludedSearch();
+    }
+}
+
+function setupExcludedSearch() {
+    document.querySelectorAll('.category-search-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const category = e.target.dataset.category;
+            const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-excluded`;
+            const container = document.querySelector(containerSelector);
+
+            if (!container) return;
+
+            container.querySelectorAll('.tag-selector').forEach(select => {
+                select.querySelectorAll('option').forEach((opt, idx) => {
+                    if (idx === 0) return; // Skip placeholder
+                    const text = opt.innerText.toLowerCase();
+                    opt.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        });
     });
 }
 
