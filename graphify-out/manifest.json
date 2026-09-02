@@ -1,0 +1,92 @@
+{
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\data.js": {
+    "mtime": 1788377560.2714486,
+    "ast_hash": "6a734bdc4f9ece2a2a90f4190b7f62b2",
+    "semantic_hash": "6a734bdc4f9ece2a2a90f4190b7f62b2"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\data\\GenrePairs.json": {
+    "mtime": 1788377560.272453,
+    "ast_hash": "c051efbb77bc1a537ec4e8376a013d72",
+    "semantic_hash": "c051efbb77bc1a537ec4e8376a013d72"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\data\\TagCompatibilityData.json": {
+    "mtime": 1788377560.279958,
+    "ast_hash": "b9bd26e40fd166691644a772d3de3dee",
+    "semantic_hash": "b9bd26e40fd166691644a772d3de3dee"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\data\\TagData.json": {
+    "mtime": 1788377560.2809637,
+    "ast_hash": "98fdb7f4bc618bcecd67b6ae616d4ebe",
+    "semantic_hash": "98fdb7f4bc618bcecd67b6ae616d4ebe"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\data\\TagsAudienceWeights.json": {
+    "mtime": 1788377560.2809637,
+    "ast_hash": "0095d22ec772dcf9b4fe556423b19258",
+    "semantic_hash": "0095d22ec772dcf9b4fe556423b19258"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\Belarusian.json": {
+    "mtime": 1788377560.284963,
+    "ast_hash": "ac4eaa462ce8b534b22fa0e109661917",
+    "semantic_hash": "ac4eaa462ce8b534b22fa0e109661917"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\Chinese.json": {
+    "mtime": 1788377560.2879632,
+    "ast_hash": "b8101b511adcbe0dc672f5ec2d2f6924",
+    "semantic_hash": "b8101b511adcbe0dc672f5ec2d2f6924"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\English.json": {
+    "mtime": 1788377560.290466,
+    "ast_hash": "e076ea3a58578ac6b5c40b9c0b6798b6",
+    "semantic_hash": "e076ea3a58578ac6b5c40b9c0b6798b6"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\French.json": {
+    "mtime": 1788377560.2944753,
+    "ast_hash": "25d383549a53a41ce46e8f59cfe27990",
+    "semantic_hash": "25d383549a53a41ce46e8f59cfe27990"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\German.json": {
+    "mtime": 1788377560.2974744,
+    "ast_hash": "b6a34407e5a1c7b4f6290fba366958ac",
+    "semantic_hash": "b6a34407e5a1c7b4f6290fba366958ac"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\Japanese.json": {
+    "mtime": 1788377560.3009858,
+    "ast_hash": "afea691e1f35dab3bd134da8c817a90f",
+    "semantic_hash": "afea691e1f35dab3bd134da8c817a90f"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\Portuguese.json": {
+    "mtime": 1788377560.3039918,
+    "ast_hash": "87d5ae170fb0ca0215488c4b701fc00e",
+    "semantic_hash": "87d5ae170fb0ca0215488c4b701fc00e"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\Russian.json": {
+    "mtime": 1788377560.3069904,
+    "ast_hash": "bc5684cdb73e92ef5f78e22bc70b9b9e",
+    "semantic_hash": "bc5684cdb73e92ef5f78e22bc70b9b9e"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\Spanish.json": {
+    "mtime": 1788377560.3112335,
+    "ast_hash": "54e282c6194eda859499891e334cdf36",
+    "semantic_hash": "54e282c6194eda859499891e334cdf36"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\localization\\Ukrainian.json": {
+    "mtime": 1788377560.3162346,
+    "ast_hash": "e0201e609950b2e23333665e149b5ae1",
+    "semantic_hash": "e0201e609950b2e23333665e149b5ae1"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\script.js": {
+    "mtime": 1788377560.3162346,
+    "ast_hash": "ed64e8ac5422a476560b37872e8fb8fa",
+    "semantic_hash": "ed64e8ac5422a476560b37872e8fb8fa"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\README.md": {
+    "mtime": 1788377560.2714486,
+    "ast_hash": "56bd10f1b1a85e38709428c80542dada",
+    "semantic_hash": "56bd10f1b1a85e38709428c80542dada"
+  },
+  "C:\\Users\\testUser\\IdeaProjects\\Hollywood-Animal-Calculator\\index.html": {
+    "mtime": 1788377560.2809637,
+    "ast_hash": "d39b4ce93ad5139c9e64bc8b84080821",
+    "semantic_hash": "d39b4ce93ad5139c9e64bc8b84080821"
+  }
+}

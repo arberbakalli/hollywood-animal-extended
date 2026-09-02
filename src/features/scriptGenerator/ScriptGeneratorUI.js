@@ -20,12 +20,14 @@ export class ScriptGeneratorUI {
      * @param {import('./ExclusionManager.js').ExclusionManager} manager
      * @param {(id: string) => string} getTagName     Display name for a tag ID
      * @param {() => {id: string, name: string, category: string}[]} getAllTags
+     * @param {() => string[]} getLockedTagIds   Returns IDs of currently locked tags (to exclude from ban search)
      */
-    constructor(containerId, manager, getTagName, getAllTags) {
+    constructor(containerId, manager, getTagName, getAllTags, getLockedTagIds = () => []) {
         this._container = document.getElementById(containerId);
         this._manager = manager;
         this._getTagName = getTagName;
         this._getAllTags = getAllTags;
+        this._getLockedTagIds = getLockedTagIds;
         this._listFilter = new ScriptSearch();
     }
 
@@ -66,9 +68,11 @@ export class ScriptGeneratorUI {
 
             if (q.length < 2) { results.classList.add('hidden'); return; }
 
+            const lockedIds = new Set(this._getLockedTagIds());
             const matches = this._getAllTags()
                 .filter(t =>
                     !this._manager.has(t.id) &&
+                    !lockedIds.has(t.id) &&
                     (t.name.toLowerCase().includes(q) || t.category.toLowerCase().includes(q))
                 )
                 .slice(0, 10);

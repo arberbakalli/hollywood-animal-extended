@@ -365,27 +365,39 @@
     </div>
 
     <script src="data.js"></script>
-    <script src="script.js"></script>
     <script type="module">
         import { ExclusionManager } from './src/features/scriptGenerator/ExclusionManager.js';
         import { ScriptGeneratorUI } from './src/features/scriptGenerator/ScriptGeneratorUI.js';
 
-        window.addEventListener('hollywood:ready', () => {
-            const manager = new ExclusionManager();
-            window.__exclusionManager = manager;
+        // Initialize manager BEFORE script.js runs
+        const manager = new ExclusionManager();
+        window.__exclusionManager = manager;
+    </script>
+    <script src="script.js"></script>
+    <script type="module">
+        import { ScriptGeneratorUI } from './src/features/scriptGenerator/ScriptGeneratorUI.js';
 
+        window.addEventListener('hollywood:ready', () => {
             const getAllTags = () => Object.values(GAME_DATA.tags).map(t => ({
                 id: t.id,
                 name: t.name,
                 category: t.category,
             }));
             const getTagName = id => GAME_DATA.tags[id]?.name ?? id;
+            const getLockedTagIds = () => {
+                const locked = [];
+                document.querySelectorAll('#selectors-container-generator .tag-selector').forEach(sel => {
+                    if (sel.value) locked.push(sel.value);
+                });
+                return locked;
+            };
 
             const ui = new ScriptGeneratorUI(
                 'exclusion-ui-container',
-                manager,
+                window.__exclusionManager,
                 getTagName,
                 getAllTags,
+                getLockedTagIds,
             );
             window.__exclusionUI = ui;
             ui.mount();
