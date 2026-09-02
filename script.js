@@ -18,8 +18,9 @@ window.onload = async function() {
         initializeSelectors('advertisers');
         initializeSelectors('synergy');
 
-        // Init generator tab selectors (Locked only; Excluded uses ExclusionManager)
+        // Init generator tab selectors (Locked and Excluded)
         initializeSelectors('generator');
+        initializeSelectors('excluded');
 
         buildSearchIndex();
         setupSearchListeners();
@@ -67,20 +68,23 @@ function setGeneratorProfile(profileName) {
         populateExcludedForStartingProfile();
     } else {
         // Custom: Reset exclusions
-        window.__exclusionUI ? window.__exclusionUI.reset() : window.__exclusionManager?.clear();
+        initializeSelectors('excluded');
     }
 }
 
 function populateExcludedForStartingProfile() {
+    initializeSelectors('excluded');
     const whitelist = new Set(GAME_DATA.starterWhitelist || []);
     const allTags = Object.values(GAME_DATA.tags);
-    const excludedIds = [];
+    const container = document.getElementById('selectors-container-excluded');
+
+    container.style.display = 'none'; // Performance optimization
     allTags.forEach(tag => {
         if (!whitelist.has(tag.id)) {
-            excludedIds.push(tag.id);
+            addDropdown(tag.category, tag.id, 'excluded');
         }
     });
-    window.__exclusionManager?.replaceAll(excludedIds);
+    container.style.display = '';
 }
 
 /* =========================================================================
@@ -105,21 +109,21 @@ async function changeLanguage(langName, shouldRender = true) {
         if (Object.keys(GAME_DATA.tags).length > 0) {
             updateAllTagNames();
             buildSearchIndex();
-            window.__exclusionUI?.render();
             if (shouldRender) {
                 const savedSynergy = collectTagInputs('synergy');
                 const savedAdvertisers = collectTagInputs('advertisers');
                 const savedGenerator = collectTagInputs('generator');
-                const savedExcluded = window.__exclusionManager?.getAll() || [];
+                const savedExcluded = collectTagInputs('excluded');
 
                 initializeSelectors('synergy');
                 initializeSelectors('advertisers');
                 initializeSelectors('generator');
+                initializeSelectors('excluded');
 
                 restoreSelection('synergy', savedSynergy);
                 restoreSelection('advertisers', savedAdvertisers);
                 restoreSelection('generator', savedGenerator);
-                window.__exclusionManager?.replaceAll(savedExcluded);
+                restoreSelection('excluded', savedExcluded);
 
                 if(currentGenProfile === 'starting') {
                     populateExcludedForStartingProfile();
@@ -1718,12 +1722,7 @@ function renderSynergyResults(matrix, bonuses, tags) {
 }
 
 function resetSelectors(context) {
-    if (context !== 'excluded') {
-        initializeSelectors(context);
-    }
-    if (context === 'excluded') {
-        window.__exclusionUI?.reset();
-    }
+    initializeSelectors(context);
 
     // If resetting Advertisers, move the calculator back to its initial position
     if (context === 'advertisers') {
