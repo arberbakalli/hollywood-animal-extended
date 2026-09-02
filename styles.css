@@ -1165,3 +1165,79 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .file-action-btn:active {
     transform: translateY(1px);
 }
+
+/* ========================================= */
+/* --- EXCLUSION UI (Stage 3) --- */
+/* ========================================= */
+
+.excl-search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.excl-search-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.excl-search-input,
+.excl-filter-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--bg-input, #1a1a2e);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.excl-search-input:focus,
+.excl-filter-input:focus {
+    outline: none;
+    border-color: var(--danger);
+}
+
+.excl-badge {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--danger);
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: right;
+}
+
+.excl-filter-row {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.excl-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.excl-tag-name {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.excl-tag-cat {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-right: 4px;
+}
+
+.excl-empty {
+    padding: 16px 8px;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.88rem;
+}

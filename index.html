@@ -119,7 +119,8 @@
                     </div>
                     <p class="subtitle">Select tags to <strong>BAN</strong> (e.g., due to "The Code"). The generator will never pick these.</p>
                     
-                    <div id="selectors-container-excluded"></div>
+                    <div id="selectors-container-excluded" style="display:none;"></div>
+                    <div id="exclusion-ui-container"></div>
 
                     <div class="action-area">
                         <button class="analyze-btn" onclick="generateScripts()">Generate Scripts</button>
@@ -365,5 +366,30 @@
 
     <script src="data.js"></script>
     <script src="script.js"></script>
+    <script type="module">
+        import { ExclusionManager } from './src/features/scriptGenerator/ExclusionManager.js';
+        import { ScriptGeneratorUI } from './src/features/scriptGenerator/ScriptGeneratorUI.js';
+
+        window.addEventListener('hollywood:ready', () => {
+            const manager = new ExclusionManager();
+            window.__exclusionManager = manager;
+
+            const getAllTags = () => Object.values(GAME_DATA.tags).map(t => ({
+                id: t.id,
+                name: t.name,
+                category: t.category,
+            }));
+            const getTagName = id => GAME_DATA.tags[id]?.name ?? id;
+
+            const ui = new ScriptGeneratorUI(
+                'exclusion-ui-container',
+                manager,
+                getTagName,
+                getAllTags,
+            );
+            window.__exclusionUI = ui;
+            ui.mount();
+        }, { once: true });
+    </script>
 </body>
 </html>

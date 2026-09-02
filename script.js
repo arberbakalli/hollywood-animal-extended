@@ -36,6 +36,7 @@ window.onload = async function() {
         // RENDER PINNED SECTION IMMEDIATELY (To show Save/Load buttons)
         renderPinnedScripts();
 
+        window.dispatchEvent(new CustomEvent('hollywood:ready'));
         console.log("Initialization Complete.");
     } catch (error) {
         console.error("Failed to load data:", error);
@@ -67,7 +68,8 @@ function setGeneratorProfile(profileName) {
         populateExcludedForStartingProfile();
     } else {
         // Custom: Reset exclusions
-        initializeSelectors('excluded'); 
+        initializeSelectors('excluded');
+        window.__exclusionUI ? window.__exclusionUI.reset() : window.__exclusionManager?.clear();
     }
 }
 
@@ -76,14 +78,17 @@ function populateExcludedForStartingProfile() {
     const whitelist = new Set(GAME_DATA.starterWhitelist || []);
     const allTags = Object.values(GAME_DATA.tags);
     const container = document.getElementById('selectors-container-excluded');
-    
+
     container.style.display = 'none'; // Performance optimization
+    const excludedIds = [];
     allTags.forEach(tag => {
         if (!whitelist.has(tag.id)) {
             addDropdown(tag.category, tag.id, 'excluded');
+            excludedIds.push(tag.id);
         }
     });
-    container.style.display = 'grid'; 
+    container.style.display = 'grid';
+    window.__exclusionManager?.replaceAll(excludedIds);
 }
 
 /* =========================================================================
@@ -107,7 +112,8 @@ async function changeLanguage(langName, shouldRender = true) {
         }
         if (Object.keys(GAME_DATA.tags).length > 0) {
             updateAllTagNames();
-            buildSearchIndex(); 
+            buildSearchIndex();
+            window.__exclusionUI?.render();
             if (shouldRender) {
                 const savedSynergy = collectTagInputs('synergy');
                 const savedAdvertisers = collectTagInputs('advertisers');
@@ -647,7 +653,9 @@ function generateScripts() {
 
     // Get Fixed Tags
     const fixedTags = collectTagInputs('generator');
-    const excludedTags = collectTagInputs('excluded');
+    const excludedTags = window.__exclusionManager
+        ? window.__exclusionManager.getAll().map(id => ({ id }))
+        : collectTagInputs('excluded');
     
     // Validate
     const scoringFixed = fixedTags.filter(t => t.category !== "Genre" && t.category !== "Setting");
@@ -1708,6 +1716,9 @@ function renderSynergyResults(matrix, bonuses, tags) {
 
 function resetSelectors(context) {
     initializeSelectors(context);
+    if (context === 'excluded') {
+        window.__exclusionUI?.reset();
+    }
 
     // If resetting Advertisers, move the calculator back to its initial position
     if (context === 'advertisers') {
