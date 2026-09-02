@@ -462,24 +462,30 @@ function refreshCategoryDropdowns(category, context) {
 }
 
 function setupCategorySearch(context) {
-    document.querySelectorAll('.category-search-input').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const category = e.target.dataset.category;
-            const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
-            const container = document.querySelector(containerSelector);
+    // Use event delegation for search inputs (handles dynamically added dropdowns)
+    document.addEventListener('input', function(e) {
+        if (!e.target.classList.contains('category-search-input')) return;
 
-            if (!container) return;
+        const searchTerm = e.target.value.toLowerCase().trim();
+        const category = e.target.dataset.category;
+        const inputContext = e.target.dataset.context;
 
-            // Filter options in all selects in this category
-            container.querySelectorAll('.tag-selector').forEach(select => {
-                select.querySelectorAll('option:not(:first-child)').forEach(opt => {
-                    const matches = opt.innerText.toLowerCase().includes(searchTerm);
-                    opt.style.display = matches ? '' : 'none';
-                });
+        if (inputContext !== context) return;
+
+        const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
+        const container = document.querySelector(containerSelector);
+
+        if (!container) return;
+
+        // Filter options in all selects in this category
+        container.querySelectorAll('.tag-selector').forEach(select => {
+            select.querySelectorAll('option:not(:first-child)').forEach(opt => {
+                const text = opt.innerText.toLowerCase();
+                const matches = searchTerm === '' || text.includes(searchTerm);
+                opt.style.display = matches ? '' : 'none';
             });
         });
-    });
+    }, true); // Use capture phase for better event handling
 }
 
 function addDropdown(category, selectedId = null, context = currentTab) {
