@@ -13,26 +13,25 @@ let currentGenProfile = 'custom'; // 'custom' or 'starting'
 
 window.onload = async function() {
     try {
-        await changeLanguage('English', false); 
+        await changeLanguage('English', false);
         await loadExternalData();
         initializeSelectors('advertisers');
         initializeSelectors('synergy');
-        
-        // Init generator tab selectors (Locked and Excluded)
-        initializeSelectors('generator'); 
-        initializeSelectors('excluded');
+
+        // Init generator tab selectors (Locked only; Excluded uses ExclusionManager)
+        initializeSelectors('generator');
 
         buildSearchIndex();
         setupSearchListeners();
-        setupScoreSync(); 
-        setupGeneratorControls(); 
-        
+        setupScoreSync();
+        setupGeneratorControls();
+
         // Setup Distribution Calculator (Immediate Interaction)
         setupDistributionLogic();
 
         // Initialize Default Profile
         setGeneratorProfile('custom');
-        
+
         // RENDER PINNED SECTION IMMEDIATELY (To show Save/Load buttons)
         renderPinnedScripts();
 
@@ -68,26 +67,19 @@ function setGeneratorProfile(profileName) {
         populateExcludedForStartingProfile();
     } else {
         // Custom: Reset exclusions
-        initializeSelectors('excluded');
         window.__exclusionUI ? window.__exclusionUI.reset() : window.__exclusionManager?.clear();
     }
 }
 
 function populateExcludedForStartingProfile() {
-    initializeSelectors('excluded');
     const whitelist = new Set(GAME_DATA.starterWhitelist || []);
     const allTags = Object.values(GAME_DATA.tags);
-    const container = document.getElementById('selectors-container-excluded');
-
-    container.style.display = 'none'; // Performance optimization
     const excludedIds = [];
     allTags.forEach(tag => {
         if (!whitelist.has(tag.id)) {
-            addDropdown(tag.category, tag.id, 'excluded');
             excludedIds.push(tag.id);
         }
     });
-    container.style.display = 'grid';
     window.__exclusionManager?.replaceAll(excludedIds);
 }
 
@@ -118,18 +110,17 @@ async function changeLanguage(langName, shouldRender = true) {
                 const savedSynergy = collectTagInputs('synergy');
                 const savedAdvertisers = collectTagInputs('advertisers');
                 const savedGenerator = collectTagInputs('generator');
-                const savedExcluded = collectTagInputs('excluded');
-                
+                const savedExcluded = window.__exclusionManager?.getAll() || [];
+
                 initializeSelectors('synergy');
                 initializeSelectors('advertisers');
                 initializeSelectors('generator');
-                initializeSelectors('excluded');
-                
+
                 restoreSelection('synergy', savedSynergy);
                 restoreSelection('advertisers', savedAdvertisers);
                 restoreSelection('generator', savedGenerator);
-                restoreSelection('excluded', savedExcluded);
-                
+                window.__exclusionManager?.replaceAll(savedExcluded);
+
                 if(currentGenProfile === 'starting') {
                     populateExcludedForStartingProfile();
                 }
@@ -1715,7 +1706,9 @@ function renderSynergyResults(matrix, bonuses, tags) {
 }
 
 function resetSelectors(context) {
-    initializeSelectors(context);
+    if (context !== 'excluded') {
+        initializeSelectors(context);
+    }
     if (context === 'excluded') {
         window.__exclusionUI?.reset();
     }
