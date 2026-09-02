@@ -407,50 +407,33 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     row.className = 'select-row';
     if (category === 'Genre' && context !== 'excluded') row.classList.add('genre-row');
 
-    // Add search wrapper for large lists (more than 8 options)
-    const needsSearch = tags.length > 8;
-    if (needsSearch) {
-        const searchWrap = document.createElement('div');
-        searchWrap.className = 'dropdown-search-wrap';
-        const searchInput = document.createElement('input');
-        searchInput.type = 'text';
-        searchInput.className = 'dropdown-search-input';
-        searchInput.placeholder = `Search ${category}...`;
-        searchInput.dataset.category = category;
-        searchWrap.appendChild(searchInput);
-        row.appendChild(searchWrap);
-    }
-
     const select = document.createElement('select');
     select.className = 'tag-selector';
     select.dataset.category = category;
-    select.dataset.searchable = needsSearch ? 'true' : 'false';
     const defOpt = document.createElement('option');
     defOpt.value = "";
     defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
     select.appendChild(defOpt);
+
+    // Filter out already-selected tags for 'generator' (locked) context to prevent duplicates
+    const alreadySelected = new Set();
+    if (context === 'generator') {
+        document.querySelectorAll('#selectors-container-generator .tag-selector').forEach(sel => {
+            if (sel.value) alreadySelected.add(sel.value);
+        });
+    }
+
     tags.forEach(tag => {
+        // Skip if already selected in this context (deduplication)
+        if (alreadySelected.has(tag.id)) return;
+
         const opt = document.createElement('option');
         opt.value = tag.id;
         opt.innerText = tag.name;
-        opt.dataset.searchText = tag.name.toLowerCase();
         select.appendChild(opt);
     });
     if (selectedId) select.value = selectedId;
     row.appendChild(select);
-
-    // Setup search functionality if needed
-    if (needsSearch) {
-        const searchInput = row.querySelector('.dropdown-search-input');
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const options = select.querySelectorAll('option:not(:first-child)');
-            options.forEach(opt => {
-                const matches = opt.dataset.searchText.includes(term);
-                opt.style.display = matches ? '' : 'none';
-            });
-        });
-    }
     
     // Add percent slider only for Genre in Synergy/Advertisers (not Excluded or simple Lock)
     if (category === 'Genre' && context !== 'excluded') {
