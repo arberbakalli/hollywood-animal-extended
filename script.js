@@ -412,6 +412,50 @@ function initializeSelectors(context) {
     }
 }
 
+/**
+ * Get all currently selected tag IDs in a category for a given context
+ * @param {string} category - Category name
+ * @param {string} context - Context ('generator', 'synergy', 'excluded')
+ * @returns {Set<string>} Set of selected tag IDs in this category
+ */
+function getSelectedTagsInCategory(category, context) {
+    const selected = new Set();
+    const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const container = document.querySelector(containerSelector);
+    if (!container) return selected;
+
+    container.querySelectorAll('.tag-selector').forEach(select => {
+        if (select.value) {
+            selected.add(select.value);
+        }
+    });
+    return selected;
+}
+
+/**
+ * Refresh all dropdowns in a category to enforce deduplication
+ * Hides already-selected options from all other dropdowns
+ */
+function refreshCategoryDropdowns(category, context) {
+    const categoryContainerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const categoryContainer = document.getElementById(categoryContainerId);
+    if (!categoryContainer) return;
+
+    const selects = categoryContainer.querySelectorAll('.tag-selector');
+    selects.forEach(select => {
+        const currentValue = select.value;
+        select.querySelectorAll('option:not(:first-child)').forEach(opt => {
+            // Check if this option is selected in another dropdown
+            const isSelectedElsewhere = Array.from(selects)
+                .filter(s => s !== select)
+                .some(s => s.value === opt.value);
+
+            // Hide it if selected elsewhere, show it if not
+            opt.style.display = isSelectedElsewhere ? 'none' : '';
+        });
+    });
+}
+
 function setupExcludedSearch() {
     document.querySelectorAll('.category-search-input').forEach(input => {
         input.addEventListener('input', (e) => {
@@ -459,25 +503,64 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
     select.appendChild(defOpt);
 
-    // Filter out already-selected tags for 'generator' (locked) context to prevent duplicates
+    // Add search wrapper for large lists (more than 8 options)
+    const needsSearch = tags.length > 8;
+    if (needsSearch) {
+        const searchWrap = document.createElement('div');
+        searchWrap.className = 'dropdown-search-wrap';
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.className = 'dropdown-search-input';
+        searchInput.placeholder = `Search ${category}...`;
+        searchInput.dataset.category = category;
+        searchWrap.appendChild(searchInput);
+        row.appendChild(searchWrap);
+    }
+
+    // Filter out already-selected tags in THIS CATEGORY to prevent duplicates (per-category deduplication)
     const alreadySelected = new Set();
-    if (context === 'generator') {
-        document.querySelectorAll('#selectors-container-generator .tag-selector').forEach(sel => {
-            if (sel.value) alreadySelected.add(sel.value);
-        });
+    if (context === 'generator' || context === 'synergy') {
+        const categoryContainerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+        const categoryContainer = document.getElementById(categoryContainerId);
+        if (categoryContainer) {
+            categoryContainer.querySelectorAll('.tag-selector').forEach(sel => {
+                if (sel.value) alreadySelected.add(sel.value);
+            });
+        }
     }
 
     tags.forEach(tag => {
-        // Skip if already selected in this context (deduplication)
-        if (alreadySelected.has(tag.id)) return;
+        // Skip if already selected in THIS CATEGORY (deduplication)
+        if (alreadySelected.has(tag.id) && tag.id !== selectedId) return;
 
         const opt = document.createElement('option');
         opt.value = tag.id;
         opt.innerText = tag.name;
+        opt.dataset.searchText = tag.name.toLowerCase();
         select.appendChild(opt);
     });
     if (selectedId) select.value = selectedId;
     row.appendChild(select);
+
+    // Setup search functionality if needed
+    if (needsSearch) {
+        const searchInput = row.querySelector('.dropdown-search-input');
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const options = select.querySelectorAll('option:not(:first-child)');
+            options.forEach(opt => {
+                const matches = opt.dataset.searchText.includes(term);
+                opt.style.display = matches ? '' : 'none';
+            });
+        });
+    }
+
+    // When selection changes, refresh all dropdowns in this category to enforce deduplication
+    select.addEventListener('change', () => {
+        if (context === 'generator' || context === 'synergy') {
+            refreshCategoryDropdowns(category, context);
+        }
+    });
     
     // Add percent slider only for Genre in Synergy/Advertisers (not Excluded or simple Lock)
     if (category === 'Genre' && context !== 'excluded') {
