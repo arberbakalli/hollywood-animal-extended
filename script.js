@@ -373,8 +373,8 @@ function initializeSelectors(context) {
         label.innerText = category;
         header.appendChild(label);
 
-        // Add search input for excluded context (to filter options within category)
-        if (context === 'excluded' && tagsInCategory.length > 5) {
+        // Add search input for large categories (>5 items) in generator/synergy/excluded contexts
+        if (tagsInCategory.length > 5) {
             const searchWrapper = document.createElement('div');
             searchWrapper.className = 'category-search-wrapper';
             const searchInput = document.createElement('input');
@@ -406,10 +406,8 @@ function initializeSelectors(context) {
         addDropdown(category, null, context);
     });
 
-    // Setup search filtering for excluded context
-    if (context === 'excluded') {
-        setupExcludedSearch();
-    }
+    // Setup search filtering for all contexts
+    setupCategorySearch(context);
 }
 
 /**
@@ -434,7 +432,7 @@ function getSelectedTagsInCategory(category, context) {
 
 /**
  * Refresh all dropdowns in a category to enforce deduplication
- * Hides already-selected options from all other dropdowns
+ * Disables already-selected options so they can't be picked again
  */
 function refreshCategoryDropdowns(category, context) {
     const categoryContainerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
@@ -442,35 +440,42 @@ function refreshCategoryDropdowns(category, context) {
     if (!categoryContainer) return;
 
     const selects = categoryContainer.querySelectorAll('.tag-selector');
-    selects.forEach(select => {
-        const currentValue = select.value;
-        select.querySelectorAll('option:not(:first-child)').forEach(opt => {
-            // Check if this option is selected in another dropdown
-            const isSelectedElsewhere = Array.from(selects)
-                .filter(s => s !== select)
-                .some(s => s.value === opt.value);
 
-            // Hide it if selected elsewhere, show it if not
-            opt.style.display = isSelectedElsewhere ? 'none' : '';
+    // Get all currently selected values in this category
+    const selectedValues = new Set();
+    selects.forEach(select => {
+        if (select.value) {
+            selectedValues.add(select.value);
+        }
+    });
+
+    // Update each dropdown: disable options that are selected elsewhere
+    selects.forEach(select => {
+        select.querySelectorAll('option:not(:first-child)').forEach(opt => {
+            const isSelectedInThisDropdown = (opt.value === select.value);
+            const isSelectedElsewhere = selectedValues.has(opt.value) && !isSelectedInThisDropdown;
+
+            // Disable if selected in another dropdown, enable otherwise
+            opt.disabled = isSelectedElsewhere;
         });
     });
 }
 
-function setupExcludedSearch() {
+function setupCategorySearch(context) {
     document.querySelectorAll('.category-search-input').forEach(input => {
         input.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             const category = e.target.dataset.category;
-            const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-excluded`;
+            const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
             const container = document.querySelector(containerSelector);
 
             if (!container) return;
 
+            // Filter options in all selects in this category
             container.querySelectorAll('.tag-selector').forEach(select => {
-                select.querySelectorAll('option').forEach((opt, idx) => {
-                    if (idx === 0) return; // Skip placeholder
-                    const text = opt.innerText.toLowerCase();
-                    opt.style.display = text.includes(searchTerm) ? '' : 'none';
+                select.querySelectorAll('option:not(:first-child)').forEach(opt => {
+                    const matches = opt.innerText.toLowerCase().includes(searchTerm);
+                    opt.style.display = matches ? '' : 'none';
                 });
             });
         });
@@ -503,64 +508,25 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
     select.appendChild(defOpt);
 
-    // Add search wrapper for large lists (more than 8 options)
-    const needsSearch = tags.length > 8;
-    if (needsSearch) {
-        const searchWrap = document.createElement('div');
-        searchWrap.className = 'dropdown-search-wrap';
-        const searchInput = document.createElement('input');
-        searchInput.type = 'text';
-        searchInput.className = 'dropdown-search-input';
-        searchInput.placeholder = `Search ${category}...`;
-        searchInput.dataset.category = category;
-        searchWrap.appendChild(searchInput);
-        row.appendChild(searchWrap);
-    }
-
-    // Filter out already-selected tags in THIS CATEGORY to prevent duplicates (per-category deduplication)
-    const alreadySelected = new Set();
-    if (context === 'generator' || context === 'synergy') {
-        const categoryContainerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
-        const categoryContainer = document.getElementById(categoryContainerId);
-        if (categoryContainer) {
-            categoryContainer.querySelectorAll('.tag-selector').forEach(sel => {
-                if (sel.value) alreadySelected.add(sel.value);
-            });
-        }
-    }
-
     tags.forEach(tag => {
-        // Skip if already selected in THIS CATEGORY (deduplication)
-        if (alreadySelected.has(tag.id) && tag.id !== selectedId) return;
-
         const opt = document.createElement('option');
         opt.value = tag.id;
         opt.innerText = tag.name;
         opt.dataset.searchText = tag.name.toLowerCase();
         select.appendChild(opt);
     });
+
     if (selectedId) select.value = selectedId;
     row.appendChild(select);
 
-    // Setup search functionality if needed
-    if (needsSearch) {
-        const searchInput = row.querySelector('.dropdown-search-input');
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const options = select.querySelectorAll('option:not(:first-child)');
-            options.forEach(opt => {
-                const matches = opt.dataset.searchText.includes(term);
-                opt.style.display = matches ? '' : 'none';
-            });
-        });
-    }
-
     // When selection changes, refresh all dropdowns in this category to enforce deduplication
-    select.addEventListener('change', () => {
-        if (context === 'generator' || context === 'synergy') {
+    if (context === 'generator' || context === 'synergy') {
+        select.addEventListener('change', () => {
             refreshCategoryDropdowns(category, context);
-        }
-    });
+        });
+        // Initial refresh to disable already-selected options
+        setTimeout(() => refreshCategoryDropdowns(category, context), 0);
+    }
     
     // Add percent slider only for Genre in Synergy/Advertisers (not Excluded or simple Lock)
     if (category === 'Genre' && context !== 'excluded') {
