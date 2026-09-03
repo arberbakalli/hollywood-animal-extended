@@ -10,6 +10,7 @@ let currentLanguage = 'English';
 
 // --- NEW: PROFILE STATE ---
 let currentGenProfile = 'custom'; // 'custom' or 'starting'
+let startingProfileExcludedLoaded = false; // Lazy loading flag
 
 window.onload = async function() {
     try {
@@ -76,18 +77,22 @@ function setGeneratorProfile(profileName) {
 }
 
 function populateExcludedForStartingProfile() {
+    // Lazy loading: Only populate excluded elements once to prevent UI freeze
+    if (startingProfileExcludedLoaded) return;
+
     initializeSelectors('excluded');
     const whitelist = new Set(GAME_DATA.starterWhitelist || []);
     const allTags = Object.values(GAME_DATA.tags);
     const container = document.getElementById('selectors-container-excluded');
 
-    container.style.display = 'none'; // Performance optimization
+    container.style.display = 'none'; // Batch DOM updates
     allTags.forEach(tag => {
         if (!whitelist.has(tag.id)) {
             addDropdown(tag.category, tag.id, 'excluded');
         }
     });
-    container.style.display = '';
+    container.style.display = 'grid';
+    startingProfileExcludedLoaded = true;  // Mark as loaded to prevent re-rendering
 }
 
 /* =========================================================================
