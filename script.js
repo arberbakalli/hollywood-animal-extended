@@ -12,6 +12,10 @@ let currentLanguage = 'English';
 let currentGenProfile = 'custom'; // 'custom' or 'starting'
 let startingProfileExcludedLoaded = false; // Lazy loading flag
 
+// --- PERFORMANCE: Deferred data loading ---
+let compatibilityLoaded = false;
+let genrePairsLoaded = false;
+
 window.addEventListener('load', async function initializeApp() {
     try {
         await changeLanguage('English', false);
@@ -363,17 +367,14 @@ function updatePercentSliderTrack(slider) {
 
 async function loadExternalData() {
     try {
-        const [tagRes, weightRes, compRes, genreRes] = await Promise.all([
+        // Load only essential data at startup; defer compatibility (2.5MB) and genrePairs
+        const [tagRes, weightRes] = await Promise.all([
             fetch('data/TagData.json'),
-            fetch('data/TagsAudienceWeights.json'),
-            fetch('data/TagCompatibilityData.json'),
-            fetch('data/GenrePairs.json')
+            fetch('data/TagsAudienceWeights.json')
         ]);
         if (!tagRes.ok || !weightRes.ok) return;
         const tagDataRaw = await tagRes.json();
         const weightDataRaw = await weightRes.json();
-        if (compRes.ok) GAME_DATA.compatibility = await compRes.json();
-        if (genreRes.ok) GAME_DATA.genrePairs = await genreRes.json();
         for (const [tagId, data] of Object.entries(tagDataRaw)) {
             if (!weightDataRaw[tagId]) continue;
             let category = "Unknown";
@@ -401,6 +402,30 @@ async function loadExternalData() {
         }
     } catch(e) {
         console.warn("External JSON load failed, relying on data.js default", e);
+    }
+}
+
+// Deferred loading: Load compatibility data only when needed (Script Generator, Graves, Synergy)
+async function ensureCompatibilityLoaded() {
+    if (compatibilityLoaded) return;
+    try {
+        const res = await fetch('data/TagCompatibilityData.json');
+        if (res.ok) GAME_DATA.compatibility = await res.json();
+        compatibilityLoaded = true;
+    } catch (e) {
+        console.warn("Failed to load compatibility data", e);
+    }
+}
+
+// Deferred loading: Load genre pairs only when needed (Best Advertisers)
+async function ensureGenrePairsLoaded() {
+    if (genrePairsLoaded) return;
+    try {
+        const res = await fetch('data/GenrePairs.json');
+        if (res.ok) GAME_DATA.genrePairs = await res.json();
+        genrePairsLoaded = true;
+    } catch (e) {
+        console.warn("Failed to load genre pairs", e);
     }
 }
 
@@ -900,7 +925,8 @@ function collectTagInputs(context) {
    SCRIPT GENERATOR LOGIC
    ========================================================================= */
 
-function generateScripts() {
+async function generateScripts() {
+    await ensureCompatibilityLoaded();
     const targetComp = parseFloat(document.getElementById('genCompInput').value);
     const targetScoreInput = parseInt(document.getElementById('genScoreInput').value);
     
@@ -1387,7 +1413,9 @@ function transferScriptToAdvertisers(uniqueId) {
    ANALYSIS / ADVERTISERS / DISTRIBUTION LOGIC
    ========================================================================= */
 
-function analyzeMovie() {
+async function analyzeMovie() {
+    await ensureCompatibilityLoaded();
+    await ensureGenrePairsLoaded();
     const tagInputs = collectTagInputs('advertisers');
     if(tagInputs.length === 0) {
         alert("Please select at least one tag.");
@@ -1745,7 +1773,8 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
 
 // --- SYNERGY LOGIC (Unchanged, just kept for context) ---
 
-function generateGravesScripts() {
+async function generateGravesScripts() {
+    await ensureCompatibilityLoaded();
     const selectedTags = collectTagInputs('graves');
 
     // Validate: Genre + Setting mandatory, 5-10 total
@@ -1817,7 +1846,8 @@ function generateGravesScripts() {
     document.getElementById('results-graves').classList.remove('hidden');
 }
 
-function generateBestMatches() {
+async function generateBestMatches() {
+    await ensureCompatibilityLoaded();
     const selectedTags = collectTagInputs('graves');
 
     if (selectedTags.length === 0) {
@@ -1903,7 +1933,8 @@ function displayBestMatches(matches) {
     resultsContainer.classList.remove('hidden');
 }
 
-function calculateSynergy() {
+async function calculateSynergy() {
+    await ensureCompatibilityLoaded();
     const selectedTags = collectTagInputs('synergy');
     if (selectedTags.length === 0) {
         alert("Please select at least one tag.");
