@@ -779,6 +779,7 @@ function buildSearchIndex() {
 function setupSearchListeners() {
     setupSingleSearch('globalSearchAdvertisers', 'searchResultsAdvertisers', 'advertisers');
     setupSingleSearch('globalSearchSynergy', 'searchResultsSynergy', 'synergy');
+    setupSingleSearch('globalSearchGraves', 'searchResultsGraves', 'graves');
 }
 
 function setupSingleSearch(inputId, resultId, context) {
