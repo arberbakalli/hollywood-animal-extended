@@ -466,6 +466,36 @@ function refreshCategoryDropdowns(category, context) {
 }
 
 function setupGlobalCategorySearch() {
+    // Keyboard shortcuts for search inputs
+    document.addEventListener('keydown', function(e) {
+        if (!e.target.classList.contains('category-search-input')) return;
+
+        // Escape = clear search
+        if (e.key === 'Escape') {
+            e.target.value = '';
+            e.target.classList.remove('has-matches', 'no-matches');
+            e.target.blur();
+            // Trigger input event to update filtered view
+            e.target.dispatchEvent(new Event('input'));
+        }
+
+        // Enter = focus first matching dropdown (to select from filtered results)
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const category = e.target.dataset.category;
+            const context = e.target.dataset.context;
+            const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
+            const container = document.querySelector(containerSelector);
+            if (container) {
+                const firstVisibleSelect = container.querySelector('.select-row:not([style*="display: none"]) .tag-selector');
+                if (firstVisibleSelect) {
+                    firstVisibleSelect.focus();
+                    firstVisibleSelect.click();  // Open dropdown
+                }
+            }
+        }
+    });
+
     // Global event delegation for all category search inputs
     document.addEventListener('input', function(e) {
         if (!e.target.classList.contains('category-search-input')) return;
