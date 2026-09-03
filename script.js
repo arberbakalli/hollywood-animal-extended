@@ -18,6 +18,7 @@ window.addEventListener('load', async function initializeApp() {
         await loadExternalData();
         initializeSelectors('advertisers');
         initializeSelectors('synergy');
+        initializeSelectors('graves');
 
         // Init generator tab selectors (Locked and Excluded)
         initializeSelectors('generator');
@@ -232,6 +233,7 @@ function setupDomEventBindings() {
         ['calculateSynergyButton', calculateSynergy],
         ['transferTagsButton', transferTagsToAdvertisers],
         ['analyzeMovieButton', analyzeMovie],
+        ['generateGravesScripts', generateGravesScripts],
     ];
 
     clickBindings.forEach(([id, handler]) => {
@@ -424,8 +426,9 @@ function initializeSelectors(context) {
     const container = document.getElementById(`selectors-container-${context}`);
     container.innerHTML = '';
 
-    // Sort categories alphabetically for consistent display
-    const sortedCategories = [...GAME_DATA.categories].sort((a, b) => a.localeCompare(b));
+    // Define locked element order (matching game's UI)
+    const categoryOrder = ['Genre', 'Setting', 'Antagonist', 'Protagonist', 'Supporting Character', 'Theme & Event', 'Finale'];
+    const sortedCategories = categoryOrder.filter(cat => GAME_DATA.categories.includes(cat));
 
     sortedCategories.forEach(category => {
         const tagsInCategory = Object.values(GAME_DATA.tags).filter(t =>
@@ -1735,6 +1738,50 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
 
 // --- SYNERGY LOGIC (Unchanged, just kept for context) ---
 
+function generateGravesScripts() {
+    const selectedTags = collectTagInputs('graves');
+    const pairs = [];
+
+    const compatibility = GAME_DATA.compatibility;
+    for (const [tagA, compats] of Object.entries(compatibility)) {
+        for (const [tagB, score] of Object.entries(compats)) {
+            if (parseFloat(score) >= 4.0) {
+                pairs.push({ tag1: tagA, tag2: tagB, score: parseFloat(score) });
+            }
+        }
+    }
+
+    let filtered = pairs;
+    if (selectedTags.length > 0) {
+        const selectedIds = new Set(selectedTags.map(t => t.id));
+        filtered = pairs.filter(p => selectedIds.has(p.tag1) || selectedIds.has(p.tag2));
+    }
+
+    filtered.sort((a, b) => b.score - a.score);
+
+    const resultsList = document.getElementById('gravesResultsList');
+    resultsList.innerHTML = '';
+
+    if (filtered.length === 0) {
+        resultsList.innerHTML = '<div class="empty-state">No perfect scripts found.</div>';
+    } else {
+        filtered.forEach(pair => {
+            const row = document.createElement('div');
+            row.className = 'script-row';
+            row.innerHTML = `
+                <div class="script-content">
+                    <div class="script-tags">${GAME_DATA.tags[pair.tag1].name} + ${GAME_DATA.tags[pair.tag2].name}</div>
+                    <div class="script-meta">${GAME_DATA.tags[pair.tag1].category} + ${GAME_DATA.tags[pair.tag2].category}</div>
+                </div>
+                <div class="script-score">${pair.score.toFixed(2)}</div>
+            `;
+            resultsList.appendChild(row);
+        });
+    }
+
+    document.getElementById('results-graves').classList.remove('hidden');
+}
+
 function calculateSynergy() {
     const selectedTags = collectTagInputs('synergy');
     if (selectedTags.length === 0) {
@@ -2027,5 +2074,6 @@ function transferTagsToAdvertisers() {
             }
         });
     }
+
     analyzeMovie();
 }
