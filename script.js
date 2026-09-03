@@ -479,6 +479,8 @@ function setupGlobalCategorySearch() {
 
         if (!container) return;
 
+        let totalMatches = 0;  // Count visible options for feedback
+
         // Filter rows and options in all selects in this category
         container.querySelectorAll('.select-row').forEach(row => {
             const select = row.querySelector('.tag-selector');
@@ -503,8 +505,20 @@ function setupGlobalCategorySearch() {
                 const text = opt.innerText.toLowerCase();
                 const matches = searchTerm === '' || text.includes(searchTerm);
                 opt.style.display = matches ? '' : 'none';
+                if (matches && searchTerm !== '') totalMatches++;
             });
         });
+
+        // Visual feedback: highlight search box based on matches
+        if (searchTerm === '') {
+            e.target.classList.remove('has-matches', 'no-matches');
+        } else if (totalMatches > 0) {
+            e.target.classList.remove('no-matches');
+            e.target.classList.add('has-matches');
+        } else {
+            e.target.classList.remove('has-matches');
+            e.target.classList.add('no-matches');
+        }
     });
 }
 

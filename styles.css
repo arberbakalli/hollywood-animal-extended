@@ -1270,6 +1270,17 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     border-color: var(--accent);
 }
 
+/* Search status indicators */
+.category-search-input.has-matches {
+    border-color: #55EA83;  /* Green - matches found */
+    box-shadow: 0 0 8px rgba(85, 234, 131, 0.3);
+}
+
+.category-search-input.no-matches {
+    border-color: #FF6B6B;  /* Red - no matches */
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+}
+
 /* Dropdown search wrapper (for locked elements) */
 .dropdown-search-wrap {
     margin-bottom: 8px;
