@@ -98,9 +98,35 @@
 
 ---
 
+---
+
+## Session 3: Four Improvements ✅ COMPLETE
+**Time:** ~50 minutes  
+**4 Stages implemented:**
+
+| Stage | Feature | Time | Status |
+|-------|---------|------|--------|
+| 1 | Sort categories A→Z + prepend new rows | 10m | ✅ |
+| 2 | Search highlighting (green/red glow) | 12m | ✅ |
+| 3 | Keyboard shortcuts (Esc/Enter) | 8m | ✅ |
+| 4 | Performance debouncing (300ms) | 20m | ✅ |
+
+**What we built:**
+- ✅ Category groups now alphabetically ordered (Antagonist, Excluded, Genre, etc.)
+- ✅ New rows added to TOP when clicking + (not bottom)
+- ✅ Search box glows **green** when matches found, **red** when none
+- ✅ **Escape** = clear search instantly
+- ✅ **Enter** = focus first matching dropdown to select quickly
+- ✅ Debounced search filtering (waits 300ms after typing stops)
+- ✅ Prevents excessive DOM updates on large lists
+
+---
+
 ## Daily Summary
-✅ **Total time: 113 minutes (1h 53m)**
+✅ **Total time: 163 minutes (2h 43m)**
 - Session 1: Excluded Elements refactor (98m)
 - Session 2: Row hiding feature (15m)
+- Session 3: Four improvements (50m)
 
-**Code quality:** 3 commits, ~110 lines changed, production-ready
+**Code quality:** 8 commits, ~200 lines changed, production-ready
+**Commits:** Sorting, Search highlighting, Keyboard shortcuts, Debouncing
