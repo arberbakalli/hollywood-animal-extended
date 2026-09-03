@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calculateMatrixScore — golden master a known conflicting pair reports a spoiler and a negative score 1`] = `
+{
+  "rawAverage": 3,
+  "spoilers": [
+    "American Civil War conflicts with Alien",
+    "Alien conflicts with American Civil War",
+  ],
+  "totalScore": -1.875,
+}
+`;
+
+exports[`calculateMatrixScore — golden master degenerate inputs do not throw: empty 1`] = `
+{
+  "rawAverage": 3,
+  "spoilers": [],
+  "totalScore": 0,
+}
+`;
+
+exports[`calculateMatrixScore — golden master degenerate inputs do not throw: single tag 1`] = `
+{
+  "rawAverage": 3,
+  "spoilers": [],
+  "totalScore": 0,
+}
+`;
+
+exports[`calculateMatrixScore — golden master single genre with a full supporting cast 1`] = `
+{
+  "rawAverage": 3.047619,
+  "spoilers": [
+    "American Civil War conflicts with Alien",
+    "Alien conflicts with American Civil War",
+  ],
+  "totalScore": -3.125,
+}
+`;
+
+exports[`calculateMatrixScore — golden master two genres weighted 60/40 1`] = `
+{
+  "rawAverage": 4,
+  "spoilers": [],
+  "totalScore": 0.27,
+}
+`;
+
+exports[`calculateTotalBonuses / calculateGenrePairScore — golden master genre pair bonus applies when both genres clear the thresholds: bonuses 1`] = `
+{
+  "art": 0.5,
+  "com": 0.35,
+}
+`;
+
+exports[`calculateTotalBonuses / calculateGenrePairScore — golden master genre pair bonus applies when both genres clear the thresholds: pair 1`] = `
+{
+  "art": 0.3,
+  "com": 0.35,
+  "names": "Action + Adventure",
+}
+`;
+
+exports[`pure helpers formatScore and formatSimpleScore: formatScore negative 1`] = `"-1.23"`;
+
+exports[`pure helpers formatScore and formatSimpleScore: formatScore positive 1`] = `"+1.23"`;
+
+exports[`pure helpers formatScore and formatSimpleScore: formatSimpleScore 1`] = `"+2.5"`;
