@@ -12,7 +12,7 @@ let currentLanguage = 'English';
 let currentGenProfile = 'custom'; // 'custom' or 'starting'
 let startingProfileExcludedLoaded = false; // Lazy loading flag
 
-window.onload = async function() {
+window.addEventListener('load', async function initializeApp() {
     try {
         await changeLanguage('English', false);
         await loadExternalData();
@@ -25,6 +25,7 @@ window.onload = async function() {
 
         // Setup global search filtering (once, for all contexts)
         setupGlobalCategorySearch();
+        setupDomEventBindings();
 
         buildSearchIndex();
         setupSearchListeners();
@@ -45,7 +46,7 @@ window.onload = async function() {
     } catch (error) {
         console.error("Failed to load data:", error);
     }
-};
+}, { once: true });
 
 /* =========================================================================
    PROFILE MANAGEMENT
@@ -62,7 +63,7 @@ function setGeneratorProfile(profileName) {
     // 2. Update Description Text
     const descText = document.getElementById('profile-desc-text');
     if (profileName === 'starting') {
-        descText.innerHTML = "Only <strong style='color:var(--accent);'>Starting Tags</strong> are available. Everything else is moved to Excluded.";
+        descText.innerHTML = "Only <strong class=\"text-accent\">Starting Tags</strong> are available. Everything else is moved to Excluded.";
     } else {
         descText.innerHTML = "All tags are available. You can manually exclude tags below.";
     }
@@ -88,13 +89,13 @@ function populateExcludedForStartingProfile() {
             const allTags = Object.values(GAME_DATA.tags);
             const container = document.getElementById('selectors-container-excluded');
 
-            container.style.display = 'none'; // Batch DOM updates
+            container.classList.add('is-batching');
             allTags.forEach(tag => {
                 if (!whitelist.has(tag.id)) {
                     addDropdown(tag.category, tag.id, 'excluded');
                 }
             });
-            container.style.display = 'grid';
+            container.classList.remove('is-batching');
             startingProfileExcludedLoaded = true;
         }, { timeout: 2000 }); // 2 second max wait
     } else {
@@ -105,13 +106,13 @@ function populateExcludedForStartingProfile() {
             const allTags = Object.values(GAME_DATA.tags);
             const container = document.getElementById('selectors-container-excluded');
 
-            container.style.display = 'none';
+            container.classList.add('is-batching');
             allTags.forEach(tag => {
                 if (!whitelist.has(tag.id)) {
                     addDropdown(tag.category, tag.id, 'excluded');
                 }
             });
-            container.style.display = 'grid';
+            container.classList.remove('is-batching');
             startingProfileExcludedLoaded = true;
         }, 100);
     }
@@ -210,14 +211,49 @@ function restoreSelection(context, savedInputs) {
 function switchTab(tabName) {
     currentTab = tabName;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    const btns = document.querySelectorAll('.tab-btn');
-    if(tabName === 'generator') btns[0].classList.add('active');
-    else if(tabName === 'synergy') btns[1].classList.add('active');
-    else btns[2].classList.add('active'); // Advertisers
+    const activeButton = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (activeButton) activeButton.classList.add('active');
     
     document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
     document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+}
+
+function setupDomEventBindings() {
+    const languageSelector = document.getElementById('languageSelector');
+    if (languageSelector) {
+        languageSelector.addEventListener('change', e => changeLanguage(e.target.value));
+    }
+
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(button => {
+        button.addEventListener('click', () => switchTab(button.dataset.tab));
+    });
+
+    document.querySelectorAll('[data-generator-profile]').forEach(button => {
+        button.addEventListener('click', () => setGeneratorProfile(button.dataset.generatorProfile));
+    });
+
+    document.querySelectorAll('[data-reset-context]').forEach(button => {
+        button.addEventListener('click', () => resetSelectors(button.dataset.resetContext));
+    });
+
+    const clickBindings = [
+        ['generateScriptsButton', generateScripts],
+        ['savePinnedScriptsButton', savePinnedScripts],
+        ['loadPinnedScriptsButton', triggerLoadScripts],
+        ['calculateSynergyButton', calculateSynergy],
+        ['transferTagsButton', transferTagsToAdvertisers],
+        ['analyzeMovieButton', analyzeMovie],
+    ];
+
+    clickBindings.forEach(([id, handler]) => {
+        const element = document.getElementById(id);
+        if (element) element.addEventListener('click', handler);
+    });
+
+    const loadScriptsInput = document.getElementById('loadScriptsInput');
+    if (loadScriptsInput) {
+        loadScriptsInput.addEventListener('change', e => handleFileLoad(e.target));
+    }
 }
 
 function setupScoreSync() {
@@ -307,13 +343,15 @@ function updateSliderTrack(slider, colorOverride = null) {
     let color = isArt ? '#a0a0ff' : '#d4af37'; 
     if (colorOverride) color = colorOverride;
     
-    slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${value}%, #444 ${value}%, #444 100%)`;
+    slider.style.setProperty('--slider-fill-color', color);
+    slider.style.setProperty('--slider-fill-percent', `${value}%`);
 }
 
 function updatePercentSliderTrack(slider) {
     const value = slider.value;
     const color = '#d4af37';
-    slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${value}%, #444 ${value}%, #444 100%)`;
+    slider.style.setProperty('--slider-fill-color', color);
+    slider.style.setProperty('--slider-fill-percent', `${value}%`);
 }
 
 async function loadExternalData() {
@@ -426,7 +464,7 @@ function initializeSelectors(context) {
             const addBtn = document.createElement('button');
             addBtn.className = 'add-btn';
             addBtn.innerHTML = '+';
-            addBtn.onclick = () => addDropdown(category, null, context);
+            addBtn.addEventListener('click', () => addDropdown(category, null, context));
             header.appendChild(addBtn);
         }
         groupDiv.appendChild(header);
@@ -517,7 +555,7 @@ function setupGlobalCategorySearch() {
             const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
             const container = document.querySelector(containerSelector);
             if (container) {
-                const firstVisibleSelect = container.querySelector('.select-row:not([style*="display: none"]) .tag-selector');
+                const firstVisibleSelect = container.querySelector('.select-row:not(.hidden) .tag-selector');
                 if (firstVisibleSelect) {
                     firstVisibleSelect.focus();
                     firstVisibleSelect.click();  // Open dropdown
@@ -571,18 +609,18 @@ function performSearchFilter(searchInput) {
             // Show/hide the entire row based on whether selected value matches search
             if (searchTerm === '') {
                 // No search: show all rows
-                row.style.display = '';
+                row.classList.remove('hidden');
             } else {
                 // Search active: show only if selected value matches OR if nothing is selected yet
                 const rowMatches = selectedText.includes(searchTerm) || selectedText === '-- select ' + category.toLowerCase() + ' --' || selectedText === '';
-                row.style.display = rowMatches ? '' : 'none';
+                row.classList.toggle('hidden', !rowMatches);
             }
 
             // Also filter the dropdown options (for when user clicks to select)
             select.querySelectorAll('option:not(:first-child)').forEach(opt => {
                 const text = opt.innerText.toLowerCase();
                 const matches = searchTerm === '' || text.includes(searchTerm);
-                opt.style.display = matches ? '' : 'none';
+                opt.hidden = !matches;
                 if (matches && searchTerm !== '') totalMatches++;
             });
         });
@@ -663,8 +701,7 @@ function addDropdown(category, selectedId = null, context = currentTab) {
         slider.value = 100;
         const label = document.createElement('span');
         label.innerText = '%';
-        label.style.fontSize = '0.8rem';
-        label.style.color = '#888';
+        label.className = 'percent-unit';
         numInput.addEventListener('input', (e) => {
             slider.value = e.target.value;
             updatePercentSliderTrack(slider);
@@ -684,10 +721,10 @@ function addDropdown(category, selectedId = null, context = currentTab) {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
         removeBtn.innerHTML = '×';
-        removeBtn.onclick = () => {
+        removeBtn.addEventListener('click', () => {
             row.remove();
             if (category === 'Genre' && context !== 'excluded') updateGenreControls(context);
-        };
+        });
         row.appendChild(removeBtn);
     }
     // Add new rows to the TOP (prepend) instead of bottom
@@ -756,11 +793,11 @@ function setupSingleSearch(inputId, resultId, context) {
                 const div = document.createElement('div');
                 div.className = 'search-item';
                 div.innerHTML = `<strong>${match.name}</strong> <small>${match.category}</small>`;
-                div.onclick = () => {
+                div.addEventListener('click', () => {
                     selectTagFromSearch(match, context);
                     input.value = '';
                     resultsBox.classList.add('hidden');
-                };
+                });
                 resultsBox.appendChild(div);
             });
         } else {
@@ -797,8 +834,8 @@ function selectTagFromSearch(tagObj, context) {
     }
     const group = document.getElementById(`group-${category.replace(/\s/g, '-')}-${context}`);
     if (group) {
-        group.style.borderColor = '#d4af37';
-        setTimeout(() => group.style.borderColor = '', 500);
+        group.classList.add('is-highlighted');
+        setTimeout(() => group.classList.remove('is-highlighted'), 500);
         group.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
@@ -1111,11 +1148,11 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
     // Editable Name Input (Only if in pinned section)
     const nameInputHtml = isPinnedSection 
         ? `<input type="text" class="script-name-input" value="${scriptObj.name || 'Untitled Script'}" 
-           onclick="event.stopPropagation()" onkeyup="updateScriptName('${scriptObj.uniqueId}', this.value)" placeholder="Script Name">`
+           placeholder="Script Name">`
         : '';
 
     div.innerHTML = `
-        <div class="gen-header" onclick="toggleScriptCard(this)">
+        <div class="gen-header">
             <div class="gen-left-col">
                 ${nameInputHtml}
                 <div class="gen-info-row">
@@ -1133,7 +1170,7 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
                     </div>
                 </div>
             </div>
-            <button class="pin-btn ${pinClass}" title="${pinTitle}" onclick="togglePin('${scriptObj.uniqueId}', event)">
+            <button class="pin-btn ${pinClass}" title="${pinTitle}">
                 ${isActuallyPinned ? '★' : '☆'}
             </button>
         </div>
@@ -1142,13 +1179,22 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
                 ${tagsHtml}
             </div>
             <div class="gen-actions">
-                <span style="font-size:0.8rem; color:#666;">ID: ${scriptObj.uniqueId.substring(scriptObj.uniqueId.length-6)}</span>
-                <button class="transfer-link-btn" onclick="transferScriptToAdvertisers('${scriptObj.uniqueId}')">
+                <span class="script-id">ID: ${scriptObj.uniqueId.substring(scriptObj.uniqueId.length-6)}</span>
+                <button class="transfer-link-btn">
                     Find Best Advertisers &rarr;
                 </button>
             </div>
         </div>
     `;
+    div.querySelector('.gen-header')?.addEventListener('click', event => {
+        if (event.target.closest('button, input')) return;
+        toggleScriptCard(event.currentTarget);
+    });
+    div.querySelector('.pin-btn')?.addEventListener('click', event => togglePin(scriptObj.uniqueId, event));
+    div.querySelector('.transfer-link-btn')?.addEventListener('click', () => transferScriptToAdvertisers(scriptObj.uniqueId));
+    div.querySelector('.script-name-input')?.addEventListener('keyup', event => updateScriptName(scriptObj.uniqueId, event.target.value));
+    div.querySelector('.script-name-input')?.addEventListener('click', event => event.stopPropagation());
+
     return div;
 }
 
@@ -1204,7 +1250,7 @@ function renderPinnedScripts() {
     
     // Show placeholder instead of hiding
     if(pinnedScripts.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted); font-style:italic; font-size:0.9rem; padding:10px 0;">No pinned scripts yet.</div>';
+        container.innerHTML = '<div class="empty-state pinned-empty">No pinned scripts yet.</div>';
         return;
     }
     
@@ -1259,7 +1305,7 @@ function handleFileLoad(input) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.addEventListener('load', function(e) {
         try {
             const loaded = JSON.parse(e.target.result);
             if(Array.isArray(loaded)) {
@@ -1292,7 +1338,7 @@ function handleFileLoad(input) {
             console.error(err);
             alert("Error parsing JSON file.");
         }
-    };
+    }, { once: true });
     reader.readAsText(file);
 }
 
@@ -1445,11 +1491,7 @@ function analyzeMovie() {
             audienceContainer.appendChild(chip);
         });
     } else {
-        audienceContainer.innerHTML = `
-            <div style="color: #666; font-style: italic; font-size: 0.95rem;">
-                No audience fits the criteria.
-            </div>
-        `;
+        audienceContainer.innerHTML = '<div class="empty-state">No audience fits the criteria.</div>';
     }
 
     const validTargetIds = targetAudiences.map(t => t.id);
@@ -1483,12 +1525,16 @@ function analyzeMovie() {
 
     const agentContainer = document.getElementById('adAgentDisplay');
     const leanDisplay = document.getElementById('movieLeanDisplay');
-    leanDisplay.innerHTML = `<span style="color: ${movieLean === 1 ? '#a0a0ff' : (movieLean === 2 ? '#d4af37' : '#fff')}">${leanText}</span>`;
+    leanDisplay.textContent = leanText;
+    leanDisplay.className = 'value';
+    if (movieLean === 1) leanDisplay.classList.add('lean-art');
+    else if (movieLean === 2) leanDisplay.classList.add('lean-com');
+    else leanDisplay.classList.add('lean-balanced');
 
     if (validTargetIds.length === 0) {
-        agentContainer.innerHTML = `<div style="color:#666; font-style:italic; padding:10px 0;">Identify a target audience first.</div>`;
+        agentContainer.innerHTML = '<div class="empty-state padded-empty">Identify a target audience first.</div>';
     } else if (validAgents.length === 0) {
-        agentContainer.innerHTML = `<div style="color:#d4af37; padding:10px 0;">No specific advertisers found.</div>`;
+        agentContainer.innerHTML = '<div class="empty-state accent-empty padded-empty">No specific advertisers found.</div>';
     } else {
         const agentHtml = validAgents.slice(0, 4).map(a => {
             let typeLabel = a.type === 0 ? "Univ." : (a.type === 1 ? "Art" : "Com");
@@ -1506,7 +1552,7 @@ function analyzeMovie() {
     holidayContainer.innerHTML = '';
 
     if (validTargetIds.length === 0) {
-        holidayContainer.innerHTML = `<div style="color:#666; font-style:italic;">Identify target audience first.</div>`;
+        holidayContainer.innerHTML = '<div class="empty-state">Identify target audience first.</div>';
     } else {
         let primaryTargets = highInterestIds;
         if (primaryTargets.length === 0) {
@@ -1559,9 +1605,8 @@ function analyzeMovie() {
             const alternatives = viableHolidays.slice(1, 4); 
             if(alternatives.length > 0) {
                 const altHeader = document.createElement('div');
-                altHeader.className = 'holiday-section-label';
+                altHeader.className = 'holiday-section-label spaced';
                 altHeader.innerText = "Alternatives";
-                altHeader.style.marginTop = "20px";
                 holidayContainer.appendChild(altHeader);
 
                 alternatives.forEach(alt => {
@@ -1600,14 +1645,14 @@ function analyzeMovie() {
                 <span class="camp-value">${releaseDuration} wks</span>
             </div>
 
-            <div class="campaign-block post" style="opacity: ${postDuration > 0 ? 1 : 0.3}">
+            <div class="campaign-block post ${postDuration > 0 ? '' : 'is-dimmed'}">
                 <span class="camp-title">Post-Release</span>
                 <span class="camp-value">${postDuration} wks</span>
             </div>
         </div>
 
         <div class="total-duration-footer">
-            Total Duration: <strong style="color:#fff;">${totalWeeks} Weeks</strong>
+            Total Duration: <strong class="text-main">${totalWeeks} Weeks</strong>
         </div>
     `;
 
@@ -1617,7 +1662,7 @@ function analyzeMovie() {
     
     if(distCard && resultsContainer) {
         resultsContainer.appendChild(distCard);
-        distCard.style.marginTop = "0"; 
+        distCard.classList.add('distribution-card--in-results');
     }
 
     document.getElementById('results-advertisers').classList.remove('hidden');
@@ -1685,7 +1730,7 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
         const box = document.createElement('div');
         box.className = 'week-box';
         // Highlight active weeks
-        if (val > 0) box.style.borderColor = 'rgba(212, 175, 55, 0.3)';
+        if (val > 0) box.classList.add('active-week');
         
         box.innerHTML = `
             <span class="week-label">Week ${weekNum}</span>
@@ -1846,28 +1891,33 @@ function formatSimpleScore(num) {
     return (num > 0 ? "+" : "") + parseFloat(num.toFixed(2));
 }
 
+function setToneClass(element, tone) {
+    element.classList.remove('tone-success', 'tone-danger', 'tone-neutral', 'tone-accent', 'tone-art');
+    element.classList.add(`tone-${tone}`);
+}
+
 function renderSynergyResults(matrix, bonuses, tags) {
     document.getElementById('results-synergy').classList.remove('hidden');
     const avgEl = document.getElementById('synergyAverageDisplay');
     avgEl.innerHTML = `${matrix.rawAverage.toFixed(1)} <span class="sub-value">/ 5.0</span>`;
-    if (matrix.rawAverage >= 3.5) avgEl.style.color = 'var(--success)';
-    else if (matrix.rawAverage < 2.5) avgEl.style.color = 'var(--danger)';
-    else avgEl.style.color = '#fff';
+    if (matrix.rawAverage >= 3.5) setToneClass(avgEl, 'success');
+    else if (matrix.rawAverage < 2.5) setToneClass(avgEl, 'danger');
+    else setToneClass(avgEl, 'neutral');
 
     const baseScoreEl = document.getElementById('synergyTotalDisplay');
     baseScoreEl.innerText = formatScore(matrix.totalScore);
-    baseScoreEl.style.color = matrix.totalScore >= 0 ? 'var(--success)' : 'var(--danger)';
+    setToneClass(baseScoreEl, matrix.totalScore >= 0 ? 'success' : 'danger');
 
     const breakdownBase = document.getElementById('breakdownBaseScore');
     breakdownBase.innerText = formatScore(matrix.totalScore);
-    breakdownBase.style.color = matrix.totalScore >= 0 ? 'var(--success)' : 'var(--danger)';
+    setToneClass(breakdownBase, matrix.totalScore >= 0 ? 'success' : 'danger');
 
     const breakdownCom = document.getElementById('breakdownComBonus');
     const breakdownArt = document.getElementById('breakdownArtBonus');
     breakdownCom.innerText = formatSimpleScore(bonuses.com);
-    breakdownCom.style.color = bonuses.com > 0 ? 'var(--success)' : (bonuses.com < 0 ? 'var(--danger)' : '#fff');
+    setToneClass(breakdownCom, bonuses.com > 0 ? 'success' : (bonuses.com < 0 ? 'danger' : 'neutral'));
     breakdownArt.innerText = formatSimpleScore(bonuses.art);
-    breakdownArt.style.color = bonuses.art > 0 ? '#a0a0ff' : (bonuses.art < 0 ? 'var(--danger)' : '#fff');
+    setToneClass(breakdownArt, bonuses.art > 0 ? 'art' : (bonuses.art < 0 ? 'danger' : 'neutral'));
 
     // Tag Cap Logic
     let ngCount = 0;
@@ -1899,19 +1949,16 @@ function renderSynergyResults(matrix, bonuses, tags) {
     }
 
     totalComEl.innerHTML = formatFinalRating(displayCom);
-    totalComEl.style.color = displayCom > 0 ? 'var(--accent)' : 'var(--danger)'; 
+    setToneClass(totalComEl, displayCom > 0 ? 'accent' : 'danger');
     totalArtEl.innerHTML = formatFinalRating(displayArt);
-    totalArtEl.style.color = displayArt > 0 ? '#a0a0ff' : 'var(--danger)'; 
+    setToneClass(totalArtEl, displayArt > 0 ? 'art' : 'danger');
     
     let capLabel = document.getElementById('scoreCapLabel');
     if (!capLabel) {
         const rightCol = document.querySelector('#results-synergy .right-col');
         capLabel = document.createElement('div');
         capLabel.id = 'scoreCapLabel';
-        capLabel.style.fontSize = '0.75rem';
-        capLabel.style.color = '#666';
-        capLabel.style.marginTop = '10px';
-        capLabel.style.textAlign = 'right';
+        capLabel.className = 'score-cap-label';
         rightCol.appendChild(capLabel);
     }
     capLabel.innerHTML = `Max Score Capped at <strong>${tagCap}.0</strong> (${ngCount} Scoring Elements)`;
@@ -1920,10 +1967,10 @@ function renderSynergyResults(matrix, bonuses, tags) {
     if (matrix.spoilers.length > 0) {
         let uniqueSpoilers = [...new Set(matrix.spoilers)];
         spoilerEl.innerHTML = uniqueSpoilers.map(s => 
-            `<div style="color:var(--danger); padding: 4px 0; border-bottom:1px solid #444;">${s}</div>`
+            `<div class="spoiler-row">${s}</div>`
         ).join('');
     } else {
-        spoilerEl.innerHTML = `<div style="color: #888; font-style: italic;">No severe conflicts found.</div>`;
+        spoilerEl.innerHTML = '<div class="empty-state">No severe conflicts found.</div>';
     }
     document.getElementById('results-synergy').scrollIntoView({ behavior: 'smooth' });
 }
@@ -1937,7 +1984,7 @@ function resetSelectors(context) {
         const anchor = document.getElementById('dist-calc-anchor');
         if(distCard && anchor) {
             anchor.appendChild(distCard);
-            distCard.style.marginTop = ""; 
+            distCard.classList.remove('distribution-card--in-results');
         }
     }
 

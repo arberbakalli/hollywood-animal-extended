@@ -1,0 +1,4 @@
+[     245ms] [ERROR] Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/plain". Strict MIME type checking is enforced for module scripts per HTML spec. @ http://127.0.0.1:8000/src/features/scriptGenerator/ScriptGeneratorUI.js:0
+[     252ms] [ERROR] Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/plain". Strict MIME type checking is enforced for module scripts per HTML spec. @ http://127.0.0.1:8000/src/features/scriptGenerator/ExclusionManager.js:0
+[     337ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://127.0.0.1:8000/favicon.ico:0
+[     411ms] [LOG] Initialization Complete. @ http://127.0.0.1:8000/script.js:44

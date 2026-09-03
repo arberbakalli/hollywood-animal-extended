@@ -129,18 +129,18 @@
                 <!-- PINNED RESULTS -->
                 <div id="pinned-scripts-container" class="results-container hidden">
                     <div class="pinned-header-row">
-                        <div class="section-title" style="margin-bottom:0;">
-                            <h3 style="color: var(--accent); margin:0;">Pinned Scripts</h3>
+                        <div class="section-title section-title-compact">
+                            <h3 class="accent-heading">Pinned Scripts</h3>
                         </div>
                         <div class="file-controls">
-                            <button class="file-action-btn" onclick="savePinnedScripts()" title="Download Pinned Scripts">
+                            <button id="savePinnedScriptsButton" class="file-action-btn" title="Download Pinned Scripts">
                                 <span>⬇ Save</span>
                             </button>
-                            <button class="file-action-btn" onclick="triggerLoadScripts()" title="Upload JSON File">
+                            <button id="loadPinnedScriptsButton" class="file-action-btn" title="Upload JSON File">
                                 <span>⬆ Load</span>
                             </button>
                             <!-- Hidden File Input -->
-                            <input type="file" id="loadScriptsInput" class="hidden-file-input" accept=".json" onchange="handleFileLoad(this)">
+                            <input type="file" id="loadScriptsInput" class="hidden-file-input" accept=".json">
                         </div>
                     </div>
                     <div id="pinnedResultsList" class="script-list"></div>
@@ -170,14 +170,14 @@
                 <div class="card builder-card">
                     <div class="card-header">
                         <h3>Check Compatibility</h3>
-                        <button class="reset-btn" onclick="resetSelectors('synergy')">Reset</button>
+                        <button class="reset-btn" data-reset-context="synergy">Reset</button>
                     </div>
                     <p class="subtitle">Select story elements to see how well they fit together.</p>
                     
                     <div id="selectors-container-synergy"></div>
                     
                     <div class="action-area">
-                        <button class="analyze-btn" onclick="calculateSynergy()">Check Compatibility</button>
+                        <button id="calculateSynergyButton" class="analyze-btn">Check Compatibility</button>
                     </div>
                 </div>
 
@@ -226,16 +226,16 @@
                         </div>
                     </div>
 
-                    <div class="card result-card" style="border-left: 4px solid var(--danger);">
+                    <div class="card result-card danger-accent-card">
                         <h3>Conflicts</h3>
                         <div class="list-subtitle">Severe clashes that ruin the script</div>
                         <div id="spoilerDisplay" class="strategy-content">
-                            <div style="color: #888; font-style: italic;">No conflicts found.</div>
+                            <div class="empty-state">No conflicts found.</div>
                         </div>
                     </div>
 
-                    <div class="action-area" style="margin-top: 0;">
-                        <button class="analyze-btn secondary-btn" onclick="transferTagsToAdvertisers()">Find Best Advertisers &rarr;</button>
+                    <div class="action-area action-area-flush">
+                        <button id="transferTagsButton" class="analyze-btn secondary-btn">Find Best Advertisers &rarr;</button>
                     </div>
                 </div>
             </div>
@@ -281,18 +281,18 @@
                 <div class="card builder-card">
                     <div class="card-header">
                         <h3>Build Your Script</h3>
-                        <button class="reset-btn" onclick="resetSelectors('advertisers')">Reset</button>
+                        <button class="reset-btn" data-reset-context="advertisers">Reset</button>
                     </div>
                     <p class="subtitle">Select tags manually or use the search bar above. Add multiple genres to adjust their influence.</p>
                     <div id="selectors-container-advertisers"></div>
                     <div class="action-area">
-                        <button class="analyze-btn" onclick="analyzeMovie()">Analyse</button>
+                        <button id="analyzeMovieButton" class="analyze-btn">Analyse</button>
                     </div>
                 </div>
 
                 <!-- DISTRIBUTION CALCULATOR (Initial Position) -->
-                <div id="dist-calc-anchor" style="margin-top: 25px;">
-                    <div id="dist-wrapper" class="card result-card" style="border-left: 4px solid var(--accent); transition: all 0.5s ease;">
+                <div id="dist-calc-anchor" class="dist-calc-anchor">
+                    <div id="dist-wrapper" class="card result-card distribution-card">
                         <div class="card-header">
                             <h3>Distribution Calculator</h3>
                         </div>
@@ -303,13 +303,13 @@
                                 <input type="number" id="ownedScreeningsInput" class="screenings-input" value="3185" min="0" step="1">
                             </div>
                             <div class="dist-info-group">
-                                <span class="subtitle" style="margin:0; font-size:0.85rem;">
-                                    Based on Target Commercial Score: <strong id="dist-com-score-display" style="color:var(--accent);">5.0</strong>
+                                <span class="subtitle dist-info-text">
+                                    Based on Target Commercial Score: <strong id="dist-com-score-display" class="text-accent">5.0</strong>
                                 </span>
                             </div>
                         </div>
                         
-                        <p class="subtitle" style="margin-top:-10px; margin-bottom: 20px;">
+                        <p class="subtitle dist-note">
                             Screenings needed for independent distribution. Adjust the <strong>Commercial Score</strong> above to see changes.
                         </p>
 

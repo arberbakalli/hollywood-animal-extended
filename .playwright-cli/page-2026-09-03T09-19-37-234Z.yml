@@ -1,0 +1,33 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - heading "Hollywood Animal" [level=1] [ref=e6]
+        - heading "Calculator" [level=2] [ref=e7]
+      - combobox [ref=e9] [cursor=pointer]:
+        - option "🇺🇸 English" [selected]
+        - option "🇧🇾 Belarusian"
+        - option "🇨🇳 Chinese"
+        - option "🇫🇷 French"
+        - option "🇩🇪 German"
+        - option "🇯🇵 Japanese"
+        - option "🇧🇷 Portuguese"
+        - option "🇷🇺 Russian"
+        - option "🇪🇸 Spanish"
+        - option "🇺🇦 Ukrainian"
+  - navigation [ref=e10]:
+    - button "Script Generator" [ref=e11] [cursor=pointer]
+    - button "SE Compatibility" [ref=e12] [cursor=pointer]
+    - button "Best Advertisers" [ref=e13] [cursor=pointer]
+  - generic [ref=e15]:
+    - generic [ref=e16]:
+      - heading "Quick Search" [level=3] [ref=e17]
+      - textbox "Type to find a tag (e.g., 'Action', 'Cowboy')..." [ref=e19]
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - heading "Check Compatibility" [level=3] [ref=e22]
+        - button "Reset" [ref=e23] [cursor=pointer]
+      - paragraph [ref=e24]: Select story elements to see how well they fit together.
+      - button "Check Compatibility" [ref=e26] [cursor=pointer]
+  - contentinfo [ref=e27]:
+    - paragraph [ref=e28]: Unofficial Tool for Hollywood Animal

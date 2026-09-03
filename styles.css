@@ -229,7 +229,15 @@ h3 {
     appearance: none;
     width: 100%;
     height: 6px;
-    background: #444;
+    --slider-fill-color: var(--accent);
+    --slider-fill-percent: 0%;
+    background: linear-gradient(
+        to right,
+        var(--slider-fill-color) 0%,
+        var(--slider-fill-color) var(--slider-fill-percent),
+        #444 var(--slider-fill-percent),
+        #444 100%
+    );
     border-radius: 3px;
     outline: none;
     cursor: pointer;
@@ -301,6 +309,24 @@ h3 {
 
 /* --- SELECTORS GRID --- */
 .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+.profile-description { margin-top: 8px; font-size: 0.8rem; }
+.score-help-text { margin-top: 10px; font-size: 0.8rem; }
+.generator-required-tags,
+.text-accent { color: var(--accent); }
+.text-main { color: #fff; }
+.danger-heading { color: var(--danger); }
+.empty-state {
+    color: #666;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+.padded-empty { padding: 10px 0; }
+.pinned-empty {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    padding: 10px 0;
+}
+.accent-empty { color: var(--accent); }
 
 #selectors-container-advertisers, 
 #selectors-container-synergy, 
@@ -320,6 +346,9 @@ h3 {
 }
 
 .category-group:hover { border-left-color: var(--accent); }
+.category-group.is-highlighted { border-left-color: var(--accent); }
+
+#selectors-container-excluded.is-batching { display: none; }
 
 /* Different border for excluded group */
 #selectors-container-excluded .category-group:hover {
@@ -517,6 +546,10 @@ input[type="text"] {
     margin-bottom: 15px;
 }
 
+.section-title-compact {
+    margin-bottom: 0;
+}
+
 .section-title h3 {
     margin: 0;
     font-size: 0.9rem;
@@ -525,6 +558,10 @@ input[type="text"] {
     color: var(--text-muted);
     font-weight: 700;
     border-bottom: none;
+}
+
+.section-title h3.accent-heading {
+    color: var(--accent);
 }
 
 .script-list {
@@ -668,6 +705,11 @@ input[type="text"] {
     border-top: 1px solid #333;
 }
 
+.script-id {
+    color: #666;
+    font-size: 0.8rem;
+}
+
 /* Pin Button */
 .pin-btn {
     background: transparent;
@@ -737,6 +779,14 @@ input[type="text"] {
     margin-bottom: 20px;
     border-bottom: none;
     opacity: 0.8;
+}
+
+.danger-accent-card {
+    border-left: 4px solid var(--danger);
+}
+
+.action-area-flush {
+    margin-top: 0;
 }
 
 /* Audience Pills */
@@ -856,6 +906,9 @@ input[type="text"] {
 .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
 .label { color: var(--text-muted); font-size: 0.9rem; }
 .value { font-weight: bold; color: var(--text-main); }
+.lean-art { color: #a0a0ff; }
+.lean-com { color: var(--accent); }
+.lean-balanced { color: #fff; }
 
 /* Campaign Duration */
 #campaignStrategyDisplay {
@@ -885,6 +938,7 @@ input[type="text"] {
 .campaign-block.pre { border-left: 4px solid #a0a0ff; }
 .campaign-block.release { border-left: 4px solid var(--accent); }
 .campaign-block.post { border-left: 4px solid #ff5f5f; }
+.campaign-block.is-dimmed { opacity: 0.3; }
 .camp-title { font-size: 0.85rem; text-transform: uppercase; color: #aaa; letter-spacing: 1px; font-weight: 600; }
 .camp-value { font-size: 1.25rem; font-weight: 700; color: #fff; font-family: 'Inter', monospace; }
 .total-duration-footer {
@@ -930,6 +984,11 @@ input[type="text"] {
 .summary-item h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; color: #888; margin-bottom: 10px; font-weight: 600; }
 .summary-value { font-size: 3rem; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -1px; }
 .sub-value { font-size: 1.2rem; color: #555; font-weight: 500; margin-left: 4px; }
+.tone-success { color: var(--success); }
+.tone-danger { color: var(--danger); }
+.tone-neutral { color: #fff; }
+.tone-accent { color: var(--accent); }
+.tone-art { color: #a0a0ff; }
 
 /* Breakdown Grid */
 .breakdown-container {
@@ -976,6 +1035,17 @@ input[type="text"] {
 .total-row:nth-child(2) { border-left-color: var(--accent); }
 .total-row:nth-child(3) { border-left-color: #a0a0ff; }
 .context-text { font-size: 0.8rem; color: #666; line-height: 1.5; margin-top: 15px; font-style: italic; }
+.score-cap-label {
+    color: #666;
+    font-size: 0.75rem;
+    margin-top: 10px;
+    text-align: right;
+}
+.spoiler-row {
+    border-bottom: 1px solid #444;
+    color: var(--danger);
+    padding: 4px 0;
+}
 
 /* Helpers */
 .hidden { display: none; }
@@ -1006,8 +1076,21 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 /* --- DISTRIBUTION CALCULATOR STYLES --- */
 /* ========================================= */
 
+.dist-calc-anchor {
+    margin-top: 25px;
+}
+
 #dist-wrapper {
     animation: fadeIn 0.5s ease;
+}
+
+.distribution-card {
+    border-left: 4px solid var(--accent);
+    transition: all 0.5s ease;
+}
+
+.distribution-card.distribution-card--in-results {
+    margin-top: 0;
 }
 
 .dist-input-row {
@@ -1043,6 +1126,16 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     display: flex;
     align-items: center;
     margin-top: 10px;
+}
+
+.dist-info-text {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.dist-note {
+    margin-top: -10px;
+    margin-bottom: 20px;
 }
 
 @media(min-width: 600px) {
@@ -1215,6 +1308,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     margin-bottom: 8px;
 }
 
+.excl-filter-row.hidden {
+    display: none;
+}
+
 .excl-row {
     display: flex;
     align-items: center;
@@ -1338,4 +1435,13 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: #000;
     border-color: var(--accent);
     font-weight: 600;
+}
+
+.week-box.active-week {
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.percent-unit {
+    color: #888;
+    font-size: 0.8rem;
 }

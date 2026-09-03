@@ -44,7 +44,7 @@ export class ScriptGeneratorUI {
                 </div>
                 <span class="excl-badge" id="excl-badge"></span>
             </div>
-            <div class="excl-filter-row" id="excl-filter-row" style="display:none;">
+            <div class="excl-filter-row hidden" id="excl-filter-row">
                 <input type="text" id="excl-filter-input" class="excl-filter-input"
                     placeholder="Filter banned tags...">
                 <div class="excl-sort-controls">
@@ -91,11 +91,11 @@ export class ScriptGeneratorUI {
                 const div = document.createElement('div');
                 div.className = 'search-item';
                 div.innerHTML = `<strong>${tag.name}</strong> <small>${tag.category}</small>`;
-                div.onclick = () => {
+                div.addEventListener('click', () => {
                     this._manager.add(tag.id);
                     input.value = '';
                     results.classList.add('hidden');
-                };
+                });
                 results.appendChild(div);
             });
         });
@@ -138,7 +138,7 @@ export class ScriptGeneratorUI {
         if (!list) return;
 
         if (badge) badge.textContent = all.length ? `${all.length} banned` : '';
-        if (filterRow) filterRow.style.display = all.length > 4 ? 'flex' : 'none';
+        if (filterRow) filterRow.classList.toggle('hidden', all.length <= 4);
 
         let visible = this._listFilter.filter(
             all,
@@ -169,7 +169,7 @@ export class ScriptGeneratorUI {
                 <small class="excl-tag-cat">${this._getCategoryLabel(id)}</small>
                 <button class="remove-btn" title="Remove ban">×</button>
             `;
-            row.querySelector('.remove-btn').onclick = () => this._manager.remove(id);
+            row.querySelector('.remove-btn').addEventListener('click', () => this._manager.remove(id));
             fragment.appendChild(row);
         });
         list.appendChild(fragment);
