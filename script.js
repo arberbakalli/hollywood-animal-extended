@@ -475,8 +475,26 @@ function setupGlobalCategorySearch() {
 
         if (!container) return;
 
-        // Filter options in all selects in this category
-        container.querySelectorAll('.tag-selector').forEach(select => {
+        // Filter rows and options in all selects in this category
+        container.querySelectorAll('.select-row').forEach(row => {
+            const select = row.querySelector('.tag-selector');
+            if (!select) return;
+
+            // Get the selected option's text
+            const selectedOption = select.options[select.selectedIndex];
+            const selectedText = selectedOption ? selectedOption.innerText.toLowerCase() : '';
+
+            // Show/hide the entire row based on whether selected value matches search
+            if (searchTerm === '') {
+                // No search: show all rows
+                row.style.display = '';
+            } else {
+                // Search active: show only if selected value matches OR if nothing is selected yet
+                const rowMatches = selectedText.includes(searchTerm) || selectedText === '-- select ' + category.toLowerCase() + ' --' || selectedText === '';
+                row.style.display = rowMatches ? '' : 'none';
+            }
+
+            // Also filter the dropdown options (for when user clicks to select)
             select.querySelectorAll('option:not(:first-child)').forEach(opt => {
                 const text = opt.innerText.toLowerCase();
                 const matches = searchTerm === '' || text.includes(searchTerm);
