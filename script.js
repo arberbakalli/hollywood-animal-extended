@@ -80,19 +80,41 @@ function populateExcludedForStartingProfile() {
     // Lazy loading: Only populate excluded elements once to prevent UI freeze
     if (startingProfileExcludedLoaded) return;
 
-    initializeSelectors('excluded');
-    const whitelist = new Set(GAME_DATA.starterWhitelist || []);
-    const allTags = Object.values(GAME_DATA.tags);
-    const container = document.getElementById('selectors-container-excluded');
+    // Defer heavy DOM work to idle time to prevent blocking main thread
+    if (requestIdleCallback) {
+        requestIdleCallback(() => {
+            initializeSelectors('excluded');
+            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+            const allTags = Object.values(GAME_DATA.tags);
+            const container = document.getElementById('selectors-container-excluded');
 
-    container.style.display = 'none'; // Batch DOM updates
-    allTags.forEach(tag => {
-        if (!whitelist.has(tag.id)) {
-            addDropdown(tag.category, tag.id, 'excluded');
-        }
-    });
-    container.style.display = 'grid';
-    startingProfileExcludedLoaded = true;  // Mark as loaded to prevent re-rendering
+            container.style.display = 'none'; // Batch DOM updates
+            allTags.forEach(tag => {
+                if (!whitelist.has(tag.id)) {
+                    addDropdown(tag.category, tag.id, 'excluded');
+                }
+            });
+            container.style.display = 'grid';
+            startingProfileExcludedLoaded = true;
+        }, { timeout: 2000 }); // 2 second max wait
+    } else {
+        // Fallback for browsers without requestIdleCallback
+        setTimeout(() => {
+            initializeSelectors('excluded');
+            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+            const allTags = Object.values(GAME_DATA.tags);
+            const container = document.getElementById('selectors-container-excluded');
+
+            container.style.display = 'none';
+            allTags.forEach(tag => {
+                if (!whitelist.has(tag.id)) {
+                    addDropdown(tag.category, tag.id, 'excluded');
+                }
+            });
+            container.style.display = 'grid';
+            startingProfileExcludedLoaded = true;
+        }, 100);
+    }
 }
 
 /* =========================================================================

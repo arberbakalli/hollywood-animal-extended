@@ -20,7 +20,7 @@
 
                 <!-- LANGUAGE SELECTOR -->
                 <div class="lang-wrapper">
-                    <select id="languageSelector" class="lang-dropdown" onchange="changeLanguage(this.value)">
+                    <select id="languageSelector" class="lang-dropdown">
                         <option value="English">🇺🇸 English</option>
                         <option value="Belarusian">🇧🇾 Belarusian</option>
                         <option value="Chinese">🇨🇳 Chinese</option>
@@ -38,9 +38,9 @@
 
         <!-- TAB NAVIGATION -->
         <nav class="tab-nav">
-            <button class="tab-btn" data-tab="generator" onclick="switchTab('generator')">Script Generator</button>
-            <button class="tab-btn active" data-tab="synergy" onclick="switchTab('synergy')">SE Compatibility</button>
-            <button class="tab-btn" data-tab="advertisers" onclick="switchTab('advertisers')">Best Advertisers</button>
+            <button class="tab-btn" data-tab="generator">Script Generator</button>
+            <button class="tab-btn active" data-tab="synergy">SE Compatibility</button>
+            <button class="tab-btn" data-tab="advertisers">Best Advertisers</button>
         </nav>
 
         <div class="container">
@@ -59,14 +59,14 @@
                             <label>Tag Availability</label>
                         </div>
                         <div class="profile-btn-group">
-                            <button id="btn-profile-starting" class="profile-btn" onclick="setGeneratorProfile('starting')">
+                            <button id="btn-profile-starting" class="profile-btn" data-generator-profile="starting">
                                 Starting Tags
                             </button>
-                            <button id="btn-profile-custom" class="profile-btn active" onclick="setGeneratorProfile('custom')">
+                            <button id="btn-profile-custom" class="profile-btn active" data-generator-profile="custom">
                                 Custom
                             </button>
                         </div>
-                        <p id="profile-desc-text" class="subtitle" style="margin-top:8px; font-size: 0.8rem;">
+                        <p id="profile-desc-text" class="subtitle profile-description">
                             Select which story elements are available for generation.
                         </p>
                     </div>
@@ -81,7 +81,7 @@
                             <div class="range-wrapper">
                                 <input type="range" id="genCompSlider" class="styled-slider com-slider" min="1" max="5" step="0.1" value="4.0">
                             </div>
-                            <p class="subtitle" style="margin-top:10px; font-size: 0.8rem;">The generator will attempt to find a script matching or exceeding this compatibility score.</p>
+                            <p class="subtitle score-help-text">The generator will attempt to find a script matching or exceeding this compatibility score.</p>
                         </div>
 
                         <!-- TARGET MOVIE SCORE -->
@@ -93,7 +93,7 @@
                             <div class="range-wrapper">
                                 <input type="range" id="genScoreSlider" class="styled-slider art-slider" min="6" max="10" step="1" value="6">
                             </div>
-                            <p id="genTagsRequiredDisplay" class="subtitle" style="margin-top:10px; font-size: 0.8rem; color: var(--accent);">
+                            <p id="genTagsRequiredDisplay" class="subtitle score-help-text generator-required-tags">
                                 Requires 8 Story Elements (excluding Genre).
                             </p>
                         </div>
@@ -104,7 +104,7 @@
                     <!-- LOCKED ELEMENTS -->
                     <div class="card-header">
                         <h3>Locked Elements</h3>
-                        <button class="reset-btn" onclick="resetSelectors('generator')">Reset Locks</button>
+                        <button class="reset-btn" data-reset-context="generator">Reset Locks</button>
                     </div>
                     <p class="subtitle">Select specific tags you <strong>MUST</strong> have in the script.</p>
                     
@@ -114,15 +114,15 @@
 
                     <!-- EXCLUDED ELEMENTS -->
                     <div class="card-header">
-                        <h3 style="color: var(--danger);">Excluded Elements</h3>
-                        <button class="reset-btn" onclick="resetSelectors('excluded')">Reset Bans</button>
+                        <h3 class="danger-heading">Excluded Elements</h3>
+                        <button class="reset-btn" data-reset-context="excluded">Reset Bans</button>
                     </div>
                     <p class="subtitle">Select tags to <strong>BAN</strong> (e.g., due to "The Code"). The generator will never pick these.</p>
                     
                     <div id="selectors-container-excluded"></div>
 
                     <div class="action-area">
-                        <button class="analyze-btn" onclick="generateScripts()">Generate Scripts</button>
+                        <button id="generateScriptsButton" class="analyze-btn">Generate Scripts</button>
                     </div>
                 </div>
 
