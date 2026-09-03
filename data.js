@@ -140,5 +140,6 @@ const GAME_DATA = {
 
     tags: {},
     compatibility: {},
-    genrePairs: {}
+    genrePairs: {},
+    agencies: []
 };

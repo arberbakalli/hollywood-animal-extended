@@ -1841,3 +1841,90 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background-color: #166534;
     color: white;
 }
+
+/* Advertiser Recommendation Styles */
+.advertiser-recommendation {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.rec-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.rec-top-pick {
+    flex: 1;
+}
+
+.advertiser-card {
+    background: #252525;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+}
+
+.advertiser-card.top {
+    border-left: 4px solid var(--accent);
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.advertiser-card.top:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
+}
+
+.advertiser-card.alt {
+    border-left: 2px solid var(--border);
+}
+
+.advertiser-card.alt:hover {
+    border-left-color: var(--accent);
+    background: rgba(212, 175, 55, 0.03);
+}
+
+.adv-name {
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.adv-score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.score-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.score-grade {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.adv-reasoning {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.rec-alternatives {
+    border-top: 1px solid var(--border);
+    padding-top: 15px;
+}

@@ -388,17 +388,19 @@ function updatePercentSliderTrack(slider) {
 
 async function loadExternalData() {
     try {
-        const [tagRes, weightRes, compRes, genreRes] = await Promise.all([
+        const [tagRes, weightRes, compRes, genreRes, agenciesRes] = await Promise.all([
             fetch('data/TagData.json'),
             fetch('data/TagsAudienceWeights.json'),
             fetch('data/TagCompatibilityData.json'),
-            fetch('data/GenrePairs.json')
+            fetch('data/GenrePairs.json'),
+            fetch('data/agencies.json')
         ]);
         if (!tagRes.ok || !weightRes.ok) return;
         const tagDataRaw = await tagRes.json();
         const weightDataRaw = await weightRes.json();
         if (compRes.ok) GAME_DATA.compatibility = await compRes.json();
         if (genreRes.ok) GAME_DATA.genrePairs = await genreRes.json();
+        if (agenciesRes.ok) GAME_DATA.agencies = (await agenciesRes.json()).agencies;
         for (const [tagId, data] of Object.entries(tagDataRaw)) {
             if (!weightDataRaw[tagId]) continue;
             let category = "Unknown";
@@ -1600,51 +1602,22 @@ function analyzeMovie() {
     if (inputArt > inputCom + 0.1) { movieLean = 1; leanText = "Artistic"; } 
     else if (inputCom > inputArt + 0.1) { movieLean = 2; leanText = "Commercial"; }
 
-    let validAgents = [];
-    if (validTargetIds.length > 0) {
-        validAgents = GAME_DATA.adAgents.filter(agent => {
-            return agent.targets.some(t => validTargetIds.includes(t));
-        }).map(agent => {
-            let score = 0;
-            validTargetIds.forEach(targetId => {
-                if (agent.targets.includes(targetId)) {
-                    score += 5; 
-                }
-            });
-            if(agent.type !== 0 && agent.type !== movieLean) score -= 10;
-            score += agent.level;
-            return { ...agent, score };
-        });
-        validAgents = validAgents.filter(a => a.score > 0);
-        validAgents.sort((a, b) => {
-            if (b.score !== a.score) return b.score - a.score;
-            if (b.level !== a.level) return b.level - a.level;
-            return a.name.localeCompare(b.name);
-        });
-    }
+    // Get advertiser recommendations using the new recommendation engine
+    const scriptConfig = {
+        tags: tagInputs.map(t => GAME_DATA.tags[t.id]).filter(t => t),
+        commercialScore: inputCom,
+        artisticScore: inputArt
+    };
+    const recommendations = getRecommendations(scriptConfig);
+    displayAdvertiserRecommendations(recommendations);
 
-    const agentContainer = document.getElementById('adAgentDisplay');
     const leanDisplay = document.getElementById('movieLeanDisplay');
-    leanDisplay.textContent = leanText;
-    leanDisplay.className = 'value';
-    if (movieLean === 1) leanDisplay.classList.add('lean-art');
-    else if (movieLean === 2) leanDisplay.classList.add('lean-com');
-    else leanDisplay.classList.add('lean-balanced');
-
-    if (validTargetIds.length === 0) {
-        agentContainer.innerHTML = '<div class="empty-state padded-empty">Identify a target audience first.</div>';
-    } else if (validAgents.length === 0) {
-        agentContainer.innerHTML = '<div class="empty-state accent-empty padded-empty">No specific advertisers found.</div>';
-    } else {
-        const agentHtml = validAgents.slice(0, 4).map(a => {
-            let typeLabel = a.type === 0 ? "Univ." : (a.type === 1 ? "Art" : "Com");
-            return `
-            <div class="advertiser-row">
-                <span class="advertiser-name">${a.name}</span>
-                <span class="advertiser-type">${typeLabel}</span>
-            </div>`;
-        }).join('');
-        agentContainer.innerHTML = agentHtml;
+    if (leanDisplay) {
+        leanDisplay.textContent = leanText;
+        leanDisplay.className = 'value';
+        if (movieLean === 1) leanDisplay.classList.add('lean-art');
+        else if (movieLean === 2) leanDisplay.classList.add('lean-com');
+        else leanDisplay.classList.add('lean-balanced');
     }
 
     // --- HOLIDAY LOGIC ---
@@ -2319,4 +2292,158 @@ function transferTagsToAdvertisers() {
         });
     }
     analyzeMovie();
+}
+
+// ============ BEST ADVERTISERS RECOMMENDATION ENGINE ============
+
+function calculateAdvertiserMatch(scriptTags, scriptStrength, agency) {
+    if (!scriptTags || scriptTags.length === 0) return 0;
+
+    let totalScore = 0;
+    let relevantCount = 0;
+
+    for (const tag of scriptTags) {
+        if (!tag.weights) continue;
+
+        let agencyScore = 0;
+        let agencyAudienceCount = 0;
+
+        for (const audience of agency.audiences) {
+            if (tag.weights[audience] !== undefined) {
+                agencyScore += tag.weights[audience];
+                agencyAudienceCount++;
+            }
+        }
+
+        if (agencyAudienceCount > 0) {
+            const avgScore = agencyScore / agencyAudienceCount;
+            totalScore += avgScore;
+            relevantCount++;
+        }
+    }
+
+    if (relevantCount === 0) return 0;
+
+    let baseScore = totalScore / relevantCount;
+
+    // Apply scoreType bonus/penalty
+    if (agency.scoreType === 'commercial' && scriptStrength.com > scriptStrength.art) {
+        baseScore += 0.25;
+    } else if (agency.scoreType === 'artistic' && scriptStrength.art > scriptStrength.com) {
+        baseScore += 0.25;
+    } else if (agency.scoreType !== 'neutral' && agency.scoreType !== 'mixed') {
+        if ((agency.scoreType === 'commercial' && scriptStrength.com <= scriptStrength.art) ||
+            (agency.scoreType === 'artistic' && scriptStrength.art <= scriptStrength.com)) {
+            baseScore -= 0.2;
+        }
+    }
+
+    return Math.min(5.0, Math.max(0, baseScore));
+}
+
+function predictGradeFromScore(score) {
+    if (score >= 5.0) return { grade: 'A+', color: '#55EA83' };
+    if (score >= 4.7) return { grade: 'A', color: '#55EA83' };
+    if (score >= 4.3) return { grade: 'B+', color: '#8BEAFF' };
+    if (score >= 4.0) return { grade: 'B', color: '#8BEAFF' };
+    if (score >= 3.5) return { grade: 'C+', color: '#FFD700' };
+    if (score >= 3.0) return { grade: 'C', color: '#FFD700' };
+    if (score >= 2.0) return { grade: 'D', color: '#FF9F0A' };
+    return { grade: 'F', color: '#FF5F5F' };
+}
+
+function getRecommendations(scriptConfig) {
+    if (!GAME_DATA.agencies || !scriptConfig.tags || scriptConfig.tags.length === 0) {
+        return {
+            topRecommendation: null,
+            alternatives: [],
+            weakMatches: [],
+            error: 'No valid script configuration'
+        };
+    }
+
+    const scriptStrength = {
+        com: scriptConfig.commercialScore || 5.0,
+        art: scriptConfig.artisticScore || 5.0
+    };
+
+    const scores = GAME_DATA.agencies.map(agency => {
+        const matchScore = calculateAdvertiserMatch(scriptConfig.tags, scriptStrength, agency);
+        const gradeInfo = predictGradeFromScore(matchScore);
+
+        return {
+            agency: agency,
+            score: matchScore,
+            grade: gradeInfo.grade,
+            color: gradeInfo.color,
+            reasoning: generateReasoning(agency, matchScore, scriptConfig.tags)
+        };
+    }).sort((a, b) => b.score - a.score);
+
+    return {
+        topRecommendation: scores[0] || null,
+        alternatives: scores.slice(1, Math.min(7, scores.length)),
+        weakMatches: scores.slice(Math.max(7, scores.length - 2)),
+        allScores: scores
+    };
+}
+
+function generateReasoning(agency, score, tags) {
+    const audienceMatch = agency.audiences.join(', ');
+    if (score >= 4.5) return `${agency.name} has strong appeal with your selected tags for audiences: ${audienceMatch}`;
+    if (score >= 4.0) return `${agency.name} shows good compatibility with your script across ${audienceMatch} demographics`;
+    if (score >= 3.5) return `${agency.name} serves some of your target audiences but may not maximize appeal`;
+    return `${agency.name} has limited appeal for this script configuration`;
+}
+
+function displayAdvertiserRecommendations(recommendations) {
+    const agentContainer = document.getElementById('adAgentDisplay');
+    if (!agentContainer) return;
+
+    if (recommendations.error) {
+        agentContainer.innerHTML = '<div class="empty-state padded-empty">Please select tags to get recommendations.</div>';
+        return;
+    }
+
+    if (!recommendations.topRecommendation) {
+        agentContainer.innerHTML = '<div class="empty-state">No advertisers available.</div>';
+        return;
+    }
+
+    const top = recommendations.topRecommendation;
+    const alternatives = recommendations.alternatives || [];
+
+    let html = `
+        <div class="advertiser-recommendation">
+            <div class="rec-top-pick">
+                <div class="rec-header">TOP PICK</div>
+                <div class="advertiser-card top">
+                    <div class="adv-name">${top.agency.name}</div>
+                    <div class="adv-score">
+                        <span class="score-value" style="color: ${top.color}">${top.score.toFixed(2)}</span>
+                        <span class="score-grade">${top.grade}</span>
+                    </div>
+                    <div class="adv-reasoning">${top.reasoning}</div>
+                </div>
+            </div>
+    `;
+
+    if (alternatives.length > 0) {
+        html += '<div class="rec-alternatives"><div class="rec-header">ALTERNATIVES</div>';
+        alternatives.slice(0, 3).forEach(alt => {
+            html += `
+                <div class="advertiser-card alt">
+                    <div class="adv-name">${alt.agency.name}</div>
+                    <div class="adv-score">
+                        <span class="score-value" style="color: ${alt.color}">${alt.score.toFixed(2)}</span>
+                        <span class="score-grade">${alt.grade}</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+
+    html += '</div>';
+    agentContainer.innerHTML = html;
 }
