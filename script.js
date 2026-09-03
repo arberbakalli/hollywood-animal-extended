@@ -22,6 +22,9 @@ window.onload = async function() {
         initializeSelectors('generator');
         initializeSelectors('excluded');
 
+        // Setup global search filtering (once, for all contexts)
+        setupGlobalCategorySearch();
+
         buildSearchIndex();
         setupSearchListeners();
         setupScoreSync();
@@ -405,9 +408,6 @@ function initializeSelectors(context) {
         container.appendChild(groupDiv);
         addDropdown(category, null, context);
     });
-
-    // Setup search filtering for all contexts
-    setupCategorySearch(context);
 }
 
 /**
@@ -461,16 +461,14 @@ function refreshCategoryDropdowns(category, context) {
     });
 }
 
-function setupCategorySearch(context) {
-    // Use event delegation for search inputs (handles dynamically added dropdowns)
+function setupGlobalCategorySearch() {
+    // Global event delegation for all category search inputs
     document.addEventListener('input', function(e) {
         if (!e.target.classList.contains('category-search-input')) return;
 
         const searchTerm = e.target.value.toLowerCase().trim();
         const category = e.target.dataset.category;
-        const inputContext = e.target.dataset.context;
-
-        if (inputContext !== context) return;
+        const context = e.target.dataset.context;
 
         const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
         const container = document.querySelector(containerSelector);
@@ -485,7 +483,7 @@ function setupCategorySearch(context) {
                 opt.style.display = matches ? '' : 'none';
             });
         });
-    }, true); // Use capture phase for better event handling
+    });
 }
 
 function addDropdown(category, selectedId = null, context = currentTab) {
@@ -526,7 +524,7 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     row.appendChild(select);
 
     // When selection changes, refresh all dropdowns in this category to enforce deduplication
-    if (context === 'generator' || context === 'synergy') {
+    if (context === 'generator' || context === 'synergy' || context === 'excluded') {
         select.addEventListener('change', () => {
             refreshCategoryDropdowns(category, context);
         });
