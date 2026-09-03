@@ -359,7 +359,11 @@ function beautifyTagName(rawId) {
 function initializeSelectors(context) {
     const container = document.getElementById(`selectors-container-${context}`);
     container.innerHTML = '';
-    GAME_DATA.categories.forEach(category => {
+
+    // Sort categories alphabetically for consistent display
+    const sortedCategories = [...GAME_DATA.categories].sort((a, b) => a.localeCompare(b));
+
+    sortedCategories.forEach(category => {
         const tagsInCategory = Object.values(GAME_DATA.tags).filter(t =>
             t.category === category
         ).sort((a, b) => a.name.localeCompare(b.name));
@@ -549,7 +553,7 @@ function addDropdown(category, selectedId = null, context = currentTab) {
         // Initial refresh to disable already-selected options
         setTimeout(() => refreshCategoryDropdowns(category, context), 0);
     }
-    
+
     // Add percent slider only for Genre in Synergy/Advertisers (not Excluded or simple Lock)
     if (category === 'Genre' && context !== 'excluded') {
         const percentWrapper = document.createElement('div');
@@ -595,7 +599,8 @@ function addDropdown(category, selectedId = null, context = currentTab) {
         };
         row.appendChild(removeBtn);
     }
-    container.appendChild(row);
+    // Add new rows to the TOP (prepend) instead of bottom
+    container.insertBefore(row, container.firstChild);
     if (category === 'Genre' && context !== 'excluded') {
         updateGenreControls(context);
     }
