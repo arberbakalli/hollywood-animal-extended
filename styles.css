@@ -1521,3 +1521,66 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 #suggestPerfectScripts {
     width: 100%;
 }
+
+.graves-results-section {
+    margin-bottom: 1.5rem;
+}
+
+.graves-section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.graves-section-title.successful {
+    color: var(--success);
+}
+
+.graves-section-title.common {
+    color: var(--moderate);
+}
+
+.graves-section-title.unsuccessful {
+    color: var(--danger);
+}
+
+.graves-combinations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.graves-combo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.graves-combo-tags {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex: 1;
+}
+
+.graves-combo-tag {
+    background: var(--accent);
+    color: var(--bg-color);
+    padding: 0.35rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.graves-combo-score {
+    font-weight: 600;
+    min-width: 3rem;
+    text-align: right;
+}

@@ -245,23 +245,43 @@
             <div id="tab-graves" class="tab-content hidden">
                 <div class="card builder-card">
                     <div class="card-header">
-                        <h3>Find Perfect Scripts</h3>
+                        <h3>Graves's Evaluation</h3>
                         <button class="reset-btn" data-reset-context="graves">Reset</button>
                     </div>
-                    <p class="subtitle">Select story elements (or leave empty for all 4.0+ scripts).</p>
+                    <p class="subtitle">Genre + Setting required. Select 5-10 elements total to see combinations.</p>
 
                     <div id="selectors-container-graves"></div>
 
+                    <div class="score-controls-wrapper">
+                        <div class="score-control-group">
+                            <div class="score-label-row">
+                                <label for="gravesCountInput">Elements to Evaluate</label>
+                                <input type="number" id="gravesCountInput" class="score-number-display" step="1" min="5" max="10" value="5">
+                            </div>
+                            <div class="range-wrapper">
+                                <input type="range" id="gravesCountSlider" class="styled-slider com-slider" min="5" max="10" step="1" value="5">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="action-area">
-                        <button id="generateGravesScripts" class="analyze-btn">Generate Perfect Scripts</button>
+                        <button id="generateGravesScripts" class="analyze-btn">Generate Combinations</button>
                     </div>
                 </div>
 
                 <div id="results-graves" class="results-container hidden">
-                    <div class="section-title">
-                        <h3>Perfect Scripts (4.0+ Compatibility)</h3>
+                    <div class="graves-results-section">
+                        <h4 class="graves-section-title successful">✓ SUCCESSFUL COMBINATIONS</h4>
+                        <div id="gravesSuccessful" class="graves-combinations"></div>
                     </div>
-                    <div id="gravesResultsList" class="script-list"></div>
+                    <div class="graves-results-section">
+                        <h4 class="graves-section-title common">− COMMON COMBINATIONS</h4>
+                        <div id="gravesCommon" class="graves-combinations"></div>
+                    </div>
+                    <div class="graves-results-section">
+                        <h4 class="graves-section-title unsuccessful">✗ UNSUCCESSFUL COMBINATIONS</h4>
+                        <div id="gravesUnsuccessful" class="graves-combinations"></div>
+                    </div>
                 </div>
             </div>
 

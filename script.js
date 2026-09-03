@@ -248,22 +248,27 @@ function setupDomEventBindings() {
 }
 
 function setupScoreSync() {
-    // Existing Advertiser Tab Sync
+    // Advertiser Tab & Graves Count Sync
     const pairs = [
         { slider: 'comScoreSlider', input: 'comScoreInput' },
-        { slider: 'artScoreSlider', input: 'artScoreInput' }
+        { slider: 'artScoreSlider', input: 'artScoreInput' },
+        { slider: 'gravesCountSlider', input: 'gravesCountInput' }
     ];
     pairs.forEach(pair => {
         const slider = document.getElementById(pair.slider);
         const input = document.getElementById(pair.input);
+        if (!slider || !input) return;
+
         slider.addEventListener('input', (e) => {
             input.value = e.target.value;
             updateSliderTrack(slider);
         });
         input.addEventListener('input', (e) => {
             let val = parseFloat(e.target.value);
-            if (val > 10) val = 10;
-            if (val < 0) val = 0;
+            const min = parseFloat(slider.min || 0);
+            const max = parseFloat(slider.max || 10);
+            if (val > max) val = max;
+            if (val < min) val = min;
             if (!isNaN(val)) {
                 slider.value = val;
                 updateSliderTrack(slider);
@@ -1740,44 +1745,69 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
 
 function generateGravesScripts() {
     const selectedTags = collectTagInputs('graves');
-    const pairs = [];
 
-    const compatibility = GAME_DATA.compatibility;
-    for (const [tagA, compats] of Object.entries(compatibility)) {
-        for (const [tagB, score] of Object.entries(compats)) {
-            if (parseFloat(score) >= 4.0) {
-                pairs.push({ tag1: tagA, tag2: tagB, score: parseFloat(score) });
+    // Validate: Genre + Setting mandatory, 5-10 total
+    const genre = selectedTags.find(t => t.category === 'Genre');
+    const setting = selectedTags.find(t => t.category === 'Setting');
+    if (!genre || !setting) {
+        alert('Genre and Setting are required.');
+        return;
+    }
+
+    if (selectedTags.length < 5 || selectedTags.length > 10) {
+        alert('Select 5-10 elements total (including Genre + Setting).');
+        return;
+    }
+
+    // Validate constraints: max 1 Antagonist, max 1 Protagonist, max 1 Finale
+    const antagonists = selectedTags.filter(t => t.category === 'Antagonist');
+    const protagonists = selectedTags.filter(t => t.category === 'Protagonist');
+    const finales = selectedTags.filter(t => t.category === 'Finale');
+
+    if (antagonists.length > 1 || protagonists.length > 1 || finales.length > 1) {
+        alert('Maximum 1 Antagonist, 1 Protagonist, and 1 Finale allowed.');
+        return;
+    }
+
+    // Generate all 2-tag combinations
+    const combinations = [];
+    for (let i = 0; i < selectedTags.length; i++) {
+        for (let j = i + 1; j < selectedTags.length; j++) {
+            const tagA = selectedTags[i];
+            const tagB = selectedTags[j];
+
+            let score = 3.0;
+            if (GAME_DATA.compatibility[tagA.id]?.[tagB.id]) {
+                score = parseFloat(GAME_DATA.compatibility[tagA.id][tagB.id]);
+            } else if (GAME_DATA.compatibility[tagB.id]?.[tagA.id]) {
+                score = parseFloat(GAME_DATA.compatibility[tagB.id][tagA.id]);
             }
+
+            combinations.push({
+                tag1Name: tagA.name,
+                tag2Name: tagB.name,
+                score: score
+            });
         }
     }
 
-    let filtered = pairs;
-    if (selectedTags.length > 0) {
-        const selectedIds = new Set(selectedTags.map(t => t.id));
-        filtered = pairs.filter(p => selectedIds.has(p.tag1) || selectedIds.has(p.tag2));
-    }
+    // Group by compatibility level
+    const successful = combinations.filter(c => c.score >= 4.0).sort((a, b) => b.score - a.score);
+    const common = combinations.filter(c => c.score >= 3.5 && c.score < 4.0).sort((a, b) => b.score - a.score);
+    const unsuccessful = combinations.filter(c => c.score < 3.5).sort((a, b) => b.score - a.score);
 
-    filtered.sort((a, b) => b.score - a.score);
+    // Render results
+    document.getElementById('gravesSuccessful').innerHTML = successful.length > 0
+        ? successful.map(c => `<div class="graves-combo"><div class="graves-combo-tags"><span class="graves-combo-tag">${c.tag1Name}</span><span class="graves-combo-tag">${c.tag2Name}</span></div><div class="graves-combo-score">${c.score.toFixed(2)}</div></div>`).join('')
+        : '<div class="empty-state">None.</div>';
 
-    const resultsList = document.getElementById('gravesResultsList');
-    resultsList.innerHTML = '';
+    document.getElementById('gravesCommon').innerHTML = common.length > 0
+        ? common.map(c => `<div class="graves-combo"><div class="graves-combo-tags"><span class="graves-combo-tag">${c.tag1Name}</span><span class="graves-combo-tag">${c.tag2Name}</span></div><div class="graves-combo-score">${c.score.toFixed(2)}</div></div>`).join('')
+        : '<div class="empty-state">None.</div>';
 
-    if (filtered.length === 0) {
-        resultsList.innerHTML = '<div class="empty-state">No perfect scripts found.</div>';
-    } else {
-        filtered.forEach(pair => {
-            const row = document.createElement('div');
-            row.className = 'script-row';
-            row.innerHTML = `
-                <div class="script-content">
-                    <div class="script-tags">${GAME_DATA.tags[pair.tag1].name} + ${GAME_DATA.tags[pair.tag2].name}</div>
-                    <div class="script-meta">${GAME_DATA.tags[pair.tag1].category} + ${GAME_DATA.tags[pair.tag2].category}</div>
-                </div>
-                <div class="script-score">${pair.score.toFixed(2)}</div>
-            `;
-            resultsList.appendChild(row);
-        });
-    }
+    document.getElementById('gravesUnsuccessful').innerHTML = unsuccessful.length > 0
+        ? unsuccessful.map(c => `<div class="graves-combo"><div class="graves-combo-tags"><span class="graves-combo-tag">${c.tag1Name}</span><span class="graves-combo-tag">${c.tag2Name}</span></div><div class="graves-combo-score">${c.score.toFixed(2)}</div></div>`).join('')
+        : '<div class="empty-state">None.</div>';
 
     document.getElementById('results-graves').classList.remove('hidden');
 }
