@@ -1776,6 +1776,9 @@ function generateGravesScripts() {
             const tagA = selectedTags[i];
             const tagB = selectedTags[j];
 
+            const tagAName = GAME_DATA.tags[tagA.id]?.name || 'Unknown';
+            const tagBName = GAME_DATA.tags[tagB.id]?.name || 'Unknown';
+
             let score = 3.0;
             if (GAME_DATA.compatibility[tagA.id]?.[tagB.id]) {
                 score = parseFloat(GAME_DATA.compatibility[tagA.id][tagB.id]);
@@ -1784,8 +1787,8 @@ function generateGravesScripts() {
             }
 
             combinations.push({
-                tag1Name: tagA.name,
-                tag2Name: tagB.name,
+                tag1Name: tagAName,
+                tag2Name: tagBName,
                 score: score
             });
         }
