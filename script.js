@@ -10,37 +10,45 @@ let currentLanguage = 'English';
 
 // --- NEW: PROFILE STATE ---
 let currentGenProfile = 'custom'; // 'custom' or 'starting'
+let startingProfileExcludedLoaded = false; // Lazy loading flag
+let tagSelectRowCounter = 0;
 
-window.onload = async function() {
+window.addEventListener('load', async function initializeApp() {
     try {
-        await changeLanguage('English', false); 
+        await changeLanguage('English', false);
         await loadExternalData();
         initializeSelectors('advertisers');
         initializeSelectors('synergy');
-        
+        initializeSelectors('graves');
+
         // Init generator tab selectors (Locked and Excluded)
-        initializeSelectors('generator'); 
+        initializeSelectors('generator');
         initializeSelectors('excluded');
+
+        // Setup global search filtering (once, for all contexts)
+        setupGlobalCategorySearch();
+        setupDomEventBindings();
 
         buildSearchIndex();
         setupSearchListeners();
-        setupScoreSync(); 
-        setupGeneratorControls(); 
-        
+        setupScoreSync();
+        setupGeneratorControls();
+
         // Setup Distribution Calculator (Immediate Interaction)
         setupDistributionLogic();
 
         // Initialize Default Profile
         setGeneratorProfile('custom');
-        
+
         // RENDER PINNED SECTION IMMEDIATELY (To show Save/Load buttons)
         renderPinnedScripts();
 
+        window.dispatchEvent(new CustomEvent('hollywood:ready'));
         console.log("Initialization Complete.");
     } catch (error) {
         console.error("Failed to load data:", error);
     }
-};
+}, { once: true });
 
 /* =========================================================================
    PROFILE MANAGEMENT
@@ -57,7 +65,7 @@ function setGeneratorProfile(profileName) {
     // 2. Update Description Text
     const descText = document.getElementById('profile-desc-text');
     if (profileName === 'starting') {
-        descText.innerHTML = "Only <strong style='color:var(--accent);'>Starting Tags</strong> are available. Everything else is moved to Excluded.";
+        descText.innerHTML = "Only <strong class=\"text-accent\">Starting Tags</strong> are available. Everything else is moved to Excluded.";
     } else {
         descText.innerHTML = "All tags are available. You can manually exclude tags below.";
     }
@@ -66,24 +74,57 @@ function setGeneratorProfile(profileName) {
     if (profileName === 'starting') {
         populateExcludedForStartingProfile();
     } else {
-        // Custom: Reset exclusions
-        initializeSelectors('excluded'); 
+        // Custom: Reset exclusions. Clear the lazy-load flag too, otherwise
+        // switching back to Starting Tags would find it already "loaded".
+        startingProfileExcludedLoaded = false;
+        initializeSelectors('excluded');
     }
 }
 
 function populateExcludedForStartingProfile() {
-    initializeSelectors('excluded');
+    // Lazy loading: Only populate excluded elements once to prevent UI freeze
+    if (startingProfileExcludedLoaded) return;
+
+    const buildExcludedList = () => {
+        initializeSelectors('excluded');
+        const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+        const allTags = Object.values(GAME_DATA.tags);
+        const container = document.getElementById('selectors-container-excluded');
+
+        container.classList.add('is-batching');
+        allTags.forEach(tag => {
+            if (!whitelist.has(tag.id)) {
+                addDropdown(tag.category, tag.id, 'excluded');
+            }
+        });
+        container.classList.remove('is-batching');
+        startingProfileExcludedLoaded = true;
+    };
+
+    // Defer the heavy DOM work off the click handler so the button repaints
+    // immediately and INP stays low. Deliberately setTimeout, not
+    // requestIdleCallback: Chrome suspends idle callbacks in hidden tabs and
+    // ignores their timeout there, so clicking Starting Tags and switching tabs
+    // would leave the exclusion list silently empty.
+    setTimeout(buildExcludedList, 0);
+}
+
+function getProfileExcludedIds() {
+    if (currentGenProfile !== 'starting') return new Set();
+
     const whitelist = new Set(GAME_DATA.starterWhitelist || []);
-    const allTags = Object.values(GAME_DATA.tags);
-    const container = document.getElementById('selectors-container-excluded');
-    
-    container.style.display = 'none'; // Performance optimization
-    allTags.forEach(tag => {
-        if (!whitelist.has(tag.id)) {
-            addDropdown(tag.category, tag.id, 'excluded');
-        }
-    });
-    container.style.display = 'grid'; 
+    return new Set(
+        Object.values(GAME_DATA.tags)
+            .filter(tag => !whitelist.has(tag.id))
+            .map(tag => tag.id)
+    );
+}
+
+function getGeneratorExcludedTags(manualExcludedTags = collectTagInputs('excluded')) {
+    const excludedIds = new Set(manualExcludedTags.map(tag => tag.id));
+    getProfileExcludedIds().forEach(id => excludedIds.add(id));
+
+    return [...excludedIds].map(id => ({ id }));
 }
 
 /* =========================================================================
@@ -107,23 +148,23 @@ async function changeLanguage(langName, shouldRender = true) {
         }
         if (Object.keys(GAME_DATA.tags).length > 0) {
             updateAllTagNames();
-            buildSearchIndex(); 
+            buildSearchIndex();
             if (shouldRender) {
                 const savedSynergy = collectTagInputs('synergy');
                 const savedAdvertisers = collectTagInputs('advertisers');
                 const savedGenerator = collectTagInputs('generator');
                 const savedExcluded = collectTagInputs('excluded');
-                
+
                 initializeSelectors('synergy');
                 initializeSelectors('advertisers');
                 initializeSelectors('generator');
                 initializeSelectors('excluded');
-                
+
                 restoreSelection('synergy', savedSynergy);
                 restoreSelection('advertisers', savedAdvertisers);
                 restoreSelection('generator', savedGenerator);
                 restoreSelection('excluded', savedExcluded);
-                
+
                 if(currentGenProfile === 'starting') {
                     populateExcludedForStartingProfile();
                 }
@@ -140,11 +181,23 @@ function updateAllTagNames() {
     }
 }
 
+function toDomId(value) {
+    return String(value)
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'item';
+}
+
+function categoryToElementSlug(category) {
+    return toDomId(category);
+}
+
 function restoreSelection(context, savedInputs) {
     if(!savedInputs || savedInputs.length === 0) return;
     savedInputs.forEach(input => {
         const category = input.category;
-        const containerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+        const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
         const container = document.getElementById(containerId);
         if(!container) return;
         const selects = container.querySelectorAll('select');
@@ -163,7 +216,7 @@ function restoreSelection(context, savedInputs) {
     });
     if(savedInputs.some(i => i.category === 'Genre')) {
         updateGenreControls(context);
-        const genreRows = document.querySelectorAll(`#inputs-Genre-${context} .genre-row`);
+        const genreRows = document.querySelectorAll(`#inputs-${categoryToElementSlug('Genre')}-${context} .genre-row`);
         const genres = savedInputs.filter(i => i.category === 'Genre');
         genreRows.forEach((row, idx) => {
             if(genres[idx]) {
@@ -179,14 +232,50 @@ function restoreSelection(context, savedInputs) {
 function switchTab(tabName) {
     currentTab = tabName;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    const btns = document.querySelectorAll('.tab-btn');
-    if(tabName === 'generator') btns[0].classList.add('active');
-    else if(tabName === 'synergy') btns[1].classList.add('active');
-    else btns[2].classList.add('active'); // Advertisers
+    const activeButton = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (activeButton) activeButton.classList.add('active');
     
     document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
     document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+}
+
+function setupDomEventBindings() {
+    const languageSelector = document.getElementById('languageSelector');
+    if (languageSelector) {
+        languageSelector.addEventListener('change', e => changeLanguage(e.target.value));
+    }
+
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(button => {
+        button.addEventListener('click', () => switchTab(button.dataset.tab));
+    });
+
+    document.querySelectorAll('[data-generator-profile]').forEach(button => {
+        button.addEventListener('click', () => setGeneratorProfile(button.dataset.generatorProfile));
+    });
+
+    document.querySelectorAll('[data-reset-context]').forEach(button => {
+        button.addEventListener('click', () => resetSelectors(button.dataset.resetContext));
+    });
+
+    const clickBindings = [
+        ['generateScriptsButton', generateScripts],
+        ['savePinnedScriptsButton', savePinnedScripts],
+        ['loadPinnedScriptsButton', triggerLoadScripts],
+        ['calculateSynergyButton', calculateSynergy],
+        ['evaluateGravesButton', evaluateColmanGravesScript],
+        ['transferTagsButton', transferTagsToAdvertisers],
+        ['analyzeMovieButton', analyzeMovie],
+    ];
+
+    clickBindings.forEach(([id, handler]) => {
+        const element = document.getElementById(id);
+        if (element) element.addEventListener('click', handler);
+    });
+
+    const loadScriptsInput = document.getElementById('loadScriptsInput');
+    if (loadScriptsInput) {
+        loadScriptsInput.addEventListener('change', e => handleFileLoad(e.target));
+    }
 }
 
 function setupScoreSync() {
@@ -215,6 +304,19 @@ function setupScoreSync() {
     });
 }
 
+/**
+ * Single source of truth: how many scoring elements (excluding Genre and Setting)
+ * a given target Movie Score needs. Read by both the generator and the help text
+ * above the slider, so the UI cannot promise a count the generator won't use.
+ */
+function getRequiredElementCount(targetScore) {
+    if (targetScore >= 9) return 9;
+    if (targetScore === 8) return 8;  // reaches cap 8
+    if (targetScore === 7) return 7;  // reaches cap 8 (safe)
+    if (targetScore === 6) return 5;  // reaches cap 6
+    return 4;                         // below the slider minimum
+}
+
 function setupGeneratorControls() {
     // Generator Tab Sliders + Inputs
     const genCompSlider = document.getElementById('genCompSlider');
@@ -241,13 +343,8 @@ function setupGeneratorControls() {
 
     function updateScoreDisplay(val) {
         // Update Help Text for Tag Count
-        let requiredTags = 0;
-        if(val <= 6) requiredTags = 4; // ~5 filled slots usually
-        else if(val === 7) requiredTags = 6;
-        else if(val === 8) requiredTags = 8;
-        else if(val === 9) requiredTags = 9;
-        else if(val === 10) requiredTags = 10;
-        
+        const requiredTags = getRequiredElementCount(val);
+
         requiredTagsDisplay.innerText = `Requires ~${requiredTags} Story Elements (excluding Genre & Setting).`;
         updateSliderTrack(genScoreSlider, '#d4af37');
     }
@@ -266,7 +363,9 @@ function setupGeneratorControls() {
             updateScoreDisplay(val);
         }
     });
-    updateSliderTrack(genScoreSlider, '#d4af37');
+    // Render the help text once on load, otherwise the placeholder markup in
+    // index.html stands until the user first touches the slider.
+    updateScoreDisplay(parseInt(genScoreInput.value));
 }
 
 function updateSliderTrack(slider, colorOverride = null) {
@@ -276,13 +375,15 @@ function updateSliderTrack(slider, colorOverride = null) {
     let color = isArt ? '#a0a0ff' : '#d4af37'; 
     if (colorOverride) color = colorOverride;
     
-    slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${value}%, #444 ${value}%, #444 100%)`;
+    slider.style.setProperty('--slider-fill-color', color);
+    slider.style.setProperty('--slider-fill-percent', `${value}%`);
 }
 
 function updatePercentSliderTrack(slider) {
     const value = slider.value;
     const color = '#d4af37';
-    slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${value}%, #444 ${value}%, #444 100%)`;
+    slider.style.setProperty('--slider-fill-color', color);
+    slider.style.setProperty('--slider-fill-percent', `${value}%`);
 }
 
 async function loadExternalData() {
@@ -354,98 +455,307 @@ function beautifyTagName(rawId) {
 
 function initializeSelectors(context) {
     const container = document.getElementById(`selectors-container-${context}`);
-    container.innerHTML = ''; 
-    GAME_DATA.categories.forEach(category => {
-        const tagsInCategory = Object.values(GAME_DATA.tags).filter(t => 
+    container.innerHTML = '';
+
+    // Sort categories alphabetically for consistent display
+    const sortedCategories = [...GAME_DATA.categories].sort((a, b) => a.localeCompare(b));
+
+    sortedCategories.forEach(category => {
+        const tagsInCategory = Object.values(GAME_DATA.tags).filter(t =>
             t.category === category
         ).sort((a, b) => a.name.localeCompare(b.name));
         if (tagsInCategory.length === 0) return;
-        
+
         const groupDiv = document.createElement('div');
         groupDiv.className = 'category-group';
-        groupDiv.id = `group-${category.replace(/\s/g, '-')}-${context}`;
-        
+        const categorySlug = categoryToElementSlug(category);
+        groupDiv.id = `group-${categorySlug}-${context}`;
+        groupDiv.dataset.category = category;
+        groupDiv.dataset.context = context;
+
         const header = document.createElement('div');
         header.className = 'category-header';
         const label = document.createElement('div');
         label.className = 'category-label';
         label.innerText = category;
         header.appendChild(label);
-        
+
+        // Add search input for large categories (>5 items) in generator/synergy/excluded contexts
+        if (tagsInCategory.length > 5) {
+            const searchWrapper = document.createElement('div');
+            searchWrapper.className = 'category-search-wrapper';
+            searchWrapper.id = `search-${categorySlug}-${context}-wrapper`;
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'category-search-input';
+            searchInput.id = `search-${categorySlug}-${context}-input`;
+            searchInput.placeholder = `Search ${category}...`;
+            searchInput.dataset.category = category;
+            searchInput.dataset.context = context;
+            searchWrapper.appendChild(searchInput);
+            header.appendChild(searchWrapper);
+        }
+
         // Excluded list is always multi-select for all categories
         if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
             const addBtn = document.createElement('button');
             addBtn.className = 'add-btn';
+            addBtn.id = `add-${categorySlug}-${context}-button`;
+            addBtn.dataset.action = 'add-tag-row';
+            addBtn.dataset.category = category;
+            addBtn.dataset.context = context;
             addBtn.innerHTML = '+';
-            addBtn.onclick = () => addDropdown(category, null, context);
+            addBtn.addEventListener('click', () => addDropdown(category, null, context));
             header.appendChild(addBtn);
         }
         groupDiv.appendChild(header);
-        
+
         const inputsContainer = document.createElement('div');
         inputsContainer.className = 'inputs-container';
-        inputsContainer.id = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+        inputsContainer.id = `inputs-${categorySlug}-${context}`;
+        inputsContainer.dataset.category = category;
+        inputsContainer.dataset.context = context;
         groupDiv.appendChild(inputsContainer);
-        
+
         container.appendChild(groupDiv);
         addDropdown(category, null, context);
     });
 }
 
+/**
+ * Get all currently selected tag IDs in a category for a given context
+ * @param {string} category - Category name
+ * @param {string} context - Context ('generator', 'synergy', 'excluded')
+ * @returns {Set<string>} Set of selected tag IDs in this category
+ */
+function getSelectedTagsInCategory(category, context) {
+    const selected = new Set();
+    const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
+    const container = document.querySelector(containerSelector);
+    if (!container) return selected;
+
+    container.querySelectorAll('.tag-selector').forEach(select => {
+        if (select.value) {
+            selected.add(select.value);
+        }
+    });
+    return selected;
+}
+
+/**
+ * Refresh all dropdowns in a category to enforce deduplication
+ * Disables already-selected options so they can't be picked again
+ */
+function refreshCategoryDropdowns(category, context) {
+    const categoryContainerId = `inputs-${categoryToElementSlug(category)}-${context}`;
+    const categoryContainer = document.getElementById(categoryContainerId);
+    if (!categoryContainer) return;
+
+    const selects = categoryContainer.querySelectorAll('.tag-selector');
+
+    // Get all currently selected values in this category
+    const selectedValues = new Set();
+    selects.forEach(select => {
+        if (select.value) {
+            selectedValues.add(select.value);
+        }
+    });
+
+    // Update each dropdown: disable options that are selected elsewhere
+    selects.forEach(select => {
+        select.querySelectorAll('option:not(:first-child)').forEach(opt => {
+            const isSelectedInThisDropdown = (opt.value === select.value);
+            const isSelectedElsewhere = selectedValues.has(opt.value) && !isSelectedInThisDropdown;
+
+            // Disable if selected in another dropdown, enable otherwise
+            opt.disabled = isSelectedElsewhere;
+        });
+    });
+}
+
+// Debounce timer for search performance
+const searchDebounceTimers = new Map();
+
+function setupGlobalCategorySearch() {
+    // Keyboard shortcuts for search inputs
+    document.addEventListener('keydown', function(e) {
+        if (!e.target.classList.contains('category-search-input')) return;
+
+        // Escape = clear search
+        if (e.key === 'Escape') {
+            e.target.value = '';
+            e.target.classList.remove('has-matches', 'no-matches');
+            e.target.blur();
+            // Trigger input event to update filtered view
+            e.target.dispatchEvent(new Event('input'));
+        }
+
+        // Enter = focus first matching dropdown (to select from filtered results)
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const category = e.target.dataset.category;
+            const context = e.target.dataset.context;
+            const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
+            const container = document.querySelector(containerSelector);
+            if (container) {
+                const firstVisibleSelect = container.querySelector('.select-row:not(.hidden) .tag-selector');
+                if (firstVisibleSelect) {
+                    firstVisibleSelect.focus();
+                    firstVisibleSelect.click();  // Open dropdown
+                }
+            }
+        }
+    });
+
+    // Global event delegation for all category search inputs (with debouncing for performance)
+    document.addEventListener('input', function(e) {
+        if (!e.target.classList.contains('category-search-input')) return;
+
+        const inputId = e.target.dataset.category + '-' + e.target.dataset.context;
+
+        // Clear previous timeout
+        if (searchDebounceTimers.has(inputId)) {
+            clearTimeout(searchDebounceTimers.get(inputId));
+        }
+
+        // Debounce: wait 300ms after user stops typing before filtering
+        const debounceTimer = setTimeout(() => {
+            performSearchFilter(e.target);
+            searchDebounceTimers.delete(inputId);
+        }, 300);
+
+        searchDebounceTimers.set(inputId, debounceTimer);
+    });
+}
+
+function performSearchFilter(searchInput) {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const category = searchInput.dataset.category;
+    const context = searchInput.dataset.context;
+
+    const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
+    const container = document.querySelector(containerSelector);
+
+    if (!container) return;
+
+    let totalMatches = 0;  // Count visible options for feedback
+
+    // Filter rows and options in all selects in this category
+    container.querySelectorAll('.select-row').forEach(row => {
+            const select = row.querySelector('.tag-selector');
+            if (!select) return;
+
+            // Get the selected option's text
+            const selectedOption = select.options[select.selectedIndex];
+            const selectedText = selectedOption ? selectedOption.innerText.toLowerCase() : '';
+
+            // Show/hide the entire row based on whether selected value matches search
+            if (searchTerm === '') {
+                // No search: show all rows
+                row.classList.remove('hidden');
+            } else {
+                // Search active: show only if selected value matches OR if nothing is selected yet
+                const rowMatches = selectedText.includes(searchTerm) || selectedText === '-- select ' + category.toLowerCase() + ' --' || selectedText === '';
+                row.classList.toggle('hidden', !rowMatches);
+            }
+
+            // Also filter the dropdown options (for when user clicks to select)
+            select.querySelectorAll('option:not(:first-child)').forEach(opt => {
+                const text = opt.innerText.toLowerCase();
+                const matches = searchTerm === '' || text.includes(searchTerm);
+                opt.hidden = !matches;
+                if (matches && searchTerm !== '') totalMatches++;
+            });
+        });
+
+    // Visual feedback: highlight search box based on matches
+    if (searchTerm === '') {
+        searchInput.classList.remove('has-matches', 'no-matches');
+    } else if (totalMatches > 0) {
+        searchInput.classList.remove('no-matches');
+        searchInput.classList.add('has-matches');
+    } else {
+        searchInput.classList.remove('has-matches');
+        searchInput.classList.add('no-matches');
+    }
+}
+
 function addDropdown(category, selectedId = null, context = currentTab) {
-    const containerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const categorySlug = categoryToElementSlug(category);
+    const containerId = `inputs-${categorySlug}-${context}`;
     const container = document.getElementById(containerId);
     if (!container) return;
-    
+
     // Logic for Single-select categories in 'synergy' or 'generator' (locked) context
     if (context !== 'excluded' && !MULTI_SELECT_CATEGORIES.includes(category) && container.children.length > 0) {
         const select = container.querySelector('select');
         if (selectedId) select.value = selectedId;
         return;
     }
-    
+
     const tags = Object.values(GAME_DATA.tags).filter(t => t.category === category)
                  .sort((a, b) => a.name.localeCompare(b.name));
     const row = document.createElement('div');
     row.className = 'select-row';
-    if (category === 'Genre' && context !== 'excluded') row.classList.add('genre-row'); 
-    
+    row.id = `tag-selector-row-${context}-${categorySlug}-${++tagSelectRowCounter}`;
+    row.dataset.role = 'tag-selector-row';
+    row.dataset.category = category;
+    row.dataset.context = context;
+    if (category === 'Genre' && context !== 'excluded') row.classList.add('genre-row');
+
     const select = document.createElement('select');
     select.className = 'tag-selector';
+    select.id = `${row.id}-select`;
     select.dataset.category = category;
+    select.dataset.context = context;
     const defOpt = document.createElement('option');
     defOpt.value = "";
     defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
     select.appendChild(defOpt);
+
     tags.forEach(tag => {
         const opt = document.createElement('option');
         opt.value = tag.id;
         opt.innerText = tag.name;
+        opt.dataset.searchText = tag.name.toLowerCase();
         select.appendChild(opt);
     });
+
     if (selectedId) select.value = selectedId;
     row.appendChild(select);
-    
+
+    // When selection changes, refresh all dropdowns in this category to enforce deduplication
+    if (context === 'generator' || context === 'synergy' || context === 'excluded') {
+        select.addEventListener('change', () => {
+            refreshCategoryDropdowns(category, context);
+        });
+        // Initial refresh to disable already-selected options
+        setTimeout(() => refreshCategoryDropdowns(category, context), 0);
+    }
+
     // Add percent slider only for Genre in Synergy/Advertisers (not Excluded or simple Lock)
     if (category === 'Genre' && context !== 'excluded') {
         const percentWrapper = document.createElement('div');
         percentWrapper.className = 'genre-percent-wrapper hidden'; 
+        percentWrapper.id = `${row.id}-genre-percent`;
         const numInput = document.createElement('input');
         numInput.type = 'number';
         numInput.className = 'percent-input';
+        numInput.id = `${row.id}-percent-input`;
         numInput.min = 0;
         numInput.max = 100;
         numInput.value = 100;
         const slider = document.createElement('input');
         slider.type = 'range';
         slider.className = 'styled-slider percent-slider';
+        slider.id = `${row.id}-percent-slider`;
         slider.min = 0;
         slider.max = 100;
         slider.value = 100;
         const label = document.createElement('span');
+        label.id = `${row.id}-percent-unit`;
         label.innerText = '%';
-        label.style.fontSize = '0.8rem';
-        label.style.color = '#888';
+        label.className = 'percent-unit';
         numInput.addEventListener('input', (e) => {
             slider.value = e.target.value;
             updatePercentSliderTrack(slider);
@@ -464,21 +774,26 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
+        removeBtn.id = `${row.id}-remove-button`;
+        removeBtn.dataset.action = 'remove-tag-row';
+        removeBtn.dataset.category = category;
+        removeBtn.dataset.context = context;
         removeBtn.innerHTML = '×';
-        removeBtn.onclick = () => {
+        removeBtn.addEventListener('click', () => {
             row.remove();
             if (category === 'Genre' && context !== 'excluded') updateGenreControls(context);
-        };
+        });
         row.appendChild(removeBtn);
     }
-    container.appendChild(row);
+    // Add new rows to the TOP (prepend) instead of bottom
+    container.insertBefore(row, container.firstChild);
     if (category === 'Genre' && context !== 'excluded') {
         updateGenreControls(context);
     }
 }
 
 function updateGenreControls(context) {
-    const container = document.getElementById(`inputs-Genre-${context}`);
+    const container = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
     if (!container) return;
     const rows = container.querySelectorAll('.genre-row');
     const count = rows.length;
@@ -514,6 +829,7 @@ function buildSearchIndex() {
 function setupSearchListeners() {
     setupSingleSearch('globalSearchAdvertisers', 'searchResultsAdvertisers', 'advertisers');
     setupSingleSearch('globalSearchSynergy', 'searchResultsSynergy', 'synergy');
+    setupSingleSearch('globalSearchGraves', 'searchResultsGraves', 'graves');
 }
 
 function setupSingleSearch(inputId, resultId, context) {
@@ -535,12 +851,17 @@ function setupSingleSearch(inputId, resultId, context) {
             matches.forEach(match => {
                 const div = document.createElement('div');
                 div.className = 'search-item';
+                div.id = `global-search-result-${context}-${toDomId(match.id)}`;
+                div.dataset.role = 'global-search-result';
+                div.dataset.tagId = match.id;
+                div.dataset.category = match.category;
+                div.dataset.context = context;
                 div.innerHTML = `<strong>${match.name}</strong> <small>${match.category}</small>`;
-                div.onclick = () => {
+                div.addEventListener('click', () => {
                     selectTagFromSearch(match, context);
                     input.value = '';
                     resultsBox.classList.add('hidden');
-                };
+                });
                 resultsBox.appendChild(div);
             });
         } else {
@@ -556,7 +877,7 @@ function setupSingleSearch(inputId, resultId, context) {
 
 function selectTagFromSearch(tagObj, context) {
     const category = tagObj.category;
-    const containerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
     const container = document.getElementById(containerId);
     if (!container) return;
     const selects = container.querySelectorAll('select.tag-selector');
@@ -575,10 +896,10 @@ function selectTagFromSearch(tagObj, context) {
             if (selects.length > 0) selects[0].value = tagObj.id;
         }
     }
-    const group = document.getElementById(`group-${category.replace(/\s/g, '-')}-${context}`);
+    const group = document.getElementById(`group-${categoryToElementSlug(category)}-${context}`);
     if (group) {
-        group.style.borderColor = '#d4af37';
-        setTimeout(() => group.style.borderColor = '', 500);
+        group.classList.add('is-highlighted');
+        setTimeout(() => group.classList.remove('is-highlighted'), 500);
         group.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
@@ -587,7 +908,7 @@ function collectTagInputs(context) {
     const tagInputs = []; 
     
     // BLOCK 1: Handling Genres (usually with percentages)
-    const genreContainer = document.getElementById(`inputs-Genre-${context}`);
+    const genreContainer = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
     const genreRows = genreContainer ? genreContainer.querySelectorAll('.genre-row') : [];
     let totalGenreInput = 0;
     const genreData = [];
@@ -630,30 +951,61 @@ function collectTagInputs(context) {
     return tagInputs;
 }
 
+function showFeedbackMessage(elementId, message, tone = 'danger') {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    element.textContent = message;
+    element.className = `app-feedback app-feedback-${tone}`;
+    element.classList.remove('hidden');
+}
+
+function clearFeedbackMessage(elementId) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    element.textContent = '';
+    element.classList.add('hidden');
+}
+
 /* =========================================================================
    SCRIPT GENERATOR LOGIC
    ========================================================================= */
 
 function generateScripts() {
+    clearFeedbackMessage('generatorFeedbackMessage');
+
     const targetComp = parseFloat(document.getElementById('genCompInput').value);
     const targetScoreInput = parseInt(document.getElementById('genScoreInput').value);
     
     // Map Movie Score to Required Scoring Elements (Excluding Genre AND Setting)
-    let targetCount = 4; // Default
-    if (targetScoreInput === 6) targetCount = 5; // Reaches cap 6
-    else if (targetScoreInput === 7) targetCount = 7; // Reaches cap 8 (safe)
-    else if (targetScoreInput === 8) targetCount = 8;
-    else if (targetScoreInput >= 9) targetCount = 9;
+    const targetCount = getRequiredElementCount(targetScoreInput);
 
     // Get Fixed Tags
     const fixedTags = collectTagInputs('generator');
-    const excludedTags = collectTagInputs('excluded');
+    const excludedTags = getGeneratorExcludedTags();
     
     // Validate
     const scoringFixed = fixedTags.filter(t => t.category !== "Genre" && t.category !== "Setting");
     
     if (scoringFixed.length > targetCount) {
-        alert(`You have locked ${scoringFixed.length} scoring elements, but the target Movie Score only allows for ~${targetCount}. Increase the target Movie Score or remove locked elements.`);
+        showFeedbackMessage(
+            'generatorFeedbackMessage',
+            `You locked ${scoringFixed.length} scoring elements, but this Movie Score allows about ${targetCount}. Raise the score target or remove locked elements.`
+        );
+        return;
+    }
+
+    const excludedIds = new Set(excludedTags.map(t => t.id));
+    const unavailableFixed = fixedTags.filter(t => excludedIds.has(t.id));
+    if (unavailableFixed.length > 0) {
+        const unavailableNames = unavailableFixed
+            .map(t => (GAME_DATA.tags[t.id] ? GAME_DATA.tags[t.id].name : t.id))
+            .join(', ');
+        showFeedbackMessage(
+            'generatorFeedbackMessage',
+            `Locked elements are unavailable or excluded: ${unavailableNames}. Remove them from locked picks or exclusions.`
+        );
         return;
     }
 
@@ -854,8 +1206,13 @@ function renderGeneratedScripts(scripts) {
 
 function createScriptCardHTML(scriptObj, isPinnedSection) {
     const div = document.createElement('div');
+    const cardScope = isPinnedSection ? 'pinned-script' : 'generated-script';
+    const scriptDomId = toDomId(scriptObj.uniqueId);
     div.className = 'gen-card';
+    div.id = `${cardScope}-card-${scriptDomId}`;
     div.dataset.id = scriptObj.uniqueId;
+    div.dataset.scriptId = scriptObj.uniqueId;
+    div.dataset.role = `${cardScope}-card`;
     
     const compClass = scriptObj.stats.avgComp >= 4.0 ? 'val-high' : (scriptObj.stats.avgComp >= 3.0 ? 'val-mid' : 'val-low');
     
@@ -889,11 +1246,13 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
     // Editable Name Input (Only if in pinned section)
     const nameInputHtml = isPinnedSection 
         ? `<input type="text" class="script-name-input" value="${scriptObj.name || 'Untitled Script'}" 
-           onclick="event.stopPropagation()" onkeyup="updateScriptName('${scriptObj.uniqueId}', this.value)" placeholder="Script Name">`
+           id="${cardScope}-name-${scriptDomId}"
+           data-role="script-name-input"
+           placeholder="Script Name">`
         : '';
 
     div.innerHTML = `
-        <div class="gen-header" onclick="toggleScriptCard(this)">
+        <div id="${cardScope}-header-${scriptDomId}" class="gen-header" data-role="script-card-header">
             <div class="gen-left-col">
                 ${nameInputHtml}
                 <div class="gen-info-row">
@@ -911,7 +1270,7 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
                     </div>
                 </div>
             </div>
-            <button class="pin-btn ${pinClass}" title="${pinTitle}" onclick="togglePin('${scriptObj.uniqueId}', event)">
+            <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" title="${pinTitle}" data-role="script-pin-button">
                 ${isActuallyPinned ? '★' : '☆'}
             </button>
         </div>
@@ -920,13 +1279,22 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
                 ${tagsHtml}
             </div>
             <div class="gen-actions">
-                <span style="font-size:0.8rem; color:#666;">ID: ${scriptObj.uniqueId.substring(scriptObj.uniqueId.length-6)}</span>
-                <button class="transfer-link-btn" onclick="transferScriptToAdvertisers('${scriptObj.uniqueId}')">
+                <span id="${cardScope}-short-id-${scriptDomId}" class="script-id" data-role="script-short-id">ID: ${scriptObj.uniqueId.substring(scriptObj.uniqueId.length-6)}</span>
+                <button id="${cardScope}-transfer-${scriptDomId}" class="transfer-link-btn" data-role="script-transfer-button">
                     Find Best Advertisers &rarr;
                 </button>
             </div>
         </div>
     `;
+    div.querySelector('.gen-header')?.addEventListener('click', event => {
+        if (event.target.closest('button, input')) return;
+        toggleScriptCard(event.currentTarget);
+    });
+    div.querySelector('.pin-btn')?.addEventListener('click', event => togglePin(scriptObj.uniqueId, event));
+    div.querySelector('.transfer-link-btn')?.addEventListener('click', () => transferScriptToAdvertisers(scriptObj.uniqueId));
+    div.querySelector('.script-name-input')?.addEventListener('keyup', event => updateScriptName(scriptObj.uniqueId, event.target.value));
+    div.querySelector('.script-name-input')?.addEventListener('click', event => event.stopPropagation());
+
     return div;
 }
 
@@ -982,7 +1350,7 @@ function renderPinnedScripts() {
     
     // Show placeholder instead of hiding
     if(pinnedScripts.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted); font-style:italic; font-size:0.9rem; padding:10px 0;">No pinned scripts yet.</div>';
+        container.innerHTML = '<div class="empty-state pinned-empty">No pinned scripts yet.</div>';
         return;
     }
     
@@ -1037,7 +1405,7 @@ function handleFileLoad(input) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.addEventListener('load', function(e) {
         try {
             const loaded = JSON.parse(e.target.result);
             if(Array.isArray(loaded)) {
@@ -1070,7 +1438,7 @@ function handleFileLoad(input) {
             console.error(err);
             alert("Error parsing JSON file.");
         }
-    };
+    }, { once: true });
     reader.readAsText(file);
 }
 
@@ -1085,7 +1453,7 @@ function transferScriptToAdvertisers(uniqueId) {
     
     script.tags.forEach(t => {
         const category = t.category;
-        const containerId = `inputs-${category.replace(/\s/g, '-')}-advertisers`;
+        const containerId = `inputs-${categoryToElementSlug(category)}-advertisers`;
         const container = document.getElementById(containerId);
         if (!container) return;
         
@@ -1223,11 +1591,7 @@ function analyzeMovie() {
             audienceContainer.appendChild(chip);
         });
     } else {
-        audienceContainer.innerHTML = `
-            <div style="color: #666; font-style: italic; font-size: 0.95rem;">
-                No audience fits the criteria.
-            </div>
-        `;
+        audienceContainer.innerHTML = '<div class="empty-state">No audience fits the criteria.</div>';
     }
 
     const validTargetIds = targetAudiences.map(t => t.id);
@@ -1261,12 +1625,16 @@ function analyzeMovie() {
 
     const agentContainer = document.getElementById('adAgentDisplay');
     const leanDisplay = document.getElementById('movieLeanDisplay');
-    leanDisplay.innerHTML = `<span style="color: ${movieLean === 1 ? '#a0a0ff' : (movieLean === 2 ? '#d4af37' : '#fff')}">${leanText}</span>`;
+    leanDisplay.textContent = leanText;
+    leanDisplay.className = 'value';
+    if (movieLean === 1) leanDisplay.classList.add('lean-art');
+    else if (movieLean === 2) leanDisplay.classList.add('lean-com');
+    else leanDisplay.classList.add('lean-balanced');
 
     if (validTargetIds.length === 0) {
-        agentContainer.innerHTML = `<div style="color:#666; font-style:italic; padding:10px 0;">Identify a target audience first.</div>`;
+        agentContainer.innerHTML = '<div class="empty-state padded-empty">Identify a target audience first.</div>';
     } else if (validAgents.length === 0) {
-        agentContainer.innerHTML = `<div style="color:#d4af37; padding:10px 0;">No specific advertisers found.</div>`;
+        agentContainer.innerHTML = '<div class="empty-state accent-empty padded-empty">No specific advertisers found.</div>';
     } else {
         const agentHtml = validAgents.slice(0, 4).map(a => {
             let typeLabel = a.type === 0 ? "Univ." : (a.type === 1 ? "Art" : "Com");
@@ -1284,7 +1652,7 @@ function analyzeMovie() {
     holidayContainer.innerHTML = '';
 
     if (validTargetIds.length === 0) {
-        holidayContainer.innerHTML = `<div style="color:#666; font-style:italic;">Identify target audience first.</div>`;
+        holidayContainer.innerHTML = '<div class="empty-state">Identify target audience first.</div>';
     } else {
         let primaryTargets = highInterestIds;
         if (primaryTargets.length === 0) {
@@ -1337,9 +1705,8 @@ function analyzeMovie() {
             const alternatives = viableHolidays.slice(1, 4); 
             if(alternatives.length > 0) {
                 const altHeader = document.createElement('div');
-                altHeader.className = 'holiday-section-label';
+                altHeader.className = 'holiday-section-label spaced';
                 altHeader.innerText = "Alternatives";
-                altHeader.style.marginTop = "20px";
                 holidayContainer.appendChild(altHeader);
 
                 alternatives.forEach(alt => {
@@ -1378,14 +1745,14 @@ function analyzeMovie() {
                 <span class="camp-value">${releaseDuration} wks</span>
             </div>
 
-            <div class="campaign-block post" style="opacity: ${postDuration > 0 ? 1 : 0.3}">
+            <div class="campaign-block post ${postDuration > 0 ? '' : 'is-dimmed'}">
                 <span class="camp-title">Post-Release</span>
                 <span class="camp-value">${postDuration} wks</span>
             </div>
         </div>
 
         <div class="total-duration-footer">
-            Total Duration: <strong style="color:#fff;">${totalWeeks} Weeks</strong>
+            Total Duration: <strong class="text-main">${totalWeeks} Weeks</strong>
         </div>
     `;
 
@@ -1395,7 +1762,7 @@ function analyzeMovie() {
     
     if(distCard && resultsContainer) {
         resultsContainer.appendChild(distCard);
-        distCard.style.marginTop = "0"; 
+        distCard.classList.add('distribution-card--in-results');
     }
 
     document.getElementById('results-advertisers').classList.remove('hidden');
@@ -1463,7 +1830,7 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
         const box = document.createElement('div');
         box.className = 'week-box';
         // Highlight active weeks
-        if (val > 0) box.style.borderColor = 'rgba(212, 175, 55, 0.3)';
+        if (val > 0) box.classList.add('active-week');
         
         box.innerHTML = `
             <span class="week-label">Week ${weekNum}</span>
@@ -1624,28 +1991,33 @@ function formatSimpleScore(num) {
     return (num > 0 ? "+" : "") + parseFloat(num.toFixed(2));
 }
 
+function setToneClass(element, tone) {
+    element.classList.remove('tone-success', 'tone-danger', 'tone-neutral', 'tone-accent', 'tone-art');
+    element.classList.add(`tone-${tone}`);
+}
+
 function renderSynergyResults(matrix, bonuses, tags) {
     document.getElementById('results-synergy').classList.remove('hidden');
     const avgEl = document.getElementById('synergyAverageDisplay');
     avgEl.innerHTML = `${matrix.rawAverage.toFixed(1)} <span class="sub-value">/ 5.0</span>`;
-    if (matrix.rawAverage >= 3.5) avgEl.style.color = 'var(--success)';
-    else if (matrix.rawAverage < 2.5) avgEl.style.color = 'var(--danger)';
-    else avgEl.style.color = '#fff';
+    if (matrix.rawAverage >= 3.5) setToneClass(avgEl, 'success');
+    else if (matrix.rawAverage < 2.5) setToneClass(avgEl, 'danger');
+    else setToneClass(avgEl, 'neutral');
 
     const baseScoreEl = document.getElementById('synergyTotalDisplay');
     baseScoreEl.innerText = formatScore(matrix.totalScore);
-    baseScoreEl.style.color = matrix.totalScore >= 0 ? 'var(--success)' : 'var(--danger)';
+    setToneClass(baseScoreEl, matrix.totalScore >= 0 ? 'success' : 'danger');
 
     const breakdownBase = document.getElementById('breakdownBaseScore');
     breakdownBase.innerText = formatScore(matrix.totalScore);
-    breakdownBase.style.color = matrix.totalScore >= 0 ? 'var(--success)' : 'var(--danger)';
+    setToneClass(breakdownBase, matrix.totalScore >= 0 ? 'success' : 'danger');
 
     const breakdownCom = document.getElementById('breakdownComBonus');
     const breakdownArt = document.getElementById('breakdownArtBonus');
     breakdownCom.innerText = formatSimpleScore(bonuses.com);
-    breakdownCom.style.color = bonuses.com > 0 ? 'var(--success)' : (bonuses.com < 0 ? 'var(--danger)' : '#fff');
+    setToneClass(breakdownCom, bonuses.com > 0 ? 'success' : (bonuses.com < 0 ? 'danger' : 'neutral'));
     breakdownArt.innerText = formatSimpleScore(bonuses.art);
-    breakdownArt.style.color = bonuses.art > 0 ? '#a0a0ff' : (bonuses.art < 0 ? 'var(--danger)' : '#fff');
+    setToneClass(breakdownArt, bonuses.art > 0 ? 'art' : (bonuses.art < 0 ? 'danger' : 'neutral'));
 
     // Tag Cap Logic
     let ngCount = 0;
@@ -1677,19 +2049,16 @@ function renderSynergyResults(matrix, bonuses, tags) {
     }
 
     totalComEl.innerHTML = formatFinalRating(displayCom);
-    totalComEl.style.color = displayCom > 0 ? 'var(--accent)' : 'var(--danger)'; 
+    setToneClass(totalComEl, displayCom > 0 ? 'accent' : 'danger');
     totalArtEl.innerHTML = formatFinalRating(displayArt);
-    totalArtEl.style.color = displayArt > 0 ? '#a0a0ff' : 'var(--danger)'; 
+    setToneClass(totalArtEl, displayArt > 0 ? 'art' : 'danger');
     
     let capLabel = document.getElementById('scoreCapLabel');
     if (!capLabel) {
         const rightCol = document.querySelector('#results-synergy .right-col');
         capLabel = document.createElement('div');
         capLabel.id = 'scoreCapLabel';
-        capLabel.style.fontSize = '0.75rem';
-        capLabel.style.color = '#666';
-        capLabel.style.marginTop = '10px';
-        capLabel.style.textAlign = 'right';
+        capLabel.className = 'score-cap-label';
         rightCol.appendChild(capLabel);
     }
     capLabel.innerHTML = `Max Score Capped at <strong>${tagCap}.0</strong> (${ngCount} Scoring Elements)`;
@@ -1698,15 +2067,202 @@ function renderSynergyResults(matrix, bonuses, tags) {
     if (matrix.spoilers.length > 0) {
         let uniqueSpoilers = [...new Set(matrix.spoilers)];
         spoilerEl.innerHTML = uniqueSpoilers.map(s => 
-            `<div style="color:var(--danger); padding: 4px 0; border-bottom:1px solid #444;">${s}</div>`
+            `<div class="spoiler-row">${s}</div>`
         ).join('');
     } else {
-        spoilerEl.innerHTML = `<div style="color: #888; font-style: italic;">No severe conflicts found.</div>`;
+        spoilerEl.innerHTML = '<div class="empty-state">No severe conflicts found.</div>';
     }
     document.getElementById('results-synergy').scrollIntoView({ behavior: 'smooth' });
 }
 
+function evaluateColmanGravesScript() {
+    clearFeedbackMessage('gravesFeedbackMessage');
+
+    const selectedTags = collectTagInputs('graves');
+    if (selectedTags.length < 2) {
+        showFeedbackMessage('gravesFeedbackMessage', 'Colman needs at least two story elements to compare.');
+        return;
+    }
+
+    const matrixResult = calculateMatrixScore(selectedTags);
+    const bonuses = calculateTotalBonuses(selectedTags);
+    renderColmanGravesResults(matrixResult, bonuses, selectedTags);
+}
+
+function getGravesVerdict(rawAverage) {
+    if (rawAverage >= 4.0) {
+        return {
+            label: 'Success',
+            tone: 'success',
+            text: 'Graves sees a strong, marketable script. The selected elements reinforce each other cleanly.'
+        };
+    }
+
+    if (rawAverage >= 3.5) {
+        return {
+            label: 'Common',
+            tone: 'accent',
+            text: 'Graves sees a viable script. It should work, but it is not a rare high-synergy combination.'
+        };
+    }
+
+    if (rawAverage < 3.0) {
+        return {
+            label: 'Failed',
+            tone: 'danger',
+            text: 'Graves sees a weak fit. The premise may still be interesting, but the game data says these elements fight each other.'
+        };
+    }
+
+    return {
+        label: 'Risky',
+        tone: 'neutral',
+        text: 'Graves sees an uneven script. A few pairings may carry it, but the whole package is fragile.'
+    };
+}
+
+function calculateGravesMovieScores(matrix, bonuses, tags) {
+    const scoringCount = getScoringElementCount(tags);
+    let tagCap = 6;
+    if (scoringCount >= 9) tagCap = 9;
+    else if (scoringCount >= 7) tagCap = 8;
+    else if (scoringCount >= 5) tagCap = 7;
+
+    const maxGameScore = 9.9;
+    const commercial = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore));
+    const artistic = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore));
+
+    return { commercial, artistic, tagCap, scoringCount };
+}
+
+function calculateGravesAudience(tags) {
+    const affinity = Object.fromEntries(Object.keys(GAME_DATA.demographics).map(id => [id, 0]));
+
+    tags.forEach(item => {
+        const tagData = GAME_DATA.tags[item.id];
+        if (!tagData || !tagData.weights) return;
+
+        Object.keys(affinity).forEach(demoId => {
+            affinity[demoId] += (tagData.weights[demoId] || 0) * item.percent;
+        });
+    });
+
+    const maxAffinity = Math.max(1, ...Object.values(affinity));
+    return Object.entries(affinity)
+        .map(([id, score]) => ({
+            id,
+            name: GAME_DATA.demographics[id].name,
+            score,
+            strength: Math.round((score / maxAffinity) * 100)
+        }))
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score);
+}
+
+function getRawCompatibilityScore(tagA, tagB) {
+    if (GAME_DATA.compatibility[tagA.id] && GAME_DATA.compatibility[tagA.id][tagB.id]) {
+        return parseFloat(GAME_DATA.compatibility[tagA.id][tagB.id]);
+    }
+
+    if (GAME_DATA.compatibility[tagB.id] && GAME_DATA.compatibility[tagB.id][tagA.id]) {
+        return parseFloat(GAME_DATA.compatibility[tagB.id][tagA.id]);
+    }
+
+    return 3.0;
+}
+
+function findGravesConflicts(tags) {
+    const conflicts = [];
+
+    for (let i = 0; i < tags.length; i++) {
+        for (let j = i + 1; j < tags.length; j++) {
+            const rawScore = getRawCompatibilityScore(tags[i], tags[j]);
+            if (rawScore < 2.0) {
+                const firstName = GAME_DATA.tags[tags[i].id] ? GAME_DATA.tags[tags[i].id].name : tags[i].id;
+                const secondName = GAME_DATA.tags[tags[j].id] ? GAME_DATA.tags[tags[j].id].name : tags[j].id;
+                conflicts.push({ firstName, secondName, rawScore });
+            }
+        }
+    }
+
+    return conflicts.sort((a, b) => a.rawScore - b.rawScore);
+}
+
+function renderColmanGravesResults(matrix, bonuses, tags) {
+    const verdict = getGravesVerdict(matrix.rawAverage);
+    const movieScores = calculateGravesMovieScores(matrix, bonuses, tags);
+
+    document.getElementById('results-graves').classList.remove('hidden');
+
+    const verdictEl = document.getElementById('gravesVerdictDisplay');
+    verdictEl.textContent = verdict.label;
+    setToneClass(verdictEl, verdict.tone);
+
+    const averageEl = document.getElementById('gravesAverageDisplay');
+    averageEl.innerHTML = `${matrix.rawAverage.toFixed(1)} <span class="sub-value">/ 5.0</span>`;
+    setToneClass(averageEl, matrix.rawAverage >= 4.0 ? 'success' : (matrix.rawAverage < 3.0 ? 'danger' : 'accent'));
+
+    const commercialEl = document.getElementById('gravesCommercialScoreDisplay');
+    commercialEl.textContent = movieScores.commercial.toFixed(1);
+    setToneClass(commercialEl, movieScores.commercial > 0 ? 'accent' : 'danger');
+
+    const artisticEl = document.getElementById('gravesArtisticScoreDisplay');
+    artisticEl.textContent = movieScores.artistic.toFixed(1);
+    setToneClass(artisticEl, movieScores.artistic > 0 ? 'art' : 'danger');
+
+    document.getElementById('gravesVerdictText').textContent = verdict.text;
+    document.getElementById('gravesMethodList').innerHTML = `
+        <div class="graves-method-row">
+            <span class="graves-method-label">Pair average</span>
+            <span class="graves-method-value">${matrix.rawAverage.toFixed(2)}</span>
+        </div>
+        <div class="graves-method-row">
+            <span class="graves-method-label">Script synergy</span>
+            <span class="graves-method-value">${formatScore(matrix.totalScore)}</span>
+        </div>
+        <div class="graves-method-row">
+            <span class="graves-method-label">Score cap</span>
+            <span class="graves-method-value">${movieScores.tagCap}.0 from ${movieScores.scoringCount} scoring elements</span>
+        </div>
+    `;
+
+    const audienceContainer = document.getElementById('gravesAudienceDisplay');
+    audienceContainer.innerHTML = '';
+    const audiences = calculateGravesAudience(tags).slice(0, 6);
+    if (audiences.length === 0) {
+        audienceContainer.innerHTML = '<div class="empty-state">No clear audience pattern found.</div>';
+    } else {
+        audiences.forEach(audience => {
+            const chip = document.createElement('div');
+            chip.id = `graves-audience-${toDomId(audience.id)}`;
+            chip.className = `audience-pill ${audience.strength >= 67 ? 'pill-best' : 'pill-moderate'}`;
+            chip.dataset.role = 'graves-audience-pill';
+            chip.dataset.audienceId = audience.id;
+            chip.textContent = `${audience.name} ${audience.strength}%`;
+            audienceContainer.appendChild(chip);
+        });
+    }
+
+    const conflictContainer = document.getElementById('gravesConflictDisplay');
+    const conflicts = findGravesConflicts(tags);
+    if (conflicts.length === 0) {
+        conflictContainer.innerHTML = '<div class="empty-state">No severe Graves conflicts found.</div>';
+    } else {
+        conflictContainer.innerHTML = conflicts.map((conflict, index) => `
+            <div id="graves-conflict-${index + 1}" class="spoiler-row graves-conflict-row">
+                ${conflict.firstName} clashes with ${conflict.secondName}
+                <span class="graves-raw-score">${conflict.rawScore.toFixed(1)}</span>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('results-graves').scrollIntoView({ behavior: 'smooth' });
+}
+
 function resetSelectors(context) {
+    // Reset Bans tears down the auto-populated list, so allow it to rebuild.
+    if (context === 'excluded') startingProfileExcludedLoaded = false;
+
     initializeSelectors(context);
 
     // If resetting Advertisers, move the calculator back to its initial position
@@ -1715,7 +2271,7 @@ function resetSelectors(context) {
         const anchor = document.getElementById('dist-calc-anchor');
         if(distCard && anchor) {
             anchor.appendChild(distCard);
-            distCard.style.marginTop = ""; 
+            distCard.classList.remove('distribution-card--in-results');
         }
     }
 
@@ -1733,7 +2289,7 @@ function transferTagsToAdvertisers() {
     initializeSelectors('advertisers');
     inputs.forEach(input => {
         const category = input.category;
-        const containerId = `inputs-${category.replace(/\s/g, '-')}-advertisers`;
+        const containerId = `inputs-${categoryToElementSlug(category)}-advertisers`;
         const container = document.getElementById(containerId);
         if (!container) return;
         const existingSelects = container.querySelectorAll('select');
@@ -1752,7 +2308,7 @@ function transferTagsToAdvertisers() {
     const genreInputs = inputs.filter(i => i.category === 'Genre');
     if (genreInputs.length > 1) {
         updateGenreControls('advertisers');
-        const genreRows = document.querySelectorAll('#inputs-Genre-advertisers .genre-row');
+        const genreRows = document.querySelectorAll(`#inputs-${categoryToElementSlug('Genre')}-advertisers .genre-row`);
         genreRows.forEach((row, index) => {
             if (genreInputs[index]) {
                 const percentVal = Math.round(genreInputs[index].percent * 100);

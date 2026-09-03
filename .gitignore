@@ -1,0 +1,14 @@
+node_modules/
+coverage/
+dist/
+
+.idea/
+.playwright-cli/
+graphify-out/2026-09-03/
+graphify-out/cache/ast/
+graphify-out/cache/semantic/
+.DS_Store
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
