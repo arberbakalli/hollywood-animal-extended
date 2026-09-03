@@ -11,10 +11,7 @@ let currentLanguage = 'English';
 // --- NEW: PROFILE STATE ---
 let currentGenProfile = 'custom'; // 'custom' or 'starting'
 let startingProfileExcludedLoaded = false; // Lazy loading flag
-
-// --- PERFORMANCE: Deferred data loading ---
-let compatibilityLoaded = false;
-let genrePairsLoaded = false;
+let tagSelectRowCounter = 0;
 
 window.addEventListener('load', async function initializeApp() {
     try {
@@ -112,6 +109,24 @@ function populateExcludedForStartingProfile() {
     setTimeout(buildExcludedList, 0);
 }
 
+function getProfileExcludedIds() {
+    if (currentGenProfile !== 'starting') return new Set();
+
+    const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+    return new Set(
+        Object.values(GAME_DATA.tags)
+            .filter(tag => !whitelist.has(tag.id))
+            .map(tag => tag.id)
+    );
+}
+
+function getGeneratorExcludedTags(manualExcludedTags = collectTagInputs('excluded')) {
+    const excludedIds = new Set(manualExcludedTags.map(tag => tag.id));
+    getProfileExcludedIds().forEach(id => excludedIds.add(id));
+
+    return [...excludedIds].map(id => ({ id }));
+}
+
 /* =========================================================================
    EXISTING LOGIC
    ========================================================================= */
@@ -166,11 +181,23 @@ function updateAllTagNames() {
     }
 }
 
+function toDomId(value) {
+    return String(value)
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'item';
+}
+
+function categoryToElementSlug(category) {
+    return toDomId(category);
+}
+
 function restoreSelection(context, savedInputs) {
     if(!savedInputs || savedInputs.length === 0) return;
     savedInputs.forEach(input => {
         const category = input.category;
-        const containerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+        const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
         const container = document.getElementById(containerId);
         if(!container) return;
         const selects = container.querySelectorAll('select');
@@ -189,7 +216,7 @@ function restoreSelection(context, savedInputs) {
     });
     if(savedInputs.some(i => i.category === 'Genre')) {
         updateGenreControls(context);
-        const genreRows = document.querySelectorAll(`#inputs-Genre-${context} .genre-row`);
+        const genreRows = document.querySelectorAll(`#inputs-${categoryToElementSlug('Genre')}-${context} .genre-row`);
         const genres = savedInputs.filter(i => i.category === 'Genre');
         genreRows.forEach((row, idx) => {
             if(genres[idx]) {
@@ -235,10 +262,9 @@ function setupDomEventBindings() {
         ['savePinnedScriptsButton', savePinnedScripts],
         ['loadPinnedScriptsButton', triggerLoadScripts],
         ['calculateSynergyButton', calculateSynergy],
+        ['evaluateGravesButton', evaluateColmanGravesScript],
         ['transferTagsButton', transferTagsToAdvertisers],
         ['analyzeMovieButton', analyzeMovie],
-        ['generateGravesScripts', generateGravesScripts],
-        ['generateBestMatches', generateBestMatches],
     ];
 
     clickBindings.forEach(([id, handler]) => {
@@ -253,27 +279,22 @@ function setupDomEventBindings() {
 }
 
 function setupScoreSync() {
-    // Advertiser Tab & Graves Count Sync
+    // Existing Advertiser Tab Sync
     const pairs = [
         { slider: 'comScoreSlider', input: 'comScoreInput' },
-        { slider: 'artScoreSlider', input: 'artScoreInput' },
-        { slider: 'gravesCountSlider', input: 'gravesCountInput' }
+        { slider: 'artScoreSlider', input: 'artScoreInput' }
     ];
     pairs.forEach(pair => {
         const slider = document.getElementById(pair.slider);
         const input = document.getElementById(pair.input);
-        if (!slider || !input) return;
-
         slider.addEventListener('input', (e) => {
             input.value = e.target.value;
             updateSliderTrack(slider);
         });
         input.addEventListener('input', (e) => {
             let val = parseFloat(e.target.value);
-            const min = parseFloat(slider.min || 0);
-            const max = parseFloat(slider.max || 10);
-            if (val > max) val = max;
-            if (val < min) val = min;
+            if (val > 10) val = 10;
+            if (val < 0) val = 0;
             if (!isNaN(val)) {
                 slider.value = val;
                 updateSliderTrack(slider);
@@ -367,14 +388,17 @@ function updatePercentSliderTrack(slider) {
 
 async function loadExternalData() {
     try {
-        // Load only essential data at startup; defer compatibility (2.5MB) and genrePairs
-        const [tagRes, weightRes] = await Promise.all([
+        const [tagRes, weightRes, compRes, genreRes] = await Promise.all([
             fetch('data/TagData.json'),
-            fetch('data/TagsAudienceWeights.json')
+            fetch('data/TagsAudienceWeights.json'),
+            fetch('data/TagCompatibilityData.json'),
+            fetch('data/GenrePairs.json')
         ]);
         if (!tagRes.ok || !weightRes.ok) return;
         const tagDataRaw = await tagRes.json();
         const weightDataRaw = await weightRes.json();
+        if (compRes.ok) GAME_DATA.compatibility = await compRes.json();
+        if (genreRes.ok) GAME_DATA.genrePairs = await genreRes.json();
         for (const [tagId, data] of Object.entries(tagDataRaw)) {
             if (!weightDataRaw[tagId]) continue;
             let category = "Unknown";
@@ -402,30 +426,6 @@ async function loadExternalData() {
         }
     } catch(e) {
         console.warn("External JSON load failed, relying on data.js default", e);
-    }
-}
-
-// Deferred loading: Load compatibility data only when needed (Script Generator, Graves, Synergy)
-async function ensureCompatibilityLoaded() {
-    if (compatibilityLoaded) return;
-    try {
-        const res = await fetch('data/TagCompatibilityData.json');
-        if (res.ok) GAME_DATA.compatibility = await res.json();
-        compatibilityLoaded = true;
-    } catch (e) {
-        console.warn("Failed to load compatibility data", e);
-    }
-}
-
-// Deferred loading: Load genre pairs only when needed (Best Advertisers)
-async function ensureGenrePairsLoaded() {
-    if (genrePairsLoaded) return;
-    try {
-        const res = await fetch('data/GenrePairs.json');
-        if (res.ok) GAME_DATA.genrePairs = await res.json();
-        genrePairsLoaded = true;
-    } catch (e) {
-        console.warn("Failed to load genre pairs", e);
     }
 }
 
@@ -457,9 +457,8 @@ function initializeSelectors(context) {
     const container = document.getElementById(`selectors-container-${context}`);
     container.innerHTML = '';
 
-    // Define locked element order (matching game's UI)
-    const categoryOrder = ['Genre', 'Setting', 'Antagonist', 'Protagonist', 'Supporting Character', 'Theme & Event', 'Finale'];
-    const sortedCategories = categoryOrder.filter(cat => GAME_DATA.categories.includes(cat));
+    // Sort categories alphabetically for consistent display
+    const sortedCategories = [...GAME_DATA.categories].sort((a, b) => a.localeCompare(b));
 
     sortedCategories.forEach(category => {
         const tagsInCategory = Object.values(GAME_DATA.tags).filter(t =>
@@ -469,7 +468,10 @@ function initializeSelectors(context) {
 
         const groupDiv = document.createElement('div');
         groupDiv.className = 'category-group';
-        groupDiv.id = `group-${category.replace(/\s/g, '-')}-${context}`;
+        const categorySlug = categoryToElementSlug(category);
+        groupDiv.id = `group-${categorySlug}-${context}`;
+        groupDiv.dataset.category = category;
+        groupDiv.dataset.context = context;
 
         const header = document.createElement('div');
         header.className = 'category-header';
@@ -482,9 +484,11 @@ function initializeSelectors(context) {
         if (tagsInCategory.length > 5) {
             const searchWrapper = document.createElement('div');
             searchWrapper.className = 'category-search-wrapper';
+            searchWrapper.id = `search-${categorySlug}-${context}-wrapper`;
             const searchInput = document.createElement('input');
             searchInput.type = 'text';
             searchInput.className = 'category-search-input';
+            searchInput.id = `search-${categorySlug}-${context}-input`;
             searchInput.placeholder = `Search ${category}...`;
             searchInput.dataset.category = category;
             searchInput.dataset.context = context;
@@ -496,6 +500,10 @@ function initializeSelectors(context) {
         if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
             const addBtn = document.createElement('button');
             addBtn.className = 'add-btn';
+            addBtn.id = `add-${categorySlug}-${context}-button`;
+            addBtn.dataset.action = 'add-tag-row';
+            addBtn.dataset.category = category;
+            addBtn.dataset.context = context;
             addBtn.innerHTML = '+';
             addBtn.addEventListener('click', () => addDropdown(category, null, context));
             header.appendChild(addBtn);
@@ -504,7 +512,9 @@ function initializeSelectors(context) {
 
         const inputsContainer = document.createElement('div');
         inputsContainer.className = 'inputs-container';
-        inputsContainer.id = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+        inputsContainer.id = `inputs-${categorySlug}-${context}`;
+        inputsContainer.dataset.category = category;
+        inputsContainer.dataset.context = context;
         groupDiv.appendChild(inputsContainer);
 
         container.appendChild(groupDiv);
@@ -520,7 +530,7 @@ function initializeSelectors(context) {
  */
 function getSelectedTagsInCategory(category, context) {
     const selected = new Set();
-    const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
     const container = document.querySelector(containerSelector);
     if (!container) return selected;
 
@@ -537,7 +547,7 @@ function getSelectedTagsInCategory(category, context) {
  * Disables already-selected options so they can't be picked again
  */
 function refreshCategoryDropdowns(category, context) {
-    const categoryContainerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const categoryContainerId = `inputs-${categoryToElementSlug(category)}-${context}`;
     const categoryContainer = document.getElementById(categoryContainerId);
     if (!categoryContainer) return;
 
@@ -585,7 +595,7 @@ function setupGlobalCategorySearch() {
             e.preventDefault();
             const category = e.target.dataset.category;
             const context = e.target.dataset.context;
-            const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
+            const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
             const container = document.querySelector(containerSelector);
             if (container) {
                 const firstVisibleSelect = container.querySelector('.select-row:not(.hidden) .tag-selector');
@@ -623,7 +633,7 @@ function performSearchFilter(searchInput) {
     const category = searchInput.dataset.category;
     const context = searchInput.dataset.context;
 
-    const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
     const container = document.querySelector(containerSelector);
 
     if (!container) return;
@@ -671,7 +681,8 @@ function performSearchFilter(searchInput) {
 }
 
 function addDropdown(category, selectedId = null, context = currentTab) {
-    const containerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const categorySlug = categoryToElementSlug(category);
+    const containerId = `inputs-${categorySlug}-${context}`;
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -686,11 +697,17 @@ function addDropdown(category, selectedId = null, context = currentTab) {
                  .sort((a, b) => a.name.localeCompare(b.name));
     const row = document.createElement('div');
     row.className = 'select-row';
+    row.id = `tag-selector-row-${context}-${categorySlug}-${++tagSelectRowCounter}`;
+    row.dataset.role = 'tag-selector-row';
+    row.dataset.category = category;
+    row.dataset.context = context;
     if (category === 'Genre' && context !== 'excluded') row.classList.add('genre-row');
 
     const select = document.createElement('select');
     select.className = 'tag-selector';
+    select.id = `${row.id}-select`;
     select.dataset.category = category;
+    select.dataset.context = context;
     const defOpt = document.createElement('option');
     defOpt.value = "";
     defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
@@ -720,19 +737,23 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     if (category === 'Genre' && context !== 'excluded') {
         const percentWrapper = document.createElement('div');
         percentWrapper.className = 'genre-percent-wrapper hidden'; 
+        percentWrapper.id = `${row.id}-genre-percent`;
         const numInput = document.createElement('input');
         numInput.type = 'number';
         numInput.className = 'percent-input';
+        numInput.id = `${row.id}-percent-input`;
         numInput.min = 0;
         numInput.max = 100;
         numInput.value = 100;
         const slider = document.createElement('input');
         slider.type = 'range';
         slider.className = 'styled-slider percent-slider';
+        slider.id = `${row.id}-percent-slider`;
         slider.min = 0;
         slider.max = 100;
         slider.value = 100;
         const label = document.createElement('span');
+        label.id = `${row.id}-percent-unit`;
         label.innerText = '%';
         label.className = 'percent-unit';
         numInput.addEventListener('input', (e) => {
@@ -753,6 +774,10 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-btn';
+        removeBtn.id = `${row.id}-remove-button`;
+        removeBtn.dataset.action = 'remove-tag-row';
+        removeBtn.dataset.category = category;
+        removeBtn.dataset.context = context;
         removeBtn.innerHTML = '×';
         removeBtn.addEventListener('click', () => {
             row.remove();
@@ -768,7 +793,7 @@ function addDropdown(category, selectedId = null, context = currentTab) {
 }
 
 function updateGenreControls(context) {
-    const container = document.getElementById(`inputs-Genre-${context}`);
+    const container = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
     if (!container) return;
     const rows = container.querySelectorAll('.genre-row');
     const count = rows.length;
@@ -826,6 +851,11 @@ function setupSingleSearch(inputId, resultId, context) {
             matches.forEach(match => {
                 const div = document.createElement('div');
                 div.className = 'search-item';
+                div.id = `global-search-result-${context}-${toDomId(match.id)}`;
+                div.dataset.role = 'global-search-result';
+                div.dataset.tagId = match.id;
+                div.dataset.category = match.category;
+                div.dataset.context = context;
                 div.innerHTML = `<strong>${match.name}</strong> <small>${match.category}</small>`;
                 div.addEventListener('click', () => {
                     selectTagFromSearch(match, context);
@@ -847,7 +877,7 @@ function setupSingleSearch(inputId, resultId, context) {
 
 function selectTagFromSearch(tagObj, context) {
     const category = tagObj.category;
-    const containerId = `inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
     const container = document.getElementById(containerId);
     if (!container) return;
     const selects = container.querySelectorAll('select.tag-selector');
@@ -866,7 +896,7 @@ function selectTagFromSearch(tagObj, context) {
             if (selects.length > 0) selects[0].value = tagObj.id;
         }
     }
-    const group = document.getElementById(`group-${category.replace(/\s/g, '-')}-${context}`);
+    const group = document.getElementById(`group-${categoryToElementSlug(category)}-${context}`);
     if (group) {
         group.classList.add('is-highlighted');
         setTimeout(() => group.classList.remove('is-highlighted'), 500);
@@ -878,7 +908,7 @@ function collectTagInputs(context) {
     const tagInputs = []; 
     
     // BLOCK 1: Handling Genres (usually with percentages)
-    const genreContainer = document.getElementById(`inputs-Genre-${context}`);
+    const genreContainer = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
     const genreRows = genreContainer ? genreContainer.querySelectorAll('.genre-row') : [];
     let totalGenreInput = 0;
     const genreData = [];
@@ -921,12 +951,30 @@ function collectTagInputs(context) {
     return tagInputs;
 }
 
+function showFeedbackMessage(elementId, message, tone = 'danger') {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    element.textContent = message;
+    element.className = `app-feedback app-feedback-${tone}`;
+    element.classList.remove('hidden');
+}
+
+function clearFeedbackMessage(elementId) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    element.textContent = '';
+    element.classList.add('hidden');
+}
+
 /* =========================================================================
    SCRIPT GENERATOR LOGIC
    ========================================================================= */
 
-async function generateScripts() {
-    await ensureCompatibilityLoaded();
+function generateScripts() {
+    clearFeedbackMessage('generatorFeedbackMessage');
+
     const targetComp = parseFloat(document.getElementById('genCompInput').value);
     const targetScoreInput = parseInt(document.getElementById('genScoreInput').value);
     
@@ -935,13 +983,29 @@ async function generateScripts() {
 
     // Get Fixed Tags
     const fixedTags = collectTagInputs('generator');
-    const excludedTags = collectTagInputs('excluded');
+    const excludedTags = getGeneratorExcludedTags();
     
     // Validate
     const scoringFixed = fixedTags.filter(t => t.category !== "Genre" && t.category !== "Setting");
     
     if (scoringFixed.length > targetCount) {
-        alert(`You have locked ${scoringFixed.length} scoring elements, but the target Movie Score only allows for ~${targetCount}. Increase the target Movie Score or remove locked elements.`);
+        showFeedbackMessage(
+            'generatorFeedbackMessage',
+            `You locked ${scoringFixed.length} scoring elements, but this Movie Score allows about ${targetCount}. Raise the score target or remove locked elements.`
+        );
+        return;
+    }
+
+    const excludedIds = new Set(excludedTags.map(t => t.id));
+    const unavailableFixed = fixedTags.filter(t => excludedIds.has(t.id));
+    if (unavailableFixed.length > 0) {
+        const unavailableNames = unavailableFixed
+            .map(t => (GAME_DATA.tags[t.id] ? GAME_DATA.tags[t.id].name : t.id))
+            .join(', ');
+        showFeedbackMessage(
+            'generatorFeedbackMessage',
+            `Locked elements are unavailable or excluded: ${unavailableNames}. Remove them from locked picks or exclusions.`
+        );
         return;
     }
 
@@ -1142,8 +1206,13 @@ function renderGeneratedScripts(scripts) {
 
 function createScriptCardHTML(scriptObj, isPinnedSection) {
     const div = document.createElement('div');
+    const cardScope = isPinnedSection ? 'pinned-script' : 'generated-script';
+    const scriptDomId = toDomId(scriptObj.uniqueId);
     div.className = 'gen-card';
+    div.id = `${cardScope}-card-${scriptDomId}`;
     div.dataset.id = scriptObj.uniqueId;
+    div.dataset.scriptId = scriptObj.uniqueId;
+    div.dataset.role = `${cardScope}-card`;
     
     const compClass = scriptObj.stats.avgComp >= 4.0 ? 'val-high' : (scriptObj.stats.avgComp >= 3.0 ? 'val-mid' : 'val-low');
     
@@ -1177,11 +1246,13 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
     // Editable Name Input (Only if in pinned section)
     const nameInputHtml = isPinnedSection 
         ? `<input type="text" class="script-name-input" value="${scriptObj.name || 'Untitled Script'}" 
+           id="${cardScope}-name-${scriptDomId}"
+           data-role="script-name-input"
            placeholder="Script Name">`
         : '';
 
     div.innerHTML = `
-        <div class="gen-header">
+        <div id="${cardScope}-header-${scriptDomId}" class="gen-header" data-role="script-card-header">
             <div class="gen-left-col">
                 ${nameInputHtml}
                 <div class="gen-info-row">
@@ -1199,7 +1270,7 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
                     </div>
                 </div>
             </div>
-            <button class="pin-btn ${pinClass}" title="${pinTitle}">
+            <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" title="${pinTitle}" data-role="script-pin-button">
                 ${isActuallyPinned ? '★' : '☆'}
             </button>
         </div>
@@ -1208,8 +1279,8 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
                 ${tagsHtml}
             </div>
             <div class="gen-actions">
-                <span class="script-id">ID: ${scriptObj.uniqueId.substring(scriptObj.uniqueId.length-6)}</span>
-                <button class="transfer-link-btn">
+                <span id="${cardScope}-short-id-${scriptDomId}" class="script-id" data-role="script-short-id">ID: ${scriptObj.uniqueId.substring(scriptObj.uniqueId.length-6)}</span>
+                <button id="${cardScope}-transfer-${scriptDomId}" class="transfer-link-btn" data-role="script-transfer-button">
                     Find Best Advertisers &rarr;
                 </button>
             </div>
@@ -1382,7 +1453,7 @@ function transferScriptToAdvertisers(uniqueId) {
     
     script.tags.forEach(t => {
         const category = t.category;
-        const containerId = `inputs-${category.replace(/\s/g, '-')}-advertisers`;
+        const containerId = `inputs-${categoryToElementSlug(category)}-advertisers`;
         const container = document.getElementById(containerId);
         if (!container) return;
         
@@ -1413,9 +1484,7 @@ function transferScriptToAdvertisers(uniqueId) {
    ANALYSIS / ADVERTISERS / DISTRIBUTION LOGIC
    ========================================================================= */
 
-async function analyzeMovie() {
-    await ensureCompatibilityLoaded();
-    await ensureGenrePairsLoaded();
+function analyzeMovie() {
     const tagInputs = collectTagInputs('advertisers');
     if(tagInputs.length === 0) {
         alert("Please select at least one tag.");
@@ -1773,168 +1842,7 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
 
 // --- SYNERGY LOGIC (Unchanged, just kept for context) ---
 
-async function generateGravesScripts() {
-    await ensureCompatibilityLoaded();
-    const selectedTags = collectTagInputs('graves');
-
-    // Validate: Genre + Setting mandatory, 5-10 total
-    const genre = selectedTags.find(t => t.category === 'Genre');
-    const setting = selectedTags.find(t => t.category === 'Setting');
-    if (!genre || !setting) {
-        alert('Genre and Setting are required.');
-        return;
-    }
-
-    if (selectedTags.length < 5 || selectedTags.length > 10) {
-        alert('Select 5-10 elements total (including Genre + Setting).');
-        return;
-    }
-
-    // Validate constraints: max 1 Antagonist, max 1 Protagonist, max 1 Finale
-    const antagonists = selectedTags.filter(t => t.category === 'Antagonist');
-    const protagonists = selectedTags.filter(t => t.category === 'Protagonist');
-    const finales = selectedTags.filter(t => t.category === 'Finale');
-
-    if (antagonists.length > 1 || protagonists.length > 1 || finales.length > 1) {
-        alert('Maximum 1 Antagonist, 1 Protagonist, and 1 Finale allowed.');
-        return;
-    }
-
-    // Generate all 2-tag combinations
-    const combinations = [];
-    for (let i = 0; i < selectedTags.length; i++) {
-        for (let j = i + 1; j < selectedTags.length; j++) {
-            const tagA = selectedTags[i];
-            const tagB = selectedTags[j];
-
-            const tagAName = GAME_DATA.tags[tagA.id]?.name || 'Unknown';
-            const tagBName = GAME_DATA.tags[tagB.id]?.name || 'Unknown';
-
-            let score = 3.0;
-            if (GAME_DATA.compatibility[tagA.id]?.[tagB.id]) {
-                score = parseFloat(GAME_DATA.compatibility[tagA.id][tagB.id]);
-            } else if (GAME_DATA.compatibility[tagB.id]?.[tagA.id]) {
-                score = parseFloat(GAME_DATA.compatibility[tagB.id][tagA.id]);
-            }
-
-            combinations.push({
-                tag1Name: tagAName,
-                tag2Name: tagBName,
-                score: score
-            });
-        }
-    }
-
-    // Group by compatibility level
-    const successful = combinations.filter(c => c.score >= 4.0).sort((a, b) => b.score - a.score);
-    const common = combinations.filter(c => c.score >= 3.5 && c.score < 4.0).sort((a, b) => b.score - a.score);
-    const unsuccessful = combinations.filter(c => c.score < 3.5).sort((a, b) => b.score - a.score);
-
-    // Render results
-    document.getElementById('gravesSuccessful').innerHTML = successful.length > 0
-        ? successful.map(c => `<div class="graves-combo"><div class="graves-combo-tags"><span class="graves-combo-tag">${c.tag1Name}</span><span class="graves-combo-tag">${c.tag2Name}</span></div><div class="graves-combo-score">${c.score.toFixed(2)}</div></div>`).join('')
-        : '<div class="empty-state">None.</div>';
-
-    document.getElementById('gravesCommon').innerHTML = common.length > 0
-        ? common.map(c => `<div class="graves-combo"><div class="graves-combo-tags"><span class="graves-combo-tag">${c.tag1Name}</span><span class="graves-combo-tag">${c.tag2Name}</span></div><div class="graves-combo-score">${c.score.toFixed(2)}</div></div>`).join('')
-        : '<div class="empty-state">None.</div>';
-
-    document.getElementById('gravesUnsuccessful').innerHTML = unsuccessful.length > 0
-        ? unsuccessful.map(c => `<div class="graves-combo"><div class="graves-combo-tags"><span class="graves-combo-tag">${c.tag1Name}</span><span class="graves-combo-tag">${c.tag2Name}</span></div><div class="graves-combo-score">${c.score.toFixed(2)}</div></div>`).join('')
-        : '<div class="empty-state">None.</div>';
-
-    document.getElementById('results-graves').classList.remove('hidden');
-}
-
-async function generateBestMatches() {
-    await ensureCompatibilityLoaded();
-    const selectedTags = collectTagInputs('graves');
-
-    if (selectedTags.length === 0) {
-        alert('Please select at least one element to find matches for.');
-        return;
-    }
-
-    const selectedIds = new Set(selectedTags.map(t => t.id));
-    const allMatches = [];
-    const allTagIds = Object.keys(GAME_DATA.tags);
-
-    // For each selected tag, find all 4.0+ pairings with other tags
-    for (const selectedTag of selectedTags) {
-        for (const otherId of allTagIds) {
-            if (selectedTag.id === otherId || selectedIds.has(otherId)) continue;
-
-            let score = 3.0;
-            if (GAME_DATA.compatibility[selectedTag.id]?.[otherId]) {
-                score = parseFloat(GAME_DATA.compatibility[selectedTag.id][otherId]);
-            } else if (GAME_DATA.compatibility[otherId]?.[selectedTag.id]) {
-                score = parseFloat(GAME_DATA.compatibility[otherId][selectedTag.id]);
-            }
-
-            if (score >= 4.0) {
-                allMatches.push({
-                    selectedName: GAME_DATA.tags[selectedTag.id]?.name || 'Unknown',
-                    selectedCategory: selectedTag.category,
-                    matchName: GAME_DATA.tags[otherId]?.name || 'Unknown',
-                    matchCategory: GAME_DATA.tags[otherId]?.category || 'Unknown',
-                    score: score
-                });
-            }
-        }
-    }
-
-    if (allMatches.length === 0) {
-        alert('No 4.0+ matches found for your selections. Try different elements.');
-        return;
-    }
-
-    // Sort by score descending
-    allMatches.sort((a, b) => b.score - a.score);
-
-    // Display results
-    displayBestMatches(allMatches);
-}
-
-function displayBestMatches(matches) {
-    const resultsContainer = document.getElementById('results-graves');
-    resultsContainer.innerHTML = '';
-
-    const getCategoryClass = (category) => {
-        const classMap = {
-            'Genre': 'genre',
-            'Theme & Event': 'theme',
-            'Supporting Character': 'supporting-character',
-            'Protagonist': 'protagonist',
-            'Antagonist': 'antagonist',
-        };
-        return classMap[category] || '';
-    };
-
-    const resultDiv = document.createElement('div');
-    resultDiv.innerHTML = `
-        <div class="graves-results-section">
-            <div class="graves-section-title">✨ Best Matches (4.0+ Compatibility)</div>
-            <div class="best-matches-list">
-                ${matches.map(m => `
-                    <div class="best-match-item ${getCategoryClass(m.matchCategory)}">
-                        <div class="best-match-pair">
-                            <span class="best-match-tag primary ${getCategoryClass(m.selectedCategory)}">${m.selectedName}</span>
-                            <span class="best-match-arrow">→</span>
-                            <span class="best-match-tag ${getCategoryClass(m.matchCategory)}">${m.matchName}</span>
-                        </div>
-                        <div class="best-match-score" style="color: ${m.score >= 4.5 ? '#10b981' : '#f59e0b'};">${m.score.toFixed(2)}</div>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-
-    resultsContainer.appendChild(resultDiv);
-    resultsContainer.classList.remove('hidden');
-}
-
-async function calculateSynergy() {
-    await ensureCompatibilityLoaded();
+function calculateSynergy() {
     const selectedTags = collectTagInputs('synergy');
     if (selectedTags.length === 0) {
         alert("Please select at least one tag.");
@@ -2167,6 +2075,190 @@ function renderSynergyResults(matrix, bonuses, tags) {
     document.getElementById('results-synergy').scrollIntoView({ behavior: 'smooth' });
 }
 
+function evaluateColmanGravesScript() {
+    clearFeedbackMessage('gravesFeedbackMessage');
+
+    const selectedTags = collectTagInputs('graves');
+    if (selectedTags.length < 2) {
+        showFeedbackMessage('gravesFeedbackMessage', 'Colman needs at least two story elements to compare.');
+        return;
+    }
+
+    const matrixResult = calculateMatrixScore(selectedTags);
+    const bonuses = calculateTotalBonuses(selectedTags);
+    renderColmanGravesResults(matrixResult, bonuses, selectedTags);
+}
+
+function getGravesVerdict(rawAverage) {
+    if (rawAverage >= 4.0) {
+        return {
+            label: 'Success',
+            tone: 'success',
+            text: 'Graves sees a strong, marketable script. The selected elements reinforce each other cleanly.'
+        };
+    }
+
+    if (rawAverage >= 3.5) {
+        return {
+            label: 'Common',
+            tone: 'accent',
+            text: 'Graves sees a viable script. It should work, but it is not a rare high-synergy combination.'
+        };
+    }
+
+    if (rawAverage < 3.0) {
+        return {
+            label: 'Failed',
+            tone: 'danger',
+            text: 'Graves sees a weak fit. The premise may still be interesting, but the game data says these elements fight each other.'
+        };
+    }
+
+    return {
+        label: 'Risky',
+        tone: 'neutral',
+        text: 'Graves sees an uneven script. A few pairings may carry it, but the whole package is fragile.'
+    };
+}
+
+function calculateGravesMovieScores(matrix, bonuses, tags) {
+    const scoringCount = getScoringElementCount(tags);
+    let tagCap = 6;
+    if (scoringCount >= 9) tagCap = 9;
+    else if (scoringCount >= 7) tagCap = 8;
+    else if (scoringCount >= 5) tagCap = 7;
+
+    const maxGameScore = 9.9;
+    const commercial = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore));
+    const artistic = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore));
+
+    return { commercial, artistic, tagCap, scoringCount };
+}
+
+function calculateGravesAudience(tags) {
+    const affinity = Object.fromEntries(Object.keys(GAME_DATA.demographics).map(id => [id, 0]));
+
+    tags.forEach(item => {
+        const tagData = GAME_DATA.tags[item.id];
+        if (!tagData || !tagData.weights) return;
+
+        Object.keys(affinity).forEach(demoId => {
+            affinity[demoId] += (tagData.weights[demoId] || 0) * item.percent;
+        });
+    });
+
+    const maxAffinity = Math.max(1, ...Object.values(affinity));
+    return Object.entries(affinity)
+        .map(([id, score]) => ({
+            id,
+            name: GAME_DATA.demographics[id].name,
+            score,
+            strength: Math.round((score / maxAffinity) * 100)
+        }))
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score);
+}
+
+function getRawCompatibilityScore(tagA, tagB) {
+    if (GAME_DATA.compatibility[tagA.id] && GAME_DATA.compatibility[tagA.id][tagB.id]) {
+        return parseFloat(GAME_DATA.compatibility[tagA.id][tagB.id]);
+    }
+
+    if (GAME_DATA.compatibility[tagB.id] && GAME_DATA.compatibility[tagB.id][tagA.id]) {
+        return parseFloat(GAME_DATA.compatibility[tagB.id][tagA.id]);
+    }
+
+    return 3.0;
+}
+
+function findGravesConflicts(tags) {
+    const conflicts = [];
+
+    for (let i = 0; i < tags.length; i++) {
+        for (let j = i + 1; j < tags.length; j++) {
+            const rawScore = getRawCompatibilityScore(tags[i], tags[j]);
+            if (rawScore < 2.0) {
+                const firstName = GAME_DATA.tags[tags[i].id] ? GAME_DATA.tags[tags[i].id].name : tags[i].id;
+                const secondName = GAME_DATA.tags[tags[j].id] ? GAME_DATA.tags[tags[j].id].name : tags[j].id;
+                conflicts.push({ firstName, secondName, rawScore });
+            }
+        }
+    }
+
+    return conflicts.sort((a, b) => a.rawScore - b.rawScore);
+}
+
+function renderColmanGravesResults(matrix, bonuses, tags) {
+    const verdict = getGravesVerdict(matrix.rawAverage);
+    const movieScores = calculateGravesMovieScores(matrix, bonuses, tags);
+
+    document.getElementById('results-graves').classList.remove('hidden');
+
+    const verdictEl = document.getElementById('gravesVerdictDisplay');
+    verdictEl.textContent = verdict.label;
+    setToneClass(verdictEl, verdict.tone);
+
+    const averageEl = document.getElementById('gravesAverageDisplay');
+    averageEl.innerHTML = `${matrix.rawAverage.toFixed(1)} <span class="sub-value">/ 5.0</span>`;
+    setToneClass(averageEl, matrix.rawAverage >= 4.0 ? 'success' : (matrix.rawAverage < 3.0 ? 'danger' : 'accent'));
+
+    const commercialEl = document.getElementById('gravesCommercialScoreDisplay');
+    commercialEl.textContent = movieScores.commercial.toFixed(1);
+    setToneClass(commercialEl, movieScores.commercial > 0 ? 'accent' : 'danger');
+
+    const artisticEl = document.getElementById('gravesArtisticScoreDisplay');
+    artisticEl.textContent = movieScores.artistic.toFixed(1);
+    setToneClass(artisticEl, movieScores.artistic > 0 ? 'art' : 'danger');
+
+    document.getElementById('gravesVerdictText').textContent = verdict.text;
+    document.getElementById('gravesMethodList').innerHTML = `
+        <div class="graves-method-row">
+            <span class="graves-method-label">Pair average</span>
+            <span class="graves-method-value">${matrix.rawAverage.toFixed(2)}</span>
+        </div>
+        <div class="graves-method-row">
+            <span class="graves-method-label">Script synergy</span>
+            <span class="graves-method-value">${formatScore(matrix.totalScore)}</span>
+        </div>
+        <div class="graves-method-row">
+            <span class="graves-method-label">Score cap</span>
+            <span class="graves-method-value">${movieScores.tagCap}.0 from ${movieScores.scoringCount} scoring elements</span>
+        </div>
+    `;
+
+    const audienceContainer = document.getElementById('gravesAudienceDisplay');
+    audienceContainer.innerHTML = '';
+    const audiences = calculateGravesAudience(tags).slice(0, 6);
+    if (audiences.length === 0) {
+        audienceContainer.innerHTML = '<div class="empty-state">No clear audience pattern found.</div>';
+    } else {
+        audiences.forEach(audience => {
+            const chip = document.createElement('div');
+            chip.id = `graves-audience-${toDomId(audience.id)}`;
+            chip.className = `audience-pill ${audience.strength >= 67 ? 'pill-best' : 'pill-moderate'}`;
+            chip.dataset.role = 'graves-audience-pill';
+            chip.dataset.audienceId = audience.id;
+            chip.textContent = `${audience.name} ${audience.strength}%`;
+            audienceContainer.appendChild(chip);
+        });
+    }
+
+    const conflictContainer = document.getElementById('gravesConflictDisplay');
+    const conflicts = findGravesConflicts(tags);
+    if (conflicts.length === 0) {
+        conflictContainer.innerHTML = '<div class="empty-state">No severe Graves conflicts found.</div>';
+    } else {
+        conflictContainer.innerHTML = conflicts.map((conflict, index) => `
+            <div id="graves-conflict-${index + 1}" class="spoiler-row graves-conflict-row">
+                ${conflict.firstName} clashes with ${conflict.secondName}
+                <span class="graves-raw-score">${conflict.rawScore.toFixed(1)}</span>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('results-graves').scrollIntoView({ behavior: 'smooth' });
+}
+
 function resetSelectors(context) {
     // Reset Bans tears down the auto-populated list, so allow it to rebuild.
     if (context === 'excluded') startingProfileExcludedLoaded = false;
@@ -2197,7 +2289,7 @@ function transferTagsToAdvertisers() {
     initializeSelectors('advertisers');
     inputs.forEach(input => {
         const category = input.category;
-        const containerId = `inputs-${category.replace(/\s/g, '-')}-advertisers`;
+        const containerId = `inputs-${categoryToElementSlug(category)}-advertisers`;
         const container = document.getElementById(containerId);
         if (!container) return;
         const existingSelects = container.querySelectorAll('select');
@@ -2216,7 +2308,7 @@ function transferTagsToAdvertisers() {
     const genreInputs = inputs.filter(i => i.category === 'Genre');
     if (genreInputs.length > 1) {
         updateGenreControls('advertisers');
-        const genreRows = document.querySelectorAll('#inputs-Genre-advertisers .genre-row');
+        const genreRows = document.querySelectorAll(`#inputs-${categoryToElementSlug('Genre')}-advertisers .genre-row`);
         genreRows.forEach((row, index) => {
             if (genreInputs[index]) {
                 const percentVal = Math.round(genreInputs[index].percent * 100);
@@ -2226,6 +2318,5 @@ function transferTagsToAdvertisers() {
             }
         });
     }
-
     analyzeMovie();
 }

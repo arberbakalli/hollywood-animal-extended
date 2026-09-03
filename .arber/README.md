@@ -179,3 +179,22 @@ If you're unsure about:
 **Last Updated**: 2026-09-02  
 **Status**: Ready for implementation  
 **Next Step**: Read REFACTORING_PLAN.md, then use CLAUDE_PROMPT_FILTER.md to start Stage 1
+
+---
+
+## Additional Resources
+
+### Game Visual Identity
+- **GAME_VISUAL_ASSETS.md** - Where to find Graves' portrait, category icons, color schemes
+  - Asset bundle locations (portraits, icons, postersettings)
+  - Color palette extraction guide
+  - AssetStudio instructions
+  - Verdict display UI design
+
+### Game Mechanics Analysis  
+- **GRAVES_EVALUATION_ANALYSIS.md** - Complete reverse-engineering of Graves' script evaluation
+  - Compatibility scoring system (1.0-5.0 scale)
+  - Threshold categorization logic
+  - Audience appeal modifiers
+  - Practical implications for calculator
+

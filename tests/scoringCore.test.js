@@ -155,6 +155,69 @@ describe('getRequiredElementCount', () => {
     });
 });
 
+describe('generator availability', () => {
+    test('custom profile does not add profile exclusions', () => {
+        h.evaluate("currentGenProfile = 'custom'");
+
+        expect(h.evaluate('[...getProfileExcludedIds()]')).toEqual([]);
+    });
+
+    test('starting profile excludes every non-starter tag and no starter tags', () => {
+        h.evaluate("currentGenProfile = 'starting'");
+        const result = h.evaluate(`(() => {
+            const excluded = new Set(getProfileExcludedIds());
+            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+            const allIds = Object.keys(GAME_DATA.tags);
+
+            return {
+                excludedCount: excluded.size,
+                expectedCount: allIds.filter(id => !whitelist.has(id)).length,
+                whitelistLeaks: [...whitelist].filter(id => excluded.has(id)),
+                nonStarterMisses: allIds.filter(id => !whitelist.has(id) && !excluded.has(id)),
+            };
+        })()`);
+
+        expect(result.excludedCount).toBe(result.expectedCount);
+        expect(result.whitelistLeaks).toEqual([]);
+        expect(result.nonStarterMisses).toEqual([]);
+    });
+
+    test('generator exclusions merge manual exclusions with profile exclusions once', () => {
+        h.evaluate("currentGenProfile = 'starting'");
+        const result = h.evaluate(`(() => {
+            const ids = getGeneratorExcludedTags([{ id: 'ACTION' }]).map(tag => tag.id);
+            const uniqueIds = new Set(ids);
+
+            return {
+                includesManual: uniqueIds.has('ACTION'),
+                hasDuplicates: uniqueIds.size !== ids.length,
+            };
+        })()`);
+
+        expect(result.includesManual).toBe(true);
+        expect(result.hasDuplicates).toBe(false);
+    });
+});
+
+describe('Colman Graves evaluation helpers', () => {
+    test('verdict thresholds match the reverse-engineering notes', () => {
+        expect(h.call('getGravesVerdict', 4.0).label).toBe('Success');
+        expect(h.call('getGravesVerdict', 3.5).label).toBe('Common');
+        expect(h.call('getGravesVerdict', 3.2).label).toBe('Risky');
+        expect(h.call('getGravesVerdict', 2.9).label).toBe('Failed');
+    });
+
+    test('findGravesConflicts reports raw pair clashes below 2.0', () => {
+        const conflicts = h.call('findGravesConflicts', [
+            tag('AMERICAN_CIVIL_WAR', 'Setting'),
+            tag('ANTAGONIST_ALIEN', 'Antagonist'),
+        ]);
+
+        expect(conflicts).toHaveLength(1);
+        expect(conflicts[0].rawScore).toBeLessThan(2.0);
+    });
+});
+
 describe('pure helpers', () => {
     test('parseWeights coerces every value to a float', () => {
         expect(h.call('parseWeights', { a: '1.5', b: '0', c: '-2.25' }))
