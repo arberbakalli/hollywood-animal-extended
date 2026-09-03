@@ -1586,13 +1586,14 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .best-matches-btn {
-    background-color: #d97706;
-    color: white;
+    background-color: #92400e;
+    color: #1a1a1a;
     margin-left: 1rem;
+    font-weight: 600;
 }
 
 .best-matches-btn:hover {
-    background-color: #b45309;
+    background-color: #78340a;
 }
 
 .best-matches-list {
@@ -1647,4 +1648,30 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     min-width: 3rem;
     text-align: right;
     font-size: 1.1rem;
+}
+
+/* Category color coding */
+.best-match-item.genre {
+    border-left-color: #92400e;
+    background: rgba(146, 64, 14, 0.1);
+}
+
+.best-match-item.theme {
+    border-left-color: #991b1b;
+    background: rgba(153, 27, 27, 0.1);
+}
+
+.best-match-item.supporting-character {
+    border-left-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.best-match-item.protagonist {
+    border-left-color: #1e40af;
+    background: rgba(30, 64, 175, 0.1);
+}
+
+.best-match-item.antagonist {
+    border-left-color: #166534;
+    background: rgba(22, 101, 52, 0.1);
 }

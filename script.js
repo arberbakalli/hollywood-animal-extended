@@ -1868,13 +1868,24 @@ function displayBestMatches(matches) {
     const resultsContainer = document.getElementById('results-graves');
     resultsContainer.innerHTML = '';
 
+    const getCategoryClass = (category) => {
+        const classMap = {
+            'Genre': 'genre',
+            'Theme & Event': 'theme',
+            'Supporting Character': 'supporting-character',
+            'Protagonist': 'protagonist',
+            'Antagonist': 'antagonist',
+        };
+        return classMap[category] || '';
+    };
+
     const resultDiv = document.createElement('div');
     resultDiv.innerHTML = `
         <div class="graves-results-section">
             <div class="graves-section-title">✨ Best Matches (4.0+ Compatibility)</div>
             <div class="best-matches-list">
                 ${matches.map(m => `
-                    <div class="best-match-item">
+                    <div class="best-match-item ${getCategoryClass(m.matchCategory)}">
                         <div class="best-match-pair">
                             <span class="best-match-tag primary">${m.selectedName}</span>
                             <span class="best-match-arrow">→</span>
