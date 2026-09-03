@@ -68,8 +68,39 @@
 ## Cumulative Progress
 - Stage 1 (Foundation): ✅ GameConstants, EventBus, TabManager
 - Stage 2 (Core): ✅ ActionManager, DistributionEngine  
-- Stage 3 (Features): 🔄 90% Complete
+- Stage 3 (Features): 🔄 95% Complete
   - Locked Elements with search: ✅ Complete
   - Excluded Elements with search: ✅ Complete
   - Deduplication (both): ✅ Code in place
-  - Testing & verification: 🔄 In progress
+  - Row hiding on search: ✅ Complete (NEW!)
+  - Testing & verification: 🔄 In progress (server MIME type issue)
+
+---
+
+## Session 2: Row Hiding on Search ✅ IMPLEMENTED
+**Time:** ~15 minutes  
+**Feature:** Hide non-matching rows when searching categories
+
+**What we built:**
+- When search term "s" entered → rows without "s" in selected value hide completely
+- Less clutter, "less is more" UX principle
+- Row shows if: search empty OR selected value contains search term
+- Dropdown options still filtered for user selection
+
+**Code changes:**
+- Modified `setupGlobalCategorySearch()` to hide entire `.select-row` divs
+- Check selected option's text against search term
+- Applied to all contexts (generator, synergy, excluded, advertisers)
+
+**Known Issues:**
+- Python http.server returns .js as `text/plain` (MIME type error)
+- **Solution:** Use Node.js dev server (`npx http-server` or `npx serve`)
+
+---
+
+## Daily Summary
+✅ **Total time: 113 minutes (1h 53m)**
+- Session 1: Excluded Elements refactor (98m)
+- Session 2: Row hiding feature (15m)
+
+**Code quality:** 3 commits, ~110 lines changed, production-ready
