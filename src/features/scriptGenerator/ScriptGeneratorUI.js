@@ -90,6 +90,10 @@ export class ScriptGeneratorUI {
             matches.forEach(tag => {
                 const div = document.createElement('div');
                 div.className = 'search-item';
+                div.id = `ban-search-result-${ScriptGeneratorUI._toDomId(tag.id)}`;
+                div.dataset.role = 'ban-search-result';
+                div.dataset.tagId = tag.id;
+                div.dataset.category = tag.category;
                 div.innerHTML = `<strong>${tag.name}</strong> <small>${tag.category}</small>`;
                 div.addEventListener('click', () => {
                     this._manager.add(tag.id);
@@ -163,11 +167,15 @@ export class ScriptGeneratorUI {
         const fragment = document.createDocumentFragment();
         visible.forEach(id => {
             const row = document.createElement('div');
+            const tagDomId = ScriptGeneratorUI._toDomId(id);
             row.className = 'select-row excl-row';
+            row.id = `excluded-tag-row-${tagDomId}`;
+            row.dataset.role = 'excluded-tag-row';
+            row.dataset.tagId = id;
             row.innerHTML = `
                 <span class="excl-tag-name">${this._getTagName(id)}</span>
                 <small class="excl-tag-cat">${this._getCategoryLabel(id)}</small>
-                <button class="remove-btn" title="Remove ban">×</button>
+                <button id="excluded-tag-remove-${tagDomId}" class="remove-btn" title="Remove ban" data-role="excluded-tag-remove">×</button>
             `;
             row.querySelector('.remove-btn').addEventListener('click', () => this._manager.remove(id));
             fragment.appendChild(row);
@@ -187,6 +195,14 @@ export class ScriptGeneratorUI {
 
     _getCategoryLabel(id) {
         return this._getAllTags().find(t => t.id === id)?.category ?? '';
+    }
+
+    static _toDomId(value) {
+        return String(value)
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'item';
     }
 
     // ── Public helpers called from script.js ──────────────────────────────────

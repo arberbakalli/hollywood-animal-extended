@@ -4,22 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hollywood Animal Calculator</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
     <!-- Google Fonts for modern typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body id="app-body" class="hollywood-calculator-page">
 
-    <div class="main-wrapper">
-        <header>
-            <div class="header-content">
-                <div class="logo-area">
+    <div id="app-shell" class="main-wrapper">
+        <header id="app-header" class="site-header">
+            <div id="app-header-content" class="header-content">
+                <div id="brand-block" class="logo-area">
                     <h1>Hollywood <span class="accent">Animal</span></h1>
                     <h2>Calculator</h2>
                 </div>
 
                 <!-- LANGUAGE SELECTOR -->
-                <div class="lang-wrapper">
+                <div id="language-controls" class="lang-wrapper">
                     <select id="languageSelector" class="lang-dropdown">
                         <option value="English">🇺🇸 English</option>
                         <option value="Belarusian">🇧🇾 Belarusian</option>
@@ -37,24 +38,25 @@
         </header>
 
         <!-- TAB NAVIGATION -->
-        <nav class="tab-nav">
-            <button class="tab-btn" data-tab="generator">Script Generator</button>
-            <button class="tab-btn active" data-tab="synergy">SE Compatibility</button>
-            <button class="tab-btn" data-tab="advertisers">Best Advertisers</button>
+        <nav id="primary-tabs" class="tab-nav" aria-label="Calculator tabs">
+            <button id="tab-generator-button" class="tab-btn" data-tab="generator">Script Generator</button>
+            <button id="tab-synergy-button" class="tab-btn active" data-tab="synergy">SE Compatibility</button>
+            <button id="tab-graves-button" class="tab-btn" data-tab="graves">Colman Graves</button>
+            <button id="tab-advertisers-button" class="tab-btn" data-tab="advertisers">Best Advertisers</button>
         </nav>
 
-        <div class="container">
+        <main id="app-content" class="container">
             
             <!-- TAB 1: SCRIPT GENERATOR -->
-            <div id="tab-generator" class="tab-content hidden">
+            <section id="tab-generator" class="tab-content app-tab-panel hidden">
                 
-                <div class="card builder-card">
-                    <div class="card-header">
+                <div id="generator-settings-panel" class="card builder-card">
+                    <div id="generator-settings-header" class="card-header">
                         <h3>Generator Settings</h3>
                     </div>
                     
                     <!-- PROFILE SELECTION BUTTONS -->
-                    <div class="profile-control-container">
+                    <div id="generator-profile-control" class="profile-control-container">
                         <div class="profile-label-row">
                             <label>Tag Availability</label>
                         </div>
@@ -71,9 +73,9 @@
                         </p>
                     </div>
 
-                    <div class="score-controls-wrapper">
+                    <div id="generator-score-controls" class="score-controls-wrapper">
                         <!-- TARGET COMPATIBILITY -->
-                        <div class="score-control-group">
+                        <div id="generator-compatibility-control" class="score-control-group">
                             <div class="score-label-row">
                                 <label for="genCompInput">Target Average Compatibility</label>
                                 <input type="number" id="genCompInput" class="score-number-display" step="0.1" min="1" max="5" value="4">
@@ -85,7 +87,7 @@
                         </div>
 
                         <!-- TARGET MOVIE SCORE -->
-                        <div class="score-control-group">
+                        <div id="generator-movie-score-control" class="score-control-group">
                             <div class="score-label-row">
                                 <label for="genScoreInput">Target Movie Score</label>
                                 <input type="number" id="genScoreInput" class="score-number-display" step="1" min="6" max="10" value="6">
@@ -102,33 +104,34 @@
                     <div class="divider-line"></div>
 
                     <!-- LOCKED ELEMENTS -->
-                    <div class="card-header">
+                    <div id="generator-locked-header" class="card-header">
                         <h3>Locked Elements</h3>
                         <button class="reset-btn" data-reset-context="generator">Reset Locks</button>
                     </div>
                     <p class="subtitle">Select specific tags you <strong>MUST</strong> have in the script.</p>
                     
-                    <div id="selectors-container-generator"></div>
+                    <div id="selectors-container-generator" class="tag-selector-grid"></div>
                     
                     <div class="divider-line"></div>
 
                     <!-- EXCLUDED ELEMENTS -->
-                    <div class="card-header">
+                    <div id="generator-excluded-header" class="card-header">
                         <h3 class="danger-heading">Excluded Elements</h3>
                         <button class="reset-btn" data-reset-context="excluded">Reset Bans</button>
                     </div>
                     <p class="subtitle">Select tags to <strong>BAN</strong> (e.g., due to "The Code"). The generator will never pick these.</p>
                     
-                    <div id="selectors-container-excluded"></div>
+                    <div id="selectors-container-excluded" class="tag-selector-grid"></div>
 
-                    <div class="action-area">
+                    <div id="generator-actions" class="action-area">
+                        <div id="generatorFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="generateScriptsButton" class="analyze-btn">Generate Scripts</button>
                     </div>
                 </div>
 
                 <!-- PINNED RESULTS -->
-                <div id="pinned-scripts-container" class="results-container hidden">
-                    <div class="pinned-header-row">
+                <div id="pinned-scripts-container" class="results-container generator-pinned-section hidden">
+                    <div id="pinned-scripts-header" class="pinned-header-row">
                         <div class="section-title section-title-compact">
                             <h3 class="accent-heading">Pinned Scripts</h3>
                         </div>
@@ -147,19 +150,19 @@
                 </div>
 
                 <!-- GENERATED RESULTS -->
-                <div id="results-generator" class="results-container hidden">
+                <div id="results-generator" class="results-container generator-results-section hidden">
                     <div class="section-title">
                         <h3>Generated Options</h3>
                     </div>
                     <div id="generatorResultsList" class="script-list"></div>
                 </div>
 
-            </div>
+            </section>
 
             <!-- TAB 2: SE COMPATIBILITY -->
-            <div id="tab-synergy" class="tab-content active">
+            <section id="tab-synergy" class="tab-content app-tab-panel active">
                 
-                <div class="card search-card">
+                <div id="synergy-search-panel" class="card search-card">
                     <h3>Quick Search</h3>
                     <div class="search-wrapper">
                         <input type="text" id="globalSearchSynergy" placeholder="Type to find a tag (e.g., 'Action', 'Cowboy')..." autocomplete="off">
@@ -167,34 +170,34 @@
                     </div>
                 </div>
 
-                <div class="card builder-card">
-                    <div class="card-header">
+                <div id="synergy-builder-panel" class="card builder-card">
+                    <div id="synergy-builder-header" class="card-header">
                         <h3>Check Compatibility</h3>
                         <button class="reset-btn" data-reset-context="synergy">Reset</button>
                     </div>
                     <p class="subtitle">Select story elements to see how well they fit together.</p>
                     
-                    <div id="selectors-container-synergy"></div>
+                    <div id="selectors-container-synergy" class="tag-selector-grid"></div>
                     
-                    <div class="action-area">
+                    <div id="synergy-actions" class="action-area">
                         <button id="calculateSynergyButton" class="analyze-btn">Check Compatibility</button>
                     </div>
                 </div>
 
                 <!-- SYNERGY RESULTS -->
                 <div id="results-synergy" class="results-container hidden">
-                    <div class="summary-row">
-                        <div class="summary-item">
+                    <div id="synergy-summary-row" class="summary-row">
+                        <div id="synergy-average-card" class="summary-item">
                             <h3>Average Compatibility</h3>
                             <div id="synergyAverageDisplay" class="summary-value">0.0 <span class="sub-value">/ 5.0</span></div>
                         </div>
-                        <div class="summary-item">
+                        <div id="synergy-total-card" class="summary-item">
                             <h3>Script Synergy</h3>
                             <div id="synergyTotalDisplay" class="summary-value">0.00</div>
                         </div>
                     </div>
 
-                    <div class="card result-card breakdown-container">
+                    <div id="synergy-breakdown-panel" class="card result-card breakdown-container">
                         <div class="breakdown-col left-col">
                             <h4 class="col-header">Bonuses</h4>
                             <div class="breakdown-row">
@@ -226,7 +229,7 @@
                         </div>
                     </div>
 
-                    <div class="card result-card danger-accent-card">
+                    <div id="synergy-conflicts-panel" class="card result-card danger-accent-card">
                         <h3>Conflicts</h3>
                         <div class="list-subtitle">Severe clashes that ruin the script</div>
                         <div id="spoilerDisplay" class="strategy-content">
@@ -234,15 +237,96 @@
                         </div>
                     </div>
 
-                    <div class="action-area action-area-flush">
+                    <div id="synergy-transfer-actions" class="action-area action-area-flush">
                         <button id="transferTagsButton" class="analyze-btn secondary-btn">Find Best Advertisers &rarr;</button>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- TAB 3: BEST ADVERTISERS -->
-            <div id="tab-advertisers" class="tab-content hidden">
-                <div class="card search-card">
+            <!-- TAB 3: COLMAN GRAVES SCRIPT EVALUATION -->
+            <section id="tab-graves" class="tab-content app-tab-panel hidden">
+                <div id="graves-intro-panel" class="card graves-portrait-card">
+                    <div id="graves-heading-block" class="graves-heading-block">
+                        <div id="graves-monogram" class="graves-monogram" aria-hidden="true">CG</div>
+                        <div id="graves-copy-block" class="graves-copy-block">
+                            <h3>Colman Graves Script Evaluation</h3>
+                            <p class="subtitle graves-intro-copy">
+                                Talented writer Colman Graves will study the script and tell you how well its elements fit together.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="graves-search-panel" class="card search-card">
+                    <h3>Quick Search</h3>
+                    <div class="search-wrapper">
+                        <input type="text" id="globalSearchGraves" placeholder="Type to find a story element for Graves..." autocomplete="off">
+                        <div id="searchResultsGraves" class="search-results hidden"></div>
+                    </div>
+                </div>
+
+                <div id="graves-builder-panel" class="card builder-card">
+                    <div id="graves-builder-header" class="card-header">
+                        <h3>Submit Script</h3>
+                        <button class="reset-btn" data-reset-context="graves">Reset</button>
+                    </div>
+                    <p class="subtitle">Select the script elements you want Colman Graves to judge.</p>
+
+                    <div id="selectors-container-graves" class="tag-selector-grid"></div>
+
+                    <div id="graves-actions" class="action-area">
+                        <div id="gravesFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
+                        <button id="evaluateGravesButton" class="analyze-btn">Evaluate Script</button>
+                    </div>
+                </div>
+
+                <div id="results-graves" class="results-container hidden">
+                    <div id="graves-summary-row" class="summary-row graves-summary-row">
+                        <div id="graves-verdict-card" class="summary-item graves-summary-item">
+                            <h3>Verdict</h3>
+                            <div id="gravesVerdictDisplay" class="summary-value graves-verdict-value">-</div>
+                        </div>
+                        <div id="graves-average-card" class="summary-item graves-summary-item">
+                            <h3>Average Fit</h3>
+                            <div id="gravesAverageDisplay" class="summary-value">0.0 <span class="sub-value">/ 5.0</span></div>
+                        </div>
+                        <div id="graves-commercial-card" class="summary-item graves-summary-item">
+                            <h3>Commercial</h3>
+                            <div id="gravesCommercialScoreDisplay" class="summary-value">0.0</div>
+                        </div>
+                        <div id="graves-artistic-card" class="summary-item graves-summary-item">
+                            <h3>Artistic</h3>
+                            <div id="gravesArtisticScoreDisplay" class="summary-value">0.0</div>
+                        </div>
+                    </div>
+
+                    <div id="graves-reading-panel" class="card result-card graves-reading-card">
+                        <h3>Graves Analysis</h3>
+                        <div id="gravesVerdictText" class="graves-reading-text"></div>
+                        <div id="gravesMethodList" class="graves-method-list"></div>
+                    </div>
+
+                    <div id="graves-detail-row" class="results-row">
+                        <div id="graves-audience-panel" class="card result-card">
+                            <div class="card-header-row">
+                                <h3>Likely Audience</h3>
+                            </div>
+                            <div id="gravesAudienceDisplay" class="landscape-content"></div>
+                        </div>
+                        <div id="graves-conflicts-panel" class="card result-card danger-accent-card">
+                            <h3>Conflicts</h3>
+                            <div class="list-subtitle">Pairs below Graves' danger line</div>
+                            <div id="gravesConflictDisplay" class="strategy-content">
+                                <div class="empty-state">No conflicts found.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: BEST ADVERTISERS -->
+            <section id="tab-advertisers" class="tab-content app-tab-panel hidden">
+                <div id="advertisers-search-panel" class="card search-card">
                     <h3>Quick Search</h3>
                     <div class="search-wrapper">
                         <input type="text" id="globalSearchAdvertisers" placeholder="Type to find a tag (e.g., 'Action', 'Cowboy')..." autocomplete="off">
@@ -250,13 +334,13 @@
                     </div>
                 </div>
 
-                <div class="card score-card">
-                    <div class="card-header">
+                <div id="advertisers-score-panel" class="card score-card">
+                    <div id="advertisers-score-header" class="card-header">
                         <h3>Movie Scores</h3>
                         <span class="score-help">0 - 10</span>
                     </div>
                     <div class="score-controls-wrapper">
-                        <div class="score-control-group">
+                        <div id="commercial-score-control" class="score-control-group">
                             <div class="score-label-row">
                                 <label for="comScoreInput"> Commercial</label>
                                 <input type="number" id="comScoreInput" class="score-number-display" step="0.1" min="0" max="10" value="5.0">
@@ -266,7 +350,7 @@
                             </div>
                         </div>
 
-                        <div class="score-control-group">
+                        <div id="artistic-score-control" class="score-control-group">
                             <div class="score-label-row">
                                 <label for="artScoreInput"> Art</label>
                                 <input type="number" id="artScoreInput" class="score-number-display" step="0.1" min="0" max="10" value="5.0">
@@ -278,14 +362,14 @@
                     </div>
                 </div>
 
-                <div class="card builder-card">
-                    <div class="card-header">
+                <div id="advertisers-builder-panel" class="card builder-card">
+                    <div id="advertisers-builder-header" class="card-header">
                         <h3>Build Your Script</h3>
                         <button class="reset-btn" data-reset-context="advertisers">Reset</button>
                     </div>
                     <p class="subtitle">Select tags manually or use the search bar above. Add multiple genres to adjust their influence.</p>
-                    <div id="selectors-container-advertisers"></div>
-                    <div class="action-area">
+                    <div id="selectors-container-advertisers" class="tag-selector-grid"></div>
+                    <div id="advertisers-actions" class="action-area">
                         <button id="analyzeMovieButton" class="analyze-btn">Analyse</button>
                     </div>
                 </div>
@@ -320,7 +404,7 @@
                 </div>
 
                 <div id="results-advertisers" class="results-container hidden">
-                    <div class="card result-card">
+                    <div id="target-audience-panel" class="card result-card">
                         <div class="card-header-row">
                             <h3>Target Audience</h3>
                         </div>
@@ -331,13 +415,13 @@
                         <div id="targetAudienceDisplay" class="landscape-content"></div>
                     </div>
 
-                    <div class="card result-card">
+                    <div id="holiday-release-panel" class="card result-card">
                         <h3>Holiday Release</h3>
                         <div id="holidayDisplay" class="holiday-list-container"></div>
                     </div>
 
                     <div class="results-row">
-                        <div class="card result-card">
+                        <div id="recommended-advertisers-panel" class="card result-card">
                             <h3>Recommended Advertisers</h3>
                             <div class="list-subtitle">Ranked from Highest to Lowest</div>
                             <div class="strategy-content">
@@ -348,17 +432,17 @@
                                 <div id="adAgentDisplay"></div>
                             </div>
                         </div>
-                        <div class="card result-card strategy-card">
+                        <div id="campaign-duration-panel" class="card result-card strategy-card">
                             <h3>Recommended Advertisement Duration</h3>
                             <div id="campaignStrategyDisplay"></div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-        </div>
+        </main>
         
-        <footer>
+        <footer id="app-footer">
             <p>Unofficial Tool for Hollywood Animal</p>
         </footer>
     </div>
