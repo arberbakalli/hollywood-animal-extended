@@ -465,6 +465,9 @@ function refreshCategoryDropdowns(category, context) {
     });
 }
 
+// Debounce timer for search performance
+const searchDebounceTimers = new Map();
+
 function setupGlobalCategorySearch() {
     // Keyboard shortcuts for search inputs
     document.addEventListener('keydown', function(e) {
@@ -496,23 +499,41 @@ function setupGlobalCategorySearch() {
         }
     });
 
-    // Global event delegation for all category search inputs
+    // Global event delegation for all category search inputs (with debouncing for performance)
     document.addEventListener('input', function(e) {
         if (!e.target.classList.contains('category-search-input')) return;
 
-        const searchTerm = e.target.value.toLowerCase().trim();
-        const category = e.target.dataset.category;
-        const context = e.target.dataset.context;
+        const inputId = e.target.dataset.category + '-' + e.target.dataset.context;
 
-        const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
-        const container = document.querySelector(containerSelector);
+        // Clear previous timeout
+        if (searchDebounceTimers.has(inputId)) {
+            clearTimeout(searchDebounceTimers.get(inputId));
+        }
 
-        if (!container) return;
+        // Debounce: wait 300ms after user stops typing before filtering
+        const debounceTimer = setTimeout(() => {
+            performSearchFilter(e.target);
+            searchDebounceTimers.delete(inputId);
+        }, 300);
 
-        let totalMatches = 0;  // Count visible options for feedback
+        searchDebounceTimers.set(inputId, debounceTimer);
+    });
+}
 
-        // Filter rows and options in all selects in this category
-        container.querySelectorAll('.select-row').forEach(row => {
+function performSearchFilter(searchInput) {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const category = searchInput.dataset.category;
+    const context = searchInput.dataset.context;
+
+    const containerSelector = `#inputs-${category.replace(/\s/g, '-')}-${context}`;
+    const container = document.querySelector(containerSelector);
+
+    if (!container) return;
+
+    let totalMatches = 0;  // Count visible options for feedback
+
+    // Filter rows and options in all selects in this category
+    container.querySelectorAll('.select-row').forEach(row => {
             const select = row.querySelector('.tag-selector');
             if (!select) return;
 
@@ -539,17 +560,16 @@ function setupGlobalCategorySearch() {
             });
         });
 
-        // Visual feedback: highlight search box based on matches
-        if (searchTerm === '') {
-            e.target.classList.remove('has-matches', 'no-matches');
-        } else if (totalMatches > 0) {
-            e.target.classList.remove('no-matches');
-            e.target.classList.add('has-matches');
-        } else {
-            e.target.classList.remove('has-matches');
-            e.target.classList.add('no-matches');
-        }
-    });
+    // Visual feedback: highlight search box based on matches
+    if (searchTerm === '') {
+        searchInput.classList.remove('has-matches', 'no-matches');
+    } else if (totalMatches > 0) {
+        searchInput.classList.remove('no-matches');
+        searchInput.classList.add('has-matches');
+    } else {
+        searchInput.classList.remove('has-matches');
+        searchInput.classList.add('no-matches');
+    }
 }
 
 function addDropdown(category, selectedId = null, context = currentTab) {
