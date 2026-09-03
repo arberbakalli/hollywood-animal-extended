@@ -19,7 +19,8 @@ export default {
     // Helpers and fixtures live under tests/ but are not themselves suites.
     testPathIgnorePatterns: ['/node_modules/', '/tests/helpers/'],
 
-    // script.js is loaded through a VM harness rather than imported, so
-    // coverage instrumentation cannot see it. Collect from src/ only.
-    collectCoverageFrom: ['src/**/*.js'],
+    // No coverage target is configured. The app's only executable files are
+    // script.js and data.js, both loaded through a VM harness rather than
+    // imported, so istanbul cannot instrument them. Coverage becomes meaningful
+    // once script.js is a module that tests import directly.
 };
