@@ -72,7 +72,9 @@ function setGeneratorProfile(profileName) {
     if (profileName === 'starting') {
         populateExcludedForStartingProfile();
     } else {
-        // Custom: Reset exclusions
+        // Custom: Reset exclusions. Clear the lazy-load flag too, otherwise
+        // switching back to Starting Tags would find it already "loaded".
+        startingProfileExcludedLoaded = false;
         initializeSelectors('excluded');
     }
 }
@@ -81,41 +83,28 @@ function populateExcludedForStartingProfile() {
     // Lazy loading: Only populate excluded elements once to prevent UI freeze
     if (startingProfileExcludedLoaded) return;
 
-    // Defer heavy DOM work to idle time to prevent blocking main thread
-    if (requestIdleCallback) {
-        requestIdleCallback(() => {
-            initializeSelectors('excluded');
-            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
-            const allTags = Object.values(GAME_DATA.tags);
-            const container = document.getElementById('selectors-container-excluded');
+    const buildExcludedList = () => {
+        initializeSelectors('excluded');
+        const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+        const allTags = Object.values(GAME_DATA.tags);
+        const container = document.getElementById('selectors-container-excluded');
 
-            container.classList.add('is-batching');
-            allTags.forEach(tag => {
-                if (!whitelist.has(tag.id)) {
-                    addDropdown(tag.category, tag.id, 'excluded');
-                }
-            });
-            container.classList.remove('is-batching');
-            startingProfileExcludedLoaded = true;
-        }, { timeout: 2000 }); // 2 second max wait
-    } else {
-        // Fallback for browsers without requestIdleCallback
-        setTimeout(() => {
-            initializeSelectors('excluded');
-            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
-            const allTags = Object.values(GAME_DATA.tags);
-            const container = document.getElementById('selectors-container-excluded');
+        container.classList.add('is-batching');
+        allTags.forEach(tag => {
+            if (!whitelist.has(tag.id)) {
+                addDropdown(tag.category, tag.id, 'excluded');
+            }
+        });
+        container.classList.remove('is-batching');
+        startingProfileExcludedLoaded = true;
+    };
 
-            container.classList.add('is-batching');
-            allTags.forEach(tag => {
-                if (!whitelist.has(tag.id)) {
-                    addDropdown(tag.category, tag.id, 'excluded');
-                }
-            });
-            container.classList.remove('is-batching');
-            startingProfileExcludedLoaded = true;
-        }, 100);
-    }
+    // Defer the heavy DOM work off the click handler so the button repaints
+    // immediately and INP stays low. Deliberately setTimeout, not
+    // requestIdleCallback: Chrome suspends idle callbacks in hidden tabs and
+    // ignores their timeout there, so clicking Starting Tags and switching tabs
+    // would leave the exclusion list silently empty.
+    setTimeout(buildExcludedList, 0);
 }
 
 /* =========================================================================
@@ -282,6 +271,19 @@ function setupScoreSync() {
     });
 }
 
+/**
+ * Single source of truth: how many scoring elements (excluding Genre and Setting)
+ * a given target Movie Score needs. Read by both the generator and the help text
+ * above the slider, so the UI cannot promise a count the generator won't use.
+ */
+function getRequiredElementCount(targetScore) {
+    if (targetScore >= 9) return 9;
+    if (targetScore === 8) return 8;  // reaches cap 8
+    if (targetScore === 7) return 7;  // reaches cap 8 (safe)
+    if (targetScore === 6) return 5;  // reaches cap 6
+    return 4;                         // below the slider minimum
+}
+
 function setupGeneratorControls() {
     // Generator Tab Sliders + Inputs
     const genCompSlider = document.getElementById('genCompSlider');
@@ -308,13 +310,8 @@ function setupGeneratorControls() {
 
     function updateScoreDisplay(val) {
         // Update Help Text for Tag Count
-        let requiredTags = 0;
-        if(val <= 6) requiredTags = 4; // ~5 filled slots usually
-        else if(val === 7) requiredTags = 6;
-        else if(val === 8) requiredTags = 8;
-        else if(val === 9) requiredTags = 9;
-        else if(val === 10) requiredTags = 10;
-        
+        const requiredTags = getRequiredElementCount(val);
+
         requiredTagsDisplay.innerText = `Requires ~${requiredTags} Story Elements (excluding Genre & Setting).`;
         updateSliderTrack(genScoreSlider, '#d4af37');
     }
@@ -333,7 +330,9 @@ function setupGeneratorControls() {
             updateScoreDisplay(val);
         }
     });
-    updateSliderTrack(genScoreSlider, '#d4af37');
+    // Render the help text once on load, otherwise the placeholder markup in
+    // index.html stands until the user first touches the slider.
+    updateScoreDisplay(parseInt(genScoreInput.value));
 }
 
 function updateSliderTrack(slider, colorOverride = null) {
@@ -896,17 +895,11 @@ function generateScripts() {
     const targetScoreInput = parseInt(document.getElementById('genScoreInput').value);
     
     // Map Movie Score to Required Scoring Elements (Excluding Genre AND Setting)
-    let targetCount = 4; // Default
-    if (targetScoreInput === 6) targetCount = 5; // Reaches cap 6
-    else if (targetScoreInput === 7) targetCount = 7; // Reaches cap 8 (safe)
-    else if (targetScoreInput === 8) targetCount = 8;
-    else if (targetScoreInput >= 9) targetCount = 9;
+    const targetCount = getRequiredElementCount(targetScoreInput);
 
     // Get Fixed Tags
     const fixedTags = collectTagInputs('generator');
-    const excludedTags = window.__exclusionManager
-        ? window.__exclusionManager.getAll().map(id => ({ id }))
-        : collectTagInputs('excluded');
+    const excludedTags = collectTagInputs('excluded');
     
     // Validate
     const scoringFixed = fixedTags.filter(t => t.category !== "Genre" && t.category !== "Setting");
@@ -1976,6 +1969,9 @@ function renderSynergyResults(matrix, bonuses, tags) {
 }
 
 function resetSelectors(context) {
+    // Reset Bans tears down the auto-populated list, so allow it to rebuild.
+    if (context === 'excluded') startingProfileExcludedLoaded = false;
+
     initializeSelectors(context);
 
     // If resetting Advertisers, move the calculator back to its initial position
