@@ -234,6 +234,7 @@ function setupDomEventBindings() {
         ['transferTagsButton', transferTagsToAdvertisers],
         ['analyzeMovieButton', analyzeMovie],
         ['generateGravesScripts', generateGravesScripts],
+        ['generateBestMatches', generateBestMatches],
     ];
 
     clickBindings.forEach(([id, handler]) => {
@@ -1813,6 +1814,81 @@ function generateGravesScripts() {
         : '<div class="empty-state">None.</div>';
 
     document.getElementById('results-graves').classList.remove('hidden');
+}
+
+function generateBestMatches() {
+    const selectedTags = collectTagInputs('graves');
+
+    if (selectedTags.length === 0) {
+        alert('Please select at least one element to find matches for.');
+        return;
+    }
+
+    const selectedIds = new Set(selectedTags.map(t => t.id));
+    const allMatches = [];
+    const allTagIds = Object.keys(GAME_DATA.tags);
+
+    // For each selected tag, find all 4.0+ pairings with other tags
+    for (const selectedTag of selectedTags) {
+        for (const otherId of allTagIds) {
+            if (selectedTag.id === otherId || selectedIds.has(otherId)) continue;
+
+            let score = 3.0;
+            if (GAME_DATA.compatibility[selectedTag.id]?.[otherId]) {
+                score = parseFloat(GAME_DATA.compatibility[selectedTag.id][otherId]);
+            } else if (GAME_DATA.compatibility[otherId]?.[selectedTag.id]) {
+                score = parseFloat(GAME_DATA.compatibility[otherId][selectedTag.id]);
+            }
+
+            if (score >= 4.0) {
+                allMatches.push({
+                    selectedName: GAME_DATA.tags[selectedTag.id]?.name || 'Unknown',
+                    selectedCategory: selectedTag.category,
+                    matchName: GAME_DATA.tags[otherId]?.name || 'Unknown',
+                    matchCategory: GAME_DATA.tags[otherId]?.category || 'Unknown',
+                    score: score
+                });
+            }
+        }
+    }
+
+    if (allMatches.length === 0) {
+        alert('No 4.0+ matches found for your selections. Try different elements.');
+        return;
+    }
+
+    // Sort by score descending
+    allMatches.sort((a, b) => b.score - a.score);
+
+    // Display results
+    displayBestMatches(allMatches);
+}
+
+function displayBestMatches(matches) {
+    const resultsContainer = document.getElementById('results-graves');
+    resultsContainer.innerHTML = '';
+
+    const resultDiv = document.createElement('div');
+    resultDiv.innerHTML = `
+        <div class="graves-results-section">
+            <div class="graves-section-title">✨ Best Matches (4.0+ Compatibility)</div>
+            <div class="best-matches-list">
+                ${matches.map(m => `
+                    <div class="best-match-item">
+                        <div class="best-match-pair">
+                            <span class="best-match-tag primary">${m.selectedName}</span>
+                            <span class="best-match-arrow">→</span>
+                            <span class="best-match-tag">${m.matchName}</span>
+                        </div>
+                        <div class="best-match-score" style="color: ${m.score >= 4.5 ? '#10b981' : '#f59e0b'};">${m.score.toFixed(2)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    resultsContainer.appendChild(resultDiv);
+    resultsContainer.classList.remove('hidden');
 }
 
 function calculateSynergy() {
