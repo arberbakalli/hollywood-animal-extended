@@ -57,6 +57,14 @@ export async function loadLegacyScript() {
             ctx.__args = args;
             return runInContext(`${fnName}(...__args)`, ctx);
         },
+        /** Call an async function and await its result. */
+        callAsync: async (fnName, ...args) => {
+            ctx.__args = args;
+            return await runInContext(`${fnName}(...__args)`, ctx);
+        },
+        /** Ensure deferred data is loaded. */
+        ensureCompatibilityLoaded: () => runInContext('ensureCompatibilityLoaded()', ctx),
+        ensureGenrePairsLoaded: () => runInContext('ensureGenrePairsLoaded()', ctx),
         get GAME_DATA() {
             return runInContext('GAME_DATA', ctx);
         },

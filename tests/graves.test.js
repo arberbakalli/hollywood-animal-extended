@@ -10,6 +10,8 @@ let h;
 
 beforeAll(async () => {
     h = await loadLegacyScript();
+    // Load deferred data for tests
+    await h.ensureCompatibilityLoaded();
 });
 
 const tag = (id, category) => ({ id, category });

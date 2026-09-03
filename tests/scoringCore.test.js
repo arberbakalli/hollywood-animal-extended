@@ -19,6 +19,9 @@ let cat;
 
 beforeAll(async () => {
     h = await loadLegacyScript();
+    // Load deferred data for tests
+    await h.ensureCompatibilityLoaded();
+    await h.ensureGenrePairsLoaded();
     cat = {};
     for (const t of Object.values(h.GAME_DATA.tags)) {
         (cat[t.category] ||= []).push(t.id);
