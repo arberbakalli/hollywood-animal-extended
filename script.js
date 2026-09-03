@@ -1887,9 +1887,9 @@ function displayBestMatches(matches) {
                 ${matches.map(m => `
                     <div class="best-match-item ${getCategoryClass(m.matchCategory)}">
                         <div class="best-match-pair">
-                            <span class="best-match-tag primary">${m.selectedName}</span>
+                            <span class="best-match-tag primary ${getCategoryClass(m.selectedCategory)}">${m.selectedName}</span>
                             <span class="best-match-arrow">→</span>
-                            <span class="best-match-tag">${m.matchName}</span>
+                            <span class="best-match-tag ${getCategoryClass(m.matchCategory)}">${m.matchName}</span>
                         </div>
                         <div class="best-match-score" style="color: ${m.score >= 4.5 ? '#10b981' : '#f59e0b'};">${m.score.toFixed(2)}</div>
                     </div>

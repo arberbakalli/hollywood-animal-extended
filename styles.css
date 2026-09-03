@@ -462,7 +462,13 @@ select:focus { outline: none; border-color: var(--accent); }
 }
 
 /* --- ACTION BUTTONS --- */
-.action-area { margin-top: 20px; }
+.action-area {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
 
 .analyze-btn {
     width: 100%;
@@ -1674,4 +1680,30 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .best-match-item.antagonist {
     border-left-color: #166534;
     background: rgba(22, 101, 52, 0.1);
+}
+
+/* Tag category colors */
+.best-match-tag.genre {
+    background-color: #92400e;
+    color: white;
+}
+
+.best-match-tag.theme {
+    background-color: #991b1b;
+    color: white;
+}
+
+.best-match-tag.supporting-character {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.best-match-tag.protagonist {
+    background-color: #1e40af;
+    color: white;
+}
+
+.best-match-tag.antagonist {
+    background-color: #166534;
+    color: white;
 }
