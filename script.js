@@ -1,6 +1,13 @@
 const MULTI_SELECT_CATEGORIES = ["Genre", "Setting", "Protagonist", "Antagonist", "Supporting Character", "Theme & Event", "Finale"];
 let searchIndex = [];
 let currentTab = 'synergy'; 
+const PRIMARY_TAB_BY_FEATURE = {
+    generator: 'generator',
+    synergy: 'synergy',
+    graves: 'synergy',
+    advertisers: 'advertisers',
+    targeted: 'advertisers'
+};
 let generatedScriptsCache = []; // Stores the current batch of 5 scripts
 let pinnedScripts = []; // Stores saved scripts
 
@@ -266,11 +273,19 @@ function restoreSelection(context, savedInputs) {
 
 function switchTab(tabName) {
     currentTab = tabName;
+    const primaryTab = PRIMARY_TAB_BY_FEATURE[tabName] || tabName;
+
     document.querySelectorAll('.tab-btn[data-tab]').forEach(button => {
-        const isActive = button.dataset.tab === tabName;
+        const isActive = button.dataset.tab === primaryTab;
         button.classList.toggle('active', isActive);
-        button.setAttribute('aria-selected', String(isActive));
-        button.tabIndex = isActive ? 0 : -1;
+        button.setAttribute('aria-pressed', String(isActive));
+        button.tabIndex = 0;
+    });
+
+    document.querySelectorAll('[data-feature-tab]').forEach(button => {
+        const isActive = button.dataset.featureTab === tabName;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
     });
 
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -289,6 +304,10 @@ function setupDomEventBindings() {
 
     document.querySelectorAll('.tab-btn[data-tab]').forEach(button => {
         button.addEventListener('click', () => switchTab(button.dataset.tab));
+    });
+
+    document.querySelectorAll('[data-feature-tab]').forEach(button => {
+        button.addEventListener('click', () => switchTab(button.dataset.featureTab));
     });
 
     document.querySelectorAll('[data-generator-profile]').forEach(button => {

@@ -37,23 +37,30 @@
             </div>
         </header>
 
-        <!-- TAB NAVIGATION -->
-        <nav id="primary-tabs" class="tab-nav" aria-label="Calculator tabs" role="tablist">
-            <button id="tab-generator-button" class="tab-btn" type="button" role="tab" aria-controls="tab-generator" aria-selected="false" tabindex="-1" data-tab="generator">Script Generator</button>
-            <button id="tab-synergy-button" class="tab-btn active" type="button" role="tab" aria-controls="tab-synergy" aria-selected="true" tabindex="0" data-tab="synergy">Script Compatibility</button>
-            <button id="tab-graves-button" class="tab-btn" type="button" role="tab" aria-controls="tab-graves" aria-selected="false" tabindex="-1" data-tab="graves">Colman Graves</button>
-            <button id="tab-advertisers-button" class="tab-btn" type="button" role="tab" aria-controls="tab-advertisers" aria-selected="false" tabindex="-1" data-tab="advertisers">Best Advertisers</button>
-            <button id="tab-targeted-button" class="tab-btn" type="button" role="tab" aria-controls="tab-targeted" aria-selected="false" tabindex="-1" data-tab="targeted">Targeted Ads</button>
+        <!-- PRODUCT AREA NAVIGATION -->
+        <nav id="primary-tabs" class="tab-nav product-area-nav" aria-label="Product areas">
+            <button id="tab-generator-button" class="tab-btn product-area-btn" type="button" aria-pressed="false" data-tab="generator">
+                <span class="product-area-kicker">Build</span>
+                <span class="product-area-label">Script Lab</span>
+            </button>
+            <button id="tab-synergy-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="synergy">
+                <span class="product-area-kicker">Evaluate</span>
+                <span class="product-area-label">Script Evaluation</span>
+            </button>
+            <button id="tab-advertisers-button" class="tab-btn product-area-btn" type="button" aria-pressed="false" data-tab="advertisers">
+                <span class="product-area-kicker">Market</span>
+                <span class="product-area-label">Marketing &amp; Release</span>
+            </button>
         </nav>
 
         <main id="app-content" class="container">
 
-            <!-- TAB 1: SCRIPT GENERATOR -->
-            <section id="tab-generator" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-generator-button" aria-hidden="true" hidden>
+            <!-- PRODUCT AREA 1: SCRIPT LAB -->
+            <section id="tab-generator" class="tab-content app-tab-panel hidden" aria-labelledby="tab-generator-button" aria-hidden="true" hidden>
 
                 <div id="generator-settings-panel" class="card builder-card">
                     <div id="generator-settings-header" class="card-header">
-                        <h3>Generator Settings</h3>
+                        <h3>Script Lab</h3>
                     </div>
 
                     <!-- PROFILE SELECTION BUTTONS -->
@@ -170,8 +177,12 @@
 
             </section>
 
-            <!-- TAB 2: SE COMPATIBILITY -->
-            <section id="tab-synergy" class="tab-content app-tab-panel active" role="tabpanel" aria-labelledby="tab-synergy-button" aria-hidden="false">
+            <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COMPATIBILITY NUMBERS -->
+            <section id="tab-synergy" class="tab-content app-tab-panel active" aria-labelledby="tab-synergy-button" aria-hidden="false">
+                <div id="evaluation-mode-nav-synergy" class="product-mode-nav" role="group" aria-label="Script evaluation modes">
+                    <button id="evaluation-mode-compatibility-button" class="product-mode-btn active" type="button" aria-pressed="true" data-feature-tab="synergy">Compatibility Numbers</button>
+                    <button id="evaluation-mode-graves-button" class="product-mode-btn" type="button" aria-pressed="false" data-feature-tab="graves">Colman Graves</button>
+                </div>
 
                 <div id="synergy-search-panel" class="card search-card">
                     <h3>Quick Search</h3>
@@ -183,7 +194,7 @@
 
                 <div id="synergy-builder-panel" class="card builder-card">
                     <div id="synergy-builder-header" class="card-header">
-                        <h3>Check Compatibility</h3>
+                        <h3>Compatibility Numbers</h3>
                         <button id="resetSynergyButton" class="reset-btn" type="button" data-reset-context="synergy">Reset</button>
                     </div>
                     <p class="subtitle">Select story elements to see how well they fit together.</p>
@@ -250,13 +261,18 @@
                     </div>
 
                     <div id="synergy-transfer-actions" class="action-area action-area-flush">
-                        <button id="transferTagsButton" class="analyze-btn secondary-btn" type="button">Find Best Advertisers &rarr;</button>
+                        <button id="transferTagsButton" class="analyze-btn secondary-btn" type="button">Marketing &amp; Release &rarr;</button>
                     </div>
                 </div>
             </section>
 
-            <!-- TAB 3: COLMAN GRAVES SCRIPT EVALUATION -->
-            <section id="tab-graves" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-graves-button" aria-hidden="true" hidden>
+            <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COLMAN GRAVES -->
+            <section id="tab-graves" class="tab-content app-tab-panel hidden" aria-label="Colman Graves" aria-hidden="true" hidden>
+                <div id="evaluation-mode-nav-graves" class="product-mode-nav" role="group" aria-label="Script evaluation modes">
+                    <button id="graves-mode-compatibility-button" class="product-mode-btn" type="button" aria-pressed="false" data-feature-tab="synergy">Compatibility Numbers</button>
+                    <button id="graves-mode-graves-button" class="product-mode-btn active" type="button" aria-pressed="true" data-feature-tab="graves">Colman Graves</button>
+                </div>
+
                 <div id="graves-intro-panel" class="card graves-case-card">
                     <div id="graves-heading-block" class="graves-heading-block">
                         <div id="graves-monogram" class="graves-monogram" aria-hidden="true">CG</div>
@@ -373,8 +389,13 @@
                 </div>
             </section>
 
-            <!-- TAB 4: BEST ADVERTISERS -->
-            <section id="tab-advertisers" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-advertisers-button" aria-hidden="true" hidden>
+            <!-- PRODUCT AREA 3: MARKETING & RELEASE / ANALYZE SCRIPT -->
+            <section id="tab-advertisers" class="tab-content app-tab-panel hidden" aria-labelledby="tab-advertisers-button" aria-hidden="true" hidden>
+                <div id="marketing-mode-nav-advertisers" class="product-mode-nav" role="group" aria-label="Marketing and release modes">
+                    <button id="marketing-mode-advertisers-button" class="product-mode-btn active" type="button" aria-pressed="true" data-feature-tab="advertisers">Analyze Script</button>
+                    <button id="marketing-mode-targeted-button" class="product-mode-btn" type="button" aria-pressed="false" data-feature-tab="targeted">Build for Target</button>
+                </div>
+
                 <div id="advertisers-search-panel" class="card search-card">
                     <h3>Quick Search</h3>
                     <div class="search-wrapper">
@@ -420,7 +441,7 @@
                     <div id="selectors-container-advertisers" class="tag-selector-grid"></div>
                     <div id="advertisers-actions" class="action-area">
                         <div id="advertisersFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
-                        <button id="analyzeMovieButton" class="analyze-btn" type="button">Analyse</button>
+                        <button id="analyzeMovieButton" class="analyze-btn" type="button">Analyze Script</button>
                     </div>
                 </div>
 
@@ -510,11 +531,16 @@
                 </div>
             </section>
 
-            <!-- TAB 5: TARGETED ADS -->
-            <section id="tab-targeted" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-targeted-button" aria-hidden="true" hidden>
+            <!-- PRODUCT AREA 3: MARKETING & RELEASE / BUILD FOR TARGET -->
+            <section id="tab-targeted" class="tab-content app-tab-panel hidden" aria-label="Build for Target" aria-hidden="true" hidden>
+                <div id="marketing-mode-nav-targeted" class="product-mode-nav" role="group" aria-label="Marketing and release modes">
+                    <button id="targeted-mode-advertisers-button" class="product-mode-btn" type="button" aria-pressed="false" data-feature-tab="advertisers">Analyze Script</button>
+                    <button id="targeted-mode-targeted-button" class="product-mode-btn active" type="button" aria-pressed="true" data-feature-tab="targeted">Build for Target</button>
+                </div>
+
                 <div id="targeted-input-panel" class="card builder-card">
                     <div id="targeted-input-header" class="card-header">
-                        <h3>Find Combinations for Your Target</h3>
+                        <h3>Build for Target</h3>
                         <button id="resetTargetedButton" class="reset-btn" type="button">Reset</button>
                     </div>
                     <p class="subtitle">Select target audiences or advertisers, then build a script profile to discover what combinations work best.</p>
