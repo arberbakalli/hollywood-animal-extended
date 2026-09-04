@@ -81,14 +81,43 @@ describe('calculateAdvertiserMatch', () => {
 });
 
 describe('predictGradeFromScore', () => {
-    test('maps each band to a grade and a css tier', () => {
-        const table = [5.0, 4.7, 4.3, 4.0, 3.5, 3.0, 2.0, 0].map(s => h.call('predictGradeFromScore', s));
-        expect(table.map(t => t.grade)).toEqual(['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F']);
-        for (const t of table) expect(t.tier).toMatch(/^grade-/);
+    const bands = () => h.evaluate('ADVERTISER_GRADE_BANDS');
+
+    test('covers every grade from A+ down to F, in descending order', () => {
+        const table = bands();
+        expect(table.map(([, grade]) => grade)).toEqual(['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F']);
+
+        const mins = table.map(([min]) => min);
+        for (let i = 1; i < mins.length; i++) expect(mins[i]).toBeLessThan(mins[i - 1]);
+        expect(mins[mins.length - 1]).toBe(-Infinity); // F catches everything below
+    });
+
+    test('a score exactly on a boundary earns that band', () => {
+        for (const [min, grade, tier] of bands()) {
+            if (!Number.isFinite(min)) continue;
+            expect(h.call('predictGradeFromScore', min)).toEqual({ grade, tier });
+        }
+    });
+
+    test('a hair below a boundary drops exactly one grade', () => {
+        const table = bands();
+        for (let i = 0; i < table.length - 1; i++) {
+            const [min] = table[i];
+            if (!Number.isFinite(min)) continue;
+            expect(h.call('predictGradeFromScore', min - 0.001).grade).toBe(table[i + 1][1]);
+        }
+    });
+
+    test('the bands stay inside the range real scripts can actually reach', () => {
+        // Regression: the bands originally came from the feature spec and were
+        // anchored at 4.0+, but across 3000 random six-element scripts
+        // (tools/grade-distribution.mjs) the best agency never exceeded 3.72.
+        // Every grade above C was unreachable and 94% of scripts showed D or F.
+        expect(bands()[0][0]).toBeLessThan(3.72);
     });
 
     test('never returns a colour literal — markup must stay style-attribute free', () => {
-        for (const s of [5, 4.5, 3.2, 1]) {
+        for (const s of [3.5, 2.5, 1.2, 0]) {
             expect(h.call('predictGradeFromScore', s)).not.toHaveProperty('color');
         }
     });
@@ -114,9 +143,17 @@ describe('getRecommendations', () => {
         expect([...scores].sort((a, b) => b - a)).toEqual(scores);
 
         // top + alternatives + weak accounts for the whole roster exactly once.
+        const cutoff = h.evaluate('ADVERTISER_WEAK_THRESHOLD');
         expect(1 + result.alternatives.length + result.weakMatches.length).toBe(8);
-        for (const a of result.alternatives) expect(a.score).toBeGreaterThanOrEqual(3.0);
-        for (const w of result.weakMatches) expect(w.score).toBeLessThan(3.0);
+        for (const a of result.alternatives) expect(a.score).toBeGreaterThanOrEqual(cutoff);
+        for (const w of result.weakMatches) expect(w.score).toBeLessThan(cutoff);
+    });
+
+    test('the avoid cutoff is the F boundary, so it cannot drift from the grades', () => {
+        // Regression: the cutoff was a standalone 3.0, which after the grade
+        // recalibration sat at the 99th percentile and flagged 6 of 8 agencies.
+        const bands = h.evaluate('ADVERTISER_GRADE_BANDS');
+        expect(h.evaluate('ADVERTISER_WEAK_THRESHOLD')).toBe(bands.find(([, g]) => g === 'D')[0]);
     });
 
     test('an empty selection yields no recommendation instead of throwing', () => {
@@ -127,8 +164,10 @@ describe('getRecommendations', () => {
     });
 
     test('weak entries explain why to avoid them', () => {
+        // A female lead genuinely has no fit at the male- and teen-focused
+        // agencies, so this script is the one that populates weakMatches.
         const result = h.evaluate(`getRecommendations({
-            tags: [GAME_DATA.tags.PROTAGONIST_COWBOY],
+            tags: [GAME_DATA.tags.PROTAGONIST_SOUTHERN_BELLE],
             movieLean: 0
         })`);
         expect(result.weakMatches.length).toBeGreaterThan(0);

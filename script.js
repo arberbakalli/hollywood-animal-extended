@@ -2326,8 +2326,31 @@ function transferTagsToAdvertisers() {
    TagsAudienceWeights.json.
    ========================================================================= */
 
-// Below this, an agency is reported as a match to avoid rather than an alternative.
-const ADVERTISER_WEAK_THRESHOLD = 3.0;
+/*
+ * Grade bands, as [minimum score, letter, css tier].
+ *
+ * The match score averages the audience weights the game ships, which run
+ * roughly -2..5 and cluster low. Measured over 3000 random six-element
+ * scripts, the best available agency never exceeded 3.72 and averaged 2.28,
+ * so bands anchored at 4.0+ were unreachable — 94% of scripts graded D or F
+ * on their best option. These thresholds are percentiles of that measured
+ * distribution instead. Re-derive with tools/grade-distribution.mjs if
+ * data/TagsAudienceWeights.json ever changes.
+ */
+const ADVERTISER_GRADE_BANDS = [
+    [3.33, 'A+', 'grade-high'],
+    [2.83, 'A',  'grade-high'],
+    [2.58, 'B+', 'grade-good'],
+    [2.33, 'B',  'grade-good'],
+    [2.13, 'C+', 'grade-mid'],
+    [1.94, 'C',  'grade-mid'],
+    [1.50, 'D',  'grade-low'],
+    [-Infinity, 'F', 'grade-poor']
+];
+
+// An agency is reported as one to avoid rather than an alternative exactly when
+// it grades F, so the cutoff can never drift away from the bands above.
+const ADVERTISER_WEAK_THRESHOLD = ADVERTISER_GRADE_BANDS.find(band => band[1] === 'D')[0];
 
 /**
  * Average appeal of the selected tags across the audiences an agency reaches.
@@ -2374,14 +2397,8 @@ function calculateAdvertiserMatch(scriptTags, movieLean, agency) {
 // tier is a CSS class rather than a colour literal, so the markup stays free of
 // inline style attributes (see tests/domStructure.test.js).
 function predictGradeFromScore(score) {
-    if (score >= 5.0) return { grade: 'A+', tier: 'grade-high' };
-    if (score >= 4.7) return { grade: 'A', tier: 'grade-high' };
-    if (score >= 4.3) return { grade: 'B+', tier: 'grade-good' };
-    if (score >= 4.0) return { grade: 'B', tier: 'grade-good' };
-    if (score >= 3.5) return { grade: 'C+', tier: 'grade-mid' };
-    if (score >= 3.0) return { grade: 'C', tier: 'grade-mid' };
-    if (score >= 2.0) return { grade: 'D', tier: 'grade-low' };
-    return { grade: 'F', tier: 'grade-poor' };
+    const [, grade, tier] = ADVERTISER_GRADE_BANDS.find(([min]) => score >= min);
+    return { grade, tier };
 }
 
 function generateReasoning(agency, score) {
