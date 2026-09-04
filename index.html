@@ -430,14 +430,20 @@
                         <div class="card-header distribution-header">
                             <h3>Distribution Calculator</h3>
                             <div class="dist-toggles">
-                                <label class="toggle-label">
-                                    <input type="checkbox" id="strikingImageToggle" class="toggle-checkbox">
-                                    <span class="toggle-text">Striking Image</span>
-                                </label>
-                                <label class="toggle-label">
-                                    <input type="checkbox" id="artisticAbilityToggle" class="toggle-checkbox">
-                                    <span class="toggle-text" id="artisticAbilityName">[Artistic Ability]</span>
-                                </label>
+                                <div class="toggle-wrapper">
+                                    <span class="toggle-label-text">Striking Image</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="strikingImageToggle" role="switch" aria-label="Striking Image opening viewer boost">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-wrapper">
+                                    <span class="toggle-label-text" id="artisticAbilityName">Artistic Ability</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="artisticAbilityToggle" role="switch" aria-label="Artistic Ability opening viewer boost">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         

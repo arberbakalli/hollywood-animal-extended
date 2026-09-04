@@ -1840,26 +1840,26 @@ function setupDistributionLogic() {
     const comInput = document.getElementById('comScoreInput');
     const comSlider = document.getElementById('comScoreSlider');
     const ownedInput = document.getElementById('ownedScreeningsInput');
-    const scoreDisplay = document.getElementById('dist-com-score-display');
-
-    function update() {
-        const score = parseFloat(comInput.value) || 0;
-        const owned = parseInt(ownedInput.value) || 0;
-        
-        // Update the display text in the card (if present)
-        if(scoreDisplay) scoreDisplay.innerText = score.toFixed(1);
-        
-        // Update grid
-        updateDistributionGrid(score, owned);
-    }
 
     // Attach listeners
-    if(comInput) comInput.addEventListener('input', update);
-    if(comSlider) comSlider.addEventListener('input', update);
-    if(ownedInput) ownedInput.addEventListener('input', update);
+    if(comInput) comInput.addEventListener('input', recalculateDistribution);
+    if(comSlider) comSlider.addEventListener('input', recalculateDistribution);
+    if(ownedInput) ownedInput.addEventListener('input', recalculateDistribution);
 
     // Initial run
-    update();
+    recalculateDistribution();
+}
+
+function recalculateDistribution() {
+    const comInput = document.getElementById('comScoreInput');
+    const ownedInput = document.getElementById('ownedScreeningsInput');
+    const scoreDisplay = document.getElementById('dist-com-score-display');
+
+    const score = parseFloat(comInput?.value) || 0;
+    const owned = parseInt(ownedInput?.value, 10) || 0;
+
+    if(scoreDisplay) scoreDisplay.innerText = score.toFixed(1);
+    updateDistributionGrid(score, owned);
 }
 
 function updateDistributionGrid(commercialScore, availableScreenings) {
@@ -1867,6 +1867,7 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
     const W1_MULT = 2;
     const W2_MULT = 1;
     const DECAY = 0.8;
+    const openingViewerMultiplier = getDistributionMultiplier();
 
     const rawW1 = (commercialScore * W1_MULT * BASE) - availableScreenings;
     const w1 = Math.max(0.0, rawW1);
@@ -1883,7 +1884,8 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
     }
 
     const finalResults = calcValues.map((val, index) => {
-        return index < 4 ? Math.ceil(val) : Math.floor(val);
+        const boostedValue = index < 4 ? val / openingViewerMultiplier : val;
+        return index < 4 ? Math.ceil(boostedValue) : Math.floor(boostedValue);
     });
 
     const grid = document.getElementById('dist-results-grid');
@@ -2788,10 +2790,15 @@ async function findTargetedCombinations() {
 
     const selectedAudiences = Array.from(document.querySelectorAll('.targeted-audience-checkbox:checked')).map(cb => cb.value);
     const selectedAdvertisers = Array.from(document.querySelectorAll('.targeted-advertiser-checkbox:checked')).map(cb => cb.value);
-    const selectedTags = getSelectedTags('targeted').map(id => ({ id, percent: 100 }));
+    const selectedTags = collectTagInputs('targeted');
 
     if (selectedAudiences.length === 0 && selectedAdvertisers.length === 0) {
         showFeedbackMessage('targetedFeedbackMessage', 'Please select at least one audience or advertiser.', 'accent');
+        return;
+    }
+
+    if (selectedTags.length > 6) {
+        showFeedbackMessage('targetedFeedbackMessage', `Pick 6 or fewer optional tags. You selected ${selectedTags.length}.`, 'accent');
         return;
     }
 
@@ -2820,16 +2827,12 @@ async function findTargetedCombinations() {
 async function searchForTargetCombinations(targetAgencies, constraintTags = [], constraintAudiences = [], maxResults = 20) {
     await ensureCompatibilityLoaded();
 
-    const combinations = [];
     const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id);
+    const lockedTags = resolveTargetedTagInputs(constraintTags);
+    const combinations = generateTargetedCombinations(allTags, lockedTags, targetAgencies, 6, maxResults * 4);
+    const scoredCombinations = [];
 
-    // Start with constraint tags if provided, otherwise use all
-    let searchSpace = constraintTags.length > 0 ? constraintTags : allTags.slice(0, 100);
-
-    // Generate combinations (6 tags each) using heuristic search
-    const combinations3 = generateTagCombinations(allTags, 6, 100);
-
-    for (const combo of combinations3) {
+    for (const combo of combinations) {
         const scores = targetAgencies.map(agency => {
             const score = calculateAdvertiserMatch(combo, 0, agency);
             return { agency, score };
@@ -2838,42 +2841,77 @@ async function searchForTargetCombinations(targetAgencies, constraintTags = [], 
         const avgScore = scores.reduce((sum, s) => sum + s.score, 0) / scores.length;
         const grade = predictGradeFromScore(avgScore);
 
-        if (grade.grade === 'A+' || grade.grade === 'A') {
-            combinations.push({
-                tags: combo.map(t => ({ id: t.id, name: t.name })),
-                avgScore,
-                grade: grade.grade,
-                tier: grade.tier,
-                agencyScores: scores,
-                reasoning: generateTargetingReasoning(combo, scores, constraintAudiences)
-            });
-        }
-
-        if (combinations.length >= maxResults) break;
+        scoredCombinations.push({
+            tags: combo.map(t => ({ id: t.id, name: t.name })),
+            avgScore,
+            grade: grade.grade,
+            tier: grade.tier,
+            agencyScores: scores,
+            reasoning: generateTargetingReasoning(combo, scores, constraintAudiences)
+        });
     }
 
-    return combinations.sort((a, b) => b.avgScore - a.avgScore).slice(0, maxResults);
+    return scoredCombinations
+        .sort((a, b) => b.avgScore - a.avgScore || a.tags[0].name.localeCompare(b.tags[0].name))
+        .slice(0, maxResults);
 }
 
-function generateTagCombinations(allTags, size = 6, limit = 100) {
-    const combos = [];
-    const shuffled = [...allTags].sort(() => Math.random() - 0.5);
+function resolveTargetedTagInputs(tagInputs) {
+    const seen = new Set();
+    return tagInputs
+        .map(input => GAME_DATA.tags[input.id])
+        .filter(tag => {
+            if (!tag || seen.has(tag.id)) return false;
+            seen.add(tag.id);
+            return true;
+        });
+}
 
-    for (let i = 0; i < limit && i < shuffled.length; i++) {
-        const combo = [];
-        for (let j = 0; j < size && i + j < shuffled.length; j++) {
-            combo.push(shuffled[(i + j) % shuffled.length]);
+function scoreTagForTargetAgencies(tag, targetAgencies) {
+    if (!tag || !targetAgencies || targetAgencies.length === 0) return 0;
+
+    const total = targetAgencies.reduce((sum, agency) => {
+        return sum + calculateAdvertiserMatch([tag], 0, agency);
+    }, 0);
+
+    return total / targetAgencies.length;
+}
+
+function generateTargetedCombinations(allTags, lockedTags, targetAgencies, size = 6, limit = 80) {
+    const lockedIds = new Set(lockedTags.map(tag => tag.id));
+    const slotsToFill = Math.max(0, size - lockedTags.length);
+
+    if (slotsToFill === 0) return [lockedTags.slice(0, size)];
+
+    const rankedCandidates = allTags
+        .filter(tag => !lockedIds.has(tag.id))
+        .map(tag => ({ tag, score: scoreTagForTargetAgencies(tag, targetAgencies) }))
+        .sort((a, b) =>
+            b.score - a.score ||
+            a.tag.category.localeCompare(b.tag.category) ||
+            a.tag.name.localeCompare(b.tag.name)
+        );
+
+    const combos = [];
+    const maxStart = Math.max(1, rankedCandidates.length - slotsToFill + 1);
+
+    for (let start = 0; start < maxStart && combos.length < limit; start++) {
+        const fillTags = rankedCandidates
+            .slice(start, start + slotsToFill)
+            .map(entry => entry.tag);
+
+        if (fillTags.length === slotsToFill) {
+            combos.push([...lockedTags, ...fillTags]);
         }
-        if (combo.length === size) combos.push(combo);
     }
 
     return combos;
 }
 
 function generateTargetingReasoning(tags, agencyScores, constraintAudiences) {
-    const topAgencies = agencyScores.sort((a, b) => b.score - a.score).slice(0, 2);
+    const topAgencies = [...agencyScores].sort((a, b) => b.score - a.score).slice(0, 2);
     const tagNames = tags.map(t => t.name).join(', ');
-    return `Strong compatibility with ${topAgencies.map(a => a.agency.name).join(' and ')}. Tags: ${tagNames}`;
+    return `Strongest with ${topAgencies.map(a => a.agency.name).join(' and ')}. Tags: ${tagNames}`;
 }
 
 function displayTargetedResults(combinations, targetAgencies, selectedAudiences) {
@@ -2881,7 +2919,7 @@ function displayTargetedResults(combinations, targetAgencies, selectedAudiences)
     const list = document.getElementById('targetedResultsList');
 
     if (combinations.length === 0) {
-        list.innerHTML = '<div class="empty-state padded-empty">No A+ or A combinations found. Try different audiences or fewer constraints.</div>';
+        list.innerHTML = '<div class="empty-state padded-empty">No combinations found. Try different audiences or fewer constraints.</div>';
         panel.classList.remove('hidden');
         return;
     }
@@ -2903,7 +2941,7 @@ function displayTargetedResults(combinations, targetAgencies, selectedAudiences)
                 `).join('')}
             </div>
             <div class="targeted-reasoning">
-                ✓ ${combo.reasoning}
+                ${combo.reasoning}
             </div>
         </div>
     `).join('');
@@ -2915,7 +2953,7 @@ function displayTargetedResults(combinations, targetAgencies, selectedAudiences)
 function getSelectedTags(context) {
     const container = document.getElementById(`selectors-container-${context}`);
     if (!container) return [];
-    return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+    return collectTagInputs(context).map(tag => tag.id);
 }
 
 // Handle Striking Image and Artistic Ability toggles
@@ -2924,30 +2962,18 @@ function initializeDistributionToggles() {
     const artisticAbilityToggle = document.getElementById('artisticAbilityToggle');
 
     if (strikingImageToggle) {
-        strikingImageToggle.addEventListener('change', () => {
-            recalculateDistribution();
-        });
+        strikingImageToggle.addEventListener('change', recalculateDistribution);
     }
 
     if (artisticAbilityToggle) {
-        artisticAbilityToggle.addEventListener('change', () => {
-            recalculateDistribution();
-        });
+        artisticAbilityToggle.addEventListener('change', recalculateDistribution);
     }
 }
 
 function getDistributionMultiplier() {
-    let multiplier = 1;
     const strikingImageToggle = document.getElementById('strikingImageToggle');
     const artisticAbilityToggle = document.getElementById('artisticAbilityToggle');
+    const hasOpeningViewerBoost = Boolean(strikingImageToggle?.checked || artisticAbilityToggle?.checked);
 
-    if (strikingImageToggle?.checked) {
-        multiplier *= 2; // Doubles viewers for first 4 weeks (simplistic: affects base calculation)
-    }
-
-    if (artisticAbilityToggle?.checked) {
-        multiplier *= 1.5; // Placeholder for artistic ability (adjust multiplier as needed)
-    }
-
-    return multiplier;
+    return hasOpeningViewerBoost ? 2 : 1;
 }
