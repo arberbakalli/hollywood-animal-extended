@@ -112,6 +112,11 @@ h2 {
     color: var(--text-main);
 }
 
+.tab-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
 .tab-btn.active {
     background: var(--accent);
     color: #000;
@@ -484,11 +489,12 @@ select:focus { outline: none; border-color: var(--accent); }
     text-transform: uppercase;
     border-radius: var(--radius);
     cursor: pointer;
-    transition: transform 0.1s, background 0.3s;
+    transition: transform 0.12s cubic-bezier(0.23, 1, 0.32, 1),
+                background-color 0.16s ease;
 }
 
-.analyze-btn:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
-.analyze-btn:active { transform: translateY(0); }
+.analyze-btn:hover { background-color: var(--accent-hover); }
+.analyze-btn:active { transform: scale(0.98); }
 
 .app-feedback {
     margin-bottom: 12px;
@@ -754,7 +760,7 @@ input[type="text"] {
     padding: 5px;
 }
 
-.pin-btn:hover { color: var(--accent); transform: scale(1.1); }
+.pin-btn:hover { color: var(--accent); }
 .pin-btn.pinned { color: var(--accent); }
 
 .transfer-link-btn {
@@ -1553,7 +1559,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .week-box:hover {
-    transform: translateY(-2px);
     border-color: rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.08);
 }
@@ -2241,6 +2246,11 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     opacity: 0.8;
 }
 
+.collapsible-header:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
 .header-left {
     display: flex;
     align-items: center;
@@ -2271,7 +2281,8 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .collapsible-content {
     max-height: 99999px;
     overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease;
+    transition: max-height 0.24s cubic-bezier(0.23, 1, 0.32, 1),
+                opacity 0.16s ease;
     opacity: 1;
 }
 
@@ -2323,110 +2334,128 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     margin: 0;
 }
 
-.distribution-toggle-label--striking {
-    color: #ff5f5f;
-}
-
-.distribution-toggle-label--artistic {
-    color: #8beaff;
-}
-
-/* Switch Container */
-.switch {
+/* Toggle Container */
+.toggle-container {
     position: relative;
+    border-radius: 50px;
+    width: 52px;
+    height: 30px;
     display: inline-block;
-    width: 56px;
-    height: 32px;
-    margin: 0;
-    padding: 0;
 }
 
 /* Checkbox Input - Hide but keep accessible */
-.switch input {
-    appearance: none;
+.toggle-checkbox {
     -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    z-index: 1;
+    border-radius: inherit;
+    width: 100%;
+    height: 100%;
     opacity: 0;
-    width: 56px;
-    height: 32px;
+    cursor: pointer;
     margin: 0;
     padding: 0;
-    cursor: pointer;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
 }
 
-/* Slider Background - Visible layer */
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #444;
-    transition: background-color 0.18s cubic-bezier(0.23, 1, 0.32, 1),
-                border-color 0.18s cubic-bezier(0.23, 1, 0.32, 1),
-                box-shadow 0.18s cubic-bezier(0.23, 1, 0.32, 1);
-    border: 1px solid #555;
-    border-radius: 32px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
-    z-index: 1;
+/* Toggle Track */
+.toggle-track {
+    display: flex;
+    align-items: center;
+    position: relative;
+    border-radius: inherit;
+    padding: 4px;
+    width: 100%;
+    height: 100%;
+    background-color: #aeaeae;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.4s linear;
 }
 
-/* Slider Circle/Thumb */
-.slider::before {
-    position: absolute;
-    content: "";
-    height: 24px;
-    width: 24px;
-    left: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: #e8e8e8;
-    border-radius: 50%;
-    transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1),
-                background-color 0.18s cubic-bezier(0.23, 1, 0.32, 1),
-                box-shadow 0.18s cubic-bezier(0.23, 1, 0.32, 1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    z-index: 0;
+.toggle-container.red > .toggle-checkbox:checked + .toggle-track {
+    background-color: #ff5f5f;
 }
 
-/* Checked State */
-.switch input:checked + .slider {
-    background-color: var(--accent);
-    border-color: var(--accent);
-    box-shadow: 0 0 14px rgba(212, 175, 55, 0.4);
+.toggle-container.blue > .toggle-checkbox:checked + .toggle-track {
+    background-color: #8beaff;
 }
 
-/* Checked State - Circle moves right */
-.switch input:checked + .slider::before {
-    transform: translate(24px, -50%);
+/* Toggle Thumb */
+.toggle-thumb {
+    position: relative;
+    border-radius: 11px;
+    transform-origin: left;
+    width: 22px;
+    height: 22px;
     background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.4s linear;
 }
 
-.switch input:focus-visible + .slider {
+.toggle-checkbox:checked + .toggle-track > .toggle-thumb {
+    transform: translateX(22px);
+}
+
+/* Animation on first toggle */
+.toggle-checkbox.toggled-once + .toggle-track > .toggle-thumb {
+    animation-name: grow-out, bounce-out;
+    animation-duration: 0.2s;
+    animation-timing-function: cubic-bezier(0.75, 0, 1, 1), cubic-bezier(0, 0, 0.3, 1.5);
+    animation-delay: 0s, 0.2s;
+    animation-fill-mode: forwards;
+}
+
+.toggle-checkbox.toggled-once:checked + .toggle-track > .toggle-thumb {
+    animation-name: grow-in, bounce-in;
+}
+
+@keyframes grow-in {
+    0% {
+        border-radius: 11px;
+        transform: translateX(0) scale(1);
+    }
+    100% {
+        border-radius: 6.42px / 3.25px;
+        transform: translateX(8px) scale(1.545, 0.727);
+    }
+}
+
+@keyframes bounce-in {
+    0% {
+        border-radius: 6.42px / 3.25px;
+        transform: translateX(8px) scale(1.545, 0.727);
+    }
+    100% {
+        border-radius: 11px;
+        transform: translateX(22px) scale(1);
+    }
+}
+
+@keyframes grow-out {
+    0% {
+        border-radius: 11px;
+        transform: translateX(22px) scale(1);
+    }
+    100% {
+        border-radius: 6.42px / 3.25px;
+        transform: translateX(2px) scale(1.545, 0.727);
+    }
+}
+
+@keyframes bounce-out {
+    0% {
+        border-radius: 6.42px / 3.25px;
+        transform: translateX(2px) scale(1.545, 0.727);
+    }
+    100% {
+        border-radius: 11px;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.toggle-checkbox:focus-visible + .toggle-track {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
-}
-
-@media (hover: hover) and (pointer: fine) {
-    .switch:hover input + .slider {
-        box-shadow: 0 0 8px rgba(212, 175, 55, 0.15), inset 0 1px 3px rgba(0, 0, 0, 0.4);
-    }
-
-    .switch input:checked:hover + .slider {
-        box-shadow: 0 0 16px rgba(212, 175, 55, 0.5);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .slider,
-    .slider::before {
-        transition-duration: 0.01ms;
-    }
 }
 
 /* --- COMBINATION CARD STYLES --- */
