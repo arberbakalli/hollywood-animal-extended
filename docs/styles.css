@@ -343,6 +343,7 @@ h3 {
     border-radius: var(--radius);
     border-left: 3px solid var(--border);
     transition: border-color 0.3s;
+    margin-bottom: 20px;
 }
 
 .category-group:hover { border-left-color: var(--accent); }
