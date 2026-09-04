@@ -2139,16 +2139,29 @@ function renderSynergyResults(matrix, bonuses, tags) {
 async function evaluateColmanGravesScript() {
     await ensureCompatibilityLoaded();
     clearFeedbackMessage('gravesFeedbackMessage');
+    hideGravesBestMatches();
 
     const selectedTags = collectTagInputs('graves');
-    if (selectedTags.length < 2) {
-        showFeedbackMessage('gravesFeedbackMessage', 'Colman needs at least two story elements to compare.');
+    if (selectedTags.length < 5) {
+        showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements for a real script evaluation. You selected ${selectedTags.length}.`, 'accent');
+        return;
+    }
+
+    if (selectedTags.length > 10) {
+        showFeedbackMessage('gravesFeedbackMessage', `Colman evaluates up to 10 story elements at once. You selected ${selectedTags.length}.`, 'accent');
         return;
     }
 
     const matrixResult = calculateMatrixScore(selectedTags);
     const bonuses = calculateTotalBonuses(selectedTags);
     renderColmanGravesResults(matrixResult, bonuses, selectedTags);
+}
+
+function hideGravesBestMatches() {
+    const panel = document.getElementById('graves-best-matches-panel');
+    const list = document.getElementById('gravesBestMatchesList');
+    if (panel) panel.classList.add('hidden');
+    if (list) list.innerHTML = '';
 }
 
 function getGravesVerdict(rawAverage) {
@@ -2253,6 +2266,7 @@ function findGravesConflicts(tags) {
 async function generateBestMatches() {
     await ensureCompatibilityLoaded();
     clearFeedbackMessage('gravesFeedbackMessage');
+    hideGravesEvaluationResults();
 
     const selectedTags = collectTagInputs('graves');
     if (selectedTags.length === 0) {
@@ -2302,6 +2316,22 @@ async function generateBestMatches() {
         });
 
     renderBestMatches(deduped.slice(0, 30));
+}
+
+function hideGravesEvaluationResults() {
+    const resultsContainer = document.getElementById('results-graves');
+    const evaluationPanels = [
+        'graves-summary-row',
+        'graves-reading-panel',
+        'graves-detail-row'
+    ];
+
+    evaluationPanels.forEach(panelId => {
+        const panel = document.getElementById(panelId);
+        if (panel) panel.classList.add('hidden');
+    });
+
+    if (resultsContainer) resultsContainer.classList.add('hidden');
 }
 
 function renderBestMatches(matches) {
@@ -2354,6 +2384,10 @@ function renderColmanGravesResults(matrix, bonuses, tags) {
     const movieScores = calculateGravesMovieScores(matrix, bonuses, tags);
 
     document.getElementById('results-graves').classList.remove('hidden');
+    ['graves-summary-row', 'graves-reading-panel', 'graves-detail-row'].forEach(panelId => {
+        const panel = document.getElementById(panelId);
+        if (panel) panel.classList.remove('hidden');
+    });
 
     const verdictEl = document.getElementById('gravesVerdictDisplay');
     verdictEl.textContent = verdict.label;

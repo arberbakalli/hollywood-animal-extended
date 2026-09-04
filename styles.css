@@ -1026,24 +1026,13 @@ input[type="text"] {
 .graves-case-card {
     position: relative;
     overflow: hidden;
-    border-color: rgba(212, 175, 55, 0.45);
+    border-color: rgba(212, 175, 55, 0.34);
     background:
-        linear-gradient(180deg, rgba(31, 28, 20, 0.96), rgba(21, 21, 21, 0.98)),
+        linear-gradient(180deg, rgba(30, 27, 18, 0.72), rgba(21, 21, 21, 0.98)),
         var(--card-bg);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.graves-file-meta-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 18px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.graves-file-label,
-.graves-fee-label,
 .graves-role-label {
     color: var(--accent);
     font-size: 0.72rem;
@@ -1076,7 +1065,7 @@ input[type="text"] {
 
 .graves-copy-block h3 {
     margin-bottom: 4px;
-    font-size: 2rem;
+    font-size: 1.65rem;
     letter-spacing: 0;
 }
 
@@ -1085,61 +1074,14 @@ input[type="text"] {
     margin: 8px 0 0;
 }
 
-.graves-case-stamp {
-    flex: 0 0 auto;
-    align-self: flex-start;
-    padding: 9px 12px;
-    border: 1px solid rgba(212, 175, 55, 0.55);
-    border-radius: 4px;
-    color: var(--accent);
-    font-size: 0.72rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transform: rotate(-2deg);
-    background: rgba(212, 175, 55, 0.08);
-}
-
-.graves-briefing-strip {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 22px;
-}
-
-.graves-briefing-stat {
-    padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.graves-briefing-stat span,
-.graves-briefing-stat strong {
-    display: block;
-}
-
-.graves-briefing-stat span {
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    font-weight: 700;
-}
-
-.graves-briefing-stat strong {
-    margin-top: 4px;
-    color: var(--text-main);
-    font-size: 0.95rem;
-    letter-spacing: 0;
-}
-
 .graves-best-match-controls {
     display: grid;
-    grid-template-columns: minmax(180px, 1fr) minmax(160px, 0.75fr) auto;
+    grid-template-columns: minmax(220px, 1fr) minmax(180px, 0.75fr) minmax(180px, auto);
     align-items: end;
-    gap: 14px;
-    margin-top: 22px;
-    padding: 14px;
+    column-gap: 22px;
+    row-gap: 14px;
+    margin-top: 28px;
+    padding: 18px;
     border: 1px solid rgba(212, 175, 55, 0.18);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.035);
@@ -1173,6 +1115,7 @@ input[type="text"] {
     min-height: 42px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     padding: 0 12px;
     border: 1px solid var(--border);
@@ -1337,15 +1280,11 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     .card { padding: 15px; }
     .graves-heading-block { align-items: flex-start; }
     .graves-monogram { width: 52px; height: 52px; }
-    .graves-case-stamp { transform: none; }
     .graves-heading-block,
-    .graves-file-meta-row,
-    .graves-briefing-strip,
     .best-match-pair {
         flex-direction: column;
         align-items: flex-start;
     }
-    .graves-briefing-strip { grid-template-columns: 1fr; }
     .graves-copy-block h3 { font-size: 1.55rem; }
     .graves-summary-row { grid-template-columns: 1fr; }
     .category-group { padding: 10px; border-left-width: 3px; width: 100%; }
