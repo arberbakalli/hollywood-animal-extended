@@ -2321,6 +2321,14 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     font-weight: 700;
 }
 
+.collapsible-title--locked {
+    color: var(--accent);
+}
+
+.collapsible-title--excluded {
+    color: var(--danger);
+}
+
 .chevron {
     display: inline-block;
     width: 1em;
@@ -2344,6 +2352,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     transition: max-height 0.24s cubic-bezier(0.23, 1, 0.32, 1),
                 opacity 0.16s ease;
     opacity: 1;
+}
+
+#toggleExcludedElementsButton .chevron {
+    color: var(--danger);
 }
 
 .collapsible-content.hidden {
