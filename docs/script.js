@@ -1947,7 +1947,8 @@ async function calculateSynergy() {
     }
     const matrixResult = calculateMatrixScore(selectedTags);
     const bonuses = calculateTotalBonuses(selectedTags);
-    renderSynergyResults(matrixResult, bonuses, selectedTags);
+    const evaluation = calculateScriptEvaluation(selectedTags, matrixResult, bonuses);
+    renderSynergyResults(evaluation);
 }
 
 function calculateMatrixScore(tags) {
@@ -2093,7 +2094,39 @@ function setToneClass(element, tone) {
     element.classList.add(`tone-${tone}`);
 }
 
-function renderSynergyResults(matrix, bonuses, tags) {
+function getMovieScoreCap(scoringCount) {
+    if (scoringCount >= 9) return 9;
+    if (scoringCount >= 7) return 8;
+    if (scoringCount >= 5) return 7;
+    return 6;
+}
+
+function calculateMovieScores(matrix, bonuses, tags) {
+    const scoringCount = tags ? getScoringElementCount(tags) : 0;
+    const tagCap = getMovieScoreCap(scoringCount);
+    const maxGameScore = 9.9;
+    const commercial = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore));
+    const artistic = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore));
+
+    return { commercial, artistic, tagCap, scoringCount };
+}
+
+function calculateScriptEvaluation(tags, matrix = null, bonuses = null) {
+    const matrixResult = matrix || calculateMatrixScore(tags);
+    const bonusResult = bonuses || calculateTotalBonuses(tags);
+
+    return {
+        tags,
+        matrix: matrixResult,
+        bonuses: bonusResult,
+        movieScores: calculateMovieScores(matrixResult, bonusResult, tags),
+        audience: calculateGravesAudience(tags),
+        conflicts: findGravesConflicts(tags)
+    };
+}
+
+function renderSynergyResults(evaluation) {
+    const { matrix, bonuses, movieScores } = evaluation;
     document.getElementById('results-synergy').classList.remove('hidden');
     const avgEl = document.getElementById('synergyAverageDisplay');
     avgEl.innerHTML = `${matrix.rawAverage.toFixed(1)} <span class="sub-value">/ 5.0</span>`;
@@ -2116,27 +2149,6 @@ function renderSynergyResults(matrix, bonuses, tags) {
     breakdownArt.innerText = formatSimpleScore(bonuses.art);
     setToneClass(breakdownArt, bonuses.art > 0 ? 'art' : (bonuses.art < 0 ? 'danger' : 'neutral'));
 
-    // Tag Cap Logic
-    let ngCount = 0;
-    if (tags) {
-        ngCount = getScoringElementCount(tags);
-    }
-    
-    let tagCap = 6;
-    if(ngCount >= 9) tagCap = 9;
-    else if(ngCount >= 7) tagCap = 8;
-    else if(ngCount >= 5) tagCap = 7;
-
-    const MAX_GAME_SCORE = 9.9; 
-    const totalComRaw = matrix.totalScore + bonuses.com;
-    const totalArtRaw = matrix.totalScore + bonuses.art;
-    
-    let displayCom = Math.max(0, totalComRaw * MAX_GAME_SCORE);
-    let displayArt = Math.max(0, totalArtRaw * MAX_GAME_SCORE);
-
-    displayCom = Math.min(tagCap, displayCom);
-    displayArt = Math.min(tagCap, displayArt);
-
     const totalComEl = document.getElementById('totalComScore');
     const totalArtEl = document.getElementById('totalArtScore');
     
@@ -2145,10 +2157,10 @@ function renderSynergyResults(matrix, bonuses, tags) {
         return val.toFixed(1);
     }
 
-    totalComEl.innerHTML = formatFinalRating(displayCom);
-    setToneClass(totalComEl, displayCom > 0 ? 'accent' : 'danger');
-    totalArtEl.innerHTML = formatFinalRating(displayArt);
-    setToneClass(totalArtEl, displayArt > 0 ? 'art' : 'danger');
+    totalComEl.innerHTML = formatFinalRating(movieScores.commercial);
+    setToneClass(totalComEl, movieScores.commercial > 0 ? 'accent' : 'danger');
+    totalArtEl.innerHTML = formatFinalRating(movieScores.artistic);
+    setToneClass(totalArtEl, movieScores.artistic > 0 ? 'art' : 'danger');
     
     let capLabel = document.getElementById('scoreCapLabel');
     if (!capLabel) {
@@ -2158,7 +2170,7 @@ function renderSynergyResults(matrix, bonuses, tags) {
         capLabel.className = 'score-cap-label';
         rightCol.appendChild(capLabel);
     }
-    capLabel.innerHTML = `Max Score Capped at <strong>${tagCap}.0</strong> (${ngCount} Scoring Elements)`;
+    capLabel.innerHTML = `Max Score Capped at <strong>${movieScores.tagCap}.0</strong> (${movieScores.scoringCount} Scoring Elements)`;
 
     const spoilerEl = document.getElementById('spoilerDisplay');
     if (matrix.spoilers.length > 0) {
@@ -2188,9 +2200,7 @@ async function evaluateColmanGravesScript() {
         return;
     }
 
-    const matrixResult = calculateMatrixScore(selectedTags);
-    const bonuses = calculateTotalBonuses(selectedTags);
-    renderColmanGravesResults(matrixResult, bonuses, selectedTags);
+    renderColmanGravesResults(calculateScriptEvaluation(selectedTags));
 }
 
 function hideGravesBestMatches() {
@@ -2230,20 +2240,6 @@ function getGravesVerdict(rawAverage) {
         tone: 'neutral',
         text: 'Graves sees an uneven script. A few pairings may carry it, but the whole package is fragile.'
     };
-}
-
-function calculateGravesMovieScores(matrix, bonuses, tags) {
-    const scoringCount = getScoringElementCount(tags);
-    let tagCap = 6;
-    if (scoringCount >= 9) tagCap = 9;
-    else if (scoringCount >= 7) tagCap = 8;
-    else if (scoringCount >= 5) tagCap = 7;
-
-    const maxGameScore = 9.9;
-    const commercial = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore));
-    const artistic = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore));
-
-    return { commercial, artistic, tagCap, scoringCount };
 }
 
 function calculateGravesAudience(tags) {
@@ -2415,9 +2411,9 @@ function renderBestMatches(matches) {
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-function renderColmanGravesResults(matrix, bonuses, tags) {
+function renderColmanGravesResults(evaluation) {
+    const { matrix, movieScores } = evaluation;
     const verdict = getGravesVerdict(matrix.rawAverage);
-    const movieScores = calculateGravesMovieScores(matrix, bonuses, tags);
 
     document.getElementById('results-graves').classList.remove('hidden');
     ['graves-summary-row', 'graves-reading-panel', 'graves-detail-row'].forEach(panelId => {
@@ -2459,7 +2455,7 @@ function renderColmanGravesResults(matrix, bonuses, tags) {
 
     const audienceContainer = document.getElementById('gravesAudienceDisplay');
     audienceContainer.innerHTML = '';
-    const audiences = calculateGravesAudience(tags).slice(0, 6);
+    const audiences = evaluation.audience.slice(0, 6);
     if (audiences.length === 0) {
         audienceContainer.innerHTML = '<div class="empty-state">No clear audience pattern found.</div>';
     } else {
@@ -2475,7 +2471,7 @@ function renderColmanGravesResults(matrix, bonuses, tags) {
     }
 
     const conflictContainer = document.getElementById('gravesConflictDisplay');
-    const conflicts = findGravesConflicts(tags);
+    const conflicts = evaluation.conflicts;
     if (conflicts.length === 0) {
         conflictContainer.innerHTML = '<div class="empty-state">No severe Graves conflicts found.</div>';
     } else {
