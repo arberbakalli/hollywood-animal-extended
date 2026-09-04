@@ -513,8 +513,9 @@
             <!-- TAB 5: TARGETED ADS -->
             <section id="tab-targeted" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-targeted-button" aria-hidden="true" hidden>
                 <div id="targeted-input-panel" class="card builder-card">
-                    <div class="card-header">
+                    <div id="targeted-input-header" class="card-header">
                         <h3>Find Combinations for Your Target</h3>
+                        <button id="resetTargetedButton" class="reset-btn" type="button">Reset</button>
                     </div>
                     <p class="subtitle">Select target audiences or advertisers, then build a script profile to discover what combinations work best.</p>
 
@@ -541,7 +542,6 @@
                     <div class="targeted-action-row">
                         <div id="targetedFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="findCombinationsButton" class="analyze-btn targeted-find-btn" type="button">Find Top Combinations</button>
-                        <button id="resetTargetedButton" class="reset-btn" type="button">Reset</button>
                     </div>
                 </div>
 
