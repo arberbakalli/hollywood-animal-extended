@@ -105,11 +105,11 @@
                     <div class="divider-line"></div>
 
                     <!-- LOCKED ELEMENTS -->
-                    <div id="generator-locked-header" class="card-header collapsible-header" role="button" tabindex="0" aria-controls="locked-content" aria-expanded="true" data-toggle="locked-content">
-                        <div class="header-left">
+                    <div id="generator-locked-header" class="card-header collapsible-header">
+                        <button id="toggleLockedElementsButton" class="header-left collapsible-toggle" type="button" aria-controls="locked-content" aria-expanded="true" data-toggle="locked-content">
                             <span class="chevron rotate-90">›</span>
-                            <h3>Locked Elements</h3>
-                        </div>
+                            <span class="collapsible-title">Locked Elements</span>
+                        </button>
                         <button id="resetGeneratorLocksButton" class="reset-btn" type="button" data-reset-context="generator">Reset Locks</button>
                     </div>
                     <div id="locked-content" class="collapsible-content">
@@ -120,12 +120,12 @@
                     <div class="divider-line"></div>
 
                     <!-- EXCLUDED ELEMENTS -->
-                    <div id="generator-excluded-header" class="card-header collapsible-header" role="button" tabindex="0" aria-controls="excluded-content" aria-expanded="true" data-toggle="excluded-content">
-                        <div class="header-left">
+                    <div id="generator-excluded-header" class="card-header collapsible-header">
+                        <button id="toggleExcludedElementsButton" class="header-left collapsible-toggle" type="button" aria-controls="excluded-content" aria-expanded="true" data-toggle="excluded-content">
                             <span class="chevron rotate-90">›</span>
-                            <h3 class="danger-heading">Excluded Elements</h3>
+                            <span class="collapsible-title danger-heading">Excluded Elements</span>
                             <span class="badge-danger" id="excluded-count">0</span>
-                        </div>
+                        </button>
                         <button id="resetExcludedBansButton" class="reset-btn" type="button" data-reset-context="excluded">Reset Bans</button>
                     </div>
                     <div id="excluded-content" class="collapsible-content">
@@ -172,7 +172,7 @@
 
             <!-- TAB 2: SE COMPATIBILITY -->
             <section id="tab-synergy" class="tab-content app-tab-panel active" role="tabpanel" aria-labelledby="tab-synergy-button" aria-hidden="false">
-                
+
                 <div id="synergy-search-panel" class="card search-card">
                     <h3>Quick Search</h3>
                     <div class="search-wrapper">
@@ -431,26 +431,26 @@
                             <h3>Distribution Calculator</h3>
                             <div class="dist-toggles">
                                 <div class="toggle-wrapper">
-                                    <span class="toggle-label-text" style="color: #ff5f5f;">Striking Image</span>
-                                    <div class="toggle-container red">
+                                    <span class="toggle-label-text distribution-toggle-label--striking">Striking Image</span>
+                                    <div class="toggle-container distribution-toggle distribution-toggle--striking">
                                         <input type="checkbox" class="toggle-checkbox" id="strikingImageToggle" role="switch" aria-label="Striking Image opening viewer boost">
-                                        <div class="toggle-track">
-                                            <div class="toggle-thumb"></div>
+                                        <div class="toggle-track" aria-hidden="true">
+                                            <div class="toggle-thumb" aria-hidden="true"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="toggle-wrapper">
-                                    <span class="toggle-label-text" style="color: #8BEAFF;" id="artisticAbilityName">Artistic Ability</span>
-                                    <div class="toggle-container blue">
+                                    <span class="toggle-label-text distribution-toggle-label--artistic" id="artisticAbilityName">Artistic Ability</span>
+                                    <div class="toggle-container distribution-toggle distribution-toggle--artistic">
                                         <input type="checkbox" class="toggle-checkbox" id="artisticAbilityToggle" role="switch" aria-label="Artistic Ability opening viewer boost">
-                                        <div class="toggle-track">
-                                            <div class="toggle-thumb"></div>
+                                        <div class="toggle-track" aria-hidden="true">
+                                            <div class="toggle-thumb" aria-hidden="true"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="dist-input-row">
                             <div class="dist-input-group">
                                 <label for="ownedScreeningsInput">Owned Theatres (Screenings)</label>
@@ -462,7 +462,7 @@
                                 </span>
                             </div>
                         </div>
-                        
+
                         <p class="subtitle dist-note">
                             Screenings needed for independent distribution. Adjust the <strong>Commercial Score</strong> above to see changes.
                         </p>
@@ -555,7 +555,7 @@
             </section>
 
         </main>
-        
+
         <footer id="app-footer">
             <p>Unofficial Tool for Hollywood Animal</p>
         </footer>

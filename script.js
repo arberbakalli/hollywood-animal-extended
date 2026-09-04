@@ -2675,10 +2675,10 @@ function renderAdvertiserCard(entry, extraClass) {
 }
 
 function setupCollapsibleSections() {
-    function setCollapsibleState(header, expanded) {
-        const targetId = header.getAttribute('data-toggle');
+    function setCollapsibleState(toggle, expanded) {
+        const targetId = toggle.getAttribute('data-toggle');
         const content = document.getElementById(targetId);
-        const chevron = header.querySelector('.chevron');
+        const chevron = toggle.querySelector('.chevron');
 
         if (!content || !chevron) return;
 
@@ -2686,36 +2686,25 @@ function setupCollapsibleSections() {
         content.hidden = !expanded;
         content.setAttribute('aria-hidden', String(!expanded));
         chevron.classList.toggle('rotate-90', expanded);
-        header.setAttribute('aria-expanded', String(expanded));
+        toggle.setAttribute('aria-expanded', String(expanded));
     }
 
-    function toggleCollapsible(header) {
-        const targetId = header.getAttribute('data-toggle');
+    function toggleCollapsible(toggle) {
+        const targetId = toggle.getAttribute('data-toggle');
         const content = document.getElementById(targetId);
         if (!content) return;
 
-        setCollapsibleState(header, content.classList.contains('hidden'));
+        setCollapsibleState(toggle, content.classList.contains('hidden'));
     }
 
-    document.querySelectorAll('.collapsible-header').forEach(header => {
-        const targetId = header.getAttribute('data-toggle');
+    document.querySelectorAll('.collapsible-toggle[data-toggle]').forEach(toggle => {
+        const targetId = toggle.getAttribute('data-toggle');
         const content = document.getElementById(targetId);
         if (content) {
-            setCollapsibleState(header, !content.classList.contains('hidden'));
+            setCollapsibleState(toggle, !content.classList.contains('hidden'));
         }
 
-        header.addEventListener('click', function(e) {
-            // Ignore clicks on buttons (Reset buttons)
-            if (e.target.closest('button')) return;
-
-            toggleCollapsible(this);
-        });
-
-        header.addEventListener('keydown', function(e) {
-            if (e.key !== 'Enter' && e.key !== ' ') return;
-            if (e.target.closest('button')) return;
-
-            e.preventDefault();
+        toggle.addEventListener('click', function() {
             toggleCollapsible(this);
         });
     });
@@ -2998,16 +2987,9 @@ function getSelectedTags(context) {
 function initializeDistributionToggles() {
     const strikingImageToggle = document.getElementById('strikingImageToggle');
     const artisticAbilityToggle = document.getElementById('artisticAbilityToggle');
-
-    const toggles = [strikingImageToggle, artisticAbilityToggle].filter(Boolean);
-
-    toggles.forEach(toggle => {
-        toggle.addEventListener('click', (e) => {
-            e.target.classList.add('toggled-once');
-        }, { once: true });
-
-        toggle.addEventListener('change', recalculateDistribution);
-    });
+    [strikingImageToggle, artisticAbilityToggle]
+        .filter(Boolean)
+        .forEach(toggle => toggle.addEventListener('change', recalculateDistribution));
 }
 
 function getDistributionMultiplier() {

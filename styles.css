@@ -261,7 +261,6 @@ h3 {
     margin-top: -6px;
 }
 
-.styled-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
 .art-slider::-webkit-slider-thumb { background: #a0a0ff; }
 .com-slider::-webkit-slider-thumb { background: var(--accent); }
 
@@ -1563,6 +1562,24 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: rgba(255, 255, 255, 0.08);
 }
 
+@media (hover: hover) and (pointer: fine) {
+    .styled-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    .analyze-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .pin-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .week-box:hover {
+        transform: translateY(-2px);
+    }
+}
+
 .week-label {
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -2234,31 +2251,48 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 /* Collapsible sections */
 .collapsible-header {
-    cursor: pointer;
-    user-select: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: opacity 0.2s;
+    gap: 12px;
 }
 
-.collapsible-header:hover {
-    opacity: 0.8;
-}
-
-.collapsible-header:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-}
-
-.header-left {
+.header-left,
+.collapsible-toggle {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.header-left h3 {
+.collapsible-toggle {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.collapsible-toggle:hover {
+    opacity: 0.8;
+}
+
+.collapsible-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.header-left h3,
+.collapsible-title {
     margin: 0;
+}
+
+.collapsible-title {
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
 }
 
 .chevron {
@@ -2334,6 +2368,14 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     margin: 0;
 }
 
+.distribution-toggle-label--striking {
+    color: #ff5f5f;
+}
+
+.distribution-toggle-label--artistic {
+    color: #8beaff;
+}
+
 /* Toggle Container */
 .toggle-container {
     position: relative;
@@ -2369,14 +2411,14 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     height: 100%;
     background-color: #aeaeae;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.4s linear;
+    transition: background-color 0.18s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.toggle-container.red > .toggle-checkbox:checked + .toggle-track {
+.distribution-toggle--striking > .toggle-checkbox:checked + .toggle-track {
     background-color: #ff5f5f;
 }
 
-.toggle-container.blue > .toggle-checkbox:checked + .toggle-track {
+.distribution-toggle--artistic > .toggle-checkbox:checked + .toggle-track {
     background-color: #8beaff;
 }
 
@@ -2389,68 +2431,12 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     height: 22px;
     background-color: #fff;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
-    transition: transform 0.4s linear;
+    transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1),
+                box-shadow 0.18s ease;
 }
 
 .toggle-checkbox:checked + .toggle-track > .toggle-thumb {
     transform: translateX(22px);
-}
-
-/* Animation on first toggle */
-.toggle-checkbox.toggled-once + .toggle-track > .toggle-thumb {
-    animation-name: grow-out, bounce-out;
-    animation-duration: 0.2s;
-    animation-timing-function: cubic-bezier(0.75, 0, 1, 1), cubic-bezier(0, 0, 0.3, 1.5);
-    animation-delay: 0s, 0.2s;
-    animation-fill-mode: forwards;
-}
-
-.toggle-checkbox.toggled-once:checked + .toggle-track > .toggle-thumb {
-    animation-name: grow-in, bounce-in;
-}
-
-@keyframes grow-in {
-    0% {
-        border-radius: 11px;
-        transform: translateX(0) scale(1);
-    }
-    100% {
-        border-radius: 6.42px / 3.25px;
-        transform: translateX(8px) scale(1.545, 0.727);
-    }
-}
-
-@keyframes bounce-in {
-    0% {
-        border-radius: 6.42px / 3.25px;
-        transform: translateX(8px) scale(1.545, 0.727);
-    }
-    100% {
-        border-radius: 11px;
-        transform: translateX(22px) scale(1);
-    }
-}
-
-@keyframes grow-out {
-    0% {
-        border-radius: 11px;
-        transform: translateX(22px) scale(1);
-    }
-    100% {
-        border-radius: 6.42px / 3.25px;
-        transform: translateX(2px) scale(1.545, 0.727);
-    }
-}
-
-@keyframes bounce-out {
-    0% {
-        border-radius: 6.42px / 3.25px;
-        transform: translateX(2px) scale(1.545, 0.727);
-    }
-    100% {
-        border-radius: 11px;
-        transform: translateX(0) scale(1);
-    }
 }
 
 .toggle-checkbox:focus-visible + .toggle-track {

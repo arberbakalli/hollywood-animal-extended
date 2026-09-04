@@ -266,12 +266,19 @@ function restoreSelection(context, savedInputs) {
 
 function switchTab(tabName) {
     currentTab = tabName;
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    const activeButton = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
-    if (activeButton) activeButton.classList.add('active');
-    
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
-    document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(button => {
+        const isActive = button.dataset.tab === tabName;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', String(isActive));
+        button.tabIndex = isActive ? 0 : -1;
+    });
+
+    document.querySelectorAll('.tab-content').forEach(content => {
+        const isActive = content.id === `tab-${tabName}`;
+        content.classList.toggle('hidden', !isActive);
+        content.hidden = !isActive;
+        content.setAttribute('aria-hidden', String(!isActive));
+    });
 }
 
 function setupDomEventBindings() {
@@ -556,6 +563,7 @@ function initializeSelectors(context) {
         // Excluded list is always multi-select for all categories
         if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
             const addBtn = document.createElement('button');
+            addBtn.type = 'button';
             addBtn.className = 'add-btn';
             addBtn.id = `add-${categorySlug}-${context}-button`;
             addBtn.dataset.action = 'add-tag-row';
@@ -831,6 +839,7 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     
     if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
         const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
         removeBtn.className = 'remove-btn';
         removeBtn.id = `${row.id}-remove-button`;
         removeBtn.dataset.action = 'remove-tag-row';
@@ -1360,7 +1369,7 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
                     </div>
                 </div>
             </div>
-            <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" title="${pinTitle}" data-role="script-pin-button">
+            <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" type="button" title="${pinTitle}" data-role="script-pin-button">
                 ${isActuallyPinned ? '★' : '☆'}
             </button>
         </div>
@@ -1370,7 +1379,7 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
             </div>
             <div class="gen-actions">
                 <span id="${cardScope}-short-id-${scriptDomId}" class="script-id" data-role="script-short-id">ID: ${scriptObj.uniqueId.substring(scriptObj.uniqueId.length-6)}</span>
-                <button id="${cardScope}-transfer-${scriptDomId}" class="transfer-link-btn" data-role="script-transfer-button">
+                <button id="${cardScope}-transfer-${scriptDomId}" class="transfer-link-btn" type="button" data-role="script-transfer-button">
                     Find Best Advertisers &rarr;
                 </button>
             </div>
@@ -2666,19 +2675,37 @@ function renderAdvertiserCard(entry, extraClass) {
 }
 
 function setupCollapsibleSections() {
-    document.querySelectorAll('.collapsible-header').forEach(header => {
-        header.addEventListener('click', function(e) {
-            // Ignore clicks on buttons (Reset buttons)
-            if (e.target.tagName === 'BUTTON') return;
+    function setCollapsibleState(toggle, expanded) {
+        const targetId = toggle.getAttribute('data-toggle');
+        const content = document.getElementById(targetId);
+        const chevron = toggle.querySelector('.chevron');
 
-            const targetId = this.getAttribute('data-toggle');
-            const content = document.getElementById(targetId);
-            const chevron = this.querySelector('.chevron');
+        if (!content || !chevron) return;
 
-            if (content && chevron) {
-                content.classList.toggle('hidden');
-                chevron.classList.toggle('rotate-90');
-            }
+        content.classList.toggle('hidden', !expanded);
+        content.hidden = !expanded;
+        content.setAttribute('aria-hidden', String(!expanded));
+        chevron.classList.toggle('rotate-90', expanded);
+        toggle.setAttribute('aria-expanded', String(expanded));
+    }
+
+    function toggleCollapsible(toggle) {
+        const targetId = toggle.getAttribute('data-toggle');
+        const content = document.getElementById(targetId);
+        if (!content) return;
+
+        setCollapsibleState(toggle, content.classList.contains('hidden'));
+    }
+
+    document.querySelectorAll('.collapsible-toggle[data-toggle]').forEach(toggle => {
+        const targetId = toggle.getAttribute('data-toggle');
+        const content = document.getElementById(targetId);
+        if (content) {
+            setCollapsibleState(toggle, !content.classList.contains('hidden'));
+        }
+
+        toggle.addEventListener('click', function() {
+            toggleCollapsible(this);
         });
     });
 
@@ -2960,14 +2987,9 @@ function getSelectedTags(context) {
 function initializeDistributionToggles() {
     const strikingImageToggle = document.getElementById('strikingImageToggle');
     const artisticAbilityToggle = document.getElementById('artisticAbilityToggle');
-
-    if (strikingImageToggle) {
-        strikingImageToggle.addEventListener('change', recalculateDistribution);
-    }
-
-    if (artisticAbilityToggle) {
-        artisticAbilityToggle.addEventListener('change', recalculateDistribution);
-    }
+    [strikingImageToggle, artisticAbilityToggle]
+        .filter(Boolean)
+        .forEach(toggle => toggle.addEventListener('change', recalculateDistribution));
 }
 
 function getDistributionMultiplier() {

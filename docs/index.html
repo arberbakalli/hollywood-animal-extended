@@ -38,34 +38,34 @@
         </header>
 
         <!-- TAB NAVIGATION -->
-        <nav id="primary-tabs" class="tab-nav" aria-label="Calculator tabs">
-            <button id="tab-generator-button" class="tab-btn" data-tab="generator">Script Generator</button>
-            <button id="tab-synergy-button" class="tab-btn active" data-tab="synergy">Script Compatibility</button>
-            <button id="tab-graves-button" class="tab-btn" data-tab="graves">Colman Graves</button>
-            <button id="tab-advertisers-button" class="tab-btn" data-tab="advertisers">Best Advertisers</button>
-            <button id="tab-targeted-button" class="tab-btn" data-tab="targeted">Targeted Ads</button>
+        <nav id="primary-tabs" class="tab-nav" aria-label="Calculator tabs" role="tablist">
+            <button id="tab-generator-button" class="tab-btn" type="button" role="tab" aria-controls="tab-generator" aria-selected="false" tabindex="-1" data-tab="generator">Script Generator</button>
+            <button id="tab-synergy-button" class="tab-btn active" type="button" role="tab" aria-controls="tab-synergy" aria-selected="true" tabindex="0" data-tab="synergy">Script Compatibility</button>
+            <button id="tab-graves-button" class="tab-btn" type="button" role="tab" aria-controls="tab-graves" aria-selected="false" tabindex="-1" data-tab="graves">Colman Graves</button>
+            <button id="tab-advertisers-button" class="tab-btn" type="button" role="tab" aria-controls="tab-advertisers" aria-selected="false" tabindex="-1" data-tab="advertisers">Best Advertisers</button>
+            <button id="tab-targeted-button" class="tab-btn" type="button" role="tab" aria-controls="tab-targeted" aria-selected="false" tabindex="-1" data-tab="targeted">Targeted Ads</button>
         </nav>
 
         <main id="app-content" class="container">
-            
+
             <!-- TAB 1: SCRIPT GENERATOR -->
-            <section id="tab-generator" class="tab-content app-tab-panel hidden">
-                
+            <section id="tab-generator" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-generator-button" aria-hidden="true" hidden>
+
                 <div id="generator-settings-panel" class="card builder-card">
                     <div id="generator-settings-header" class="card-header">
                         <h3>Generator Settings</h3>
                     </div>
-                    
+
                     <!-- PROFILE SELECTION BUTTONS -->
                     <div id="generator-profile-control" class="profile-control-container">
                         <div class="profile-label-row">
-                            <label>Tag Availability</label>
+                            <div class="profile-field-label">Tag Availability</div>
                         </div>
                         <div class="profile-btn-group">
-                            <button id="btn-profile-starting" class="profile-btn" data-generator-profile="starting">
+                            <button id="btn-profile-starting" class="profile-btn" type="button" data-generator-profile="starting">
                                 Starting Tags
                             </button>
-                            <button id="btn-profile-custom" class="profile-btn active" data-generator-profile="custom">
+                            <button id="btn-profile-custom" class="profile-btn active" type="button" data-generator-profile="custom">
                                 Custom
                             </button>
                         </div>
@@ -105,28 +105,28 @@
                     <div class="divider-line"></div>
 
                     <!-- LOCKED ELEMENTS -->
-                    <div id="generator-locked-header" class="card-header collapsible-header" data-toggle="locked-content">
-                        <div class="header-left">
+                    <div id="generator-locked-header" class="card-header collapsible-header">
+                        <button id="toggleLockedElementsButton" class="header-left collapsible-toggle" type="button" aria-controls="locked-content" aria-expanded="true" data-toggle="locked-content">
                             <span class="chevron rotate-90">›</span>
-                            <h3>Locked Elements</h3>
-                        </div>
-                        <button class="reset-btn" data-reset-context="generator">Reset Locks</button>
+                            <span class="collapsible-title">Locked Elements</span>
+                        </button>
+                        <button id="resetGeneratorLocksButton" class="reset-btn" type="button" data-reset-context="generator">Reset Locks</button>
                     </div>
                     <div id="locked-content" class="collapsible-content">
                         <p class="subtitle">Select specific tags you <strong>MUST</strong> have in the script.</p>
                         <div id="selectors-container-generator" class="tag-selector-grid"></div>
                     </div>
-                    
+
                     <div class="divider-line"></div>
 
                     <!-- EXCLUDED ELEMENTS -->
-                    <div id="generator-excluded-header" class="card-header collapsible-header" data-toggle="excluded-content">
-                        <div class="header-left">
+                    <div id="generator-excluded-header" class="card-header collapsible-header">
+                        <button id="toggleExcludedElementsButton" class="header-left collapsible-toggle" type="button" aria-controls="excluded-content" aria-expanded="true" data-toggle="excluded-content">
                             <span class="chevron rotate-90">›</span>
-                            <h3 class="danger-heading">Excluded Elements</h3>
+                            <span class="collapsible-title danger-heading">Excluded Elements</span>
                             <span class="badge-danger" id="excluded-count">0</span>
-                        </div>
-                        <button class="reset-btn" data-reset-context="excluded">Reset Bans</button>
+                        </button>
+                        <button id="resetExcludedBansButton" class="reset-btn" type="button" data-reset-context="excluded">Reset Bans</button>
                     </div>
                     <div id="excluded-content" class="collapsible-content">
                         <p class="subtitle">Select tags to <strong>BAN</strong> (e.g., due to "The Code"). The generator will never pick these.</p>
@@ -135,7 +135,7 @@
 
                     <div id="generator-actions" class="action-area">
                         <div id="generatorFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
-                        <button id="generateScriptsButton" class="analyze-btn">Generate Scripts</button>
+                        <button id="generateScriptsButton" class="analyze-btn" type="button">Generate Scripts</button>
                     </div>
                 </div>
 
@@ -146,10 +146,10 @@
                             <h3 class="accent-heading">Pinned Scripts</h3>
                         </div>
                         <div class="file-controls">
-                            <button id="savePinnedScriptsButton" class="file-action-btn" title="Download Pinned Scripts">
+                            <button id="savePinnedScriptsButton" class="file-action-btn" type="button" title="Download Pinned Scripts">
                                 <span>⬇ Save</span>
                             </button>
-                            <button id="loadPinnedScriptsButton" class="file-action-btn" title="Upload JSON File">
+                            <button id="loadPinnedScriptsButton" class="file-action-btn" type="button" title="Upload JSON File">
                                 <span>⬆ Load</span>
                             </button>
                             <!-- Hidden File Input -->
@@ -171,8 +171,8 @@
             </section>
 
             <!-- TAB 2: SE COMPATIBILITY -->
-            <section id="tab-synergy" class="tab-content app-tab-panel active">
-                
+            <section id="tab-synergy" class="tab-content app-tab-panel active" role="tabpanel" aria-labelledby="tab-synergy-button" aria-hidden="false">
+
                 <div id="synergy-search-panel" class="card search-card">
                     <h3>Quick Search</h3>
                     <div class="search-wrapper">
@@ -184,15 +184,15 @@
                 <div id="synergy-builder-panel" class="card builder-card">
                     <div id="synergy-builder-header" class="card-header">
                         <h3>Check Compatibility</h3>
-                        <button class="reset-btn" data-reset-context="synergy">Reset</button>
+                        <button id="resetSynergyButton" class="reset-btn" type="button" data-reset-context="synergy">Reset</button>
                     </div>
                     <p class="subtitle">Select story elements to see how well they fit together.</p>
-                    
+
                     <div id="selectors-container-synergy" class="tag-selector-grid"></div>
-                    
+
                     <div id="synergy-actions" class="action-area">
                         <div id="synergyFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
-                        <button id="calculateSynergyButton" class="analyze-btn">Check Compatibility</button>
+                        <button id="calculateSynergyButton" class="analyze-btn" type="button">Check Compatibility</button>
                     </div>
                 </div>
 
@@ -250,13 +250,13 @@
                     </div>
 
                     <div id="synergy-transfer-actions" class="action-area action-area-flush">
-                        <button id="transferTagsButton" class="analyze-btn secondary-btn">Find Best Advertisers &rarr;</button>
+                        <button id="transferTagsButton" class="analyze-btn secondary-btn" type="button">Find Best Advertisers &rarr;</button>
                     </div>
                 </div>
             </section>
 
             <!-- TAB 3: COLMAN GRAVES SCRIPT EVALUATION -->
-            <section id="tab-graves" class="tab-content app-tab-panel hidden">
+            <section id="tab-graves" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-graves-button" aria-hidden="true" hidden>
                 <div id="graves-intro-panel" class="card graves-case-card">
                     <div id="graves-heading-block" class="graves-heading-block">
                         <div id="graves-monogram" class="graves-monogram" aria-hidden="true">CG</div>
@@ -281,7 +281,7 @@
                 <div id="graves-builder-panel" class="card builder-card">
                     <div id="graves-builder-header" class="card-header">
                         <h3>Submit Script</h3>
-                        <button class="reset-btn" data-reset-context="graves">Reset</button>
+                        <button id="resetGravesButton" class="reset-btn" type="button" data-reset-context="graves">Reset</button>
                     </div>
                     <p class="subtitle">Select the script elements you want Colman Graves to judge.</p>
 
@@ -295,7 +295,7 @@
                                 <option value="Genre">Genre</option>
                                 <option value="Setting">Setting</option>
                                 <option value="Theme">Theme</option>
-                                <option value="Theme & Event">Theme & Event</option>
+                                <option value="Theme &amp; Event">Theme &amp; Event</option>
                                 <option value="Protagonist">Protagonist</option>
                                 <option value="Antagonist">Antagonist</option>
                                 <option value="Supporting Character">Supporting Character</option>
@@ -310,7 +310,7 @@
                                 <option value="5.0">5.0 only</option>
                             </select>
                         </div>
-                        <label id="graves-starter-filter-field" class="graves-toggle-field" for="gravesStarterOnlyFilter">
+                        <label id="graves-starter-filter-field" class="graves-toggle-field">
                             <input type="checkbox" id="gravesStarterOnlyFilter">
                             <span>Starting tags only</span>
                         </label>
@@ -318,8 +318,8 @@
 
                     <div id="graves-actions" class="action-area">
                         <div id="gravesFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
-                        <button id="evaluateGravesButton" class="analyze-btn">Evaluate Script</button>
-                        <button id="generateBestMatchesButton" class="analyze-btn best-matches-btn">Generate Best Matches</button>
+                        <button id="evaluateGravesButton" class="analyze-btn" type="button">Evaluate Script</button>
+                        <button id="generateBestMatchesButton" class="analyze-btn best-matches-btn" type="button">Generate Best Matches</button>
                     </div>
                 </div>
 
@@ -374,7 +374,7 @@
             </section>
 
             <!-- TAB 4: BEST ADVERTISERS -->
-            <section id="tab-advertisers" class="tab-content app-tab-panel hidden">
+            <section id="tab-advertisers" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-advertisers-button" aria-hidden="true" hidden>
                 <div id="advertisers-search-panel" class="card search-card">
                     <h3>Quick Search</h3>
                     <div class="search-wrapper">
@@ -414,13 +414,13 @@
                 <div id="advertisers-builder-panel" class="card builder-card">
                     <div id="advertisers-builder-header" class="card-header">
                         <h3>Build Your Script</h3>
-                        <button class="reset-btn" data-reset-context="advertisers">Reset</button>
+                        <button id="resetAdvertisersButton" class="reset-btn" type="button" data-reset-context="advertisers">Reset</button>
                     </div>
                     <p class="subtitle">Select tags manually or use the search bar above. Add multiple genres to adjust their influence.</p>
                     <div id="selectors-container-advertisers" class="tag-selector-grid"></div>
                     <div id="advertisers-actions" class="action-area">
                         <div id="advertisersFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
-                        <button id="analyzeMovieButton" class="analyze-btn">Analyse</button>
+                        <button id="analyzeMovieButton" class="analyze-btn" type="button">Analyse</button>
                     </div>
                 </div>
 
@@ -432,21 +432,25 @@
                             <div class="dist-toggles">
                                 <div class="toggle-wrapper">
                                     <span class="toggle-label-text distribution-toggle-label--striking">Striking Image</span>
-                                    <label class="switch">
-                                        <input type="checkbox" id="strikingImageToggle" role="switch" aria-label="Striking Image opening viewer boost">
-                                        <span class="slider round"></span>
-                                    </label>
+                                    <div class="toggle-container distribution-toggle distribution-toggle--striking">
+                                        <input type="checkbox" class="toggle-checkbox" id="strikingImageToggle" role="switch" aria-label="Striking Image opening viewer boost">
+                                        <div class="toggle-track" aria-hidden="true">
+                                            <div class="toggle-thumb" aria-hidden="true"></div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="toggle-wrapper">
                                     <span class="toggle-label-text distribution-toggle-label--artistic" id="artisticAbilityName">Artistic Ability</span>
-                                    <label class="switch">
-                                        <input type="checkbox" id="artisticAbilityToggle" role="switch" aria-label="Artistic Ability opening viewer boost">
-                                        <span class="slider round"></span>
-                                    </label>
+                                    <div class="toggle-container distribution-toggle distribution-toggle--artistic">
+                                        <input type="checkbox" class="toggle-checkbox" id="artisticAbilityToggle" role="switch" aria-label="Artistic Ability opening viewer boost">
+                                        <div class="toggle-track" aria-hidden="true">
+                                            <div class="toggle-thumb" aria-hidden="true"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="dist-input-row">
                             <div class="dist-input-group">
                                 <label for="ownedScreeningsInput">Owned Theatres (Screenings)</label>
@@ -458,7 +462,7 @@
                                 </span>
                             </div>
                         </div>
-                        
+
                         <p class="subtitle dist-note">
                             Screenings needed for independent distribution. Adjust the <strong>Commercial Score</strong> above to see changes.
                         </p>
@@ -507,7 +511,7 @@
             </section>
 
             <!-- TAB 5: TARGETED ADS -->
-            <section id="tab-targeted" class="tab-content app-tab-panel hidden">
+            <section id="tab-targeted" class="tab-content app-tab-panel hidden" role="tabpanel" aria-labelledby="tab-targeted-button" aria-hidden="true" hidden>
                 <div id="targeted-input-panel" class="card builder-card">
                     <div class="card-header">
                         <h3>Find Combinations for Your Target</h3>
@@ -517,27 +521,27 @@
                     <div class="targeted-selection-grid">
                         <!-- Audience/Advertiser Selection -->
                         <div class="input-group">
-                            <label class="targeted-field-label">Select Target Audiences</label>
+                            <div class="targeted-field-label">Select Target Audiences</div>
                             <div id="targeted-audience-checkboxes" class="targeted-checkbox-list"></div>
                         </div>
 
                         <div class="input-group">
-                            <label class="targeted-field-label">Or Select Advertiser</label>
+                            <div class="targeted-field-label">Or Select Advertiser</div>
                             <div id="targeted-advertiser-checkboxes" class="targeted-checkbox-list"></div>
                         </div>
                     </div>
 
                     <!-- Tag Builder -->
                     <div class="targeted-tag-builder">
-                        <label class="targeted-field-label">Add Tags (Optional - Leave Empty for All)</label>
+                        <div class="targeted-field-label">Add Tags (Optional - Leave Empty for All)</div>
                         <div id="selectors-container-targeted" class="tag-selector-grid"></div>
                     </div>
 
                     <!-- Search Button -->
                     <div class="targeted-action-row">
                         <div id="targetedFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
-                        <button id="findCombinationsButton" class="analyze-btn targeted-find-btn">Find Top Combinations</button>
-                        <button id="resetTargetedButton" class="reset-btn">Reset</button>
+                        <button id="findCombinationsButton" class="analyze-btn targeted-find-btn" type="button">Find Top Combinations</button>
+                        <button id="resetTargetedButton" class="reset-btn" type="button">Reset</button>
                     </div>
                 </div>
 
@@ -551,7 +555,7 @@
             </section>
 
         </main>
-        
+
         <footer id="app-footer">
             <p>Unofficial Tool for Hollywood Animal</p>
         </footer>
