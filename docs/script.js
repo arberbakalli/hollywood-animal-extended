@@ -44,6 +44,12 @@ window.addEventListener('load', async function initializeApp() {
         // Initialize Collapsible Sections
         setupCollapsibleSections();
 
+        // Initialize Targeted Ads Tab
+        initializeTargetedAdsTab();
+
+        // Initialize Distribution Toggles (Striking Image, etc.)
+        initializeDistributionToggles();
+
         // Initialize Default Profile
         setGeneratorProfile('custom');
 
@@ -2726,4 +2732,222 @@ function displayAdvertiserRecommendations(recommendations) {
     }
 
     container.innerHTML = `<div class="advertiser-recommendation">${sections.join('')}</div>`;
+}
+
+// ============================================================================
+// TARGETED ADS FEATURE - Reverse Lookup for Audience-Specific Combinations
+// ============================================================================
+
+async function initializeTargetedAdsTab() {
+    // Initialize audience checkboxes
+    const audienceContainer = document.getElementById('targeted-audience-checkboxes');
+    if (audienceContainer) {
+        const demosHtml = Object.entries(GAME_DATA.demographics)
+            .map(([id, demo]) => `
+                <label class="checkbox-item targeted-checkbox-item">
+                    <input type="checkbox" value="${id}" class="targeted-audience-checkbox">
+                    <span>${demo.name}</span>
+                </label>
+            `).join('');
+        audienceContainer.innerHTML = demosHtml;
+    }
+
+    // Initialize advertiser checkboxes
+    const advertiserContainer = document.getElementById('targeted-advertiser-checkboxes');
+    if (advertiserContainer) {
+        const agenciesHtml = GAME_DATA.adAgents
+            .map(agency => `
+                <label class="checkbox-item targeted-checkbox-item">
+                    <input type="checkbox" value="${agency.id}" class="targeted-advertiser-checkbox">
+                    <span>${agency.name}</span>
+                </label>
+            `).join('');
+        advertiserContainer.innerHTML = agenciesHtml;
+    }
+
+    // Initialize tag selectors for Targeted Ads
+    initializeSelectors('targeted');
+
+    // Attach event listeners
+    document.getElementById('findCombinationsButton')?.addEventListener('click', findTargetedCombinations);
+    document.getElementById('resetTargetedButton')?.addEventListener('click', resetTargetedTab);
+}
+
+function resetTargetedTab() {
+    document.querySelectorAll('.targeted-audience-checkbox, .targeted-advertiser-checkbox').forEach(cb => cb.checked = false);
+    document.getElementById('selectors-container-targeted').innerHTML = '';
+    initializeSelectors('targeted');
+    document.getElementById('targeted-results-panel').classList.add('hidden');
+    document.getElementById('targetedResultsList').innerHTML = '';
+    clearFeedbackMessage('targetedFeedbackMessage');
+}
+
+async function findTargetedCombinations() {
+    await ensureCompatibilityLoaded();
+    clearFeedbackMessage('targetedFeedbackMessage');
+
+    const selectedAudiences = Array.from(document.querySelectorAll('.targeted-audience-checkbox:checked')).map(cb => cb.value);
+    const selectedAdvertisers = Array.from(document.querySelectorAll('.targeted-advertiser-checkbox:checked')).map(cb => cb.value);
+    const selectedTags = getSelectedTags('targeted').map(id => ({ id, percent: 100 }));
+
+    if (selectedAudiences.length === 0 && selectedAdvertisers.length === 0) {
+        showFeedbackMessage('targetedFeedbackMessage', 'Please select at least one audience or advertiser.', 'accent');
+        return;
+    }
+
+    // Determine target agencies
+    let targetAgencies = [];
+    if (selectedAdvertisers.length > 0) {
+        targetAgencies = GAME_DATA.adAgents.filter(a => selectedAdvertisers.includes(a.id));
+    } else {
+        // Find agencies that reach the selected audiences
+        targetAgencies = GAME_DATA.adAgents.filter(agency =>
+            selectedAudiences.some(aud => agency.targets.includes(aud))
+        );
+    }
+
+    if (targetAgencies.length === 0) {
+        showFeedbackMessage('targetedFeedbackMessage', 'No agencies reach the selected audiences.', 'accent');
+        return;
+    }
+
+    // Find combinations that score A+ for target agencies
+    const combinations = await searchForTargetCombinations(targetAgencies, selectedTags, selectedAudiences);
+
+    displayTargetedResults(combinations, targetAgencies, selectedAudiences);
+}
+
+async function searchForTargetCombinations(targetAgencies, constraintTags = [], constraintAudiences = [], maxResults = 20) {
+    await ensureCompatibilityLoaded();
+
+    const combinations = [];
+    const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id);
+
+    // Start with constraint tags if provided, otherwise use all
+    let searchSpace = constraintTags.length > 0 ? constraintTags : allTags.slice(0, 100);
+
+    // Generate combinations (6 tags each) using heuristic search
+    const combinations3 = generateTagCombinations(allTags, 6, 100);
+
+    for (const combo of combinations3) {
+        const scores = targetAgencies.map(agency => {
+            const score = calculateAdvertiserMatch(combo, 0, agency);
+            return { agency, score };
+        });
+
+        const avgScore = scores.reduce((sum, s) => sum + s.score, 0) / scores.length;
+        const grade = predictGradeFromScore(avgScore);
+
+        if (grade.grade === 'A+' || grade.grade === 'A') {
+            combinations.push({
+                tags: combo.map(t => ({ id: t.id, name: t.name })),
+                avgScore,
+                grade: grade.grade,
+                tier: grade.tier,
+                agencyScores: scores,
+                reasoning: generateTargetingReasoning(combo, scores, constraintAudiences)
+            });
+        }
+
+        if (combinations.length >= maxResults) break;
+    }
+
+    return combinations.sort((a, b) => b.avgScore - a.avgScore).slice(0, maxResults);
+}
+
+function generateTagCombinations(allTags, size = 6, limit = 100) {
+    const combos = [];
+    const shuffled = [...allTags].sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < limit && i < shuffled.length; i++) {
+        const combo = [];
+        for (let j = 0; j < size && i + j < shuffled.length; j++) {
+            combo.push(shuffled[(i + j) % shuffled.length]);
+        }
+        if (combo.length === size) combos.push(combo);
+    }
+
+    return combos;
+}
+
+function generateTargetingReasoning(tags, agencyScores, constraintAudiences) {
+    const topAgencies = agencyScores.sort((a, b) => b.score - a.score).slice(0, 2);
+    const tagNames = tags.map(t => t.name).join(', ');
+    return `Strong compatibility with ${topAgencies.map(a => a.agency.name).join(' and ')}. Tags: ${tagNames}`;
+}
+
+function displayTargetedResults(combinations, targetAgencies, selectedAudiences) {
+    const panel = document.getElementById('targeted-results-panel');
+    const list = document.getElementById('targetedResultsList');
+
+    if (combinations.length === 0) {
+        list.innerHTML = '<div class="empty-state padded-empty">No A+ or A combinations found. Try different audiences or fewer constraints.</div>';
+        panel.classList.remove('hidden');
+        return;
+    }
+
+    const html = combinations.map((combo, i) => `
+        <div class="combination-card targeted-combination-card">
+            <div class="targeted-combination-header">
+                <div class="targeted-combination-rank">#${i + 1}</div>
+                <div class="targeted-combination-score">
+                    <span class="targeted-score-value">${combo.avgScore.toFixed(2)}</span>
+                    <span class="targeted-score-grade">${combo.grade}</span>
+                </div>
+            </div>
+            <div class="targeted-tag-list">
+                ${combo.tags.map(tag => `
+                    <div class="targeted-tag-chip">
+                        ${tag.name}
+                    </div>
+                `).join('')}
+            </div>
+            <div class="targeted-reasoning">
+                ✓ ${combo.reasoning}
+            </div>
+        </div>
+    `).join('');
+
+    list.innerHTML = html;
+    panel.classList.remove('hidden');
+}
+
+function getSelectedTags(context) {
+    const container = document.getElementById(`selectors-container-${context}`);
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+}
+
+// Handle Striking Image and Artistic Ability toggles
+function initializeDistributionToggles() {
+    const strikingImageToggle = document.getElementById('strikingImageToggle');
+    const artisticAbilityToggle = document.getElementById('artisticAbilityToggle');
+
+    if (strikingImageToggle) {
+        strikingImageToggle.addEventListener('change', () => {
+            recalculateDistribution();
+        });
+    }
+
+    if (artisticAbilityToggle) {
+        artisticAbilityToggle.addEventListener('change', () => {
+            recalculateDistribution();
+        });
+    }
+}
+
+function getDistributionMultiplier() {
+    let multiplier = 1;
+    const strikingImageToggle = document.getElementById('strikingImageToggle');
+    const artisticAbilityToggle = document.getElementById('artisticAbilityToggle');
+
+    if (strikingImageToggle?.checked) {
+        multiplier *= 2; // Doubles viewers for first 4 weeks (simplistic: affects base calculation)
+    }
+
+    if (artisticAbilityToggle?.checked) {
+        multiplier *= 1.5; // Placeholder for artistic ability (adjust multiplier as needed)
+    }
+
+    return multiplier;
 }

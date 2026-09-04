@@ -40,9 +40,10 @@
         <!-- TAB NAVIGATION -->
         <nav id="primary-tabs" class="tab-nav" aria-label="Calculator tabs">
             <button id="tab-generator-button" class="tab-btn" data-tab="generator">Script Generator</button>
-            <button id="tab-synergy-button" class="tab-btn active" data-tab="synergy">SE Compatibility</button>
+            <button id="tab-synergy-button" class="tab-btn active" data-tab="synergy">Script Compatibility</button>
             <button id="tab-graves-button" class="tab-btn" data-tab="graves">Colman Graves</button>
             <button id="tab-advertisers-button" class="tab-btn" data-tab="advertisers">Best Advertisers</button>
+            <button id="tab-targeted-button" class="tab-btn" data-tab="targeted">Targeted Ads</button>
         </nav>
 
         <main id="app-content" class="container">
@@ -106,7 +107,7 @@
                     <!-- LOCKED ELEMENTS -->
                     <div id="generator-locked-header" class="card-header collapsible-header" data-toggle="locked-content">
                         <div class="header-left">
-                            <span class="chevron rotate-0">▼</span>
+                            <span class="chevron rotate-90">›</span>
                             <h3>Locked Elements</h3>
                         </div>
                         <button class="reset-btn" data-reset-context="generator">Reset Locks</button>
@@ -121,7 +122,7 @@
                     <!-- EXCLUDED ELEMENTS -->
                     <div id="generator-excluded-header" class="card-header collapsible-header" data-toggle="excluded-content">
                         <div class="header-left">
-                            <span class="chevron rotate-0">▼</span>
+                            <span class="chevron rotate-90">›</span>
                             <h3 class="danger-heading">Excluded Elements</h3>
                             <span class="badge-danger" id="excluded-count">0</span>
                         </div>
@@ -426,8 +427,18 @@
                 <!-- DISTRIBUTION CALCULATOR (Initial Position) -->
                 <div id="dist-calc-anchor" class="dist-calc-anchor">
                     <div id="dist-wrapper" class="card result-card distribution-card">
-                        <div class="card-header">
+                        <div class="card-header distribution-header">
                             <h3>Distribution Calculator</h3>
+                            <div class="dist-toggles">
+                                <label class="toggle-label">
+                                    <input type="checkbox" id="strikingImageToggle" class="toggle-checkbox">
+                                    <span class="toggle-text">Striking Image</span>
+                                </label>
+                                <label class="toggle-label">
+                                    <input type="checkbox" id="artisticAbilityToggle" class="toggle-checkbox">
+                                    <span class="toggle-text" id="artisticAbilityName">[Artistic Ability]</span>
+                                </label>
+                            </div>
                         </div>
                         
                         <div class="dist-input-row">
@@ -486,6 +497,50 @@
                             <div id="campaignStrategyDisplay"></div>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: TARGETED ADS -->
+            <section id="tab-targeted" class="tab-content app-tab-panel hidden">
+                <div id="targeted-input-panel" class="card builder-card">
+                    <div class="card-header">
+                        <h3>Find Combinations for Your Target</h3>
+                    </div>
+                    <p class="subtitle">Select target audiences or advertisers, then build a script profile to discover what combinations work best.</p>
+
+                    <div class="targeted-selection-grid">
+                        <!-- Audience/Advertiser Selection -->
+                        <div class="input-group">
+                            <label class="targeted-field-label">Select Target Audiences</label>
+                            <div id="targeted-audience-checkboxes" class="targeted-checkbox-list"></div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="targeted-field-label">Or Select Advertiser</label>
+                            <div id="targeted-advertiser-checkboxes" class="targeted-checkbox-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tag Builder -->
+                    <div class="targeted-tag-builder">
+                        <label class="targeted-field-label">Add Tags (Optional - Leave Empty for All)</label>
+                        <div id="selectors-container-targeted" class="tag-selector-grid"></div>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="targeted-action-row">
+                        <div id="targetedFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
+                        <button id="findCombinationsButton" class="analyze-btn targeted-find-btn">Find Top Combinations</button>
+                        <button id="resetTargetedButton" class="reset-btn">Reset</button>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="targeted-results-panel" class="card result-card hidden">
+                    <div class="card-header">
+                        <h3>Top Combinations</h3>
+                    </div>
+                    <div id="targetedResultsList" class="targeted-results-list"></div>
                 </div>
             </section>
 
