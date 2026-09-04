@@ -328,12 +328,13 @@ h3 {
 }
 .accent-empty { color: var(--accent); }
 
-#selectors-container-advertisers, 
-#selectors-container-synergy, 
+#selectors-container-advertisers,
+#selectors-container-synergy,
 #selectors-container-generator,
-#selectors-container-excluded {
+#selectors-container-excluded,
+#selectors-container-graves {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
