@@ -90,7 +90,10 @@ function setGeneratorProfile(profileName) {
 
 function populateExcludedForStartingProfile() {
     // Lazy loading: Only populate excluded elements once to prevent UI freeze
-    if (startingProfileExcludedLoaded) return;
+    if (startingProfileExcludedLoaded) {
+        updateExcludedCount();
+        return;
+    }
 
     const buildExcludedList = () => {
         initializeSelectors('excluded');
@@ -776,6 +779,7 @@ function addDropdown(category, selectedId = null, context = currentTab) {
     if (context === 'generator' || context === 'synergy' || context === 'excluded') {
         select.addEventListener('change', () => {
             refreshCategoryDropdowns(category, context);
+            if (context === 'excluded') updateExcludedCount();
         });
         // Initial refresh to disable already-selected options
         setTimeout(() => refreshCategoryDropdowns(category, context), 0);
@@ -830,6 +834,7 @@ function addDropdown(category, selectedId = null, context = currentTab) {
         removeBtn.addEventListener('click', () => {
             row.remove();
             if (category === 'Genre' && context !== 'excluded') updateGenreControls(context);
+            if (context === 'excluded') updateExcludedCount();
         });
         row.appendChild(removeBtn);
     }
@@ -2648,8 +2653,10 @@ function updateExcludedCount() {
     const excludedContainer = document.getElementById('selectors-container-excluded');
     const badge = document.getElementById('excluded-count');
     if (excludedContainer && badge) {
-        const checkedCount = excludedContainer.querySelectorAll('input[type="checkbox"]:checked').length;
-        badge.textContent = checkedCount;
+        const selectedCount = Array.from(excludedContainer.querySelectorAll('select.tag-selector'))
+            .filter(select => Boolean(select.value))
+            .length;
+        badge.textContent = selectedCount;
     }
 }
 
