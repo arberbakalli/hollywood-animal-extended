@@ -1,4 +1,4 @@
-const MULTI_SELECT_CATEGORIES = ["Genre", "Supporting Character", "Theme & Event"];
+const MULTI_SELECT_CATEGORIES = ["Genre", "Setting", "Antagonist", "Protagonist", "Supporting Character", "Theme & Event", "Finale"];
 let searchIndex = [];
 let currentTab = 'synergy'; 
 let generatedScriptsCache = []; // Stores the current batch of 5 scripts
@@ -271,6 +271,7 @@ function setupDomEventBindings() {
         ['loadPinnedScriptsButton', triggerLoadScripts],
         ['calculateSynergyButton', calculateSynergy],
         ['evaluateGravesButton', evaluateColmanGravesScript],
+        ['generateBestMatchesButton', generateBestMatches],
         ['transferTagsButton', transferTagsToAdvertisers],
         ['analyzeMovieButton', analyzeMovie],
     ];
@@ -1251,7 +1252,7 @@ function createScriptCardHTML(scriptObj, isPinnedSection) {
     const fixedInputs = collectTagInputs('generator');
     const fixedIds = new Set(fixedInputs.map(t => t.id));
     const categoryOrder = [
-        "Genre", "Setting", "Protagonist", "Antagonist", "Supporting Character", "Theme & Event", "Finale"
+        "Genre", "Setting", "Antagonist", "Protagonist", "Supporting Character", "Theme & Event", "Finale"
     ];
     const sortedTags = [...scriptObj.tags].sort((a, b) => {
         let idxA = categoryOrder.indexOf(a.category);
@@ -2190,6 +2191,85 @@ function findGravesConflicts(tags) {
     return conflicts.sort((a, b) => a.rawScore - b.rawScore);
 }
 
+async function generateBestMatches() {
+    await ensureCompatibilityLoaded();
+    clearFeedbackMessage('gravesFeedbackMessage');
+
+    const selectedTags = collectTagInputs('graves');
+    if (selectedTags.length === 0) {
+        showFeedbackMessage('gravesFeedbackMessage', 'Select at least one element to find strong matches.');
+        return;
+    }
+
+    const selectedIds = new Set(selectedTags.map(tag => tag.id));
+    const matches = [];
+
+    selectedTags.forEach(selectedTag => {
+        Object.values(GAME_DATA.tags).forEach(candidateTag => {
+            if (selectedIds.has(candidateTag.id)) return;
+
+            const score = getRawCompatibilityScore(selectedTag, candidateTag);
+            if (score < 4.0) return;
+
+            matches.push({
+                selectedId: selectedTag.id,
+                selectedName: GAME_DATA.tags[selectedTag.id] ? GAME_DATA.tags[selectedTag.id].name : selectedTag.id,
+                selectedCategory: selectedTag.category,
+                matchId: candidateTag.id,
+                matchName: candidateTag.name,
+                matchCategory: candidateTag.category,
+                score
+            });
+        });
+    });
+
+    const deduped = [];
+    const seen = new Set();
+    matches
+        .sort((a, b) => b.score - a.score || a.matchName.localeCompare(b.matchName))
+        .forEach(match => {
+            const key = `${match.selectedId}:${match.matchId}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+            deduped.push(match);
+        });
+
+    renderBestMatches(deduped.slice(0, 30));
+}
+
+function renderBestMatches(matches) {
+    const resultsContainer = document.getElementById('results-graves');
+    const panel = document.getElementById('graves-best-matches-panel');
+    const list = document.getElementById('gravesBestMatchesList');
+
+    if (!resultsContainer || !panel || !list) return;
+
+    resultsContainer.classList.remove('hidden');
+    panel.classList.remove('hidden');
+
+    if (matches.length === 0) {
+        list.innerHTML = '<div class="empty-state">No 4.0+ matches found. Try a different story element.</div>';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
+    list.innerHTML = matches.map((match, index) => `
+        <div id="graves-best-match-${index + 1}" class="best-match-item ${categoryToElementSlug(match.matchCategory)}" data-role="graves-best-match" data-score="${match.score.toFixed(2)}">
+            <div class="best-match-pair">
+                <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
+                <span class="best-match-arrow">&rarr;</span>
+                <span class="best-match-tag ${categoryToElementSlug(match.matchCategory)}">${match.matchName}</span>
+            </div>
+            <div class="best-match-meta">
+                <span class="best-match-category">${match.matchCategory}</span>
+                <span class="best-match-score ${match.score >= 4.5 ? 'score-excellent' : 'score-strong'}">${match.score.toFixed(2)}</span>
+            </div>
+        </div>
+    `).join('');
+
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function renderColmanGravesResults(matrix, bonuses, tags) {
     const verdict = getGravesVerdict(matrix.rawAverage);
     const movieScores = calculateGravesMovieScores(matrix, bonuses, tags);
@@ -2266,6 +2346,7 @@ function resetSelectors(context) {
     if (context === 'excluded') startingProfileExcludedLoaded = false;
 
     initializeSelectors(context);
+    clearFeedbackMessage(`${context}FeedbackMessage`);
 
     // If resetting Advertisers, move the calculator back to its initial position
     if (context === 'advertisers') {
@@ -2281,6 +2362,11 @@ function resetSelectors(context) {
         document.getElementById(`results-generator`).classList.add('hidden');
     } else {
         document.getElementById(`results-${context}`).classList.add('hidden');
+    }
+
+    if (context === 'graves') {
+        const bestMatchesPanel = document.getElementById('graves-best-matches-panel');
+        if (bestMatchesPanel) bestMatchesPanel.classList.add('hidden');
     }
 }
 
