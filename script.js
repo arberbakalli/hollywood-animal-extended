@@ -128,11 +128,29 @@ function getProfileExcludedIds() {
     );
 }
 
-function getGeneratorExcludedTags(manualExcludedTags = collectTagInputs('excluded')) {
-    const excludedIds = new Set(manualExcludedTags.map(tag => tag.id));
-    getProfileExcludedIds().forEach(id => excludedIds.add(id));
+function getStarterAvailableIds() {
+    return new Set(GAME_DATA.starterWhitelist || Object.keys(GAME_DATA.tags));
+}
 
-    return [...excludedIds].map(id => ({ id }));
+function getAllAvailableTagIds(profileName = currentGenProfile) {
+    if (profileName === 'starting') return getStarterAvailableIds();
+    return new Set(Object.keys(GAME_DATA.tags));
+}
+
+function getManuallyExcludedIds(context = 'excluded') {
+    return new Set(collectTagInputs(context).map(tag => tag.id));
+}
+
+function getGeneratorExcludedIds(manualExcludedTags = null) {
+    const excludedIds = manualExcludedTags
+        ? new Set(manualExcludedTags.map(tag => tag.id))
+        : getManuallyExcludedIds('excluded');
+    getProfileExcludedIds().forEach(id => excludedIds.add(id));
+    return excludedIds;
+}
+
+function getGeneratorExcludedTags(manualExcludedTags = null) {
+    return [...getGeneratorExcludedIds(manualExcludedTags)].map(id => ({ id }));
 }
 
 /* =========================================================================
@@ -934,6 +952,36 @@ function selectTagFromSearch(tagObj, context) {
     }
 }
 
+function addTagToSelectorContext(tagObj, context) {
+    const category = tagObj.category;
+    const categorySlug = categoryToElementSlug(category);
+    const container = document.getElementById(`inputs-${categorySlug}-${context}`);
+    if (!container) return false;
+
+    const selects = Array.from(container.querySelectorAll('select.tag-selector'));
+    if (selects.some(select => select.value === tagObj.id)) {
+        showFeedbackMessage(`${context}FeedbackMessage`, `${tagObj.name} is already in this script.`, 'accent');
+        return false;
+    }
+
+    const emptySelect = selects.find(select => select.value === "");
+    if (emptySelect) {
+        emptySelect.value = tagObj.id;
+        refreshCategoryDropdowns(category, context);
+        if (category === 'Genre') updateGenreControls(context);
+        return true;
+    }
+
+    if (MULTI_SELECT_CATEGORIES.includes(category)) {
+        addDropdown(category, tagObj.id, context);
+        refreshCategoryDropdowns(category, context);
+        return true;
+    }
+
+    showFeedbackMessage(`${context}FeedbackMessage`, `${category} already has a pick. Reset or change that slot first.`, 'accent');
+    return false;
+}
+
 function collectTagInputs(context) {
     const tagInputs = []; 
     
@@ -1396,8 +1444,10 @@ function renderPinnedScripts() {
    ========================================================================= */
 
 function savePinnedScripts() {
+    clearFeedbackMessage('pinnedScriptsFeedbackMessage');
+
     if (pinnedScripts.length === 0) {
-        alert("No pinned scripts to save.");
+        showFeedbackMessage('pinnedScriptsFeedbackMessage', 'No pinned scripts to save.', 'accent');
         return;
     }
     
@@ -1415,9 +1465,10 @@ function savePinnedScripts() {
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
         URL.revokeObjectURL(url);
+        showFeedbackMessage('pinnedScriptsFeedbackMessage', 'Pinned scripts export started.', 'success');
     } catch(e) {
         console.error("Save failed:", e);
-        alert("Failed to save scripts. See console for details.");
+        showFeedbackMessage('pinnedScriptsFeedbackMessage', 'Failed to save scripts. See console for details.');
     }
 }
 
@@ -1434,6 +1485,7 @@ function triggerLoadScripts() {
 function handleFileLoad(input) {
     const file = input.files[0];
     if (!file) return;
+    clearFeedbackMessage('pinnedScriptsFeedbackMessage');
 
     const reader = new FileReader();
     reader.addEventListener('load', function(e) {
@@ -1458,16 +1510,16 @@ function handleFileLoad(input) {
                 
                 if(added > 0) {
                     renderPinnedScripts();
-                    alert(`Loaded ${added} scripts.`);
+                    showFeedbackMessage('pinnedScriptsFeedbackMessage', `Loaded ${added} scripts.`, 'success');
                 } else {
-                    alert("No new unique scripts found in file.");
+                    showFeedbackMessage('pinnedScriptsFeedbackMessage', 'No new unique scripts found in file.', 'accent');
                 }
             } else {
-                alert("Invalid file format: JSON is not an array.");
+                showFeedbackMessage('pinnedScriptsFeedbackMessage', 'Invalid file format: JSON is not an array.');
             }
         } catch(err) {
             console.error(err);
-            alert("Error parsing JSON file.");
+            showFeedbackMessage('pinnedScriptsFeedbackMessage', 'Error parsing JSON file.');
         }
     }, { once: true });
     reader.readAsText(file);
@@ -1518,9 +1570,10 @@ function transferScriptToAdvertisers(uniqueId) {
 async function analyzeMovie() {
     await ensureCompatibilityLoaded();
     await ensureGenrePairsLoaded();
+    clearFeedbackMessage('advertisersFeedbackMessage');
     const tagInputs = collectTagInputs('advertisers');
     if(tagInputs.length === 0) {
-        alert("Please select at least one tag.");
+        showFeedbackMessage('advertisersFeedbackMessage', 'Please select at least one tag.', 'accent');
         return;
     }
 
@@ -1845,9 +1898,10 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
 
 async function calculateSynergy() {
     await ensureCompatibilityLoaded();
+    clearFeedbackMessage('synergyFeedbackMessage');
     const selectedTags = collectTagInputs('synergy');
     if (selectedTags.length === 0) {
-        alert("Please select at least one tag.");
+        showFeedbackMessage('synergyFeedbackMessage', 'Please select at least one tag.', 'accent');
         return;
     }
     const matrixResult = calculateMatrixScore(selectedTags);
@@ -2201,15 +2255,23 @@ async function generateBestMatches() {
         return;
     }
 
+    const categoryFilter = document.getElementById('gravesBestCategoryFilter')?.value || '';
+    const minimumScore = parseFloat(document.getElementById('gravesBestScoreFilter')?.value || '4.0');
+    const starterOnly = Boolean(document.getElementById('gravesStarterOnlyFilter')?.checked);
     const selectedIds = new Set(selectedTags.map(tag => tag.id));
+    const excludedIds = getGeneratorExcludedIds();
+    const starterIds = getAllAvailableTagIds('starting');
     const matches = [];
 
     selectedTags.forEach(selectedTag => {
         Object.values(GAME_DATA.tags).forEach(candidateTag => {
             if (selectedIds.has(candidateTag.id)) return;
+            if (excludedIds.has(candidateTag.id)) return;
+            if (categoryFilter && candidateTag.category !== categoryFilter) return;
+            if (starterOnly && !starterIds.has(candidateTag.id)) return;
 
             const score = getRawCompatibilityScore(selectedTag, candidateTag);
-            if (score < 4.0) return;
+            if (score < minimumScore) return;
 
             matches.push({
                 selectedId: selectedTag.id,
@@ -2248,13 +2310,13 @@ function renderBestMatches(matches) {
     panel.classList.remove('hidden');
 
     if (matches.length === 0) {
-        list.innerHTML = '<div class="empty-state">No 4.0+ matches found. Try a different story element.</div>';
+        list.innerHTML = '<div class="empty-state">No matches found for these filters. Try a lower fit or a different category.</div>';
         panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
     }
 
     list.innerHTML = matches.map((match, index) => `
-        <div id="graves-best-match-${index + 1}" class="best-match-item ${categoryToElementSlug(match.matchCategory)}" data-role="graves-best-match" data-score="${match.score.toFixed(2)}">
+        <div id="graves-best-match-${index + 1}" class="best-match-item ${categoryToElementSlug(match.matchCategory)}" data-role="graves-best-match" data-tag-id="${match.matchId}" data-category="${match.matchCategory}" data-score="${match.score.toFixed(2)}">
             <div class="best-match-pair">
                 <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
                 <span class="best-match-arrow">&rarr;</span>
@@ -2263,9 +2325,21 @@ function renderBestMatches(matches) {
             <div class="best-match-meta">
                 <span class="best-match-category">${match.matchCategory}</span>
                 <span class="best-match-score ${match.score >= 4.5 ? 'score-excellent' : 'score-strong'}">${match.score.toFixed(2)}</span>
+                <button id="graves-best-match-add-${index + 1}" class="best-match-add-btn" type="button" data-action="add-graves-best-match" data-tag-id="${match.matchId}" data-category="${match.matchCategory}">Add</button>
             </div>
         </div>
     `).join('');
+
+    list.querySelectorAll('[data-action="add-graves-best-match"]').forEach(button => {
+        button.addEventListener('click', () => {
+            const tag = GAME_DATA.tags[button.dataset.tagId];
+            if (!tag) return;
+            const added = addTagToSelectorContext(tag, 'graves');
+            if (added) {
+                showFeedbackMessage('gravesFeedbackMessage', `${tag.name} added to the Graves script.`, 'success');
+            }
+        });
+    });
 
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
