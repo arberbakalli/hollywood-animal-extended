@@ -286,6 +286,7 @@
                     <div id="graves-actions" class="action-area">
                         <div id="gravesFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="evaluateGravesButton" class="analyze-btn">Evaluate Script</button>
+                        <button id="generateBestMatchesButton" class="analyze-btn best-matches-btn">Generate Best Matches</button>
                     </div>
                 </div>
 
@@ -313,6 +314,12 @@
                         <h3>Graves Analysis</h3>
                         <div id="gravesVerdictText" class="graves-reading-text"></div>
                         <div id="gravesMethodList" class="graves-method-list"></div>
+                    </div>
+
+                    <div id="graves-best-matches-panel" class="card result-card graves-best-matches-panel hidden">
+                        <h3>Best Matches</h3>
+                        <div class="list-subtitle">Strong pairings for the elements you selected</div>
+                        <div id="gravesBestMatchesList" class="best-matches-list"></div>
                     </div>
 
                     <div id="graves-detail-row" class="results-row">

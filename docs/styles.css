@@ -1728,7 +1728,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .best-matches-btn {
     background-color: #92400e;
     color: #1a1a1a;
-    margin-left: 1rem;
+    margin-top: 12px;
     font-weight: 600;
 }
 
@@ -1752,6 +1752,20 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     border-left: 4px solid #10b981;
     border-radius: 4px;
     gap: 1rem;
+}
+
+.best-match-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+.best-match-category {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .best-match-pair {
@@ -1790,13 +1804,17 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     font-size: 1.1rem;
 }
 
+.best-match-score.score-excellent { color: #10b981; }
+.best-match-score.score-strong { color: #f59e0b; }
+
 /* Category color coding */
 .best-match-item.genre {
     border-left-color: #92400e;
     background: rgba(146, 64, 14, 0.1);
 }
 
-.best-match-item.theme {
+.best-match-item.theme,
+.best-match-item.theme-event {
     border-left-color: #991b1b;
     background: rgba(153, 27, 27, 0.1);
 }
@@ -1816,13 +1834,24 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: rgba(22, 101, 52, 0.1);
 }
 
+.best-match-item.setting {
+    border-left-color: #6d28d9;
+    background: rgba(109, 40, 217, 0.1);
+}
+
+.best-match-item.finale {
+    border-left-color: #be185d;
+    background: rgba(190, 24, 93, 0.1);
+}
+
 /* Tag category colors */
 .best-match-tag.genre {
     background-color: #92400e;
     color: white;
 }
 
-.best-match-tag.theme {
+.best-match-tag.theme,
+.best-match-tag.theme-event {
     background-color: #991b1b;
     color: white;
 }
@@ -1839,6 +1868,16 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .best-match-tag.antagonist {
     background-color: #166534;
+    color: white;
+}
+
+.best-match-tag.setting {
+    background-color: #6d28d9;
+    color: white;
+}
+
+.best-match-tag.finale {
+    background-color: #be185d;
     color: white;
 }
 
