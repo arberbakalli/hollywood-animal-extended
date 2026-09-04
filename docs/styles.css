@@ -2017,7 +2017,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .collapsible-content {
-    max-height: 3500px;
+    max-height: 99999px;
     overflow: hidden;
     transition: max-height 0.3s ease, opacity 0.3s ease;
     opacity: 1;
