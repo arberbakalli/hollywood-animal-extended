@@ -104,24 +104,33 @@
                     <div class="divider-line"></div>
 
                     <!-- LOCKED ELEMENTS -->
-                    <div id="generator-locked-header" class="card-header">
-                        <h3>Locked Elements</h3>
+                    <div id="generator-locked-header" class="card-header collapsible-header" data-toggle="locked-content">
+                        <div class="header-left">
+                            <span class="chevron rotate-0">▼</span>
+                            <h3>Locked Elements</h3>
+                        </div>
                         <button class="reset-btn" data-reset-context="generator">Reset Locks</button>
                     </div>
-                    <p class="subtitle">Select specific tags you <strong>MUST</strong> have in the script.</p>
-                    
-                    <div id="selectors-container-generator" class="tag-selector-grid"></div>
+                    <div id="locked-content" class="collapsible-content">
+                        <p class="subtitle">Select specific tags you <strong>MUST</strong> have in the script.</p>
+                        <div id="selectors-container-generator" class="tag-selector-grid"></div>
+                    </div>
                     
                     <div class="divider-line"></div>
 
                     <!-- EXCLUDED ELEMENTS -->
-                    <div id="generator-excluded-header" class="card-header">
-                        <h3 class="danger-heading">Excluded Elements</h3>
+                    <div id="generator-excluded-header" class="card-header collapsible-header" data-toggle="excluded-content">
+                        <div class="header-left">
+                            <span class="chevron rotate-0">▼</span>
+                            <h3 class="danger-heading">Excluded Elements</h3>
+                            <span class="badge-danger" id="excluded-count">0</span>
+                        </div>
                         <button class="reset-btn" data-reset-context="excluded">Reset Bans</button>
                     </div>
-                    <p class="subtitle">Select tags to <strong>BAN</strong> (e.g., due to "The Code"). The generator will never pick these.</p>
-                    
-                    <div id="selectors-container-excluded" class="tag-selector-grid"></div>
+                    <div id="excluded-content" class="collapsible-content">
+                        <p class="subtitle">Select tags to <strong>BAN</strong> (e.g., due to "The Code"). The generator will never pick these.</p>
+                        <div id="selectors-container-excluded" class="tag-selector-grid"></div>
+                    </div>
 
                     <div id="generator-actions" class="action-area">
                         <div id="generatorFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>

@@ -41,6 +41,9 @@ window.addEventListener('load', async function initializeApp() {
         // Setup Distribution Calculator (Immediate Interaction)
         setupDistributionLogic();
 
+        // Initialize Collapsible Sections
+        setupCollapsibleSections();
+
         // Initialize Default Profile
         setGeneratorProfile('custom');
 
@@ -2452,6 +2455,41 @@ function renderAdvertiserCard(entry, extraClass) {
             </div>
             <div class="adv-reasoning">${entry.reasoning}</div>
         </div>`;
+}
+
+function setupCollapsibleSections() {
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+        header.addEventListener('click', function(e) {
+            // Ignore clicks on buttons (Reset buttons)
+            if (e.target.tagName === 'BUTTON') return;
+
+            const targetId = this.getAttribute('data-toggle');
+            const content = document.getElementById(targetId);
+            const chevron = this.querySelector('.chevron');
+
+            if (content && chevron) {
+                content.classList.toggle('hidden');
+                chevron.classList.toggle('rotate-90');
+            }
+        });
+    });
+
+    // Update excluded count whenever excluded items change
+    updateExcludedCount();
+    const excludedContainer = document.getElementById('selectors-container-excluded');
+    if (excludedContainer) {
+        const observer = new MutationObserver(() => updateExcludedCount());
+        observer.observe(excludedContainer, { childList: true, subtree: true });
+    }
+}
+
+function updateExcludedCount() {
+    const excludedContainer = document.getElementById('selectors-container-excluded');
+    const badge = document.getElementById('excluded-count');
+    if (excludedContainer && badge) {
+        const checkedCount = excludedContainer.querySelectorAll('input[type="checkbox"]:checked').length;
+        badge.textContent = checkedCount;
+    }
 }
 
 function displayAdvertiserRecommendations(recommendations) {

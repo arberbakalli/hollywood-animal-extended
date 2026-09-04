@@ -1940,3 +1940,64 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .score-value.grade-mid  { color: #FFD700; }
 .score-value.grade-low  { color: #FF9F0A; }
 .score-value.grade-poor { color: #FF5F5F; }
+
+/* Collapsible sections */
+.collapsible-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: opacity 0.2s;
+}
+
+.collapsible-header:hover {
+    opacity: 0.8;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-left h3 {
+    margin: 0;
+}
+
+.chevron {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.chevron.rotate-90 {
+    transform: rotate(90deg);
+}
+
+.collapsible-content {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.collapsible-content.hidden {
+    max-height: 0;
+    opacity: 0;
+}
+
+.badge-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    background: var(--danger);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
