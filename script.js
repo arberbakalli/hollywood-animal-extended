@@ -487,8 +487,8 @@ function initializeSelectors(context) {
     const container = document.getElementById(`selectors-container-${context}`);
     container.innerHTML = '';
 
-    // Sort categories alphabetically for consistent display
-    const sortedCategories = [...GAME_DATA.categories].sort((a, b) => a.localeCompare(b));
+    // Use MULTI_SELECT_CATEGORIES order for consistent display across all contexts
+    const sortedCategories = MULTI_SELECT_CATEGORIES.filter(cat => GAME_DATA.categories.includes(cat));
 
     sortedCategories.forEach(category => {
         const tagsInCategory = Object.values(GAME_DATA.tags).filter(t =>
