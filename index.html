@@ -16,7 +16,7 @@
             <div id="app-header-content" class="header-content">
                 <div id="brand-block" class="logo-area">
                     <h1>Hollywood <span class="accent">Animal</span></h1>
-                    <h2>Calculator</h2>
+                    <h2>Calculator Extended</h2>
                 </div>
 
                 <!-- LANGUAGE SELECTOR -->
@@ -155,6 +155,7 @@
                             <input type="file" id="loadScriptsInput" class="hidden-file-input" accept=".json">
                         </div>
                     </div>
+                    <div id="pinnedScriptsFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                     <div id="pinnedResultsList" class="script-list"></div>
                 </div>
 
@@ -189,6 +190,7 @@
                     <div id="selectors-container-synergy" class="tag-selector-grid"></div>
                     
                     <div id="synergy-actions" class="action-area">
+                        <div id="synergyFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="calculateSynergyButton" class="analyze-btn">Check Compatibility</button>
                     </div>
                 </div>
@@ -254,14 +256,34 @@
 
             <!-- TAB 3: COLMAN GRAVES SCRIPT EVALUATION -->
             <section id="tab-graves" class="tab-content app-tab-panel hidden">
-                <div id="graves-intro-panel" class="card graves-portrait-card">
+                <div id="graves-intro-panel" class="card graves-case-card">
+                    <div id="graves-file-meta-row" class="graves-file-meta-row">
+                        <span id="graves-file-label" class="graves-file-label">Script Office</span>
+                        <span id="graves-fee-label" class="graves-fee-label">Evaluation Desk</span>
+                    </div>
                     <div id="graves-heading-block" class="graves-heading-block">
                         <div id="graves-monogram" class="graves-monogram" aria-hidden="true">CG</div>
                         <div id="graves-copy-block" class="graves-copy-block">
-                            <h3>Colman Graves Script Evaluation</h3>
+                            <h3>Colman Graves</h3>
+                            <p id="graves-role-label" class="graves-role-label">Script evaluation</p>
                             <p class="subtitle graves-intro-copy">
-                                Talented writer Colman Graves will study the script and tell you how well its elements fit together.
+                                Submit the parts of your script and Graves will mark the fit, commercial pull, artistic edge, audience, and danger pairs.
                             </p>
+                        </div>
+                        <div id="graves-case-stamp" class="graves-case-stamp">Awaiting Script</div>
+                    </div>
+                    <div id="graves-briefing-strip" class="graves-briefing-strip">
+                        <div id="graves-briefing-fit" class="graves-briefing-stat">
+                            <span>Reads</span>
+                            <strong>pair fit</strong>
+                        </div>
+                        <div id="graves-briefing-market" class="graves-briefing-stat">
+                            <span>Balances</span>
+                            <strong>market vs art</strong>
+                        </div>
+                        <div id="graves-briefing-risk" class="graves-briefing-stat">
+                            <span>Flags</span>
+                            <strong>script clashes</strong>
                         </div>
                     </div>
                 </div>
@@ -282,6 +304,35 @@
                     <p class="subtitle">Select the script elements you want Colman Graves to judge.</p>
 
                     <div id="selectors-container-graves" class="tag-selector-grid"></div>
+
+                    <div id="graves-best-match-controls" class="graves-best-match-controls">
+                        <div id="graves-best-category-field" class="graves-filter-field">
+                            <label for="gravesBestCategoryFilter">Match Category</label>
+                            <select id="gravesBestCategoryFilter" class="filter-select">
+                                <option value="">Any Category</option>
+                                <option value="Genre">Genre</option>
+                                <option value="Setting">Setting</option>
+                                <option value="Theme">Theme</option>
+                                <option value="Theme & Event">Theme & Event</option>
+                                <option value="Protagonist">Protagonist</option>
+                                <option value="Antagonist">Antagonist</option>
+                                <option value="Supporting Character">Supporting Character</option>
+                                <option value="Finale">Finale</option>
+                            </select>
+                        </div>
+                        <div id="graves-best-score-field" class="graves-filter-field">
+                            <label for="gravesBestScoreFilter">Minimum Fit</label>
+                            <select id="gravesBestScoreFilter" class="filter-select">
+                                <option value="4.0">4.0+</option>
+                                <option value="4.5">4.5+</option>
+                                <option value="5.0">5.0 only</option>
+                            </select>
+                        </div>
+                        <label id="graves-starter-filter-field" class="graves-toggle-field" for="gravesStarterOnlyFilter">
+                            <input type="checkbox" id="gravesStarterOnlyFilter">
+                            <span>Starting tags only</span>
+                        </label>
+                    </div>
 
                     <div id="graves-actions" class="action-area">
                         <div id="gravesFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
@@ -386,6 +437,7 @@
                     <p class="subtitle">Select tags manually or use the search bar above. Add multiple genres to adjust their influence.</p>
                     <div id="selectors-container-advertisers" class="tag-selector-grid"></div>
                     <div id="advertisers-actions" class="action-area">
+                        <div id="advertisersFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="analyzeMovieButton" class="analyze-btn">Analyse</button>
                     </div>
                 </div>
