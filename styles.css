@@ -2112,6 +2112,22 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background-color: #78340a;
 }
 
+.save-script-btn {
+    padding: 12px;
+    border: 1px solid var(--border);
+    background-color: transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: none;
+}
+
+.save-script-btn:hover {
+    border-color: var(--accent);
+    background-color: transparent;
+    color: var(--accent);
+}
+
 .best-matches-list {
     display: flex;
     flex-direction: column;

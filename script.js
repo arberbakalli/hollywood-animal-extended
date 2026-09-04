@@ -310,6 +310,10 @@ function setupDomEventBindings() {
         button.addEventListener('click', () => switchTab(button.dataset.featureTab));
     });
 
+    document.querySelectorAll('[data-save-script]').forEach(button => {
+        button.addEventListener('click', () => saveScriptFromContext(button.dataset.saveScript));
+    });
+
     document.querySelectorAll('[data-generator-profile]').forEach(button => {
         button.addEventListener('click', () => setGeneratorProfile(button.dataset.generatorProfile));
     });
@@ -1248,32 +1252,13 @@ function runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags
     }
     
     // 3. Calculate Final Stats
-    const ngCount = getScoringElementCount(bestSet);
-    let tagCap = 6;
-    let maxScriptQual = 5;
-    
-    if(ngCount >= 9) { tagCap = 9; maxScriptQual = 8; }
-    else if(ngCount >= 7) { tagCap = 8; maxScriptQual = 7; } 
-    else if(ngCount >= 5) { tagCap = 7; maxScriptQual = 6; } 
-    else { tagCap = 6; maxScriptQual = 5; }
-    
     const bonuses = calculateTotalBonuses(bestSet);
-    const MAX_GAME_SCORE = 9.9;
-    const rawCom = (bestStats.totalScore + bonuses.com) * MAX_GAME_SCORE;
-    const rawArt = (bestStats.totalScore + bonuses.art) * MAX_GAME_SCORE;
-    const maxPotential = Math.max(0, Math.max(rawCom, rawArt));
-    
-    const finalMovieScore = Math.min(tagCap, maxPotential);
+    const movieScores = calculateMovieScores(bestStats, bonuses, bestSet);
 
     return {
         tags: bestSet,
-        stats: {
-            avgComp: bestStats.rawAverage,
-            synergySum: bestStats.totalScore,
-            maxScriptQuality: maxScriptQual,
-            movieScore: finalMovieScore.toFixed(1)
-        },
-        uniqueId: Date.now() + Math.random().toString()
+        stats: buildScriptStats(bestStats, movieScores),
+        uniqueId: createScriptId()
     };
 }
 
@@ -1320,6 +1305,55 @@ function renderGeneratedScripts(scripts) {
         const card = createScriptCardHTML(script, false); 
         container.appendChild(card);
     });
+}
+
+function createScriptId() {
+    return Date.now() + Math.random().toString();
+}
+
+// The generator and every evaluation view describe a script the same way, so a
+// saved script reads identically no matter which screen produced it.
+function buildScriptStats(matrix, movieScores) {
+    return {
+        avgComp: matrix.rawAverage,
+        synergySum: matrix.totalScore,
+        maxScriptQuality: movieScores.tagCap - 1,
+        movieScore: Math.max(movieScores.commercial, movieScores.artistic).toFixed(1)
+    };
+}
+
+function buildScriptFromTags(tags, name) {
+    const evaluation = calculateScriptEvaluation(tags);
+
+    return {
+        tags: tags.map(tag => ({ id: tag.id, category: tag.category, percent: tag.percent })),
+        stats: buildScriptStats(evaluation.matrix, evaluation.movieScores),
+        name,
+        uniqueId: createScriptId()
+    };
+}
+
+const SAVED_SCRIPT_SOURCE = {
+    synergy: 'Compatibility',
+    graves: 'Graves',
+    advertisers: 'Marketing'
+};
+
+async function saveScriptFromContext(context) {
+    await ensureCompatibilityLoaded();
+
+    const feedbackId = `${context}FeedbackMessage`;
+    clearFeedbackMessage(feedbackId);
+
+    const tags = collectTagInputs(context);
+    if (tags.length < 2) {
+        showFeedbackMessage(feedbackId, 'Select at least 2 story elements before saving.', 'accent');
+        return;
+    }
+
+    pinnedScripts.push(buildScriptFromTags(tags, `${SAVED_SCRIPT_SOURCE[context]} script`));
+    renderPinnedScripts();
+    showFeedbackMessage(feedbackId, 'Saved to your script library in Script Lab.', 'success');
 }
 
 function createScriptCardHTML(scriptObj, isPinnedSection) {
@@ -1468,7 +1502,7 @@ function renderPinnedScripts() {
     
     // Show placeholder instead of hiding
     if(pinnedScripts.length === 0) {
-        container.innerHTML = '<div class="empty-state pinned-empty">No pinned scripts yet.</div>';
+        container.innerHTML = '<div class="empty-state pinned-empty">No saved scripts yet. Pin a generated script, or use Save to Script Library from any evaluation.</div>';
         return;
     }
     
