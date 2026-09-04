@@ -1,4 +1,4 @@
-const MULTI_SELECT_CATEGORIES = ["Genre", "Supporting Character", "Theme & Event"];
+const MULTI_SELECT_CATEGORIES = ["Genre", "Setting", "Protagonist", "Antagonist", "Supporting Character", "Theme & Event", "Finale"];
 let searchIndex = [];
 let currentTab = 'synergy'; 
 let generatedScriptsCache = []; // Stores the current batch of 5 scripts
