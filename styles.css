@@ -1858,8 +1858,9 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     margin-bottom: 10px;
 }
 
-.rec-top-pick {
-    flex: 1;
+.rec-section + .rec-section {
+    border-top: 1px solid var(--border);
+    padding-top: 15px;
 }
 
 .advertiser-card {
@@ -1924,7 +1925,18 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     line-height: 1.4;
 }
 
-.rec-alternatives {
-    border-top: 1px solid var(--border);
-    padding-top: 15px;
+.advertiser-card.weak {
+    border-left: 2px solid var(--danger);
+    opacity: 0.75;
 }
+
+.advertiser-card.weak:hover {
+    opacity: 1;
+}
+
+/* Grade tiers for advertiser match scores */
+.score-value.grade-high { color: #55EA83; }
+.score-value.grade-good { color: #8BEAFF; }
+.score-value.grade-mid  { color: #FFD700; }
+.score-value.grade-low  { color: #FF9F0A; }
+.score-value.grade-poor { color: #FF5F5F; }

@@ -70,10 +70,9 @@ describe('HTML structure', () => {
 
 describe('generated DOM hooks', () => {
     test('avoids generated inline event and style attributes', async () => {
-        const source = [
-            await readProjectFile('script.js'),
-            await readProjectFile('src/features/scriptGenerator/ScriptGeneratorUI.js'),
-        ].join('\n');
+        // script.js is the only source that generates DOM; the src/ tree was
+        // removed in f6b0413 as unreachable.
+        const source = await readProjectFile('script.js');
 
         expect(source).not.toMatch(/\sstyle="/i);
         expect(source).not.toMatch(/\son[a-z]+="/i);

@@ -63,15 +63,18 @@ const GAME_DATA = {
         }
     },
 
+    // Single source of truth for advertising agencies.
+    // type: 0 = universal (no art/commercial lean), 1 = artistic, 2 = commercial.
+    // level is the agency tier. id is the in-game identifier.
     adAgents: [
-        { name: "NBG", targets: ["AM", "AF"], type: 0, level: 3 },
-        { name: "Ross&Ross Bros.", targets: ["AM", "AF"], type: 0, level: 2 },
-        { name: "Vien Pascal", targets: ["TM", "TF", "AM", "AF"], type: 1, level: 2 },
-        { name: "Spark", targets: ["YM", "YF", "AM", "AF"], type: 2, level: 3 },
-        { name: "Nate Sparrow Press", targets: ["YM", "YF", "AM", "AF"], type: 0, level: 3 },
-        { name: "Velvet Gloss", targets: ["TF", "YF", "AF"], type: 2, level: 3 },
-        { name: "Pierre Zola Company", targets: ["TM", "YM", "AM"], type: 0, level: 2 }, 
-        { name: "Spice Mice", targets: ["TM", "TF", "YM", "YF"], type: 2, level: 2 }
+        { id: "B1RADIO", name: "NBG", targets: ["AM", "AF"], type: 0, level: 3 },
+        { id: "B1BLBRD", name: "Ross&Ross Bros.", targets: ["AM", "AF"], type: 0, level: 2 },
+        { id: "ARTMAG", name: "Vien Pascal", targets: ["TM", "TF", "AM", "AF"], type: 1, level: 2 },
+        { id: "COMMAG", name: "Spark", targets: ["YM", "YF", "AM", "AF"], type: 2, level: 3 },
+        { id: "B3PRINT", name: "Nate Sparrow Press", targets: ["YM", "YF", "AM", "AF"], type: 0, level: 3 },
+        { id: "FC2", name: "Velvet Gloss", targets: ["TF", "YF", "AF"], type: 2, level: 3 },
+        { id: "MCA1", name: "Pierre Zola Company", targets: ["TM", "YM", "AM"], type: 0, level: 2 },
+        { id: "TYC1", name: "Spice Mice", targets: ["TM", "TF", "YM", "YF"], type: 2, level: 2 }
     ],
 
     holidays: [
@@ -140,6 +143,5 @@ const GAME_DATA = {
 
     tags: {},
     compatibility: {},
-    genrePairs: {},
-    agencies: []
+    genrePairs: {}
 };
