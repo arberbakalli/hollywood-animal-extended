@@ -1884,7 +1884,7 @@ function updateDistributionGrid(commercialScore, availableScreenings) {
     }
 
     const finalResults = calcValues.map((val, index) => {
-        const boostedValue = index < 4 ? val / openingViewerMultiplier : val;
+        const boostedValue = index < 4 ? val * openingViewerMultiplier : val;
         return index < 4 ? Math.ceil(boostedValue) : Math.floor(boostedValue);
     });
 

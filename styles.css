@@ -2323,6 +2323,14 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     margin: 0;
 }
 
+.distribution-toggle-label--striking {
+    color: #ff5f5f;
+}
+
+.distribution-toggle-label--artistic {
+    color: #8beaff;
+}
+
 /* Switch Container */
 .switch {
     position: relative;
