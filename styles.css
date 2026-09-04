@@ -1531,6 +1531,28 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-left: auto;
+}
+
+.targeted-combination-compat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 16px;
+    border-left: 1px solid var(--border);
+}
+
+.targeted-score-label {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.targeted-compat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
 }
 
 .targeted-score-value {

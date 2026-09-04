@@ -2888,6 +2888,7 @@ async function searchForTargetCombinations(targetAgencies, constraintTags = [], 
             avgScore,
             grade: grade.grade,
             tier: grade.tier,
+            compatibility: calculateMatrixScore(withCompatibilityWeights(combo)).rawAverage,
             agencyScores: scores,
             reasoning: generateTargetingReasoning(combo, scores, constraintAudiences)
         });
@@ -2907,6 +2908,16 @@ function resolveTargetedTagInputs(tagInputs) {
             seen.add(tag.id);
             return true;
         });
+}
+
+// Raw GAME_DATA tags carry no percent, which the compatibility matrix needs to
+// weight genres. Genres share the slate the way collectTagInputs normalizes them.
+function withCompatibilityWeights(tags) {
+    const genreCount = tags.filter(tag => tag.category === 'Genre').length;
+    return tags.map(tag => ({
+        ...tag,
+        percent: tag.category === 'Genre' ? 1 / genreCount : 1.0
+    }));
 }
 
 function scoreTagForTargetAgencies(tag, targetAgencies) {
@@ -2956,6 +2967,14 @@ function generateTargetingReasoning(tags, agencyScores, constraintAudiences) {
     return `Strongest with ${topAgencies.map(a => a.agency.name).join(' and ')}. Tags: ${tagNames}`;
 }
 
+// Same bands the Compatibility view uses, so a story fit reads identically
+// whichever screen the user is on.
+function compatibilityTone(rawAverage) {
+    if (rawAverage >= 3.5) return 'tone-success';
+    if (rawAverage < 2.5) return 'tone-danger';
+    return 'tone-neutral';
+}
+
 function displayTargetedResults(combinations, targetAgencies, selectedAudiences) {
     const panel = document.getElementById('targeted-results-panel');
     const list = document.getElementById('targetedResultsList');
@@ -2971,8 +2990,13 @@ function displayTargetedResults(combinations, targetAgencies, selectedAudiences)
             <div class="targeted-combination-header">
                 <div class="targeted-combination-rank">#${i + 1}</div>
                 <div class="targeted-combination-score">
+                    <span class="targeted-score-label">Advertiser fit</span>
                     <span class="targeted-score-value">${combo.avgScore.toFixed(2)}</span>
                     <span class="targeted-score-grade">${combo.grade}</span>
+                </div>
+                <div class="targeted-combination-compat ${compatibilityTone(combo.compatibility)}">
+                    <span class="targeted-score-label">Story fit</span>
+                    <span class="targeted-compat-value">${combo.compatibility.toFixed(1)} <span class="sub-value">/ 5.0</span></span>
                 </div>
             </div>
             <div class="targeted-tag-list">
