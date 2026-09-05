@@ -4,6 +4,31 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const CLASSIC_MODULES = [
+    'src/app/state.js',
+    'src/app/domIds.js',
+    'src/ui/feedback.js',
+    'src/ui/scoreFormatting.js',
+    'src/data/localization.js',
+    'src/data/dataLoaders.js',
+    'src/selectors/searchIndex.js',
+    'src/selectors/storyElementSelector.js',
+    'src/generator/availabilityFilter.js',
+    'src/evaluation/compatibilityEngine.js',
+    'src/evaluation/movieScoreEstimator.js',
+    'src/generator/scriptGenerator.js',
+    'src/library/scriptLibrary.js',
+    'src/evaluation/scriptEvaluation.js',
+    'src/evaluation/gravesAudience.js',
+    'src/evaluation/gravesBestMatches.js',
+    'src/marketing/advertiserMatcher.js',
+    'src/marketing/distributionPlanner.js',
+    'src/marketing/marketingPlanner.js',
+    'src/marketing/targetedAds.js',
+    'src/ui/collapsibleSections.js',
+    'src/app/appShell.js',
+];
+
 const SCORING_MODULES = [
     'src/evaluation/compatibilityEngine.js',
     'src/evaluation/movieScoreEstimator.js',
@@ -48,7 +73,7 @@ export async function loadLegacyScript() {
 
     const ctx = createContext(sandbox);
     runInContext(await readFile(join(ROOT, 'data.js'), 'utf8'), ctx, { filename: 'data.js' });
-    for (const file of SCORING_MODULES) {
+    for (const file of CLASSIC_MODULES) {
         runInContext(await readFile(join(ROOT, file), 'utf8'), ctx, { filename: file });
     }
     runInContext(await readFile(join(ROOT, 'script.js'), 'utf8'), ctx, { filename: 'script.js' });

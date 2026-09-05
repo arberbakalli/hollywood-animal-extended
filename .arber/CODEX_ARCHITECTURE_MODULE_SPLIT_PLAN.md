@@ -14,7 +14,11 @@ game logic, scoring outputs, UI labels, DOM ids, or saved-script file shape.
 
 ## Current State
 
-`script.js` owns almost every layer:
+The browser now loads feature-owned classic-script modules from `src/`.
+`script.js` is a bootstrap and legacy shim file that preserves the old global
+function names for tests, browser handlers, and gradual migration.
+
+The implemented module split owns these layers:
 
 - app boot and tab switching
 - data loading and localization
@@ -28,9 +32,8 @@ game logic, scoring outputs, UI labels, DOM ids, or saved-script file shape.
 - distribution planning
 - shared feedback and collapsible UI behavior
 
-That is workable for a prototype, but it is now the main source of risk. A
-small feature change can accidentally touch scoring, rendering, and navigation
-because all functions share the same file scope.
+This removes the old monolithic ownership risk while keeping static GitHub
+Pages deployment simple.
 
 ## Non-Goals
 
@@ -64,8 +67,9 @@ function returns the same values.
 
 ## Proposed Source Layout
 
-Keep the static app simple. Introduce modules under `src/`, then keep
-`script.js` as the bootstrap/orchestration layer until all tests are updated.
+Keep the static app simple. Modules live under `src/`, and `script.js` stays as
+the bootstrap/orchestration shim until all tests and browser handlers can move
+off legacy global function names.
 
 ```text
 src/
@@ -464,6 +468,8 @@ move gradually.
 
 ### Slice 2: Script Evaluation Modules
 
+Status: done on `major-changes`.
+
 Move:
 
 - `calculateScriptEvaluation`
@@ -477,6 +483,8 @@ Why second:
 
 ### Slice 3: Selector Component
 
+Status: done on `major-changes`.
+
 Move selector/search functions.
 
 Why third:
@@ -485,6 +493,8 @@ Why third:
 - Needs browser smoke after every small step.
 
 ### Slice 4: Script Library
+
+Status: done on `major-changes`.
 
 Move saved-script functions.
 
@@ -495,6 +505,8 @@ Why fourth:
 
 ### Slice 5: Generator
 
+Status: done on `major-changes`.
+
 Move availability profile and generation logic.
 
 Why fifth:
@@ -503,6 +515,8 @@ Why fifth:
   scripts. It should move only after its dependencies are modules.
 
 ### Slice 6: Marketing & Release
+
+Status: done on `major-changes`.
 
 Move advertiser matcher, targeted ads, and distribution.
 
@@ -513,12 +527,15 @@ Why sixth:
 
 ### Slice 7: Bootstrap Cleanup
 
+Status: done on `major-changes`.
+
 After all feature modules are extracted:
 
 - shrink `script.js` into a bootstrap file
-- keep only imports, app initialization, and compatibility shims if tests still
-  need them
-- update `docs/script.js` or add a copy/sync step for `docs/`
+- keep only app initialization and compatibility shims while tests still need
+  old global function names
+- mirror `src/`, `index.html`, and `script.js` into `docs/` with
+  `npm run sync:docs`
 
 ## Deployment Notes
 
@@ -563,12 +580,12 @@ Pause the module split if any slice causes:
 
 ## Recommendation
 
-Do not split modules until `major-changes` is either accepted or rejected.
+Module split is complete enough for manual product verification on
+`major-changes`.
 
-Next safe implementation after approval:
+Next safe implementation after manual approval:
 
-1. Extract `src/evaluation/compatibilityEngine.js`.
-2. Add direct module tests for that file.
-3. Keep legacy global wrappers in `script.js`.
-4. Sync the same source layout into `docs/`.
-5. Browser smoke the full app.
+1. Merge `major-changes` into the working branch you want to keep.
+2. Remove legacy wrappers only after tests import modules directly.
+3. Keep `npm run sync:docs` in the verification loop when root browser files
+   change.
