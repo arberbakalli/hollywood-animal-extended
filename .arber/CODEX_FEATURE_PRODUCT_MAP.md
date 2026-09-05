@@ -962,7 +962,7 @@ My product opinion:
 
 Most useful next document:
 
-- A route-by-route refactor plan that maps each future module to exact existing functions and test coverage.
+- Created: `.arber/CODEX_ARCHITECTURE_MODULE_SPLIT_PLAN.md`.
 
 ## Implementation Status
 

@@ -4,9 +4,7 @@ dist/
 
 .idea/
 .playwright-cli/
-graphify-out/2026-09-03/
-graphify-out/*/
-graphify-out/cache/
+graphify-out/
 output/
 .DS_Store
 
