@@ -962,4 +962,36 @@ My product opinion:
 
 Most useful next document:
 
-- A route-by-route refactor plan that maps each future module to exact existing functions and test coverage.
+- Created: `.arber/CODEX_ARCHITECTURE_MODULE_SPLIT_PLAN.md`.
+
+## Implementation Status
+
+Branch: `major-changes`. Updated 2026-09-05.
+
+| Step | Status |
+| --- | --- |
+| 1. Shared evaluation result model | Done. `calculateScriptEvaluation`. |
+| 2. Graves and Compatibility render from it | Done. |
+| 3. Shared advertiser engine | Already shared. `scoreTagForTargetAgencies` delegates to `calculateAdvertiserMatch`; both directions grade through `predictGradeFromScore`. |
+| 4. Best Advertisers and Targeted under one area | Done. `Marketing & Release` with `Analyze Script` / `Build for Target` modes. |
+| 5. Distribution in the same product area | Done. Permanent section, calculation untouched. |
+| 6. Pinned scripts as a shared library | Done. `Script Library`, saveable from Compatibility, Graves and Marketing. |
+| 7. Merge generator-style features under Script Lab | Declined. |
+
+### Step 7 decision
+
+Best Matches stays in Graves. It is wired to the `graves` context in five
+places, and moving it to Script Lab would repoint suggestions at the
+generator's locked-tags builder, changing what "add this suggestion" means.
+The evaluate, spot a weak pair, add a tag, re-evaluate loop is what makes the
+panel useful, and that loop belongs to evaluation rather than generation.
+
+### Also addressed
+
+The medium-risk note that Targeted Ads ignores compatibility: each combination
+now reports a story fit next to its advertiser grade, using the Compatibility
+view's bands. Ranking still follows advertiser fit so the mode's optimization
+goal stays legible.
+
+The movie-score cap ladder had a third copy inside the generator. It now uses
+`calculateMovieScores`, verified byte-identical against the previous math.

@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll } from '@jest/globals';
-import { loadLegacyScript, round } from './helpers/legacyHarness.js';
+import { loadLegacyScript, loadScoringModules, round } from './helpers/legacyHarness.js';
 
 /**
  * Golden-master characterisation of the scoring core in script.js.
@@ -16,12 +16,14 @@ import { loadLegacyScript, round } from './helpers/legacyHarness.js';
 
 let h;
 let cat;
+let scoringModules;
 
 beforeAll(async () => {
     h = await loadLegacyScript();
     // Load deferred data for tests
     await h.ensureCompatibilityLoaded();
     await h.ensureGenrePairsLoaded();
+    scoringModules = await loadScoringModules();
     cat = {};
     for (const t of Object.values(h.GAME_DATA.tags)) {
         (cat[t.category] ||= []).push(t.id);
@@ -133,6 +135,48 @@ describe('compatibility lookup is symmetric', () => {
         const reverse = h.call('calculateMatrixScore', [b, a]);
         expect(round(forward.totalScore)).toBe(round(reverse.totalScore));
         expect(round(forward.rawAverage)).toBe(round(reverse.rawAverage));
+    });
+});
+
+describe('extracted scoring modules', () => {
+    test('compatibility engine matches legacy wrappers', () => {
+        const combo = [
+            tag(cat.Genre[0], 'Genre', 0.6),
+            tag(cat.Genre[1], 'Genre', 0.4),
+            tag(cat.Setting[0], 'Setting'),
+            tag(cat.Protagonist[0], 'Protagonist'),
+            tag(cat.Antagonist[0], 'Antagonist'),
+        ];
+
+        expect(normalise(scoringModules.compatibility.calculateMatrixScore(combo, h.GAME_DATA)))
+            .toEqual(normalise(h.call('calculateMatrixScore', combo)));
+        expect(scoringModules.compatibility.calculateTotalBonuses(combo, h.GAME_DATA))
+            .toEqual(h.call('calculateTotalBonuses', combo));
+        expect(scoringModules.compatibility.calculateGenrePairScore(combo, h.GAME_DATA))
+            .toEqual(h.call('calculateGenrePairScore', combo));
+        expect(scoringModules.compatibility.getRawCompatibilityScore(combo[0], combo[1], h.GAME_DATA))
+            .toBe(h.call('getRawCompatibilityScore', combo[0], combo[1]));
+    });
+
+    test('movie score estimator matches legacy wrappers', () => {
+        const tags = [
+            tag('A', 'Genre'),
+            tag('B', 'Setting'),
+            tag('C', 'Protagonist'),
+            tag('D', 'Antagonist'),
+            tag('E', 'Supporting Character'),
+            tag('F', 'Theme & Event'),
+            tag('G', 'Finale'),
+        ];
+        const matrix = { totalScore: 0.42 };
+        const bonuses = { art: 0.15, com: 0.25 };
+
+        expect(scoringModules.movieScores.getScoringElementCount(tags))
+            .toBe(h.call('getScoringElementCount', tags));
+        expect(scoringModules.movieScores.getMovieScoreCap(5))
+            .toBe(h.call('getMovieScoreCap', 5));
+        expect(scoringModules.movieScores.calculateMovieScores(matrix, bonuses, tags))
+            .toEqual(h.call('calculateMovieScores', matrix, bonuses, tags));
     });
 });
 
