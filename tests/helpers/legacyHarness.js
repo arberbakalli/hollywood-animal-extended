@@ -4,6 +4,10 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const SCORING_MODULES = [
+    'src/evaluation/compatibilityEngine.js',
+    'src/evaluation/movieScoreEstimator.js',
+];
 
 /**
  * Loads data.js and script.js into a VM context so their functions can be
@@ -44,6 +48,9 @@ export async function loadLegacyScript() {
 
     const ctx = createContext(sandbox);
     runInContext(await readFile(join(ROOT, 'data.js'), 'utf8'), ctx, { filename: 'data.js' });
+    for (const file of SCORING_MODULES) {
+        runInContext(await readFile(join(ROOT, file), 'utf8'), ctx, { filename: file });
+    }
     runInContext(await readFile(join(ROOT, 'script.js'), 'utf8'), ctx, { filename: 'script.js' });
 
     // Real loader, real JSON, real normalisation.
@@ -68,6 +75,25 @@ export async function loadLegacyScript() {
         get GAME_DATA() {
             return runInContext('GAME_DATA', ctx);
         },
+    };
+}
+
+/**
+ * Loads extracted classic namespace modules without the legacy app shell.
+ * This lets refactor tests prove module behavior directly.
+ */
+export async function loadScoringModules() {
+    const sandbox = { console };
+    sandbox.globalThis = sandbox;
+    const ctx = createContext(sandbox);
+
+    for (const file of SCORING_MODULES) {
+        runInContext(await readFile(join(ROOT, file), 'utf8'), ctx, { filename: file });
+    }
+
+    return {
+        compatibility: runInContext('HACCompatibilityEngine', ctx),
+        movieScores: runInContext('HACMovieScoreEstimator', ctx),
     };
 }
 

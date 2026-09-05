@@ -435,6 +435,8 @@ Owns:
 
 ### Slice 1: Pure Scoring Modules
 
+Status: done on `major-changes`.
+
 Move only pure helpers:
 
 - `calculateMatrixScore`
@@ -449,6 +451,16 @@ Why first:
 
 - These functions are testable without DOM.
 - Existing snapshots already guard behavior.
+
+Implemented files:
+
+- `src/evaluation/compatibilityEngine.js`
+- `src/evaluation/movieScoreEstimator.js`
+- `docs/src/evaluation/compatibilityEngine.js`
+- `docs/src/evaluation/movieScoreEstimator.js`
+
+Legacy wrapper functions remain in `script.js` so current UI code and tests can
+move gradually.
 
 ### Slice 2: Script Evaluation Modules
 

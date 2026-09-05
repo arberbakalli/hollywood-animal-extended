@@ -1277,7 +1277,7 @@ function getCompatibleGenres(sourceId, excludedIds) {
 }
 
 function getScoringElementCount(tags) {
-    return tags.filter(t => t.category !== "Genre" && t.category !== "Setting").length;
+    return HACMovieScoreEstimator.getScoringElementCount(tags);
 }
 
 function getRandomTagByCategory(category, currentTags, excludedIds) {
@@ -1986,131 +1986,15 @@ async function calculateSynergy() {
 }
 
 function calculateMatrixScore(tags) {
-    let totalScore = 0;
-    let spoilers = [];
-    let rawSum = 0;
-    let pairCount = 0;
-    for (let i = 0; i < tags.length; i++) {
-        for (let j = i + 1; j < tags.length; j++) {
-            let tA = tags[i];
-            let tB = tags[j];
-            let rawVal = 3.0;
-            if (GAME_DATA.compatibility[tA.id] && GAME_DATA.compatibility[tA.id][tB.id]) {
-                rawVal = parseFloat(GAME_DATA.compatibility[tA.id][tB.id]);
-            } else if (GAME_DATA.compatibility[tB.id] && GAME_DATA.compatibility[tB.id][tA.id]) {
-                rawVal = parseFloat(GAME_DATA.compatibility[tB.id][tA.id]);
-            }
-            rawSum += rawVal;
-            pairCount++;
-        }
-    }
-    let rawAverage = pairCount > 0 ? (rawSum / pairCount) : 3.0; 
-    tags.forEach(tagA => {
-        let rowSum = 0;
-        let rowWeight = 0;
-        let worstVal = 6.0; 
-        let worstPartner = "";
-        tags.forEach(tagB => {
-            if (tagA.id === tagB.id) return;
-            let rawVal = 3.0;
-            if (GAME_DATA.compatibility[tagA.id] && GAME_DATA.compatibility[tagA.id][tagB.id]) {
-                rawVal = parseFloat(GAME_DATA.compatibility[tagA.id][tagB.id]);
-            } else if (GAME_DATA.compatibility[tagB.id] && GAME_DATA.compatibility[tagB.id][tagA.id]) {
-                rawVal = parseFloat(GAME_DATA.compatibility[tagB.id][tagA.id]);
-            }
-            let score = (rawVal - 3.0) / 2.0;
-            let weight = 1.0;
-            if (score < 0) {
-                if (tagB.category === "Genre") {
-                    score *= 20.0 * tagB.percent;
-                    weight = 20.0 * tagB.percent;
-                } else if (tagB.category === "Setting") {
-                    score *= 5.0;
-                    weight = 5.0;
-                } else {
-                    score *= 3.0;
-                    weight = 3.0;
-                }
-            } else {
-                if (tagB.category === "Genre") {
-                    score *= tagB.percent;
-                    weight = tagB.percent;
-                }
-            }
-            rowSum += score;
-            rowWeight += weight;
-            if (rawVal < worstVal) {
-                worstVal = rawVal;
-                worstPartner = tagB.id;
-            }
-        });
-        let rowAverage = 0;
-        if (rowWeight > 0) rowAverage = rowSum / rowWeight;
-        let transformedWorst = (worstVal - 3.0) / 2.0;
-        let finalRowScore = rowAverage;
-        if (worstVal <= 1.0) {
-            let partnerName = worstPartner && GAME_DATA.tags[worstPartner] ? GAME_DATA.tags[worstPartner].name : "another selected tag";
-            spoilers.push(`${GAME_DATA.tags[tagA.id].name} conflicts with ${partnerName}`);
-            finalRowScore = -1.0; 
-        } else if (transformedWorst < rowAverage) {
-             finalRowScore = transformedWorst;
-        }
-        totalScore += finalRowScore * tagA.percent;
-    });
-    if (totalScore >= 0) totalScore *= 0.9;
-    else totalScore *= 1.25;
-    return { totalScore, spoilers, rawAverage };
+    return HACCompatibilityEngine.calculateMatrixScore(tags, GAME_DATA);
 }
 
 function calculateTotalBonuses(tags) {
-    let totalArt = 0;
-    let totalCom = 0;
-    const genrePair = calculateGenrePairScore(tags);
-    if (genrePair) {
-        totalArt += genrePair.art;
-        totalCom += genrePair.com;
-    } else {
-        const genres = tags.filter(t => t.category === "Genre").sort((a, b) => b.percent - a.percent);
-        if (genres.length > 0) {
-            const topGenre = GAME_DATA.tags[genres[0].id];
-            if (topGenre) {
-                totalArt += topGenre.art;
-                totalCom += topGenre.com;
-            }
-        }
-    }
-    tags.forEach(tag => {
-        if (tag.category !== "Genre") {
-            const data = GAME_DATA.tags[tag.id];
-            if (data) {
-                totalArt += data.art;
-                totalCom += data.com;
-            }
-        }
-    });
-    return { art: totalArt, com: totalCom };
+    return HACCompatibilityEngine.calculateTotalBonuses(tags, GAME_DATA);
 }
 
 function calculateGenrePairScore(tags) {
-    const genres = tags.filter(t => t.category === "Genre").sort((a, b) => b.percent - a.percent);
-    if (genres.length < 2) return null;
-    const g1 = genres[0];
-    const g2 = genres[1];
-    if ((g1.percent + g2.percent < 0.7) || (g2.percent < 0.35)) {
-        return null;
-    }
-    let pairData = null;
-    if (GAME_DATA.genrePairs[g1.id] && GAME_DATA.genrePairs[g1.id][g2.id]) {
-        pairData = GAME_DATA.genrePairs[g1.id][g2.id];
-    } else if (GAME_DATA.genrePairs[g2.id] && GAME_DATA.genrePairs[g2.id][g1.id]) {
-        pairData = GAME_DATA.genrePairs[g2.id][g1.id];
-    }
-    if (!pairData) return null;
-    return {
-        com: parseFloat(pairData.Item1),
-        art: parseFloat(pairData.Item2),
-        names: `${GAME_DATA.tags[g1.id].name} + ${GAME_DATA.tags[g2.id].name}`
-    };
+    return HACCompatibilityEngine.calculateGenrePairScore(tags, GAME_DATA);
 }
 
 function formatScore(num) {
@@ -2129,20 +2013,11 @@ function setToneClass(element, tone) {
 }
 
 function getMovieScoreCap(scoringCount) {
-    if (scoringCount >= 9) return 9;
-    if (scoringCount >= 7) return 8;
-    if (scoringCount >= 5) return 7;
-    return 6;
+    return HACMovieScoreEstimator.getMovieScoreCap(scoringCount);
 }
 
 function calculateMovieScores(matrix, bonuses, tags) {
-    const scoringCount = tags ? getScoringElementCount(tags) : 0;
-    const tagCap = getMovieScoreCap(scoringCount);
-    const maxGameScore = 9.9;
-    const commercial = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore));
-    const artistic = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore));
-
-    return { commercial, artistic, tagCap, scoringCount };
+    return HACMovieScoreEstimator.calculateMovieScores(matrix, bonuses, tags);
 }
 
 function calculateScriptEvaluation(tags, matrix = null, bonuses = null) {
@@ -2301,15 +2176,7 @@ function calculateGravesAudience(tags) {
 }
 
 function getRawCompatibilityScore(tagA, tagB) {
-    if (GAME_DATA.compatibility[tagA.id] && GAME_DATA.compatibility[tagA.id][tagB.id]) {
-        return parseFloat(GAME_DATA.compatibility[tagA.id][tagB.id]);
-    }
-
-    if (GAME_DATA.compatibility[tagB.id] && GAME_DATA.compatibility[tagB.id][tagA.id]) {
-        return parseFloat(GAME_DATA.compatibility[tagB.id][tagA.id]);
-    }
-
-    return 3.0;
+    return HACCompatibilityEngine.getRawCompatibilityScore(tagA, tagB, GAME_DATA);
 }
 
 function findGravesConflicts(tags) {
