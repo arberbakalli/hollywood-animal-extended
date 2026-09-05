@@ -7,7 +7,16 @@ const docs = join(root, 'docs');
 
 const filesToMirror = [
     'index.html',
+    'styles.css',
     'script.js',
+    'data.js',
+];
+
+const directoriesToMirror = [
+    'assets',
+    'data',
+    'localization',
+    'src',
 ];
 
 mkdirSync(docs, { recursive: true });
@@ -16,7 +25,9 @@ for (const file of filesToMirror) {
     cpSync(join(root, file), join(docs, file));
 }
 
-rmSync(join(docs, 'src'), { recursive: true, force: true });
-cpSync(join(root, 'src'), join(docs, 'src'), { recursive: true });
+for (const directory of directoriesToMirror) {
+    rmSync(join(docs, directory), { recursive: true, force: true });
+    cpSync(join(root, directory), join(docs, directory), { recursive: true });
+}
 
 console.log('Synced docs/ browser app mirror.');

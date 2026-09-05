@@ -1798,7 +1798,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: var(--bg-input, #1a1a2e);
     border: 1px solid var(--border);
     border-radius: 4px;
-    color: var(--text);
+    color: var(--text-main);
     font-size: 0.9rem;
     box-sizing: border-box;
 }
@@ -1839,7 +1839,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .excl-tag-name {
     flex: 1;
     font-size: 0.9rem;
-    color: var(--text);
+    color: var(--text-main);
 }
 
 .excl-tag-cat {
@@ -1867,7 +1867,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: var(--bg-input, #1a1a2e);
     border: 1px solid var(--border);
     border-radius: 3px;
-    color: var(--text);
+    color: var(--text-main);
     font-size: 0.8rem;
     box-sizing: border-box;
     transition: border-color 0.2s;
@@ -1906,7 +1906,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: var(--bg-input, #1a1a2e);
     border: 1px solid var(--border);
     border-radius: 3px;
-    color: var(--text);
+    color: var(--text-main);
     font-size: 0.8rem;
     box-sizing: border-box;
 }
@@ -1933,7 +1933,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: var(--bg-input, #1a1a2e);
     border: 1px solid var(--border);
     border-radius: 3px;
-    color: var(--text);
+    color: var(--text-main);
     font-size: 0.75rem;
     cursor: pointer;
     transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
