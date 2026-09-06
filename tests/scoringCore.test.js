@@ -276,6 +276,11 @@ describe('generator availability', () => {
         expect(h.evaluate("HACStoryElementSelector.isTagExcludedForContext('ACTION', 'advertisers')"))
             .toBe(true);
 
+        expect(h.evaluate(`HACStoryElementSelector.filterTagsForContext([
+            GAME_DATA.tags.ACTION,
+            GAME_DATA.tags.ADVENTURE
+        ], 'advertisers').map(tag => tag.id)`)).toEqual(['ADVENTURE']);
+
         const result = h.evaluate(`HACTargetedAds.resolveTargetedTagInputs([
             { id: 'ACTION' },
             { id: 'ADVENTURE' }

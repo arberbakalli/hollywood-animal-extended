@@ -93,25 +93,15 @@
         if (inputs.length === 0) return;
         switchTab('advertisers');
         initializeSelectors('advertisers');
+        const addedGenreInputs = [];
         inputs.forEach(input => {
-            const category = input.category;
-            const containerId = `inputs-${categoryToElementSlug(category)}-advertisers`;
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            const existingSelects = container.querySelectorAll('select');
-            let placed = false;
-            for (let sel of existingSelects) {
-                if (sel.value === "") {
-                    sel.value = input.id;
-                    placed = true;
-                    break;
-                }
-            }
-            if (!placed) {
-                addDropdown(category, input.id, 'advertisers');
+            const tag = GAME_DATA.tags[input.id] || input;
+            const added = addTagToSelectorContext(tag, 'advertisers');
+            if (added && input.category === 'Genre') {
+                addedGenreInputs.push(input);
             }
         });
-        const genreInputs = inputs.filter(i => i.category === 'Genre');
+        const genreInputs = addedGenreInputs;
         if (genreInputs.length > 1) {
             updateGenreControls('advertisers');
             const genreRows = document.querySelectorAll(`#inputs-${categoryToElementSlug('Genre')}-advertisers .genre-row`);

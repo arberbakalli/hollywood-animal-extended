@@ -72,6 +72,22 @@ function initializeSelectors(context) {
     return HACStoryElementSelector.initializeSelectors(context);
 }
 
+function contextUsesGlobalExclusions(context) {
+    return HACStoryElementSelector.contextUsesGlobalExclusions(context);
+}
+
+function isTagExcludedForContext(tagId, context) {
+    return HACStoryElementSelector.isTagExcludedForContext(tagId, context);
+}
+
+function canUseTagInContext(tagId, context) {
+    return HACStoryElementSelector.canUseTagInContext(tagId, context);
+}
+
+function filterTagsForContext(tags, context) {
+    return HACStoryElementSelector.filterTagsForContext(tags, context);
+}
+
 function getSelectedTagsInCategory(category, context) {
     return HACStoryElementSelector.getSelectedTagsInCategory(category, context);
 }

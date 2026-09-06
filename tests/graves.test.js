@@ -16,6 +16,41 @@ beforeAll(async () => {
 
 const tag = (id, category) => ({ id, category });
 
+function buildGravesBestMatchesDom(selectorsExpression) {
+    return `(() => {
+        const feedback = {
+            textContent: '',
+            className: '',
+            classList: { add() {}, remove() {} }
+        };
+        const generic = {
+            classList: { add() {}, remove() {} },
+            scrollIntoView() {}
+        };
+        const emptyContainer = { querySelectorAll() { return []; } };
+        const gravesContainer = {
+            querySelectorAll(selector) {
+                if (selector === '.tag-selector') return ${selectorsExpression};
+                return [];
+            }
+        };
+
+        document = {
+            getElementById(id) {
+                if (id === 'gravesFeedbackMessage') return feedback;
+                if (id === 'selectors-container-graves') return gravesContainer;
+                if (id === 'selectors-container-excluded') return emptyContainer;
+                if (id.startsWith('inputs-')) return null;
+                return generic;
+            },
+            querySelector() { return null; },
+            querySelectorAll() { return []; }
+        };
+
+        return feedback;
+    })()`;
+}
+
 describe('Graves Evaluation', () => {
     test('validates mandatory Genre + Setting', () => {
         const selectedTags = [tag('ACTION', 'Genre')];
@@ -143,6 +178,35 @@ describe('Graves Evaluation', () => {
         }
 
         expect(score).toBe(3.0);
+    });
+
+    test('Generate Best Matches requires at least 5 selected elements', async () => {
+        const result = await h.evaluate(`(async () => {
+            const feedback = ${buildGravesBestMatchesDom(`[
+                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } }
+            ]`)};
+
+            await generateBestMatches();
+            return feedback.textContent;
+        })()`);
+
+        expect(result).toContain('at least 5 story elements');
+        expect(result).toContain('You selected 1');
+    });
+
+    test('Generate Best Matches rejects more than 10 selected elements', async () => {
+        const result = await h.evaluate(`(async () => {
+            const feedback = ${buildGravesBestMatchesDom(`Array.from({ length: 11 }, (_, index) => ({
+                value: 'TEST_TAG_' + index,
+                dataset: { category: 'Supporting Character' }
+            }))`)};
+
+            await generateBestMatches();
+            return feedback.textContent;
+        })()`);
+
+        expect(result).toContain('up to 10 story elements');
+        expect(result).toContain('You selected 11');
     });
 
     test('category colors are defined', () => {

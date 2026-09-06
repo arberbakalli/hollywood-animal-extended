@@ -53,6 +53,11 @@
         });
     }
 
+    function canUseSearchResult(item, context) {
+        if (!global.HACStoryElementSelector) return true;
+        return global.HACStoryElementSelector.canUseTagInContext(item.id, context);
+    }
+
     function performSearchFilter(searchInput) {
         const searchTerm = searchInput.value.toLowerCase().trim();
         const category = searchInput.dataset.category;
@@ -87,7 +92,8 @@
                 // Also filter the dropdown options (for when user clicks to select)
                 select.querySelectorAll('option:not(:first-child)').forEach(opt => {
                     const text = opt.innerText.toLowerCase();
-                    const matches = searchTerm === '' || text.includes(searchTerm);
+                    const isAvailable = canUseSearchResult({ id: opt.value }, context);
+                    const matches = isAvailable && (searchTerm === '' || text.includes(searchTerm));
                     opt.hidden = !matches;
                     if (matches && searchTerm !== '') totalMatches++;
                 });
@@ -132,8 +138,11 @@
                 return;
             }
             const matches = searchIndex.filter(item =>
-                item.name.toLowerCase().includes(query) ||
-                item.category.toLowerCase().includes(query)
+                canUseSearchResult(item, context) &&
+                (
+                    item.name.toLowerCase().includes(query) ||
+                    item.category.toLowerCase().includes(query)
+                )
             );
             if (matches.length > 0) {
                 resultsBox.classList.remove('hidden');
@@ -168,6 +177,7 @@
         setupGlobalCategorySearch,
         performSearchFilter,
         buildSearchIndex,
+        canUseSearchResult,
         setupSearchListeners,
         setupSingleSearch
     };

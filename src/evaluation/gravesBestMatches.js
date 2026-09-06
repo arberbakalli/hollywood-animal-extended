@@ -412,8 +412,13 @@
         hideGravesEvaluationResults();
 
         const selectedTags = collectTagInputs('graves');
-        if (selectedTags.length === 0) {
-            showFeedbackMessage('gravesFeedbackMessage', 'Select at least one element to find strong matches.');
+        if (selectedTags.length < 5) {
+            showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements before suggesting best matches. You selected ${selectedTags.length}.`, 'accent');
+            return;
+        }
+
+        if (selectedTags.length > 10) {
+            showFeedbackMessage('gravesFeedbackMessage', `Colman suggests matches for up to 10 story elements at once. You selected ${selectedTags.length}.`, 'accent');
             return;
         }
 

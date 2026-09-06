@@ -22,9 +22,45 @@
         return Boolean(getExcludedIdsForContext(context)?.has(tagId));
     }
 
+    function canUseTagInContext(tagId, context) {
+        return !isTagExcludedForContext(tagId, context);
+    }
+
+    function excludedTagFeedbackMessage(tagId) {
+        const tagName = GAME_DATA.tags[tagId] ? GAME_DATA.tags[tagId].name : tagId;
+        return `${tagName} is excluded in Script Lab. Remove it from Excluded Elements first.`;
+    }
+
+    function showExcludedTagFeedback(tagId, context) {
+        showFeedbackMessage(`${context}FeedbackMessage`, excludedTagFeedbackMessage(tagId), 'accent');
+    }
+
+    function filterTagsForContext(tags, context) {
+        return tags.filter(tag => tag && tag.id && canUseTagInContext(tag.id, context));
+    }
+
+    function clearExcludedSelectionsInCategory(category, context, excludedIds = getExcludedIdsForContext(context)) {
+        if (!excludedIds || excludedIds.size === 0) return [];
+
+        const categoryContainerId = `inputs-${categoryToElementSlug(category)}-${context}`;
+        const categoryContainer = document.getElementById(categoryContainerId);
+        if (!categoryContainer) return [];
+
+        const clearedIds = [];
+        categoryContainer.querySelectorAll('.tag-selector').forEach(select => {
+            if (select.value && excludedIds.has(select.value)) {
+                clearedIds.push(select.value);
+                select.value = "";
+            }
+        });
+        return clearedIds;
+    }
+
     function restoreSelection(context, savedInputs) {
         if(!savedInputs || savedInputs.length === 0) return;
         savedInputs.forEach(input => {
+            if (isTagExcludedForContext(input.id, context)) return;
+
             const category = input.category;
             const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
             const container = document.getElementById(containerId);
@@ -149,6 +185,9 @@
 
         const selects = categoryContainer.querySelectorAll('.tag-selector');
 
+        const excludedIds = getExcludedIdsForContext(context);
+        const clearedIds = clearExcludedSelectionsInCategory(category, context, excludedIds);
+
         // Get all currently selected values in this category
         const selectedValues = new Set();
         selects.forEach(select => {
@@ -157,28 +196,46 @@
             }
         });
 
-        // Script builders cannot use excluded tags. The Excluded Elements table
-        // is the shared availability source for generation, evaluation, and
-        // marketing. An already-selected one stays enabled so it remains visible
-        // and fixable instead of disappearing from the UI.
-        const excludedIds = getExcludedIdsForContext(context);
-
         // Update each dropdown: disable options that are selected elsewhere
         selects.forEach(select => {
             select.querySelectorAll('option:not(:first-child)').forEach(opt => {
                 const isSelectedInThisDropdown = (opt.value === select.value);
                 const isSelectedElsewhere = selectedValues.has(opt.value) && !isSelectedInThisDropdown;
-                const isExcluded = Boolean(excludedIds && excludedIds.has(opt.value)) && !isSelectedInThisDropdown;
+                const isExcluded = Boolean(excludedIds && excludedIds.has(opt.value));
 
                 opt.disabled = isSelectedElsewhere || isExcluded;
+                opt.hidden = isExcluded;
+                opt.dataset.excluded = String(isExcluded);
             });
         });
+
+        if (clearedIds.length > 0 && category === 'Genre' && context !== 'excluded') {
+            updateGenreControls(context);
+        }
+
+        return clearedIds;
     }
 
     /** Re-applies exclusion availability to every script-building dropdown. */
     function refreshScriptBuilderAvailability() {
         SCRIPT_BUILDER_CONTEXTS.forEach(context => {
-            MULTI_SELECT_CATEGORIES.forEach(category => refreshCategoryDropdowns(category, context));
+            const cleared = MULTI_SELECT_CATEGORIES
+                .flatMap(category => refreshCategoryDropdowns(category, context) || []);
+
+            // Excluding a tag drops it from any script already using it. Saying so
+            // matters: otherwise a selection the user built just disappears, which
+            // reads as the app losing their work rather than obeying their ban.
+            if (cleared.length === 0) return;
+
+            const names = [...new Set(cleared)]
+                .map(id => (GAME_DATA.tags[id] ? GAME_DATA.tags[id].name : id))
+                .join(', ');
+
+            showFeedbackMessage(
+                `${context}FeedbackMessage`,
+                `Removed from this script because they are now excluded: ${names}.`,
+                'accent'
+            );
         });
     }
 
@@ -188,6 +245,10 @@
     }
 
     function addDropdown(category, selectedId = null, context = currentTab) {
+        if (selectedId && !canUseTagInContext(selectedId, context)) {
+            selectedId = null;
+        }
+
         const categorySlug = categoryToElementSlug(category);
         const containerId = `inputs-${categorySlug}-${context}`;
         const container = document.getElementById(containerId);
@@ -200,8 +261,10 @@
             return;
         }
 
-        const tags = Object.values(GAME_DATA.tags).filter(t => t.category === category)
-                     .sort((a, b) => a.name.localeCompare(b.name));
+        const tags = filterTagsForContext(
+            Object.values(GAME_DATA.tags).filter(t => t.category === category),
+            context
+        ).sort((a, b) => a.name.localeCompare(b.name));
         const row = document.createElement('div');
         row.className = 'select-row';
         row.id = `tag-selector-row-${context}-${categorySlug}-${++tagSelectRowCounter}`;
@@ -233,6 +296,10 @@
 
         // When selection changes, refresh all dropdowns in this category to enforce deduplication
         select.addEventListener('change', () => {
+            if (select.value && isTagExcludedForContext(select.value, context)) {
+                showExcludedTagFeedback(select.value, context);
+                select.value = "";
+            }
             refreshCategoryDropdowns(category, context);
             if (context === 'excluded') updateExcludedCount();
         });
@@ -326,7 +393,7 @@
 
     function selectTagFromSearch(tagObj, context) {
         if (isTagExcludedForContext(tagObj.id, context)) {
-            showFeedbackMessage(`${context}FeedbackMessage`, `${tagObj.name} is excluded in Script Lab. Remove it from Excluded Elements first.`, 'accent');
+            showExcludedTagFeedback(tagObj.id, context);
             return;
         }
 
@@ -360,7 +427,7 @@
 
     function addTagToSelectorContext(tagObj, context) {
         if (isTagExcludedForContext(tagObj.id, context)) {
-            showFeedbackMessage(`${context}FeedbackMessage`, `${tagObj.name} is excluded in Script Lab. Remove it from Excluded Elements first.`, 'accent');
+            showExcludedTagFeedback(tagObj.id, context);
             return false;
         }
 
@@ -397,6 +464,9 @@
         const tagInputs = [];
 
         const excludedIds = getExcludedIdsForContext(context);
+        if (excludedIds) {
+            MULTI_SELECT_CATEGORIES.forEach(category => refreshCategoryDropdowns(category, context));
+        }
 
         // BLOCK 1: Handling Genres (usually with percentages)
         const genreContainer = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
@@ -482,6 +552,10 @@
         initializeSelectors,
         contextUsesGlobalExclusions,
         isTagExcludedForContext,
+        canUseTagInContext,
+        excludedTagFeedbackMessage,
+        filterTagsForContext,
+        clearExcludedSelectionsInCategory,
         getSelectedTagsInCategory,
         refreshCategoryDropdowns,
         refreshScriptBuilderAvailability,

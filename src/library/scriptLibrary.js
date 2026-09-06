@@ -184,29 +184,33 @@
         switchTab(targetContext);
         initializeSelectors(targetContext);
 
-        script.tags.forEach(t => {
-            const category = t.category;
-            const containerId = `inputs-${categoryToElementSlug(category)}-${targetContext}`;
-            const container = document.getElementById(containerId);
-            if (!container) return;
+        const skippedTags = [];
+        const addedGenreInputs = [];
 
-            const existingSelects = container.querySelectorAll('select');
-            let placed = false;
-            for (let sel of existingSelects) {
-                if (sel.value === "") {
-                    sel.value = t.id;
-                    placed = true;
-                    break;
-                }
+        script.tags.forEach(t => {
+            const tag = GAME_DATA.tags[t.id] || t;
+            if (!tag || !tag.id) return;
+
+            if (!HACStoryElementSelector.canUseTagInContext(tag.id, targetContext)) {
+                skippedTags.push(tag);
+                return;
             }
-            if (!placed) {
-                addDropdown(category, t.id, targetContext);
+
+            const added = addTagToSelectorContext(tag, targetContext);
+            if (added && t.category === "Genre") {
+                addedGenreInputs.push(t);
             }
         });
 
-        const genres = script.tags.filter(t => t.category === "Genre");
-        if(genres.length > 1) {
+        if(addedGenreInputs.length > 1) {
             updateGenreControls(targetContext);
+        }
+
+        if (skippedTags.length > 0) {
+            const names = skippedTags
+                .map(tag => GAME_DATA.tags[tag.id] ? GAME_DATA.tags[tag.id].name : tag.id)
+                .join(', ');
+            showFeedbackMessage(`${targetContext}FeedbackMessage`, `Skipped excluded elements: ${names}.`, 'accent');
         }
 
         runTransferTarget(targetContext);
