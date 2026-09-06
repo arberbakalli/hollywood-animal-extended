@@ -2,9 +2,21 @@
     "use strict";
 
     const BASE_DECAY = 0.8;
-    const BEHEMOTH_DECAY = 0.85;
+    // Week 2 keeps half of week 1 (W2_MULT / W1_MULT), so it is a retention step
+    // like every later week, just with a steeper rate.
+    const BASE_WEEK_TWO_RETENTION = 0.5;
+    // "Attendance will fall 25% more slowly": the drop shrinks by a quarter, so
+    // 20% becomes 15% and 50% becomes 37.5%. One factor keeps every week
+    // consistent instead of a separate magic number per step.
+    const BEHEMOTH_SLOWER_FALL = 0.75;
     const BEHEMOTH_DECAY_MIN_SCORE = 9;
     const BEHEMOTH_WEEK_ONE_BOOST = 1.25;
+
+    // Rounded because the raw arithmetic yields 0.8500000000000001, and the
+    // week grid rounds up, so that dust surfaces as a whole extra screening.
+    function easedRetention(baseRetention) {
+        return Math.round((1 - (1 - baseRetention) * BEHEMOTH_SLOWER_FALL) * 1e6) / 1e6;
+    }
 
     function setupDistributionLogic() {
         const comInput = document.getElementById('comScoreInput');
@@ -39,12 +51,17 @@
         const decay = getDecayRate(commercialScore);
         const openingViewerMultiplier = getDistributionMultiplier();
         const behemothWeekOne = isBehemothActive() ? BEHEMOTH_WEEK_ONE_BOOST : 1;
+        // Week 2 is a retention step too, so the slower fall lifts it by the same
+        // ratio the rate improved. Later weeks then compound from the lifted value.
+        const weekTwoRatio = hasDecayBonus(commercialScore)
+            ? easedRetention(BASE_WEEK_TWO_RETENTION) / BASE_WEEK_TWO_RETENTION
+            : 1;
 
         const rawW1 = (commercialScore * W1_MULT * BASE) - availableScreenings;
         const w1 = Math.max(0.0, rawW1);
 
         const rawW2 = (commercialScore * W2_MULT * BASE) - availableScreenings;
-        const w2 = Math.max(0.0, rawW2);
+        const w2 = Math.max(0.0, rawW2) * weekTwoRatio;
 
         let calcValues = [w1, w2];
         let currentDecayBase = w2;
@@ -99,13 +116,13 @@
         return Boolean(document.getElementById('behemothToggle')?.checked);
     }
 
-    /**
-     * Behemoth slows attendance decay by a quarter, but only above a commercial
-     * rating of 9. The base 0.8 keeps a 20% weekly drop; a quarter less is 15%.
-     */
+    /** Behemoth's slower fall applies only above a commercial rating of 9. */
+    function hasDecayBonus(commercialScore) {
+        return isBehemothActive() && commercialScore > BEHEMOTH_DECAY_MIN_SCORE;
+    }
+
     function getDecayRate(commercialScore) {
-        const qualifies = isBehemothActive() && commercialScore > BEHEMOTH_DECAY_MIN_SCORE;
-        return qualifies ? BEHEMOTH_DECAY : BASE_DECAY;
+        return hasDecayBonus(commercialScore) ? easedRetention(BASE_DECAY) : BASE_DECAY;
     }
 
 
@@ -116,6 +133,8 @@
         initializeDistributionToggles,
         getDistributionMultiplier,
         isBehemothActive,
-        getDecayRate
+        hasDecayBonus,
+        getDecayRate,
+        easedRetention
     };
 })(globalThis);
