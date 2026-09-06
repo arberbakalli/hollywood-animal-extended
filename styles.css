@@ -2755,3 +2755,35 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     border-color: var(--accent);
     box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
 }
+
+/* Category text colors for dropdowns — readable on dark inputs, derived from game palette */
+:root {
+  --cat-genre-action: #c68367;
+  --cat-genre-adventure: #779e4f;
+  --cat-genre-comedy: #579dab;
+  --cat-genre-detective: #ba80ae;
+  --cat-genre-drama: #8690c3;
+  --cat-genre-romance: #67a070;
+  --cat-genre-thriller: #c5826f;
+  --cat-protagonist: #67a070;
+  --cat-antagonist: #9c89ca;
+  --cat-supporting: #7297ae;
+  --cat-theme-event: #c28575;
+  --cat-finale: #bf80a3;
+  --cat-setting: #8fa3d1; /* neutral fallback, placeholder pending image */
+}
+
+/* Apply category colors to option text */
+option.genre-action { color: var(--cat-genre-action); }
+option.genre-adventure { color: var(--cat-genre-adventure); }
+option.genre-comedy { color: var(--cat-genre-comedy); }
+option.genre-detective { color: var(--cat-genre-detective); }
+option.genre-drama { color: var(--cat-genre-drama); }
+option.genre-romance { color: var(--cat-genre-romance); }
+option.genre-thriller { color: var(--cat-genre-thriller); }
+option.setting { color: var(--cat-setting); }
+option.protagonist { color: var(--cat-protagonist); }
+option.antagonist { color: var(--cat-antagonist); }
+option.supporting-character { color: var(--cat-supporting); }
+option.theme-event { color: var(--cat-theme-event); }
+option.finale { color: var(--cat-finale); }

@@ -23,7 +23,6 @@ describe('shared classic-script state', () => {
         'currentLanguage',
         'currentGenProfile',
         'startingProfileExcludedLoaded',
-        'tagSelectRowCounter',
         'compatibilityLoaded',
         'genrePairsLoaded',
     ];

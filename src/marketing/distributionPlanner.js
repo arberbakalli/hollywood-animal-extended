@@ -86,12 +86,15 @@
             const weekNum = index + 1;
             const box = document.createElement('div');
             box.className = 'week-box';
+            box.id = `dist-week-${weekNum}`;
+            box.dataset.week = String(weekNum);
+            box.dataset.screenings = String(val);
             // Highlight active weeks
             if (val > 0) box.classList.add('active-week');
 
             box.innerHTML = `
-                <span class="week-label">Week ${weekNum}</span>
-                <span class="week-val ${val > 0 ? 'active' : ''}">${val.toLocaleString()}</span>
+                <span class="week-label" id="dist-week-${weekNum}-label">Week ${weekNum}</span>
+                <span class="week-val ${val > 0 ? 'active' : ''}" id="dist-week-${weekNum}-value">${val.toLocaleString()}</span>
             `;
             grid.appendChild(box);
         });

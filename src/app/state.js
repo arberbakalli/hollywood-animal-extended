@@ -20,6 +20,5 @@ var localizationMap = {};
 var currentLanguage = 'English';
 var currentGenProfile = 'custom';
 var startingProfileExcludedLoaded = false;
-var tagSelectRowCounter = 0;
 var compatibilityLoaded = false;
 var genrePairsLoaded = false;

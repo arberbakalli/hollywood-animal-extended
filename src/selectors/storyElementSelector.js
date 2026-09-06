@@ -98,8 +98,9 @@
         const container = document.getElementById(`selectors-container-${context}`);
         container.innerHTML = '';
 
-        // Use MULTI_SELECT_CATEGORIES order for consistent display across all contexts
-        const sortedCategories = MULTI_SELECT_CATEGORIES.filter(cat => GAME_DATA.categories.includes(cat));
+        // Every category the data defines, in its canonical order. MULTI_SELECT_CATEGORIES
+        // only decides which ones may add extra rows — it must not decide which ones render.
+        const sortedCategories = GAME_DATA.categories;
 
         sortedCategories.forEach(category => {
             const tagsInCategory = Object.values(GAME_DATA.tags).filter(t =>
@@ -272,7 +273,13 @@
         tags = filterTagsForContext(tags, context).sort((a, b) => a.name.localeCompare(b.name));
         const row = document.createElement('div');
         row.className = 'select-row';
-        row.id = `tag-selector-row-${context}-${categorySlug}-${++tagSelectRowCounter}`;
+        // Numbered within this category+context. A shared counter made row ids shift
+        // whenever any other panel added a row, so they could not be relied on.
+        const usedIndices = Array.from(container.querySelectorAll('.select-row'))
+            .map(existing => Number(existing.id.slice(existing.id.lastIndexOf('-') + 1)))
+            .filter(Number.isFinite);
+        const rowIndex = usedIndices.length ? Math.max(...usedIndices) + 1 : 1;
+        row.id = `tag-selector-row-${context}-${categorySlug}-${rowIndex}`;
         row.dataset.role = 'tag-selector-row';
         row.dataset.category = category;
         row.dataset.context = context;

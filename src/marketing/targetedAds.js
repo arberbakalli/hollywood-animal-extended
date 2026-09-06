@@ -7,8 +7,8 @@
         if (audienceContainer) {
             const demosHtml = Object.entries(GAME_DATA.demographics)
                 .map(([id, demo]) => `
-                    <label class="checkbox-item targeted-checkbox-item">
-                        <input type="checkbox" value="${id}" class="targeted-audience-checkbox">
+                    <label class="checkbox-item targeted-checkbox-item" id="targeted-audience-${toDomId(id)}-item">
+                        <input type="checkbox" value="${id}" class="targeted-audience-checkbox" id="targeted-audience-${toDomId(id)}">
                         <span>${demo.name}</span>
                     </label>
                 `).join('');
@@ -20,8 +20,8 @@
         if (advertiserContainer) {
             const agenciesHtml = GAME_DATA.adAgents
                 .map(agency => `
-                    <label class="checkbox-item targeted-checkbox-item">
-                        <input type="checkbox" value="${agency.id}" class="targeted-advertiser-checkbox">
+                    <label class="checkbox-item targeted-checkbox-item" id="targeted-advertiser-${toDomId(agency.id)}-item">
+                        <input type="checkbox" value="${agency.id}" class="targeted-advertiser-checkbox" id="targeted-advertiser-${toDomId(agency.id)}">
                         <span>${agency.name}</span>
                     </label>
                 `).join('');
