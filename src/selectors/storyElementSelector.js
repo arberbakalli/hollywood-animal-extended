@@ -288,6 +288,15 @@
             opt.value = tag.id;
             opt.innerText = tag.name;
             opt.dataset.searchText = tag.name.toLowerCase();
+            if (category === 'Genre') {
+                opt.className = `genre-${tag.id.toLowerCase()}`;
+            } else {
+                const categorySlug = category
+                    .toLowerCase()
+                    .replace(/[&\s]+/g, '-')
+                    .replace(/-+$/, '');
+                opt.className = categorySlug;
+            }
             select.appendChild(opt);
         });
 
