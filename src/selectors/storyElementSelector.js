@@ -1,6 +1,27 @@
 (function(global) {
     "use strict";
 
+    const SCRIPT_BUILDER_CONTEXTS = new Set([
+        'generator',
+        'synergy',
+        'graves',
+        'advertisers',
+        'targeted'
+    ]);
+
+    function contextUsesGlobalExclusions(context) {
+        return SCRIPT_BUILDER_CONTEXTS.has(context);
+    }
+
+    function getExcludedIdsForContext(context) {
+        if (!contextUsesGlobalExclusions(context)) return null;
+        return getGeneratorExcludedIds();
+    }
+
+    function isTagExcludedForContext(tagId, context) {
+        return Boolean(getExcludedIdsForContext(context)?.has(tagId));
+    }
+
     function restoreSelection(context, savedInputs) {
         if(!savedInputs || savedInputs.length === 0) return;
         savedInputs.forEach(input => {
@@ -136,10 +157,11 @@
             }
         });
 
-        // Locked picks cannot use an excluded tag - the generator rejects the run.
-        // Offering them anyway is what let users build a script it then refused.
-        // An already-selected one stays enabled so it remains visible and fixable.
-        const excludedIds = context === 'generator' ? getGeneratorExcludedIds() : null;
+        // Script builders cannot use excluded tags. The Excluded Elements table
+        // is the shared availability source for generation, evaluation, and
+        // marketing. An already-selected one stays enabled so it remains visible
+        // and fixable instead of disappearing from the UI.
+        const excludedIds = getExcludedIdsForContext(context);
 
         // Update each dropdown: disable options that are selected elsewhere
         selects.forEach(select => {
@@ -153,9 +175,16 @@
         });
     }
 
-    /** Re-applies exclusion availability to every Locked Elements dropdown. */
+    /** Re-applies exclusion availability to every script-building dropdown. */
+    function refreshScriptBuilderAvailability() {
+        SCRIPT_BUILDER_CONTEXTS.forEach(context => {
+            MULTI_SELECT_CATEGORIES.forEach(category => refreshCategoryDropdowns(category, context));
+        });
+    }
+
+    /** Legacy name kept for script.js wrappers and old tests. */
     function refreshLockedElementAvailability() {
-        MULTI_SELECT_CATEGORIES.forEach(category => refreshCategoryDropdowns(category, 'generator'));
+        refreshScriptBuilderAvailability();
     }
 
     function addDropdown(category, selectedId = null, context = currentTab) {
@@ -203,14 +232,12 @@
         row.appendChild(select);
 
         // When selection changes, refresh all dropdowns in this category to enforce deduplication
-        if (context === 'generator' || context === 'synergy' || context === 'excluded') {
-            select.addEventListener('change', () => {
-                refreshCategoryDropdowns(category, context);
-                if (context === 'excluded') updateExcludedCount();
-            });
-            // Initial refresh to disable already-selected options
-            setTimeout(() => refreshCategoryDropdowns(category, context), 0);
-        }
+        select.addEventListener('change', () => {
+            refreshCategoryDropdowns(category, context);
+            if (context === 'excluded') updateExcludedCount();
+        });
+        // Initial refresh to disable already-selected options
+        setTimeout(() => refreshCategoryDropdowns(category, context), 0);
 
         // Add percent slider only for Genre in Synergy/Advertisers (not Excluded or simple Lock)
         if (category === 'Genre' && context !== 'excluded') {
@@ -298,6 +325,11 @@
     }
 
     function selectTagFromSearch(tagObj, context) {
+        if (isTagExcludedForContext(tagObj.id, context)) {
+            showFeedbackMessage(`${context}FeedbackMessage`, `${tagObj.name} is excluded in Script Lab. Remove it from Excluded Elements first.`, 'accent');
+            return;
+        }
+
         const category = tagObj.category;
         const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
         const container = document.getElementById(containerId);
@@ -327,6 +359,11 @@
     }
 
     function addTagToSelectorContext(tagObj, context) {
+        if (isTagExcludedForContext(tagObj.id, context)) {
+            showFeedbackMessage(`${context}FeedbackMessage`, `${tagObj.name} is excluded in Script Lab. Remove it from Excluded Elements first.`, 'accent');
+            return false;
+        }
+
         const category = tagObj.category;
         const categorySlug = categoryToElementSlug(category);
         const container = document.getElementById(`inputs-${categorySlug}-${context}`);
@@ -359,6 +396,8 @@
     function collectTagInputs(context) {
         const tagInputs = [];
 
+        const excludedIds = getExcludedIdsForContext(context);
+
         // BLOCK 1: Handling Genres (usually with percentages)
         const genreContainer = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
         const genreRows = genreContainer ? genreContainer.querySelectorAll('.genre-row') : [];
@@ -367,7 +406,7 @@
         genreRows.forEach(row => {
             const select = row.querySelector('select');
             const input = row.querySelector('.percent-input');
-            if (select.value) {
+            if (select.value && !excludedIds?.has(select.value)) {
                 let val = parseFloat(input ? input.value : 100);
                 if (isNaN(val) || val < 0) val = 0;
                 totalGenreInput += val;
@@ -392,7 +431,7 @@
             // Skip genres here if they were handled in Block 1
             if (sel.dataset.category === "Genre" && context !== 'excluded') return;
 
-            if (sel.value) {
+            if (sel.value && !excludedIds?.has(sel.value)) {
                 tagInputs.push({
                     id: sel.value,
                     percent: 1.0,
@@ -441,8 +480,11 @@
     global.HACStoryElementSelector = {
         restoreSelection,
         initializeSelectors,
+        contextUsesGlobalExclusions,
+        isTagExcludedForContext,
         getSelectedTagsInCategory,
         refreshCategoryDropdowns,
+        refreshScriptBuilderAvailability,
         refreshLockedElementAvailability,
         addDropdown,
         updateGenreControls,

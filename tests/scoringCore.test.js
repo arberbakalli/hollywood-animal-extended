@@ -241,6 +241,48 @@ describe('generator availability', () => {
         expect(result.includesManual).toBe(true);
         expect(result.hasDuplicates).toBe(false);
     });
+
+    test('excluded elements are the shared source of truth for every script builder', () => {
+        const contexts = ['generator', 'synergy', 'graves', 'advertisers', 'targeted'];
+
+        expect(
+            contexts.map(context =>
+                h.evaluate(`HACStoryElementSelector.contextUsesGlobalExclusions('${context}')`)
+            )
+        ).toEqual(contexts.map(() => true));
+        expect(h.evaluate("HACStoryElementSelector.contextUsesGlobalExclusions('excluded')"))
+            .toBe(false);
+    });
+
+    test('shared selector and targeted ads ignore tags selected in Excluded Elements', () => {
+        h.evaluate(`document = {
+            getElementById(id) {
+                if (id === 'inputs-genre-excluded') return null;
+                if (id === 'selectors-container-excluded') {
+                    return {
+                        querySelectorAll() {
+                            return [
+                                { value: 'ACTION', dataset: { category: 'Genre' } }
+                            ];
+                        }
+                    };
+                }
+                return null;
+            },
+            querySelectorAll() { return []; },
+            querySelector() { return null; }
+        }`);
+
+        expect(h.evaluate("HACStoryElementSelector.isTagExcludedForContext('ACTION', 'advertisers')"))
+            .toBe(true);
+
+        const result = h.evaluate(`HACTargetedAds.resolveTargetedTagInputs([
+            { id: 'ACTION' },
+            { id: 'ADVENTURE' }
+        ]).map(tag => tag.id)`);
+
+        expect(result).toEqual(['ADVENTURE']);
+    });
 });
 
 describe('Colman Graves evaluation helpers', () => {

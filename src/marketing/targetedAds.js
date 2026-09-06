@@ -88,7 +88,8 @@
     async function searchForTargetCombinations(targetAgencies, constraintTags = [], constraintAudiences = [], maxResults = 20) {
         await ensureCompatibilityLoaded();
 
-        const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id);
+        const excludedIds = getGeneratorExcludedIds();
+        const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id && !excludedIds.has(t.id));
         const lockedTags = resolveTargetedTagInputs(constraintTags);
         const combinations = generateTargetedCombinations(allTags, lockedTags, targetAgencies, 6, maxResults * 4);
         const scoredCombinations = [];
@@ -120,10 +121,11 @@
 
     function resolveTargetedTagInputs(tagInputs) {
         const seen = new Set();
+        const excludedIds = getGeneratorExcludedIds();
         return tagInputs
             .map(input => GAME_DATA.tags[input.id])
             .filter(tag => {
-                if (!tag || seen.has(tag.id)) return false;
+                if (!tag || seen.has(tag.id) || excludedIds.has(tag.id)) return false;
                 seen.add(tag.id);
                 return true;
             });

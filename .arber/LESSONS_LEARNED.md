@@ -130,3 +130,29 @@ constant so a confirmed figure is a one-line change.
 **The rule.** Shipping an inference is fine when the default is untouched, the
 patch point is single, and the uncertainty is written down where the next
 person will read it. Shipping it as though it were measured is not.
+
+---
+
+## 8. "Source of truth" means every consumer, not the one in front of you
+
+**What happened.** Excluded Elements were fixed for Script Lab generation, and
+later for Graves Best Matches, but Marketing & Release still ignored the same
+ban list. Analyze Script could evaluate excluded tags, Build for Target could
+offer excluded tags, and Targeted Ads could generate combinations containing
+tags the user had already said were unavailable.
+
+**The real cause.** The exclusion code lived in `src/generator/`, so patches kept
+treating it like generator behavior even after the product had grown. The user
+asked for the Excluded Elements table to be the source of truth, but the code
+only wired the consumer being debugged at the time.
+
+**The rule.** When the requirement says "source of truth," list every reader
+before coding. For this app, the Excluded Elements table owns tag availability
+for Script Lab, Compatibility Numbers, Colman Graves, Analyze Script, and Build
+for Target. A fix that touches only one of those is incomplete even if that one
+screen passes.
+
+**Cheap check for next time.** Search for every `collectTagInputs(...)`,
+`initializeSelectors(...)`, and candidate-generation path. If a context builds,
+evaluates, markets, or recommends script tags, it must read the shared
+availability filter or have a written reason why not.
