@@ -1,0 +1,222 @@
+{
+  "pages": [
+    {
+      "name": "Navigation",
+      "elements": [
+        { "elementName": "buildTab", "selector": { "css": "#tab-generator-button" } },
+        { "elementName": "evaluateTab", "selector": { "css": "#tab-synergy-button" } },
+        { "elementName": "marketTab", "selector": { "css": "#tab-advertisers-button" } },
+        { "elementName": "languageSelector", "selector": { "css": "#languageSelector" } }
+      ]
+    },
+    {
+      "name": "ScriptLab",
+      "elements": [
+        { "elementName": "panel", "selector": { "css": "#tab-generator" } },
+        { "elementName": "settingsPanel", "selector": { "css": "#generator-settings-panel" } },
+
+        { "elementName": "startingTagsProfile", "selector": { "css": "#btn-profile-starting" } },
+        { "elementName": "customProfile", "selector": { "css": "#btn-profile-custom" } },
+        { "elementName": "profileDescription", "selector": { "css": "#profile-desc-text" } },
+
+        { "elementName": "compatibilityInput", "selector": { "css": "#genCompInput" } },
+        { "elementName": "compatibilitySlider", "selector": { "css": "#genCompSlider" } },
+        { "elementName": "movieScoreInput", "selector": { "css": "#genScoreInput" } },
+        { "elementName": "movieScoreSlider", "selector": { "css": "#genScoreSlider" } },
+        { "elementName": "requiredTagsHint", "selector": { "css": "#genTagsRequiredDisplay" } },
+
+        { "elementName": "lockedSectionToggle", "selector": { "css": "#toggleLockedElementsButton" } },
+        { "elementName": "lockedContent", "selector": { "css": "#locked-content" } },
+        { "elementName": "resetLocksButton", "selector": { "css": "#resetGeneratorLocksButton" } },
+        { "elementName": "lockedCategoryGroups", "selector": { "css": "#selectors-container-generator .category-group" } },
+        { "elementName": "lockedGenreSelect", "selector": { "css": "#inputs-genre-generator select.tag-selector" } },
+        { "elementName": "lockedSettingSelect", "selector": { "css": "#inputs-setting-generator select.tag-selector" } },
+        { "elementName": "lockedProtagonistSelect", "selector": { "css": "#inputs-protagonist-generator select.tag-selector" } },
+        { "elementName": "lockedAntagonistSelect", "selector": { "css": "#inputs-antagonist-generator select.tag-selector" } },
+        { "elementName": "lockedFinaleSelect", "selector": { "css": "#inputs-finale-generator select.tag-selector" } },
+        { "elementName": "lockedSupportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-generator select.tag-selector" } },
+        { "elementName": "lockedThemeEventSelect", "selector": { "css": "#inputs-theme-event-generator select.tag-selector" } },
+        { "elementName": "lockedSupportingCharacterSearch", "selector": { "css": "#search-supporting-character-generator-input" } },
+        { "elementName": "lockedThemeEventSearch", "selector": { "css": "#search-theme-event-generator-input" } },
+        { "elementName": "addLockedSupportingCharacterRow", "selector": { "css": "#add-supporting-character-generator-button" } },
+        { "elementName": "addLockedThemeEventRow", "selector": { "css": "#add-theme-event-generator-button" } },
+
+        { "elementName": "excludedSectionToggle", "selector": { "css": "#toggleExcludedElementsButton" } },
+        { "elementName": "excludedContent", "selector": { "css": "#excluded-content" } },
+        { "elementName": "excludedCountBadge", "selector": { "css": "#excluded-count" } },
+        { "elementName": "resetBansButton", "selector": { "css": "#resetExcludedBansButton" } },
+        { "elementName": "excludedSupportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-excluded select.tag-selector" } },
+        { "elementName": "excludedThemeEventSelect", "selector": { "css": "#inputs-theme-event-excluded select.tag-selector" } },
+        { "elementName": "excludedSupportingCharacterSearch", "selector": { "css": "#search-supporting-character-excluded-input" } },
+        { "elementName": "addExcludedSupportingCharacterRow", "selector": { "css": "#add-supporting-character-excluded-button" } },
+
+        { "elementName": "feedbackMessage", "selector": { "css": "#generatorFeedbackMessage" } },
+        { "elementName": "unlockBlockedLocksButton", "selector": { "css": "#unlockBlockedLocksButton" } },
+        { "elementName": "generateButton", "selector": { "css": "#generateScriptsButton" } },
+
+        { "elementName": "resultsSection", "selector": { "css": "#results-generator" } },
+        { "elementName": "resultsList", "selector": { "css": "#generatorResultsList" } },
+        { "elementName": "generatedCards", "selector": { "css": "#generatorResultsList .gen-card" } },
+        { "elementName": "generatedTagChips", "selector": { "css": "#generatorResultsList .gen-tag-chip" } },
+        { "elementName": "generatedPinButtons", "selector": { "css": "#generatorResultsList [id^='generated-script-pin-']" } },
+
+        { "elementName": "pinnedSection", "selector": { "css": "#pinned-scripts-container" } },
+        { "elementName": "pinnedList", "selector": { "css": "#pinnedResultsList" } },
+        { "elementName": "pinnedCards", "selector": { "css": "#pinnedResultsList .gen-card" } },
+        { "elementName": "savePinnedButton", "selector": { "css": "#savePinnedScriptsButton" } },
+        { "elementName": "loadPinnedButton", "selector": { "css": "#loadPinnedScriptsButton" } },
+        { "elementName": "pinnedFeedbackMessage", "selector": { "css": "#pinnedScriptsFeedbackMessage" } }
+      ]
+    },
+    {
+      "name": "ScriptEvaluation",
+      "elements": [
+        { "elementName": "panel", "selector": { "css": "#tab-synergy" } },
+        { "elementName": "compatibilityModeButton", "selector": { "css": "#evaluation-mode-compatibility-button" } },
+        { "elementName": "gravesModeButton", "selector": { "css": "#evaluation-mode-graves-button" } },
+        { "elementName": "quickSearch", "selector": { "css": "#globalSearchSynergy" } },
+        { "elementName": "quickSearchResults", "selector": { "css": "#searchResultsSynergy" } },
+        { "elementName": "quickSearchResultItems", "selector": { "css": "[id^='global-search-result-synergy-']" } },
+        { "elementName": "resetButton", "selector": { "css": "#resetSynergyButton" } },
+        { "elementName": "categoryGroups", "selector": { "css": "#selectors-container-synergy .category-group" } },
+        { "elementName": "genreSelect", "selector": { "css": "#inputs-genre-synergy select.tag-selector" } },
+        { "elementName": "genrePercentInput", "selector": { "css": "#tag-selector-row-synergy-genre-1-percent-input" } },
+        { "elementName": "genrePercentSlider", "selector": { "css": "#tag-selector-row-synergy-genre-1-percent-slider" } },
+        { "elementName": "settingSelect", "selector": { "css": "#inputs-setting-synergy select.tag-selector" } },
+        { "elementName": "protagonistSelect", "selector": { "css": "#inputs-protagonist-synergy select.tag-selector" } },
+        { "elementName": "antagonistSelect", "selector": { "css": "#inputs-antagonist-synergy select.tag-selector" } },
+        { "elementName": "finaleSelect", "selector": { "css": "#inputs-finale-synergy select.tag-selector" } },
+        { "elementName": "supportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-synergy select.tag-selector" } },
+        { "elementName": "themeEventSelect", "selector": { "css": "#inputs-theme-event-synergy select.tag-selector" } },
+        { "elementName": "feedbackMessage", "selector": { "css": "#synergyFeedbackMessage" } },
+        { "elementName": "checkCompatibilityButton", "selector": { "css": "#calculateSynergyButton" } },
+        { "elementName": "saveToLibraryButton", "selector": { "css": "#saveSynergyScriptButton" } },
+        { "elementName": "resultsSection", "selector": { "css": "#results-synergy" } },
+        { "elementName": "averageCompatibility", "selector": { "css": "#synergyAverageDisplay" } },
+        { "elementName": "scriptSynergyTotal", "selector": { "css": "#synergyTotalDisplay" } },
+        { "elementName": "breakdownBaseScore", "selector": { "css": "#breakdownBaseScore" } },
+        { "elementName": "breakdownCommercialBonus", "selector": { "css": "#breakdownComBonus" } },
+        { "elementName": "breakdownArtisticBonus", "selector": { "css": "#breakdownArtBonus" } },
+        { "elementName": "totalCommercialScore", "selector": { "css": "#totalComScore" } },
+        { "elementName": "totalArtisticScore", "selector": { "css": "#totalArtScore" } },
+        { "elementName": "conflictsPanel", "selector": { "css": "#synergy-conflicts-panel" } },
+        { "elementName": "conflictsList", "selector": { "css": "#spoilerDisplay" } },
+        { "elementName": "transferToMarketButton", "selector": { "css": "#transferTagsButton" } }
+      ]
+    },
+    {
+      "name": "ColmanGraves",
+      "elements": [
+        { "elementName": "panel", "selector": { "css": "#tab-graves" } },
+        { "elementName": "compatibilityModeButton", "selector": { "css": "#graves-mode-compatibility-button" } },
+        { "elementName": "gravesModeButton", "selector": { "css": "#graves-mode-graves-button" } },
+        { "elementName": "quickSearch", "selector": { "css": "#globalSearchGraves" } },
+        { "elementName": "quickSearchResults", "selector": { "css": "#searchResultsGraves" } },
+        { "elementName": "quickSearchResultItems", "selector": { "css": "[id^='global-search-result-graves-']" } },
+        { "elementName": "allTagSelects", "selector": { "css": "#selectors-container-graves select.tag-selector" } },
+        { "elementName": "genreSelect", "selector": { "css": "#inputs-genre-graves select.tag-selector" } },
+        { "elementName": "settingSelect", "selector": { "css": "#inputs-setting-graves select.tag-selector" } },
+        { "elementName": "protagonistSelect", "selector": { "css": "#inputs-protagonist-graves select.tag-selector" } },
+        { "elementName": "antagonistSelect", "selector": { "css": "#inputs-antagonist-graves select.tag-selector" } },
+        { "elementName": "resetButton", "selector": { "css": "#resetGravesButton" } },
+        { "elementName": "supportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-graves select.tag-selector" } },
+        { "elementName": "themeEventSelect", "selector": { "css": "#inputs-theme-event-graves select.tag-selector" } },
+        { "elementName": "matchCategoryFilter", "selector": { "css": "#gravesBestCategoryFilter" } },
+        { "elementName": "minimumFitFilter", "selector": { "css": "#gravesBestScoreFilter" } },
+        { "elementName": "startingTagsOnlyCheckbox", "selector": { "css": "#gravesStarterOnlyFilter" } },
+        { "elementName": "exclusionNotice", "selector": { "css": "#graves-exclusion-notice" } },
+        { "elementName": "exclusionSummary", "selector": { "css": "#gravesExclusionSummary" } },
+        { "elementName": "editInScriptLabButton", "selector": { "css": "#gravesExclusionJumpButton" } },
+        { "elementName": "feedbackMessage", "selector": { "css": "#gravesFeedbackMessage" } },
+        { "elementName": "evaluateButton", "selector": { "css": "#evaluateGravesButton" } },
+        { "elementName": "generateBestMatchesButton", "selector": { "css": "#generateBestMatchesButton" } },
+        { "elementName": "saveToLibraryButton", "selector": { "css": "#saveGravesScriptButton" } },
+        { "elementName": "resultsSection", "selector": { "css": "#results-graves" } },
+        { "elementName": "verdict", "selector": { "css": "#gravesVerdictDisplay" } },
+        { "elementName": "averageFit", "selector": { "css": "#gravesAverageDisplay" } },
+        { "elementName": "commercialScore", "selector": { "css": "#gravesCommercialScoreDisplay" } },
+        { "elementName": "artisticScore", "selector": { "css": "#gravesArtisticScoreDisplay" } },
+        { "elementName": "verdictText", "selector": { "css": "#gravesVerdictText" } },
+        { "elementName": "methodList", "selector": { "css": "#gravesMethodList" } },
+        { "elementName": "bestMatchesPanel", "selector": { "css": "#graves-best-matches-panel" } },
+        { "elementName": "bestMatchesList", "selector": { "css": "#gravesBestMatchesList" } },
+        { "elementName": "bestAdditionsTab", "selector": { "css": "#graves-best-mode-additions" } },
+        { "elementName": "swapSuggestionsTab", "selector": { "css": "#graves-best-mode-swaps" } },
+        { "elementName": "pairwiseTab", "selector": { "css": "#graves-best-mode-pairwise" } },
+        { "elementName": "bestMatchRows", "selector": { "css": "#gravesBestMatchesList [data-role='graves-best-match']" } },
+        { "elementName": "bestMatchAddButtons", "selector": { "css": "#gravesBestMatchesList [data-action='add-graves-best-match']" } },
+        { "elementName": "audienceDisplay", "selector": { "css": "#gravesAudienceDisplay" } },
+        { "elementName": "conflictsPanel", "selector": { "css": "#graves-conflicts-panel" } }
+      ]
+    },
+    {
+      "name": "MarketingRelease",
+      "elements": [
+        { "elementName": "panel", "selector": { "css": "#tab-advertisers" } },
+        { "elementName": "analyzeScriptModeButton", "selector": { "css": "#marketing-mode-advertisers-button" } },
+        { "elementName": "buildForTargetModeButton", "selector": { "css": "#marketing-mode-targeted-button" } },
+        { "elementName": "quickSearch", "selector": { "css": "#globalSearchAdvertisers" } },
+        { "elementName": "quickSearchResults", "selector": { "css": "#searchResultsAdvertisers" } },
+
+        { "elementName": "commercialScoreInput", "selector": { "css": "#comScoreInput" } },
+        { "elementName": "commercialScoreSlider", "selector": { "css": "#comScoreSlider" } },
+        { "elementName": "artisticScoreInput", "selector": { "css": "#artScoreInput" } },
+        { "elementName": "artisticScoreSlider", "selector": { "css": "#artScoreSlider" } },
+
+        { "elementName": "resetButton", "selector": { "css": "#resetAdvertisersButton" } },
+        { "elementName": "allTagSelects", "selector": { "css": "#selectors-container-advertisers select.tag-selector" } },
+        { "elementName": "genreSelect", "selector": { "css": "#inputs-genre-advertisers select.tag-selector" } },
+        { "elementName": "supportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-advertisers select.tag-selector" } },
+        { "elementName": "themeEventSelect", "selector": { "css": "#inputs-theme-event-advertisers select.tag-selector" } },
+        { "elementName": "feedbackMessage", "selector": { "css": "#advertisersFeedbackMessage" } },
+        { "elementName": "analyzeScriptButton", "selector": { "css": "#analyzeMovieButton" } },
+        { "elementName": "saveToLibraryButton", "selector": { "css": "#saveAdvertisersScriptButton" } },
+
+        { "elementName": "distributionCard", "selector": { "css": "#dist-wrapper" } },
+        { "elementName": "strikingImageToggle", "selector": { "css": "#strikingImageToggle" } },
+        { "elementName": "artisticAbilityToggle", "selector": { "css": "#artisticAbilityToggle" } },
+        { "elementName": "behemothToggle", "selector": { "css": "#behemothToggle" } },
+        { "elementName": "ownedScreeningsInput", "selector": { "css": "#ownedScreeningsInput" } },
+        { "elementName": "distributionCommercialScore", "selector": { "css": "#dist-com-score-display" } },
+        { "elementName": "distributionGrid", "selector": { "css": "#dist-results-grid" } },
+        { "elementName": "weekCards", "selector": { "css": "#dist-results-grid .week-box" } },
+        { "elementName": "weekOneCard", "selector": { "css": "#dist-week-1" } },
+        { "elementName": "weekOneValue", "selector": { "css": "#dist-week-1-value" } },
+        { "elementName": "weekEightCard", "selector": { "css": "#dist-week-8" } },
+        { "elementName": "weekEightValue", "selector": { "css": "#dist-week-8-value" } },
+
+        { "elementName": "resultsSection", "selector": { "css": "#results-advertisers" } },
+        { "elementName": "targetAudience", "selector": { "css": "#targetAudienceDisplay" } },
+        { "elementName": "holidayRelease", "selector": { "css": "#holidayDisplay" } },
+        { "elementName": "movieLean", "selector": { "css": "#movieLeanDisplay" } },
+        { "elementName": "recommendedAdvertisers", "selector": { "css": "#adAgentDisplay" } },
+        { "elementName": "campaignDuration", "selector": { "css": "#campaignStrategyDisplay" } }
+      ]
+    },
+    {
+      "name": "BuildForTarget",
+      "elements": [
+        { "elementName": "panel", "selector": { "css": "#tab-targeted" } },
+        { "elementName": "analyzeScriptModeButton", "selector": { "css": "#targeted-mode-advertisers-button" } },
+        { "elementName": "buildForTargetModeButton", "selector": { "css": "#targeted-mode-targeted-button" } },
+        { "elementName": "resetButton", "selector": { "css": "#resetTargetedButton" } },
+
+        { "elementName": "audienceList", "selector": { "css": "#targeted-audience-checkboxes" } },
+        { "elementName": "audienceCheckboxes", "selector": { "css": "#targeted-audience-checkboxes .targeted-audience-checkbox" } },
+        { "elementName": "advertiserList", "selector": { "css": "#targeted-advertiser-checkboxes" } },
+        { "elementName": "advertiserCheckboxes", "selector": { "css": "#targeted-advertiser-checkboxes .targeted-advertiser-checkbox" } },
+
+        { "elementName": "tagSelectorGrid", "selector": { "css": "#selectors-container-targeted" } },
+        { "elementName": "allTagSelects", "selector": { "css": "#selectors-container-targeted select.tag-selector" } },
+        { "elementName": "genreSelect", "selector": { "css": "#inputs-genre-targeted select.tag-selector" } },
+        { "elementName": "supportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-targeted select.tag-selector" } },
+        { "elementName": "themeEventSelect", "selector": { "css": "#inputs-theme-event-targeted select.tag-selector" } },
+
+        { "elementName": "feedbackMessage", "selector": { "css": "#targetedFeedbackMessage" } },
+        { "elementName": "findCombinationsButton", "selector": { "css": "#findCombinationsButton" } },
+        { "elementName": "resultsPanel", "selector": { "css": "#targeted-results-panel" } },
+        { "elementName": "resultsList", "selector": { "css": "#targetedResultsList" } }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,8 @@ dist/
 
 .idea/
 .playwright-cli/
+test-results/
+playwright-report/
 graphify-out/
 output/
 .DS_Store
