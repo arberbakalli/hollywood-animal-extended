@@ -2204,6 +2204,106 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .best-match-score.score-excellent { color: #10b981; }
 .best-match-score.score-strong { color: #f59e0b; }
 
+/* Band grouping mirrors the in-game dossier: successful, common, unsuccessful. */
+.best-match-band {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.best-match-band-title {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.best-match-band-successful .best-match-band-title { color: #10b981; }
+.best-match-band-common .best-match-band-title { color: #f59e0b; }
+.best-match-band-unsuccessful .best-match-band-title { color: var(--danger); }
+
+/* Scoped to .best-match-band so the band signal wins over the per-category
+   colours defined further down, while Pairwise rows (which sit outside a band)
+   keep those category colours. */
+.best-match-band .best-match-item.best-match-successful {
+    background: rgba(16, 185, 129, 0.08);
+    border-left-color: #10b981;
+}
+
+.best-match-band .best-match-item.best-match-successful:hover {
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.best-match-band .best-match-item.best-match-common {
+    background: rgba(245, 158, 11, 0.08);
+    border-left-color: #f59e0b;
+}
+
+.best-match-band .best-match-item.best-match-common:hover {
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.best-match-band .best-match-item.best-match-unsuccessful {
+    background: rgba(255, 95, 95, 0.08);
+    border-left-color: var(--danger);
+}
+
+.best-match-band .best-match-item.best-match-unsuccessful:hover {
+    background: rgba(255, 95, 95, 0.12);
+}
+
+.best-match-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.best-match-from { color: var(--text-muted); }
+
+.best-match-to.up { color: #10b981; }
+.best-match-to.down { color: var(--danger); }
+.best-match-to.flat { color: var(--text-main); }
+
+.best-match-change {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.best-match-change.up { color: #10b981; }
+.best-match-change.down { color: var(--danger); }
+.best-match-change.flat { color: var(--text-muted); }
+
+.best-match-warning {
+    padding: 3px 10px;
+    border: 1px solid rgba(255, 95, 95, 0.45);
+    border-radius: 20px;
+    background: rgba(255, 95, 95, 0.12);
+    color: #ffd6d6;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.best-match-slot-note {
+    margin-bottom: 1.25rem;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+    font-size: 0.9rem;
+}
+
+#graves-best-mode-nav {
+    margin-top: 16px;
+}
+
 .best-match-add-btn {
     min-height: 32px;
     padding: 0 12px;

@@ -304,8 +304,12 @@ function hideGravesEvaluationResults() {
     return HACGravesBestMatches.hideGravesEvaluationResults();
 }
 
-function renderBestMatches(matches) {
-    return HACGravesBestMatches.renderBestMatches(matches);
+function renderBestMatches() {
+    return HACGravesBestMatches.renderBestMatches();
+}
+
+function setBestMatchMode(mode) {
+    return HACGravesBestMatches.setBestMatchMode(mode);
 }
 
 function calculateAdvertiserMatch(scriptTags, movieLean, agency) {

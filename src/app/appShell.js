@@ -91,6 +91,10 @@
             button.addEventListener('click', () => saveScriptFromContext(button.dataset.saveScript));
         });
 
+        document.querySelectorAll('[data-best-match-mode]').forEach(button => {
+            button.addEventListener('click', () => setBestMatchMode(button.dataset.bestMatchMode));
+        });
+
         document.querySelectorAll('[data-generator-profile]').forEach(button => {
             button.addEventListener('click', () => setGeneratorProfile(button.dataset.generatorProfile));
         });
