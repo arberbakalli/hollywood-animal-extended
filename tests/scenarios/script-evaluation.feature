@@ -62,24 +62,24 @@ Feature: Script Evaluation — Compatibility Numbers
     When the user checks compatibility
     Then the conflicts panel reports that no severe conflicts were found
 
-  # [verified] Severe clashes are listed as spoiler rows.
+  # [automated] Severe clashes are listed as spoiler rows.
   Scenario: Conflicts are reported for clashing elements
     Given the user has selected elements that clash
     When the user checks compatibility
     Then the conflicts panel lists the clashing pair
 
-  # [verified] A results-time label reports the cap and the scoring count.
+  # [automated] A results-time label reports the cap and the scoring count.
   Scenario: The score cap reflects how many scoring elements were used
     Given the user has checked compatibility
     Then a label states the maximum score and the number of scoring elements
 
-  # [verified] Clicking a quick-search result adds it to the selection.
+  # [automated] Clicking a quick-search result adds it to the selection.
   Scenario: Adding a story element from quick search
     When the user types into quick search
     And the user chooses a result
     Then that element joins the current selection
 
-  # [verified] A "Save to Script Library" control exists in this mode.
+  # [automated] A "Save to Script Library" control exists in this mode.
   Scenario: Saving an evaluated script to the library
     Given the user has checked compatibility
     When the user saves the script to the library

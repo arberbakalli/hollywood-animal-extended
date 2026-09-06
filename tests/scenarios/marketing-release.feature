@@ -4,8 +4,8 @@
 #   [unverified] plausible but NOT yet confirmed — do not automate until watched
 #
 # NOTE: this area has two modes — "Analyze Script" (default) and
-# "Build for Target". The Build for Target panel was not exercised; its
-# scenarios are deliberately absent rather than guessed.
+# "Build for Target". Analyze Script scenarios live here; Build for Target has
+# its own feature file and is covered by tests/e2e/marketing-release.spec.js.
 
 Feature: Marketing and Release
   Turn a finished script into an audience, an advertiser shortlist, and a
@@ -21,7 +21,7 @@ Feature: Marketing and Release
     Then no analysis results are shown
     And the distribution calculator is shown
 
-  # [verified] Commercial and Art inputs are 0-10, both defaulting to 5.0.
+  # [automated] Commercial and Art inputs are 0-10, both defaulting to 5.0.
   Scenario: Setting the movie scores
     When the user sets the commercial score to 8.0
     And the user sets the artistic score to 3.0
@@ -40,12 +40,12 @@ Feature: Marketing and Release
     And each week card is addressable by its week number
     And the week 8 figure is lower than the week 1 figure
 
-  # [verified] Owned Theatres input defaults to 3185.
+  # [automated] Owned Theatres input defaults to 3185.
   Scenario: Changing the number of owned theatres
     When the user changes the owned theatres to 5000
     Then the screening projections are recalculated
 
-  # [verified] Three independent switches sit in the distribution header.
+  # [automated] Three independent switches sit in the distribution header.
   Scenario Outline: Distribution bonuses can be toggled independently
     When the user enables the "<bonus>" bonus
     Then the screening projections are recalculated
@@ -63,7 +63,7 @@ Feature: Marketing and Release
     When the user enables the Behemoth bonus
     Then the week 1 projection increases
 
-  # [verified] Analyze control and results markup exist.
+  # [automated] Analyze control and results markup exist.
   Scenario: Analysing a script produces a marketing profile
     When the user selects story elements for the script
     And the user analyses the script
@@ -78,19 +78,19 @@ Feature: Marketing and Release
     Given the user has analysed a script
     Then audiences are marked as high or moderate interest
 
-  # [verified] A "Movie Lean Towards" field precedes the advertiser list.
+  # [automated] A "Movie Lean Towards" field precedes the advertiser list.
   Scenario: The advertiser shortlist states which way the movie leans
     Given the user has analysed a script
     Then the movie's lean is stated
     And advertisers are listed beneath it
 
-  # [verified] Reset and Save to Script Library controls exist.
+  # [automated] Reset and Save to Script Library controls exist.
   Scenario: Resetting clears the marketing selection
     Given the user has selected story elements
     When the user resets
     Then the selection is cleared
 
-  # [verified] Save control exists in this mode.
+  # [automated] Save control exists in this mode.
   Scenario: Saving an analysed script to the library
     Given the user has analysed a script
     When the user saves the script to the library

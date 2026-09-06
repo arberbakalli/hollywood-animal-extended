@@ -41,14 +41,14 @@ Feature: Build for Target
     Then the results panel is hidden
     And the audience selections are cleared
 
-  # [verified] Tags are optional; the label says "Leave Empty for All".
+  # [automated] Tags are optional; the label says "Leave Empty for All".
   Scenario: Narrowing the search with optional tags
     Given the user has selected a target audience
     When the user adds a story element to the tag builder
     And the user searches for top combinations
     Then the combinations returned all include that story element
 
-  # [verified] findTargetedCombinations refuses more than six optional tags.
+  # [automated] findTargetedCombinations refuses more than six optional tags.
   Scenario: More than six optional tags is refused
     Given the user has selected a target audience
     When the user adds seven story elements to the tag builder
@@ -56,14 +56,14 @@ Feature: Build for Target
     Then a message says to pick six or fewer optional tags
     And the count the user selected is named in the message
 
-  # [verified] An advertiser selection takes precedence over audiences when
+  # [automated] An advertiser selection takes precedence over audiences when
   # choosing which agencies to target.
   Scenario: Selecting an advertiser targets that agency directly
     When the user selects an advertiser
     And the user searches for top combinations
     Then the combinations are ranked for that agency
 
-  # [verified] Both mode buttons are present in this panel.
+  # [automated] Both mode buttons are present in this panel.
   Scenario: Switching back to Analyze Script
     When the user selects the Analyze Script mode
     Then the Analyze Script panel is shown

@@ -75,29 +75,29 @@ Feature: Script Lab
     And the first Genre row in Script Lab is numbered 1
     And the first Supporting Character row in Script Evaluation is numbered 1
 
-  # [verified] Collapsible sections exist and default to expanded.
+  # [automated] Collapsible sections exist and default to expanded.
   Scenario: Collapsing the Locked Elements section hides its selectors
     Given the Locked Elements section is expanded
     When the user collapses the Locked Elements section
     Then the locked tag selectors are hidden
 
-  # [verified] Only Supporting Character and Theme & Event render as selectors.
+  # [automated] Only Supporting Character and Theme & Event render as selectors.
   Scenario: Locking a tag constrains the generated scripts
     When the user locks the supporting character "Sidekick"
     And the user generates scripts
     Then every generated script includes "Sidekick"
 
-  # [verified] The "+" control adds another dropdown row per category.
+  # [automated] The "+" control adds another dropdown row per category.
   Scenario: Adding a second selector row for the same category
     When the user adds another Supporting Character row
     Then two Supporting Character dropdowns are available
 
-  # [verified] A per-category search box filters that category's options.
+  # [automated] A per-category search box filters that category's options.
   Scenario: Filtering a category's options by search text
     When the user types "Sidekick" into the Supporting Character search box
     Then only matching options remain selectable in that category
 
-  # [verified] The movie-score slider updates the required-elements hint.
+  # [automated] The movie-score slider updates the required-elements hint.
   Scenario: Raising the target movie score changes the required element count
     When the user raises the target movie score
     Then the required story elements hint updates

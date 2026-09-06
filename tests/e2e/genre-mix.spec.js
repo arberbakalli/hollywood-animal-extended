@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/base.js';
+import { test, expect, openHollywood } from '../fixtures/base.js';
 
 // A genre mix is set in 5% increments, each genre holding at least 5%, and the
 // whole mix always totalling 100%. Before this was fixed, Genre had no add
@@ -10,15 +10,14 @@ const percent = async (steps, elementName) =>
 
 test.describe('Script Evaluation — genre mix', () => {
   test.beforeEach(async ({ steps }) => {
-    await steps.navigateTo('/', { waitUntil: 'domcontentloaded' });
-    await steps.on('genreAddButton', 'ScriptEvaluation').waitForState('attached');
+    await openHollywood(steps);
     await steps.on('evaluateTab', 'Navigation').click();
   });
 
   // Two rules that one list used to conflate, so narrowing it for the second
   // silently broke the first: every category renders a picker, but only these
   // three accept more than one selection.
-  test('only Genre, Supporting Character and Theme & Event accept multiples', async ({ steps }) => {
+  test('TC06-000001 only Genre, Supporting Character and Theme & Event accept multiples', async ({ steps }) => {
     await steps.on('categoryGroups', 'ScriptEvaluation').verifyCount({ exactly: 7 });
     await steps.on('addButtons', 'ScriptEvaluation').verifyCount({ exactly: 3 });
 
@@ -32,14 +31,14 @@ test.describe('Script Evaluation — genre mix', () => {
     await steps.on('finaleAddButton', 'ScriptEvaluation').verifyState('detached');
   });
 
-  test('a single genre holds the whole mix and hides the control', async ({ steps }) => {
+  test('TC06-000002 a single genre holds the whole mix and hides the control', async ({ steps }) => {
     await steps.on('genreRows', 'ScriptEvaluation').verifyCount({ exactly: 1 });
 
     expect(await percent(steps, 'genreRow1Percent')).toBe(100);
     await steps.on('genrePercentWrappers', 'ScriptEvaluation').first().verifyState('hidden');
   });
 
-  test('adding a second genre splits the mix evenly and reveals the control', async ({ steps }) => {
+  test('TC06-000003 adding a second genre splits the mix evenly and reveals the control', async ({ steps }) => {
     await steps.on('genreAddButton', 'ScriptEvaluation').click();
 
     await steps.on('genreRows', 'ScriptEvaluation').verifyCount({ exactly: 2 });
@@ -49,7 +48,7 @@ test.describe('Script Evaluation — genre mix', () => {
     expect(await percent(steps, 'genreRow2Percent')).toBe(50);
   });
 
-  test('a third genre still totals 100 in whole steps of five', async ({ steps }) => {
+  test('TC06-000004 a third genre still totals 100 in whole steps of five', async ({ steps }) => {
     await steps.on('genreAddButton', 'ScriptEvaluation').click();
     await steps.on('genreAddButton', 'ScriptEvaluation').click();
     await steps.on('genreRows', 'ScriptEvaluation').verifyCount({ exactly: 3 });
@@ -67,7 +66,7 @@ test.describe('Script Evaluation — genre mix', () => {
     }
   });
 
-  test('the slider is constrained to five-point steps from a floor of five', async ({ steps }) => {
+  test('TC06-000005 the slider is constrained to five-point steps from a floor of five', async ({ steps }) => {
     await steps.on('genreAddButton', 'ScriptEvaluation').click();
 
     await steps.expect('genreRow1Slider', 'ScriptEvaluation').attributes.get('min').toBe('5');
@@ -77,7 +76,7 @@ test.describe('Script Evaluation — genre mix', () => {
   });
 
   // The core rule: moving one genre pushes the remainder onto the others.
-  test('raising one genre lowers the other so the mix still totals 100', async ({ steps }) => {
+  test('TC06-000006 raising one genre lowers the other so the mix still totals 100', async ({ steps }) => {
     await steps.on('genreAddButton', 'ScriptEvaluation').click();
     expect(await percent(steps, 'genreRow2Percent')).toBe(50);
 
@@ -88,7 +87,7 @@ test.describe('Script Evaluation — genre mix', () => {
   });
 
   // The boundary case: one genre cannot take the whole mix while another exists.
-  test('a genre cannot squeeze the others below five percent', async ({ steps }) => {
+  test('TC06-000007 a genre cannot squeeze the others below five percent', async ({ steps }) => {
     await steps.on('genreAddButton', 'ScriptEvaluation').click();
 
     await steps.setSliderValue('genreRow1Slider', 'ScriptEvaluation', 100);

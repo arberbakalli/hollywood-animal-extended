@@ -98,7 +98,7 @@ Feature: Script Evaluation — Colman Graves
     And the user generates best matches
     Then no suggestion falls outside the starting tag set
 
-  # [verified] Each suggestion row carries an Add control.
+  # [automated] Each suggestion row carries an Add control.
   Scenario: Adding a suggested element to the script
     Given best matches are listed
     When the user adds the first suggestion

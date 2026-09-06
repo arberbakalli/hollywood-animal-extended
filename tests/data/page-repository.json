@@ -59,6 +59,8 @@
         { "elementName": "generatedCards", "selector": { "css": "#generatorResultsList .gen-card" } },
         { "elementName": "generatedTagChips", "selector": { "css": "#generatorResultsList .gen-tag-chip" } },
         { "elementName": "generatedPinButtons", "selector": { "css": "#generatorResultsList [id^='generated-script-pin-']" } },
+        { "elementName": "generatedCardHeaders", "selector": { "css": "#generatorResultsList [data-role='script-card-header']" } },
+        { "elementName": "generatedCardDetails", "selector": { "css": "#generatorResultsList .gen-details" } },
 
         { "elementName": "pinnedSection", "selector": { "css": "#pinned-scripts-container" } },
         { "elementName": "pinnedList", "selector": { "css": "#pinnedResultsList" } },
@@ -111,6 +113,7 @@
         { "elementName": "breakdownArtisticBonus", "selector": { "css": "#breakdownArtBonus" } },
         { "elementName": "totalCommercialScore", "selector": { "css": "#totalComScore" } },
         { "elementName": "totalArtisticScore", "selector": { "css": "#totalArtScore" } },
+        { "elementName": "scoreCapLabel", "selector": { "css": "#scoreCapLabel" } },
         { "elementName": "conflictsPanel", "selector": { "css": "#synergy-conflicts-panel" } },
         { "elementName": "conflictsList", "selector": { "css": "#spoilerDisplay" } },
         { "elementName": "transferToMarketButton", "selector": { "css": "#transferTagsButton" } }
@@ -217,12 +220,18 @@
         { "elementName": "audienceCheckboxes", "selector": { "css": "#targeted-audience-checkboxes .targeted-audience-checkbox" } },
         { "elementName": "advertiserList", "selector": { "css": "#targeted-advertiser-checkboxes" } },
         { "elementName": "advertiserCheckboxes", "selector": { "css": "#targeted-advertiser-checkboxes .targeted-advertiser-checkbox" } },
+        { "elementName": "checkedAudienceCheckboxes", "selector": { "css": "#targeted-audience-checkboxes .targeted-audience-checkbox:checked" } },
+        { "elementName": "checkedAdvertiserCheckboxes", "selector": { "css": "#targeted-advertiser-checkboxes .targeted-advertiser-checkbox:checked" } },
 
         { "elementName": "tagSelectorGrid", "selector": { "css": "#selectors-container-targeted" } },
         { "elementName": "allTagSelects", "selector": { "css": "#selectors-container-targeted select.tag-selector" } },
         { "elementName": "genreSelect", "selector": { "css": "#inputs-genre-targeted select.tag-selector" } },
+        { "elementName": "settingSelect", "selector": { "css": "#inputs-setting-targeted select.tag-selector" } },
+        { "elementName": "protagonistSelect", "selector": { "css": "#inputs-protagonist-targeted select.tag-selector" } },
+        { "elementName": "antagonistSelect", "selector": { "css": "#inputs-antagonist-targeted select.tag-selector" } },
         { "elementName": "supportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-targeted select.tag-selector" } },
         { "elementName": "themeEventSelect", "selector": { "css": "#inputs-theme-event-targeted select.tag-selector" } },
+        { "elementName": "finaleSelect", "selector": { "css": "#inputs-finale-targeted select.tag-selector" } },
 
         { "elementName": "feedbackMessage", "selector": { "css": "#targetedFeedbackMessage" } },
         { "elementName": "findCombinationsButton", "selector": { "css": "#findCombinationsButton" } },
