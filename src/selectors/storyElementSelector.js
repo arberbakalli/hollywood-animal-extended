@@ -1,6 +1,11 @@
 (function(global) {
     "use strict";
 
+    // A genre mix is set in 5% increments, each genre holding at least 5%, and the
+    // whole mix always totalling 100%.
+    const GENRE_PERCENT_STEP = 5;
+    const GENRE_PERCENT_MIN = 5;
+
     const SCRIPT_BUILDER_CONTEXTS = new Set([
         'generator',
         'synergy',
@@ -336,27 +341,29 @@
             numInput.type = 'number';
             numInput.className = 'percent-input';
             numInput.id = `${row.id}-percent-input`;
-            numInput.min = 0;
+            numInput.min = GENRE_PERCENT_MIN;
             numInput.max = 100;
+            numInput.step = GENRE_PERCENT_STEP;
             numInput.value = 100;
             const slider = document.createElement('input');
             slider.type = 'range';
             slider.className = 'styled-slider percent-slider';
             slider.id = `${row.id}-percent-slider`;
-            slider.min = 0;
+            slider.min = GENRE_PERCENT_MIN;
             slider.max = 100;
+            slider.step = GENRE_PERCENT_STEP;
             slider.value = 100;
             const label = document.createElement('span');
             label.id = `${row.id}-percent-unit`;
             label.innerText = '%';
             label.className = 'percent-unit';
-            numInput.addEventListener('input', (e) => {
-                slider.value = e.target.value;
-                updatePercentSliderTrack(slider);
+            // 'change' rather than 'input' on the number field, so rebalancing
+            // does not fire on every keystroke while a two-digit value is typed.
+            numInput.addEventListener('change', (e) => {
+                applyGenrePercent(context, row, parseFloat(e.target.value));
             });
             slider.addEventListener('input', (e) => {
-                numInput.value = e.target.value;
-                updatePercentSliderTrack(slider);
+                applyGenrePercent(context, row, parseFloat(e.target.value));
             });
             updatePercentSliderTrack(slider);
             percentWrapper.appendChild(slider);
@@ -388,27 +395,95 @@
         }
     }
 
-    function updateGenreControls(context) {
-        const container = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
-        if (!container) return;
-        const rows = container.querySelectorAll('.genre-row');
-        const count = rows.length;
-        const evenSplit = Math.floor(100 / count);
-        rows.forEach(row => {
-            const wrapper = row.querySelector('.genre-percent-wrapper');
-            const input = row.querySelector('.percent-input');
-            const slider = row.querySelector('.percent-slider');
-            if (count > 1) {
-                wrapper.classList.remove('hidden');
-                if (input.value == 100 && count > 1) {
-                    input.value = evenSplit;
-                    slider.value = evenSplit;
-                }
-                updatePercentSliderTrack(slider);
-            } else {
-                wrapper.classList.add('hidden');
-                input.value = 100;
+    function snapGenrePercent(value) {
+        return Math.round(value / GENRE_PERCENT_STEP) * GENRE_PERCENT_STEP;
+    }
+
+    // Split `total` across `weights` in whole steps, never below the minimum, summing
+    // to exactly `total`. Largest-remainder, so the result stays as close to the
+    // requested proportions as the step size allows.
+    function splitGenrePercent(total, weights) {
+        const count = weights.length;
+        if (count === 0) return [];
+        const weightSum = weights.reduce((sum, weight) => sum + weight, 0);
+        const raw = weights.map(weight =>
+            weightSum > 0 ? (weight / weightSum) * total : total / count);
+        const shares = raw.map(value =>
+            Math.max(GENRE_PERCENT_MIN, Math.floor(value / GENRE_PERCENT_STEP) * GENRE_PERCENT_STEP));
+        const remainders = raw.map((value, index) => value - shares[index]);
+        let assigned = shares.reduce((sum, share) => sum + share, 0);
+
+        while (assigned < total) {
+            let best = 0;
+            for (let i = 1; i < count; i++) if (remainders[i] > remainders[best]) best = i;
+            shares[best] += GENRE_PERCENT_STEP;
+            remainders[best] -= GENRE_PERCENT_STEP;
+            assigned += GENRE_PERCENT_STEP;
+        }
+        while (assigned > total) {
+            let best = -1;
+            for (let i = 0; i < count; i++) {
+                if (shares[i] - GENRE_PERCENT_STEP < GENRE_PERCENT_MIN) continue;
+                if (best === -1 || shares[i] > shares[best]) best = i;
             }
+            if (best === -1) break;
+            shares[best] -= GENRE_PERCENT_STEP;
+            assigned -= GENRE_PERCENT_STEP;
+        }
+        return shares;
+    }
+
+    function genreRows(context) {
+        const container = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
+        return container ? Array.from(container.querySelectorAll('.genre-row')) : [];
+    }
+
+    function readGenrePercent(row) {
+        const value = parseFloat(row.querySelector('.percent-input')?.value);
+        return Number.isFinite(value) ? value : GENRE_PERCENT_MIN;
+    }
+
+    function writeGenrePercent(row, value) {
+        const input = row.querySelector('.percent-input');
+        const slider = row.querySelector('.percent-slider');
+        if (!input || !slider) return;
+        input.value = value;
+        slider.value = value;
+        updatePercentSliderTrack(slider);
+    }
+
+    // Moving one genre redistributes the remainder across the others in proportion
+    // to what they already hold, so the mix always totals 100%.
+    function applyGenrePercent(context, changedRow, requestedValue) {
+        const others = genreRows(context).filter(row => row !== changedRow);
+        if (others.length === 0) {
+            writeGenrePercent(changedRow, 100);
+            return;
+        }
+        const ceiling = 100 - GENRE_PERCENT_MIN * others.length;
+        const value = Math.min(ceiling,
+            Math.max(GENRE_PERCENT_MIN, snapGenrePercent(requestedValue)));
+        writeGenrePercent(changedRow, value);
+        splitGenrePercent(100 - value, others.map(readGenrePercent))
+            .forEach((share, index) => writeGenrePercent(others[index], share));
+    }
+
+    function updateGenreControls(context) {
+        const rows = genreRows(context);
+        if (rows.length === 0) return;
+
+        if (rows.length === 1) {
+            rows[0].querySelector('.genre-percent-wrapper')?.classList.add('hidden');
+            writeGenrePercent(rows[0], 100);
+            return;
+        }
+
+        // Adding or removing a genre re-splits evenly; dragging is what preserves a
+        // deliberate mix.
+        const shares = splitGenrePercent(100, rows.map(() => 1));
+        rows.forEach((row, index) => {
+            row.querySelector('.genre-percent-wrapper')?.classList.remove('hidden');
+            writeGenrePercent(row, shares[index]);
         });
     }
 
