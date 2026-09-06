@@ -15,6 +15,23 @@ test.describe('Script Evaluation — genre mix', () => {
     await steps.on('evaluateTab', 'Navigation').click();
   });
 
+  // Two rules that one list used to conflate, so narrowing it for the second
+  // silently broke the first: every category renders a picker, but only these
+  // three accept more than one selection.
+  test('only Genre, Supporting Character and Theme & Event accept multiples', async ({ steps }) => {
+    await steps.on('categoryGroups', 'ScriptEvaluation').verifyCount({ exactly: 7 });
+    await steps.on('addButtons', 'ScriptEvaluation').verifyCount({ exactly: 3 });
+
+    await steps.on('genreAddButton', 'ScriptEvaluation').verifyState('visible');
+    await steps.on('supportingCharacterAddButton', 'ScriptEvaluation').verifyState('visible');
+    await steps.on('themeEventAddButton', 'ScriptEvaluation').verifyState('visible');
+
+    await steps.on('settingAddButton', 'ScriptEvaluation').verifyState('detached');
+    await steps.on('protagonistAddButton', 'ScriptEvaluation').verifyState('detached');
+    await steps.on('antagonistAddButton', 'ScriptEvaluation').verifyState('detached');
+    await steps.on('finaleAddButton', 'ScriptEvaluation').verifyState('detached');
+  });
+
   test('a single genre holds the whole mix and hides the control', async ({ steps }) => {
     await steps.on('genreRows', 'ScriptEvaluation').verifyCount({ exactly: 1 });
 
