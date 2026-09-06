@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "sync:docs": "node tools/sync-docs.mjs",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },

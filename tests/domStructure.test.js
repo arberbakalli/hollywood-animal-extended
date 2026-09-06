@@ -133,20 +133,6 @@ describe('HTML structure', () => {
         await Promise.all(expectedSources.map(source => readProjectFile(source)));
     });
 
-    test('keeps the GitHub Pages script mirror in sync', async () => {
-        const rootHtml = await readProjectFile('index.html');
-        const docsHtml = await readProjectFile('docs/index.html');
-        const scriptSources = getScriptSources(rootHtml);
-
-        expect(getScriptSources(docsHtml)).toEqual(scriptSources);
-        await Promise.all(
-            scriptSources.map(async source => {
-                const rootSource = await readProjectFile(source);
-                const docsSource = await readProjectFile(`docs/${source}`);
-                expect(docsSource).toBe(rootSource);
-            })
-        );
-    });
 });
 
 describe('generated DOM hooks', () => {

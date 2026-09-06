@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#121212"/>
-  <path d="M10 21h44v31H10z" fill="#1e1e1e" stroke="#d4af37" stroke-width="3"/>
-  <path d="M10 21 18 9h10l-8 12zm17 0 8-12h10l-8 12zm17 0 8-12h2v12z" fill="#d4af37"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#e0e0e0">HA</text>
-</svg>
