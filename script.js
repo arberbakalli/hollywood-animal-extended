@@ -176,6 +176,10 @@ function getRequiredElementCount(targetScore) {
     return HACScriptGenerator.getRequiredElementCount(targetScore);
 }
 
+function getRequiredScriptCategories() {
+    return HACScriptGenerator.REQUIRED_SCRIPT_CATEGORIES;
+}
+
 function setupGeneratorControls() {
     return HACScriptGenerator.setupGeneratorControls();
 }

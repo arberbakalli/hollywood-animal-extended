@@ -87,6 +87,7 @@
     }
 
     let blockedLockIds = [];
+    const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist"];
 
     function showBlockedLockAction(ids) {
         blockedLockIds = ids;
@@ -131,6 +132,24 @@
         // Get Fixed Tags
         const fixedTags = collectTagInputs('generator');
         const excludedTags = getGeneratorExcludedTags();
+        const excludedIds = new Set(excludedTags.map(t => t.id));
+
+        const missingRequiredCategories = REQUIRED_SCRIPT_CATEGORIES.filter(category =>
+            !Object.values(GAME_DATA.tags).some(tag =>
+                tag.category === category &&
+                !excludedIds.has(tag.id) &&
+                !fixedTags.some(fixed => fixed.id === tag.id)
+            ) &&
+            !fixedTags.some(tag => tag.category === category)
+        );
+
+        if (missingRequiredCategories.length > 0) {
+            showFeedbackMessage(
+                'generatorFeedbackMessage',
+                `A script needs at least one available ${missingRequiredCategories.join(', ')}. Remove exclusions or switch availability.`
+            );
+            return;
+        }
 
         // Validate
         const scoringFixed = fixedTags.filter(t => t.category !== "Genre" && t.category !== "Setting");
@@ -143,7 +162,6 @@
             return;
         }
 
-        const excludedIds = new Set(excludedTags.map(t => t.id));
         const unavailableFixed = fixedTags.filter(t => excludedIds.has(t.id));
         if (unavailableFixed.length > 0) {
             const unavailableNames = unavailableFixed
@@ -386,7 +404,8 @@
             const tagData = GAME_DATA.tags[t.id];
             const tagName = tagData ? tagData.name : t.id; // Safety fallback
             const isFixed = fixedIds.has(t.id);
-            tagsHtml += `<span class="gen-tag-chip ${isFixed ? 'tag-fixed' : ''}">${tagName} <small>${t.category}</small></span>`;
+            const categoryClass = categoryToElementSlug(t.category);
+            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${isFixed ? 'tag-fixed' : ''}">${tagName} <small>${t.category}</small></span>`;
         });
 
         // Check if truly pinned to set Icon state
@@ -456,6 +475,7 @@
     global.HACScriptGenerator = {
         setupScoreSync,
         getRequiredElementCount,
+        REQUIRED_SCRIPT_CATEGORIES,
         setupGeneratorControls,
         generateScripts,
         runGenerationAlgorithm,

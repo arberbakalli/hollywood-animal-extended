@@ -18,6 +18,7 @@ const tag = (id, category) => ({ id, category });
 
 function buildGravesBestMatchesDom(selectorsExpression) {
     return `(() => {
+        const selectors = ${selectorsExpression};
         const feedback = {
             textContent: '',
             className: '',
@@ -30,8 +31,22 @@ function buildGravesBestMatchesDom(selectorsExpression) {
         const emptyContainer = { querySelectorAll() { return []; } };
         const gravesContainer = {
             querySelectorAll(selector) {
-                if (selector === '.tag-selector') return ${selectorsExpression};
+                if (selector === '.tag-selector') return selectors;
                 return [];
+            }
+        };
+        const genreContainer = {
+            querySelectorAll(selector) {
+                if (selector !== '.genre-row') return [];
+                return selectors
+                    .filter(select => select.dataset.category === 'Genre')
+                    .map(select => ({
+                        querySelector(rowSelector) {
+                            if (rowSelector === 'select') return select;
+                            if (rowSelector === '.percent-input') return { value: '100' };
+                            return null;
+                        }
+                    }));
             }
         };
 
@@ -40,6 +55,7 @@ function buildGravesBestMatchesDom(selectorsExpression) {
                 if (id === 'gravesFeedbackMessage') return feedback;
                 if (id === 'selectors-container-graves') return gravesContainer;
                 if (id === 'selectors-container-excluded') return emptyContainer;
+                if (id === 'inputs-genre-graves') return genreContainer;
                 if (id.startsWith('inputs-')) return null;
                 return generic;
             },
@@ -183,7 +199,9 @@ describe('Graves Evaluation', () => {
     test('Generate Best Matches requires at least 5 selected elements', async () => {
         const result = await h.evaluate(`(async () => {
             const feedback = ${buildGravesBestMatchesDom(`[
-                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } }
+                { value: 'ACTION', dataset: { category: 'Genre' } },
+                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
+                { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } }
             ]`)};
 
             await generateBestMatches();
@@ -191,15 +209,37 @@ describe('Graves Evaluation', () => {
         })()`);
 
         expect(result).toContain('at least 5 story elements');
-        expect(result).toContain('You selected 1');
+        expect(result).toContain('You selected 3');
+    });
+
+    test('Generate Best Matches requires Genre, Setting, and Protagonist', async () => {
+        const result = await h.evaluate(`(async () => {
+            const feedback = ${buildGravesBestMatchesDom(`[
+                { value: 'ACTION', dataset: { category: 'Genre' } },
+                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
+                { value: 'ANTAGONIST_BANDIT', dataset: { category: 'Antagonist' } },
+                { value: 'SUPPORTINGCHARACTER_MENTOR', dataset: { category: 'Supporting Character' } },
+                { value: 'FINALE_ANTAGONIST_GETS_KILLED', dataset: { category: 'Finale' } }
+            ]`)};
+
+            await generateBestMatches();
+            return feedback.textContent;
+        })()`);
+
+        expect(result).toContain('at least one Protagonist');
     });
 
     test('Generate Best Matches rejects more than 10 selected elements', async () => {
         const result = await h.evaluate(`(async () => {
-            const feedback = ${buildGravesBestMatchesDom(`Array.from({ length: 11 }, (_, index) => ({
-                value: 'TEST_TAG_' + index,
-                dataset: { category: 'Supporting Character' }
-            }))`)};
+            const feedback = ${buildGravesBestMatchesDom(`[
+                { value: 'ACTION', dataset: { category: 'Genre' } },
+                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
+                { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } },
+                ...Array.from({ length: 8 }, (_, index) => ({
+                    value: 'TEST_TAG_' + index,
+                    dataset: { category: 'Supporting Character' }
+                }))
+            ]`)};
 
             await generateBestMatches();
             return feedback.textContent;

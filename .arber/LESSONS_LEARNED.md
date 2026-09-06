@@ -156,3 +156,23 @@ screen passes.
 `initializeSelectors(...)`, and candidate-generation path. If a context builds,
 evaluates, markets, or recommends script tags, it must read the shared
 availability filter or have a written reason why not.
+
+---
+
+## 9. Starter deck data must come from the running game
+
+**What broke.** The Starting Tags profile omitted real starting settings:
+`MODERN_AMERICAN_TOWN` and `WILD_WEST`. Wild West was especially bad because it
+had appeared in prior rule notes, yet the app still treated it as unavailable.
+
+**The real cause.** The starter deck was inferred from secondary notes and agent
+memory instead of being verified in the running game. That made the exclusion
+table look authoritative while silently banning cards the player actually has.
+
+**The rule.** Starter deck changes need direct game verification or an explicit
+"unverified" label. If the user boots the game and gives the deck, preserve that
+list exactly and add a regression test for it. Guides can suggest strategy, but
+they do not define availability.
+
+**Current verified baseline.** Early script creation requires at least one
+Genre, one Setting, and one Protagonist before choosing the remaining elements.

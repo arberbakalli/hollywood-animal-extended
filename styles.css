@@ -10,6 +10,13 @@
     --danger: #ff5f5f;
     --success: #4cd964;
     --moderate: #ff9f0a;
+    --ha-commercial: #d4af37;
+    --ha-artistic: #a0a0ff;
+    --ha-category-protagonist: #508058;
+    --ha-category-antagonist: #584090;
+    --ha-category-supporting-character: #588098;
+    --ha-category-theme-event: #905040;
+    --ha-category-finale: #904870;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     --radius: 8px;
 }
@@ -426,6 +433,28 @@ h3 {
 
 .category-group:hover { border-left-color: var(--accent); }
 .category-group.is-highlighted { border-left-color: var(--accent); }
+
+.category-group[data-category="Protagonist"] { --category-color: var(--ha-category-protagonist); }
+.category-group[data-category="Antagonist"] { --category-color: var(--ha-category-antagonist); }
+.category-group[data-category="Supporting Character"] { --category-color: var(--ha-category-supporting-character); }
+.category-group[data-category="Theme & Event"] { --category-color: var(--ha-category-theme-event); }
+.category-group[data-category="Finale"] { --category-color: var(--ha-category-finale); }
+
+.category-group[data-category="Protagonist"],
+.category-group[data-category="Antagonist"],
+.category-group[data-category="Supporting Character"],
+.category-group[data-category="Theme & Event"],
+.category-group[data-category="Finale"] {
+    border-left-color: color-mix(in srgb, var(--category-color) 70%, transparent);
+}
+
+.category-group[data-category="Protagonist"] .category-label,
+.category-group[data-category="Antagonist"] .category-label,
+.category-group[data-category="Supporting Character"] .category-label,
+.category-group[data-category="Theme & Event"] .category-label,
+.category-group[data-category="Finale"] .category-label {
+    color: var(--category-color);
+}
 
 #selectors-container-excluded.is-batching { display: none; }
 

@@ -104,7 +104,7 @@
             const grade = predictGradeFromScore(avgScore);
 
             scoredCombinations.push({
-                tags: combo.map(t => ({ id: t.id, name: t.name })),
+                tags: combo.map(t => ({ id: t.id, name: t.name, category: t.category })),
                 avgScore,
                 grade: grade.grade,
                 tier: grade.tier,
@@ -218,7 +218,7 @@
                 </div>
                 <div class="targeted-tag-list">
                     ${combo.tags.map(tag => `
-                        <div class="targeted-tag-chip">
+                        <div class="targeted-tag-chip ${categoryToElementSlug(tag.category)}">
                             ${tag.name}
                         </div>
                     `).join('')}

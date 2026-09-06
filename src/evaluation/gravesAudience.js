@@ -10,6 +10,15 @@
         hideGravesEvaluationResults();
 
         const selectedTags = collectTagInputs('graves');
+        const missingRequiredCategories = getRequiredScriptCategories().filter(category =>
+            !selectedTags.some(tag => tag.category === category)
+        );
+
+        if (missingRequiredCategories.length > 0) {
+            showFeedbackMessage('gravesFeedbackMessage', `A script needs at least one ${missingRequiredCategories.join(', ')}.`, 'accent');
+            return;
+        }
+
         if (selectedTags.length < 5) {
             showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements for a real script evaluation. You selected ${selectedTags.length}.`, 'accent');
             return;

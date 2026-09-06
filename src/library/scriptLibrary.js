@@ -175,7 +175,7 @@
         return analyzeMovie();
     }
 
-    function transferScriptToContext(uniqueId, targetContext) {
+    async function transferScriptToContext(uniqueId, targetContext) {
         let script = pinnedScripts.find(s => s.uniqueId === uniqueId);
         if(!script) script = generatedScriptsCache.find(s => s.uniqueId === uniqueId);
 
@@ -206,14 +206,14 @@
             updateGenreControls(targetContext);
         }
 
+        await runTransferTarget(targetContext);
+
         if (skippedTags.length > 0) {
             const names = skippedTags
                 .map(tag => GAME_DATA.tags[tag.id] ? GAME_DATA.tags[tag.id].name : tag.id)
                 .join(', ');
             showFeedbackMessage(`${targetContext}FeedbackMessage`, `Skipped excluded elements: ${names}.`, 'accent');
         }
-
-        runTransferTarget(targetContext);
     }
 
     function transferScriptToAdvertisers(uniqueId) {
