@@ -191,6 +191,9 @@ multiplier rather than folding into `getDistributionMultiplier()`.
     weeks 2-4  = base * openingViewerMultiplier
     weeks 5-8  = base
 
+This budget boost stays week 1 only. The separate decay bonus below also lifts
+week 2 - see "As shipped" for the amended behaviour.
+
 **Decay.** `DECAY` is currently the constant `0.8`, a 20% weekly drop. "Falls 25%
 more slowly" reduces that drop by a quarter, 20% to 15%, so retention becomes
 `0.85`. Apply only when Behemoth is on AND the commercial score exceeds 9. The
@@ -202,14 +205,32 @@ checked automatically - no new UI.
 Register `behemothToggle` in `initializeDistributionToggles()` so it triggers
 `recalculateDistribution` on change.
 
-### Open item
+### As shipped, and the open item
 
-The 0.85 figure is inferred from the wording, not verified in game. It is gated
-behind an opt-in toggle so the default is unaffected, but confirm against real
-numbers before treating it as settled. A screenshot of the in-game distribution
-table also shows the Behemoth icon on weeks 2 and 3, not week 1 only, which may
-mean the decay bonus marks those rows - or may mean the week-1 boost has wider
-reach than the tooltip states. Worth checking together.
+Amended after review: the slower fall applies to week 2 as well. Week 2 keeps
+half of week 1, which is a retention step like every later week, so an in-game
+screenshot showing the Behemoth icon on weeks 2 and 3 reads as the bonus
+covering that step too. Week 2 was previously written as an independent
+multiplier, which no decay modifier could reach.
+
+Both retentions now derive from one factor rather than separate literals:
+
+    BEHEMOTH_SLOWER_FALL = 0.75      // "falls 25% more slowly"
+    easedRetention(0.8) -> 0.85      // weeks 3-8
+    easedRetention(0.5) -> 0.625     // week 1 -> week 2
+
+Later weeks compound from the lifted week 2 rather than stepping back down.
+The rate is rounded, because `1 - (1 - 0.8) * 0.75` evaluates to
+0.8500000000000001 and the grid rounds up, surfacing as a whole extra
+screening in week 3.
+
+Decision: shipped on this inference rather than held. It is opt-in behind a
+toggle, so the default is untouched, and `BEHEMOTH_SLOWER_FALL` is read in
+exactly one place - changing that single constant repoints every week.
+
+To verify: in game with Behemoth active and a commercial rating above 9, take
+week 3 divided by week 2. 0.85 confirms the model. Anything else is the real
+rate and goes straight into that constant.
 
 ### Explicitly out of scope
 
