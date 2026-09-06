@@ -261,10 +261,15 @@
             return;
         }
 
-        const tags = filterTagsForContext(
-            Object.values(GAME_DATA.tags).filter(t => t.category === category),
-            context
-        ).sort((a, b) => a.name.localeCompare(b.name));
+        let tags = Object.values(GAME_DATA.tags).filter(t => t.category === category);
+
+        // In Starting Tags profile for script builders (not excluded), filter to starter whitelist
+        if (currentGenProfile === 'starting' && context !== 'excluded') {
+            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+            tags = tags.filter(t => whitelist.has(t.id));
+        }
+
+        tags = filterTagsForContext(tags, context).sort((a, b) => a.name.localeCompare(b.name));
         const row = document.createElement('div');
         row.className = 'select-row';
         row.id = `tag-selector-row-${context}-${categorySlug}-${++tagSelectRowCounter}`;
