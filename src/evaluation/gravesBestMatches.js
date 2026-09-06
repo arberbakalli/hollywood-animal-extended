@@ -336,7 +336,7 @@
         }
 
         list.innerHTML = matches.map((match, index) => `
-            <div id="graves-best-match-${index + 1}" class="best-match-item ${categoryToElementSlug(match.candidate.category)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}">
+            <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${bandFor(match.score, match.score)} ${categoryToElementSlug(match.candidate.category)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${bandFor(match.score, match.score)}">
                 <div class="best-match-pair">
                     <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
                     <span class="best-match-arrow">&rarr;</span>

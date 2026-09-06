@@ -2225,33 +2225,33 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .best-match-band-common .best-match-band-title { color: #f59e0b; }
 .best-match-band-unsuccessful .best-match-band-title { color: var(--danger); }
 
-/* Scoped to .best-match-band so the band signal wins over the per-category
-   colours defined further down, while Pairwise rows (which sit outside a band)
-   keep those category colours. */
-.best-match-band .best-match-item.best-match-successful {
+/* One colour language across all three modes: green reads as a good addition,
+   amber as workable, red as a clash - whether the row sits in a band or in the
+   flat Pairwise list. */
+.best-match-item.best-match-successful {
     background: rgba(16, 185, 129, 0.08);
     border-left-color: #10b981;
 }
 
-.best-match-band .best-match-item.best-match-successful:hover {
+.best-match-item.best-match-successful:hover {
     background: rgba(16, 185, 129, 0.12);
 }
 
-.best-match-band .best-match-item.best-match-common {
+.best-match-item.best-match-common {
     background: rgba(245, 158, 11, 0.08);
     border-left-color: #f59e0b;
 }
 
-.best-match-band .best-match-item.best-match-common:hover {
+.best-match-item.best-match-common:hover {
     background: rgba(245, 158, 11, 0.12);
 }
 
-.best-match-band .best-match-item.best-match-unsuccessful {
+.best-match-item.best-match-unsuccessful {
     background: rgba(255, 95, 95, 0.08);
     border-left-color: var(--danger);
 }
 
-.best-match-band .best-match-item.best-match-unsuccessful:hover {
+.best-match-item.best-match-unsuccessful:hover {
     background: rgba(255, 95, 95, 0.12);
 }
 
@@ -2323,41 +2323,8 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 /* Category color coding */
-.best-match-item.genre {
-    border-left-color: #92400e;
-    background: rgba(146, 64, 14, 0.1);
-}
-
-.best-match-item.theme,
-.best-match-item.theme-event {
-    border-left-color: #991b1b;
-    background: rgba(153, 27, 27, 0.1);
-}
-
-.best-match-item.supporting-character {
-    border-left-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-}
-
-.best-match-item.protagonist {
-    border-left-color: #1e40af;
-    background: rgba(30, 64, 175, 0.1);
-}
-
-.best-match-item.antagonist {
-    border-left-color: #166534;
-    background: rgba(22, 101, 52, 0.1);
-}
-
-.best-match-item.setting {
-    border-left-color: #6d28d9;
-    background: rgba(109, 40, 217, 0.1);
-}
-
-.best-match-item.finale {
-    border-left-color: #be185d;
-    background: rgba(190, 24, 93, 0.1);
-}
+/* Rows are coloured by band, not category, so green means "good addition" on
+   every mode. Category stays legible on the tag chip below. */
 
 /* Tag category colors */
 .best-match-tag.genre {
