@@ -232,6 +232,10 @@ function transferScriptToAdvertisers(uniqueId) {
     return HACScriptLibrary.transferScriptToAdvertisers(uniqueId);
 }
 
+function transferScriptToContext(uniqueId, targetContext) {
+    return HACScriptLibrary.transferScriptToContext(uniqueId, targetContext);
+}
+
 async function calculateSynergy() {
     return HACScriptEvaluation.calculateSynergy();
 }

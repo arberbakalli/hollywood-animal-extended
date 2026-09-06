@@ -5,6 +5,9 @@
         await ensureCompatibilityLoaded();
         clearFeedbackMessage('gravesFeedbackMessage');
         hideGravesBestMatches();
+        // Clear any previous verdict up front, so a rejected script never leaves
+        // the last script's results sitting next to the error message.
+        hideGravesEvaluationResults();
 
         const selectedTags = collectTagInputs('graves');
         if (selectedTags.length < 5) {

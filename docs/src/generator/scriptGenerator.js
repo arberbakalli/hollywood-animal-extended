@@ -396,6 +396,9 @@
                 </div>
                 <div class="gen-actions">
                     <span id="${cardScope}-short-id-${scriptDomId}" class="script-id" data-role="script-short-id">ID: ${scriptObj.uniqueId.substring(scriptObj.uniqueId.length-6)}</span>
+                    <button id="${cardScope}-graves-${scriptDomId}" class="transfer-link-btn" type="button" data-role="script-graves-button">
+                        Evaluate with Graves &rarr;
+                    </button>
                     <button id="${cardScope}-transfer-${scriptDomId}" class="transfer-link-btn" type="button" data-role="script-transfer-button">
                         Find Best Advertisers &rarr;
                     </button>
@@ -407,7 +410,8 @@
             toggleScriptCard(event.currentTarget);
         });
         div.querySelector('.pin-btn')?.addEventListener('click', event => togglePin(scriptObj.uniqueId, event));
-        div.querySelector('.transfer-link-btn')?.addEventListener('click', () => transferScriptToAdvertisers(scriptObj.uniqueId));
+        div.querySelector('[data-role="script-graves-button"]')?.addEventListener('click', () => transferScriptToContext(scriptObj.uniqueId, 'graves'));
+        div.querySelector('[data-role="script-transfer-button"]')?.addEventListener('click', () => transferScriptToContext(scriptObj.uniqueId, 'advertisers'));
         div.querySelector('.script-name-input')?.addEventListener('keyup', event => updateScriptName(scriptObj.uniqueId, event.target.value));
         div.querySelector('.script-name-input')?.addEventListener('click', event => event.stopPropagation());
 

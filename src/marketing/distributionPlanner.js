@@ -1,6 +1,11 @@
 (function(global) {
     "use strict";
 
+    const BASE_DECAY = 0.8;
+    const BEHEMOTH_DECAY = 0.85;
+    const BEHEMOTH_DECAY_MIN_SCORE = 9;
+    const BEHEMOTH_WEEK_ONE_BOOST = 1.25;
+
     function setupDistributionLogic() {
         const comInput = document.getElementById('comScoreInput');
         const comSlider = document.getElementById('comScoreSlider');
@@ -24,6 +29,7 @@
         const owned = parseInt(ownedInput?.value, 10) || 0;
 
         if(scoreDisplay) scoreDisplay.innerText = score.toFixed(1);
+        updateBehemothNote(score);
         updateDistributionGrid(score, owned);
     }
 
@@ -31,8 +37,9 @@
         const BASE = 1000;
         const W1_MULT = 2;
         const W2_MULT = 1;
-        const DECAY = 0.8;
+        const decay = getDecayRate(commercialScore);
         const openingViewerMultiplier = getDistributionMultiplier();
+        const behemothWeekOne = isBehemothActive() ? BEHEMOTH_WEEK_ONE_BOOST : 1;
 
         const rawW1 = (commercialScore * W1_MULT * BASE) - availableScreenings;
         const w1 = Math.max(0.0, rawW1);
@@ -44,12 +51,14 @@
         let currentDecayBase = w2;
 
         for (let i = 2; i < 8; i++) {
-            currentDecayBase *= DECAY;
+            currentDecayBase *= decay;
             calcValues.push(currentDecayBase);
         }
 
         const finalResults = calcValues.map((val, index) => {
-            const boostedValue = index < 4 ? val * openingViewerMultiplier : val;
+            // The opening boost covers weeks 1-4; Behemoth's is week 1 only.
+            let boostedValue = index < 4 ? val * openingViewerMultiplier : val;
+            if (index === 0) boostedValue *= behemothWeekOne;
             return index < 4 ? Math.ceil(boostedValue) : Math.floor(boostedValue);
         });
 
@@ -73,9 +82,8 @@
     }
 
     function initializeDistributionToggles() {
-        const strikingImageToggle = document.getElementById('strikingImageToggle');
-        const artisticAbilityToggle = document.getElementById('artisticAbilityToggle');
-        [strikingImageToggle, artisticAbilityToggle]
+        ['strikingImageToggle', 'artisticAbilityToggle', 'behemothToggle']
+            .map(id => document.getElementById(id))
             .filter(Boolean)
             .forEach(toggle => toggle.addEventListener('change', recalculateDistribution));
     }
@@ -88,11 +96,33 @@
         return hasOpeningViewerBoost ? 2 : 1;
     }
 
+    function isBehemothActive() {
+        return Boolean(document.getElementById('behemothToggle')?.checked);
+    }
+
+    /**
+     * Behemoth slows attendance decay by a quarter, but only above a commercial
+     * rating of 9. The base 0.8 keeps a 20% weekly drop; a quarter less is 15%.
+     */
+    function getDecayRate(commercialScore) {
+        const qualifies = isBehemothActive() && commercialScore > BEHEMOTH_DECAY_MIN_SCORE;
+        return qualifies ? BEHEMOTH_DECAY : BASE_DECAY;
+    }
+
+    function updateBehemothNote(commercialScore) {
+        const note = document.getElementById('behemoth-note');
+        if (!note) return;
+        const showNote = isBehemothActive() && commercialScore <= BEHEMOTH_DECAY_MIN_SCORE;
+        note.classList.toggle('hidden', !showNote);
+    }
+
     global.HACDistributionPlanner = {
         setupDistributionLogic,
         recalculateDistribution,
         updateDistributionGrid,
         initializeDistributionToggles,
-        getDistributionMultiplier
+        getDistributionMultiplier,
+        isBehemothActive,
+        getDecayRate
     };
 })(globalThis);

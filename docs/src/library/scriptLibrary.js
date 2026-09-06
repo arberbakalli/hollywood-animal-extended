@@ -168,18 +168,25 @@
         reader.readAsText(file);
     }
 
-    function transferScriptToAdvertisers(uniqueId) {
+    // Resolved at call time, not load time: these live in script.js, which loads
+    // after this module.
+    function runTransferTarget(targetContext) {
+        if (targetContext === 'graves') return evaluateColmanGravesScript();
+        return analyzeMovie();
+    }
+
+    function transferScriptToContext(uniqueId, targetContext) {
         let script = pinnedScripts.find(s => s.uniqueId === uniqueId);
         if(!script) script = generatedScriptsCache.find(s => s.uniqueId === uniqueId);
 
         if(!script) return;
 
-        switchTab('advertisers');
-        initializeSelectors('advertisers');
+        switchTab(targetContext);
+        initializeSelectors(targetContext);
 
         script.tags.forEach(t => {
             const category = t.category;
-            const containerId = `inputs-${categoryToElementSlug(category)}-advertisers`;
+            const containerId = `inputs-${categoryToElementSlug(category)}-${targetContext}`;
             const container = document.getElementById(containerId);
             if (!container) return;
 
@@ -193,16 +200,20 @@
                 }
             }
             if (!placed) {
-                addDropdown(category, t.id, 'advertisers');
+                addDropdown(category, t.id, targetContext);
             }
         });
 
         const genres = script.tags.filter(t => t.category === "Genre");
         if(genres.length > 1) {
-            updateGenreControls('advertisers');
+            updateGenreControls(targetContext);
         }
 
-        analyzeMovie();
+        runTransferTarget(targetContext);
+    }
+
+    function transferScriptToAdvertisers(uniqueId) {
+        return transferScriptToContext(uniqueId, 'advertisers');
     }
 
     global.HACScriptLibrary = {
@@ -215,6 +226,7 @@
         savePinnedScripts,
         triggerLoadScripts,
         handleFileLoad,
-        transferScriptToAdvertisers
+        transferScriptToAdvertisers,
+        transferScriptToContext
     };
 })(globalThis);

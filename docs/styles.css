@@ -2634,6 +2634,22 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: #8beaff;
 }
 
+.distribution-toggle-label--behemoth {
+    color: #55EA83;
+}
+
+.distribution-toggle-label--behemoth small {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.distribution-toggle-note {
+    margin: 10px 0 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
 /* Toggle Container */
 .toggle-container {
     position: relative;
@@ -2678,6 +2694,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .distribution-toggle--artistic > .toggle-checkbox:checked + .toggle-track {
     background-color: #8beaff;
+}
+
+.distribution-toggle--behemoth > .toggle-checkbox:checked + .toggle-track {
+    background-color: #55EA83;
 }
 
 /* Toggle Thumb */
