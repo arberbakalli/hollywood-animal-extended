@@ -80,6 +80,14 @@ function refreshCategoryDropdowns(category, context) {
     return HACStoryElementSelector.refreshCategoryDropdowns(category, context);
 }
 
+function removeBlockedLockedPicks() {
+    return HACScriptGenerator.removeBlockedLockedPicks();
+}
+
+function refreshLockedElementAvailability() {
+    return HACStoryElementSelector.refreshLockedElementAvailability();
+}
+
 function addDropdown(category, selectedId = null, context = currentTab) {
     return HACStoryElementSelector.addDropdown(category, selectedId, context);
 }

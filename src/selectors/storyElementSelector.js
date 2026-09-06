@@ -136,16 +136,26 @@
             }
         });
 
+        // Locked picks cannot use an excluded tag - the generator rejects the run.
+        // Offering them anyway is what let users build a script it then refused.
+        // An already-selected one stays enabled so it remains visible and fixable.
+        const excludedIds = context === 'generator' ? getGeneratorExcludedIds() : null;
+
         // Update each dropdown: disable options that are selected elsewhere
         selects.forEach(select => {
             select.querySelectorAll('option:not(:first-child)').forEach(opt => {
                 const isSelectedInThisDropdown = (opt.value === select.value);
                 const isSelectedElsewhere = selectedValues.has(opt.value) && !isSelectedInThisDropdown;
+                const isExcluded = Boolean(excludedIds && excludedIds.has(opt.value)) && !isSelectedInThisDropdown;
 
-                // Disable if selected in another dropdown, enable otherwise
-                opt.disabled = isSelectedElsewhere;
+                opt.disabled = isSelectedElsewhere || isExcluded;
             });
         });
+    }
+
+    /** Re-applies exclusion availability to every Locked Elements dropdown. */
+    function refreshLockedElementAvailability() {
+        MULTI_SELECT_CATEGORIES.forEach(category => refreshCategoryDropdowns(category, 'generator'));
     }
 
     function addDropdown(category, selectedId = null, context = currentTab) {
@@ -433,6 +443,7 @@
         initializeSelectors,
         getSelectedTagsInCategory,
         refreshCategoryDropdowns,
+        refreshLockedElementAvailability,
         addDropdown,
         updateGenreControls,
         selectTagFromSearch,

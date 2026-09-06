@@ -99,6 +99,12 @@
     function updateExcludedCount() {
         const excludedContainer = document.getElementById('selectors-container-excluded');
         const badge = document.getElementById('excluded-count');
+
+        // A mutation observer calls this on every insertion, and the Starting Tags
+        // profile inserts ~194 rows in one pass. Skip until the batch closes; that
+        // path calls this once itself afterwards.
+        if (excludedContainer && excludedContainer.classList.contains('is-batching')) return;
+
         if (excludedContainer && badge) {
             const selectedCount = Array.from(excludedContainer.querySelectorAll('select.tag-selector'))
                 .filter(select => Boolean(select.value))
@@ -106,7 +112,8 @@
             badge.textContent = selectedCount;
         }
 
-        // Graves consumes the same exclusion list, so its notice tracks this.
+        // Locked picks and the Graves notice both read this list, so both follow it.
+        if (typeof refreshLockedElementAvailability === 'function') refreshLockedElementAvailability();
         if (typeof updateGravesExclusionNotice === 'function') updateGravesExclusionNotice();
     }
 
