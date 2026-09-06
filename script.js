@@ -276,8 +276,8 @@ function renderSynergyResults(evaluation) {
     return HACScriptEvaluation.renderSynergyResults(evaluation);
 }
 
-function transferTagsToAdvertisers() {
-    return HACScriptEvaluation.transferTagsToAdvertisers();
+function transferTagsToAdvertisers(sourceContext = 'synergy') {
+    return HACScriptEvaluation.transferTagsToAdvertisers(sourceContext);
 }
 
 async function evaluateColmanGravesScript() {

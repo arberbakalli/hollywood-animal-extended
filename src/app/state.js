@@ -2,6 +2,10 @@
 // can migrate one slice at a time without changing runtime behavior.
 var MULTI_SELECT_CATEGORIES = ["Genre", "Setting", "Protagonist", "Antagonist", "Supporting Character", "Theme & Event", "Finale"];
 var searchIndex = [];
+// Per-input debounce handles for the category search boxes. Lost in the module
+// split: searchIndex.js kept using it after the declaration stayed behind, so
+// every keystroke threw and no filtering ran.
+var searchDebounceTimers = new Map();
 var currentTab = 'synergy';
 var PRIMARY_TAB_BY_FEATURE = {
     generator: 'generator',

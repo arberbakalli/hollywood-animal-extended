@@ -88,8 +88,8 @@
         document.getElementById('results-synergy').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function transferTagsToAdvertisers() {
-        const inputs = collectTagInputs('synergy');
+    function transferTagsToAdvertisers(sourceContext = 'synergy') {
+        const inputs = collectTagInputs(sourceContext);
         if (inputs.length === 0) return;
         switchTab('advertisers');
         initializeSelectors('advertisers');

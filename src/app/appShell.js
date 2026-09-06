@@ -112,7 +112,8 @@
             ['generateBestMatchesButton', generateBestMatches],
             ['unlockBlockedLocksButton', removeBlockedLockedPicks],
             ['gravesExclusionJumpButton', jumpToExclusionEditor],
-            ['transferTagsButton', transferTagsToAdvertisers],
+            ['transferTagsButton', () => transferTagsToAdvertisers('synergy')],
+            ['transferGravesTagsButton', () => transferTagsToAdvertisers('graves')],
             ['analyzeMovieButton', analyzeMovie],
         ];
 
