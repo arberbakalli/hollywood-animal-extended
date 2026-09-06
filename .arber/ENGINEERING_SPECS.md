@@ -26,10 +26,14 @@ candidate and pushes one row per pair, scored only by
 `getRawCompatibilityScore(selectedTag, candidateTag)`.
 
 The list is therefore ranked by the single best pair, not by fit with the script.
-With Drama and Ancient Egypt selected, a candidate scoring 5.0 against Ancient
-Egypt and 1.0 against Drama appears at the top as "Ancient Egypt -> X, 5.00". The
-user adds it and their overall fit drops. The panel is confidently wrong in
-exactly the situation it exists to help with.
+Any candidate that scores well against one selected element rises to the top even
+when it conflicts badly with another. The user adds it and their overall fit
+drops. The panel is confidently wrong in exactly the situation it exists to help
+with.
+
+For a real instance, select Drama and Ancient Egypt: `War Is Hell` scores 5.0
+against Drama and 1.0 against Ancient Egypt, and the old ranking put it first.
+The dataset holds 47 such candidates for that selection alone.
 
 ### Scoring model
 
@@ -106,9 +110,15 @@ default.
 
 ### Acceptance
 
-- With Drama and Ancient Egypt selected, a candidate scoring 5.0 with Ancient
-  Egypt and 1.0 with Drama must not rank above a candidate scoring 4.0 with both,
-  and must carry a visible conflict warning naming Drama.
+- General rule: given any selected set, a candidate that scores highly against
+  one element but conflicts with another must not rank above a candidate that
+  scores moderately against all of them, and must carry a visible conflict
+  warning naming the element it clashes with.
+- Concrete regression case, verified in the shipped data: with Drama and Ancient
+  Egypt selected, `War Is Hell` scores 5.0 against Drama and 1.0 against Ancient
+  Egypt. It topped the old list. It must now rank below balanced candidates such
+  as `Outcast` (5.0 / 4.0) and carry a clash warning. Nothing about this pair is
+  special - it is one reproducible instance of the rule above.
 - Every rendered row's `resultingAverage` matches
   `calculateMatrixScore([...selected, candidate]).rawAverage`.
 - Switching to Pairwise mode reproduces today's list unchanged.
