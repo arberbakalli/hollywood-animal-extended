@@ -316,6 +316,14 @@ function setBestMatchMode(mode) {
     return HACGravesBestMatches.setBestMatchMode(mode);
 }
 
+function updateGravesExclusionNotice() {
+    return HACGravesBestMatches.updateGravesExclusionNotice();
+}
+
+function jumpToExclusionEditor() {
+    return HACGravesBestMatches.jumpToExclusionEditor();
+}
+
 function calculateAdvertiserMatch(scriptTags, movieLean, agency) {
     return HACAdvertiserMatcher.calculateAdvertiserMatch(scriptTags, movieLean, agency);
 }

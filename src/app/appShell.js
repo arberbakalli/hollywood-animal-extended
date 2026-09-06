@@ -110,6 +110,7 @@
             ['calculateSynergyButton', calculateSynergy],
             ['evaluateGravesButton', evaluateColmanGravesScript],
             ['generateBestMatchesButton', generateBestMatches],
+            ['gravesExclusionJumpButton', jumpToExclusionEditor],
             ['transferTagsButton', transferTagsToAdvertisers],
             ['analyzeMovieButton', analyzeMovie],
         ];

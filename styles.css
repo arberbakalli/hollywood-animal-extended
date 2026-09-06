@@ -2640,6 +2640,39 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: #55EA83;
 }
 
+.graves-exclusion-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 159, 10, 0.35);
+    border-radius: 8px;
+    background: rgba(255, 159, 10, 0.08);
+    color: var(--text-main);
+    font-size: 0.85rem;
+}
+
+.exclusion-jump-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.exclusion-jump-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
 /* Toggle Container */
 .toggle-container {
     position: relative;

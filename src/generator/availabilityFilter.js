@@ -105,6 +105,9 @@
                 .length;
             badge.textContent = selectedCount;
         }
+
+        // Graves consumes the same exclusion list, so its notice tracks this.
+        if (typeof updateGravesExclusionNotice === 'function') updateGravesExclusionNotice();
     }
 
     global.HACAvailabilityFilter = {

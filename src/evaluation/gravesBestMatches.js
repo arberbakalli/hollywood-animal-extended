@@ -95,6 +95,47 @@
         return parseFloat(document.getElementById('gravesBestScoreFilter')?.value || '4.0');
     }
 
+    /**
+     * Exclusions are one shared list owned by Script Lab, and they silently
+     * filter these suggestions. Without this notice a user can wonder why an
+     * obvious tag never appears.
+     */
+    function updateGravesExclusionNotice() {
+        const notice = document.getElementById('graves-exclusion-notice');
+        const summary = document.getElementById('gravesExclusionSummary');
+        if (!notice || !summary) return;
+
+        const profileIds = getProfileExcludedIds();
+        const startingOnly = profileIds.size > 0;
+        // The Starting Tags profile fills the excluded list itself, so count only
+        // what the user excluded on top of it rather than reporting both twice.
+        const manualCount = [...getManuallyExcludedIds('excluded')]
+            .filter(id => !profileIds.has(id)).length;
+
+        if (!manualCount && !startingOnly) {
+            notice.classList.add('hidden');
+            return;
+        }
+
+        const reasons = [];
+        if (startingOnly) reasons.push('the Starting Tags profile');
+        if (manualCount) reasons.push(`${manualCount} excluded element${manualCount === 1 ? '' : 's'}`);
+
+        summary.textContent = `Script Lab is hiding suggestions: ${reasons.join(' and ')}.`;
+        notice.classList.remove('hidden');
+    }
+
+    function jumpToExclusionEditor() {
+        switchTab('generator');
+
+        const toggle = document.getElementById('toggleExcludedElementsButton');
+        const content = document.getElementById('excluded-content');
+        if (toggle && content && content.classList.contains('hidden')) toggle.click();
+
+        document.getElementById('generator-excluded-header')
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     function collectCandidates(selectedTags) {
         const selectedIds = new Set(selectedTags.map(tag => tag.id));
         const excludedIds = getGeneratorExcludedIds();
@@ -387,6 +428,8 @@
         generateBestMatches,
         hideGravesEvaluationResults,
         renderBestMatches,
-        setBestMatchMode
+        setBestMatchMode,
+        updateGravesExclusionNotice,
+        jumpToExclusionEditor
     };
 })(globalThis);
