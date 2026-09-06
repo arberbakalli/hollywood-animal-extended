@@ -2609,6 +2609,8 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     display: flex;
     gap: 24px;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .toggle-wrapper {
@@ -2636,18 +2638,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .distribution-toggle-label--behemoth {
     color: #55EA83;
-}
-
-.distribution-toggle-label--behemoth small {
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    font-weight: 600;
-}
-
-.distribution-toggle-note {
-    margin: 10px 0 0;
-    color: var(--text-muted);
-    font-size: 0.8rem;
 }
 
 /* Toggle Container */

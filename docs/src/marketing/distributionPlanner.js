@@ -29,7 +29,6 @@
         const owned = parseInt(ownedInput?.value, 10) || 0;
 
         if(scoreDisplay) scoreDisplay.innerText = score.toFixed(1);
-        updateBehemothNote(score);
         updateDistributionGrid(score, owned);
     }
 
@@ -109,12 +108,6 @@
         return qualifies ? BEHEMOTH_DECAY : BASE_DECAY;
     }
 
-    function updateBehemothNote(commercialScore) {
-        const note = document.getElementById('behemoth-note');
-        if (!note) return;
-        const showNote = isBehemothActive() && commercialScore <= BEHEMOTH_DECAY_MIN_SCORE;
-        note.classList.toggle('hidden', !showNote);
-    }
 
     global.HACDistributionPlanner = {
         setupDistributionLogic,
