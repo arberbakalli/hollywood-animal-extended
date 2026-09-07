@@ -40,12 +40,17 @@ Feature: Marketing and Release
     And each week card is addressable by its week number
     And the week 8 figure is lower than the week 1 figure
 
+  # [automated] Extracted game-file formula: commercial only.
+  Scenario: Screening projections follow the extracted distribution grid
+    Then commercial score 5.0 produces 10000, 5000, 4000, 3200, 2560, 2048, 1638, and 1310 screenings
+
   # [automated] Owned Theatres input defaults to 3185.
   Scenario: Changing the number of owned theatres
     When the user changes the owned theatres to 5000
-    Then the screening projections are recalculated
+    Then the owned and rented split changes
+    And audience demand does not change
 
-  # [automated] Three independent switches sit in the distribution header.
+  # [automated] Two opening-viewer switches sit in the distribution header.
   Scenario Outline: Distribution bonuses can be toggled independently
     When the user enables the "<bonus>" bonus
     Then the screening projections are recalculated
@@ -55,13 +60,6 @@ Feature: Marketing and Release
       | bonus            |
       | Striking Image   |
       | Artistic Ability |
-      | Behemoth         |
-
-  # [automated] Behemoth's documented rule, per its own tooltip.
-  Scenario: Behemoth raises first-week viewers
-    Given the Behemoth bonus is off
-    When the user enables the Behemoth bonus
-    Then the week 1 projection increases
 
   # [automated] Analyze control and results markup exist.
   Scenario: Analysing a script produces a marketing profile

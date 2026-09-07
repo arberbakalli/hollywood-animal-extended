@@ -193,7 +193,6 @@
         { "elementName": "distributionCard", "selector": { "css": "#dist-wrapper" } },
         { "elementName": "strikingImageToggle", "selector": { "css": "#strikingImageToggle" } },
         { "elementName": "artisticAbilityToggle", "selector": { "css": "#artisticAbilityToggle" } },
-        { "elementName": "behemothToggle", "selector": { "css": "#behemothToggle" } },
         { "elementName": "ownedScreeningsInput", "selector": { "css": "#ownedScreeningsInput" } },
         { "elementName": "distributionCommercialScore", "selector": { "css": "#dist-com-score-display" } },
         { "elementName": "distributionGrid", "selector": { "css": "#dist-results-grid" } },

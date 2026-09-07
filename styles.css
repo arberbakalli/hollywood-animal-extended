@@ -2712,10 +2712,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: #8beaff;
 }
 
-.distribution-toggle-label--behemoth {
-    color: #55EA83;
-}
-
 .graves-exclusion-notice {
     display: flex;
     align-items: center;
@@ -2797,10 +2793,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .distribution-toggle--artistic > .toggle-checkbox:checked + .toggle-track {
     background-color: #8beaff;
-}
-
-.distribution-toggle--behemoth > .toggle-checkbox:checked + .toggle-track {
-    background-color: #55EA83;
 }
 
 /* Toggle Thumb */

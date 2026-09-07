@@ -52,15 +52,19 @@ test.describe('Marketing and Release — distribution calculator', () => {
     expect(week1).toBeGreaterThan(week8);
   });
 
-  // The Behemoth policy documents a +25% week-one boost.
-  test('TC04-000004 the Behemoth bonus raises the week one projection', async ({ steps }) => {
-    const before = await screenings(steps, 'weekOneValue');
+  test('TC04-000004 screening projections follow the extracted commercial-only grid', async ({ steps }) => {
+    const values = await steps.getAll('weekCards', 'MarketingRelease', { extractAttribute: 'data-demand' });
 
-    await steps.on('behemothToggle', 'MarketingRelease').check();
-
-    await expect
-      .poll(async () => screenings(steps, 'weekOneValue'))
-      .toBeGreaterThan(before);
+    expect(values.map(Number)).toEqual([
+      10000,
+      5000,
+      4000,
+      3200,
+      2560,
+      2048,
+      1638,
+      1310,
+    ]);
   });
 
   // Given the user raises the target commercial score

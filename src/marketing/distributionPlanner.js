@@ -2,21 +2,6 @@
     "use strict";
 
     const BASE_DECAY = 0.8;
-    // Week 2 keeps half of week 1 (W2_MULT / W1_MULT), so it is a retention step
-    // like every later week, just with a steeper rate.
-    const BASE_WEEK_TWO_RETENTION = 0.5;
-    // "Attendance will fall 25% more slowly": the drop shrinks by a quarter, so
-    // 20% becomes 15% and 50% becomes 37.5%. One factor keeps every week
-    // consistent instead of a separate magic number per step.
-    const BEHEMOTH_SLOWER_FALL = 0.75;
-    const BEHEMOTH_DECAY_MIN_SCORE = 9;
-    const BEHEMOTH_WEEK_ONE_BOOST = 1.25;
-
-    // Rounded because the raw arithmetic yields 0.8500000000000001, and the
-    // week grid rounds up, so that dust surfaces as a whole extra screening.
-    function easedRetention(baseRetention) {
-        return Math.round((1 - (1 - baseRetention) * BEHEMOTH_SLOWER_FALL) * 1e6) / 1e6;
-    }
 
     function setupDistributionLogic() {
         const comInput = document.getElementById('comScoreInput');
@@ -63,20 +48,17 @@
     }
 
     // Audience demand per week, in screenings, before any theatre capacity is
-    // considered. Every game modifier belongs here: the Behemoth policy text talks
-    // about "the number of viewers" and "attendance", and both are demand.
+    // considered. The extracted game-file grid uses Commercial only: week 1 is
+    // score * 2 * 1000, week 2 is score * 1 * 1000, then each later week keeps
+    // 80% of the previous week.
     function weeklyDemand(commercialScore) {
         const config = distributionConfig();
-        const decay = getDecayRate(commercialScore);
+        const decay = BASE_DECAY;
         const openingViewerMultiplier = getDistributionMultiplier();
-        const behemothWeekOne = isBehemothActive() ? BEHEMOTH_WEEK_ONE_BOOST : 1;
-        const weekTwoRatio = hasDecayBonus(commercialScore)
-            ? easedRetention(BASE_WEEK_TWO_RETENTION) / BASE_WEEK_TWO_RETENTION
-            : 1;
 
         const demand = [
             commercialScore * config.weekOneMultiplier * config.base,
-            commercialScore * config.weekTwoMultiplier * config.base * weekTwoRatio
+            commercialScore * config.weekTwoMultiplier * config.base
         ];
         for (let i = config.decayFromIndex; i < config.weeks; i++) {
             demand.push(demand[demand.length - 1] * decay);
@@ -84,8 +66,7 @@
 
         return demand.map((value, index) => {
             const inOpeningWindow = index < config.openingWindow;
-            let boosted = inOpeningWindow ? value * openingViewerMultiplier : value;
-            if (index === 0) boosted *= behemothWeekOne;
+            const boosted = inOpeningWindow ? value * openingViewerMultiplier : value;
             return inOpeningWindow ? Math.ceil(boosted) : Math.floor(boosted);
         });
     }
@@ -140,7 +121,7 @@
     }
 
     function initializeDistributionToggles() {
-        ['strikingImageToggle', 'artisticAbilityToggle', 'behemothToggle']
+        ['strikingImageToggle', 'artisticAbilityToggle']
             .map(id => document.getElementById(id))
             .filter(Boolean)
             .forEach(toggle => toggle.addEventListener('change', recalculateDistribution));
@@ -154,20 +135,6 @@
         return hasOpeningViewerBoost ? 2 : 1;
     }
 
-    function isBehemothActive() {
-        return Boolean(document.getElementById('behemothToggle')?.checked);
-    }
-
-    /** Behemoth's slower fall applies only above a commercial rating of 9. */
-    function hasDecayBonus(commercialScore) {
-        return isBehemothActive() && commercialScore > BEHEMOTH_DECAY_MIN_SCORE;
-    }
-
-    function getDecayRate(commercialScore) {
-        return hasDecayBonus(commercialScore) ? easedRetention(BASE_DECAY) : BASE_DECAY;
-    }
-
-
     global.HACDistributionPlanner = {
         setupDistributionLogic,
         recalculateDistribution,
@@ -176,10 +143,6 @@
         weeklyDistribution,
         distributionConfig,
         initializeDistributionToggles,
-        getDistributionMultiplier,
-        isBehemothActive,
-        hasDecayBonus,
-        getDecayRate,
-        easedRetention
+        getDistributionMultiplier
     };
 })(globalThis);
