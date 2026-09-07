@@ -2,6 +2,9 @@
     "use strict";
 
     const BASE_DECAY = 0.8;
+    const BEHEMOTH_DECAY = 0.85;
+    const BEHEMOTH_DECAY_MIN_SCORE = 9;
+    const BEHEMOTH_WEEK_ONE_BOOST = 1.25;
 
     function setupDistributionLogic() {
         const comInput = document.getElementById('comScoreInput');
@@ -50,11 +53,12 @@
     // Audience demand per week, in screenings, before any theatre capacity is
     // considered. The extracted game-file grid uses Commercial only: week 1 is
     // score * 2 * 1000, week 2 is score * 1 * 1000, then each later week keeps
-    // 80% of the previous week.
+    // 80% of the previous week (or 85% if Behemoth policy active and score > 9).
     function weeklyDemand(commercialScore) {
         const config = distributionConfig();
-        const decay = BASE_DECAY;
+        const decay = getDecayRate(commercialScore);
         const openingViewerMultiplier = getDistributionMultiplier();
+        const behemothWeekOne = isBehemothActive() ? BEHEMOTH_WEEK_ONE_BOOST : 1;
 
         const demand = [
             commercialScore * config.weekOneMultiplier * config.base,
@@ -66,7 +70,9 @@
 
         return demand.map((value, index) => {
             const inOpeningWindow = index < config.openingWindow;
-            const boosted = inOpeningWindow ? value * openingViewerMultiplier : value;
+            let boosted = inOpeningWindow ? value * openingViewerMultiplier : value;
+            // Behemoth adds 25% to week 1 only
+            if (index === 0) boosted *= behemothWeekOne;
             return inOpeningWindow ? Math.ceil(boosted) : Math.floor(boosted);
         });
     }
@@ -121,7 +127,7 @@
     }
 
     function initializeDistributionToggles() {
-        ['strikingImageToggle', 'artisticAbilityToggle']
+        ['strikingImageToggle', 'artisticAbilityToggle', 'behemothToggle']
             .map(id => document.getElementById(id))
             .filter(Boolean)
             .forEach(toggle => toggle.addEventListener('change', recalculateDistribution));
@@ -135,6 +141,20 @@
         return hasOpeningViewerBoost ? 2 : 1;
     }
 
+    function isBehemothActive() {
+        return Boolean(document.getElementById('behemothToggle')?.checked);
+    }
+
+    // Behemoth slows attendance decay by 1.25x (15% drop instead of 20%), but only
+    // above a commercial rating of 9. Base decay is 0.8 (20% weekly drop); Behemoth
+    // decay is 0.85 (15% weekly drop) when score > 9.
+    // NOTE: Behemoth values are from community interpretation, not verified game-file
+    // extraction. Use with caution. See Lesson 7 in LESSONS_LEARNED.md.
+    function getDecayRate(commercialScore) {
+        const qualifies = isBehemothActive() && commercialScore > BEHEMOTH_DECAY_MIN_SCORE;
+        return qualifies ? BEHEMOTH_DECAY : BASE_DECAY;
+    }
+
     global.HACDistributionPlanner = {
         setupDistributionLogic,
         recalculateDistribution,
@@ -143,6 +163,8 @@
         weeklyDistribution,
         distributionConfig,
         initializeDistributionToggles,
-        getDistributionMultiplier
+        getDistributionMultiplier,
+        isBehemothActive,
+        getDecayRate
     };
 })(globalThis);

@@ -260,6 +260,7 @@
                                 <span class="t-label">Artistic Movie Score:</span>
                                 <span class="t-value" id="totalArtScore">0.00</span>
                             </div>
+                            <div id="scoreCapLabel" class="score-cap-label">Max Score Capped at <strong>0.0</strong> (0 Scoring Elements)</div>
                         </div>
                     </div>
 
@@ -494,6 +495,15 @@
                                     <span class="toggle-label-text distribution-toggle-label--artistic" id="artisticAbilityName">Artistic Ability</span>
                                     <div class="toggle-container distribution-toggle distribution-toggle--artistic">
                                         <input type="checkbox" class="toggle-checkbox" id="artisticAbilityToggle" role="switch" aria-label="Artistic Ability opening viewer boost">
+                                        <div class="toggle-track" aria-hidden="true">
+                                            <div class="toggle-thumb" aria-hidden="true"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="toggle-wrapper">
+                                    <span class="toggle-label-text distribution-toggle-label--behemoth" title="Behemoth adds 25% to week 1. Requires commercial rating above 9.">Behemoth <small>(budget over $1M)</small></span>
+                                    <div class="toggle-container distribution-toggle distribution-toggle--behemoth">
+                                        <input type="checkbox" class="toggle-checkbox" id="behemothToggle" role="switch" aria-label="Behemoth studio policy distribution bonus">
                                         <div class="toggle-track" aria-hidden="true">
                                             <div class="toggle-thumb" aria-hidden="true"></div>
                                         </div>
