@@ -52,10 +52,21 @@ package, but that does not work yet:
   `reporter/` was added *after* the `0.1.7` tag. Pinning `^0.1.7` would break the
   reporter on the next clean install.
 
-So the order is: publish `0.1.8`, then change the dependency to `^0.1.8`, and use
-`npm link ../achilles` locally when developing achilles itself. Until achilles is
-published, leave the `file:` path alone — swapping it early trades a portability
-problem for a broken build.
+**Not ours to unblock.** achilles is an upstream project we consume, not one we
+release, so bumping and publishing it is not an option here. `7f48345 chore:
+0.1.8` bumped the version on upstream main, but no `0.1.8` tag or release exists
+yet.
+
+Until upstream tags and publishes `0.1.8`, leave `file:../achilles` alone —
+switching to `^0.1.7` early trades a portability problem for a broken reporter.
+When that release lands, the fix is one line: `"^0.1.8"`.
+
+Meanwhile the practical cost is bounded and worth stating plainly: this repo
+cannot be installed by anyone who does not also have `achilles` checked out
+beside it, which includes CI. Everything except the achilles-specific scripts
+(`test:e2e:show`, `test:repair`, `test:mutate`) and the reporter entry in
+`playwright.config.js` would work without it, so dropping those is the fallback
+if the repo needs to become independently installable before upstream releases.
 
 ---
 
