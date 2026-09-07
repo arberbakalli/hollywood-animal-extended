@@ -405,7 +405,8 @@
             const tagName = tagData ? tagData.name : t.id; // Safety fallback
             const isFixed = fixedIds.has(t.id);
             const categoryClass = categoryToElementSlug(t.category);
-            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${isFixed ? 'tag-fixed' : ''}">${tagName} <small>${t.category}</small></span>`;
+            const tagClass = t.category === 'Genre' ? `genre-${toDomId(t.id)}` : '';
+            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${tagClass} ${isFixed ? 'tag-fixed' : ''}">${tagName} <small>${t.category}</small></span>`;
         });
 
         // Check if truly pinned to set Icon state

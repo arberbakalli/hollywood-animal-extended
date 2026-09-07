@@ -218,7 +218,7 @@
                 </div>
                 <div class="targeted-tag-list">
                     ${combo.tags.map(tag => `
-                        <div class="targeted-tag-chip ${categoryToElementSlug(tag.category)}">
+                        <div class="targeted-tag-chip ${categoryToElementSlug(tag.category)} ${tag.category === 'Genre' ? `genre-${toDomId(tag.id)}` : ''}">
                             ${tag.name}
                         </div>
                     `).join('')}

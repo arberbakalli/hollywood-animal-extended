@@ -12,6 +12,9 @@
     --moderate: #ff9f0a;
     --ha-commercial: #d4af37;
     --ha-artistic: #a0a0ff;
+    --ha-genre-historical: #906038;
+    --ha-genre-horror: #604038;
+    --ha-genre-science-fiction: #404860;
     --ha-category-protagonist: #508058;
     --ha-category-antagonist: #584090;
     --ha-category-supporting-character: #588098;
@@ -2421,40 +2424,52 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
    every mode. Category stays legible on the tag chip below. */
 
 /* Tag category colors */
-.best-match-tag.genre {
-    background-color: #92400e;
-    color: white;
+.gen-tag-chip.setting,
+.best-match-tag.setting,
+.targeted-tag-chip.setting {
+    color: var(--cat-setting);
+    border-color: color-mix(in srgb, var(--cat-setting) 65%, transparent);
+    background: color-mix(in srgb, var(--cat-setting) 16%, transparent);
 }
 
-.best-match-tag.theme,
-.best-match-tag.theme-event {
-    background-color: #991b1b;
-    color: white;
+.gen-tag-chip.protagonist,
+.best-match-tag.protagonist,
+.targeted-tag-chip.protagonist {
+    color: var(--cat-protagonist);
+    border-color: color-mix(in srgb, var(--cat-protagonist) 65%, transparent);
+    background: color-mix(in srgb, var(--cat-protagonist) 16%, transparent);
 }
 
-.best-match-tag.supporting-character {
-    background-color: #3b82f6;
-    color: white;
+.gen-tag-chip.antagonist,
+.best-match-tag.antagonist,
+.targeted-tag-chip.antagonist {
+    color: var(--cat-antagonist);
+    border-color: color-mix(in srgb, var(--cat-antagonist) 65%, transparent);
+    background: color-mix(in srgb, var(--cat-antagonist) 18%, transparent);
 }
 
-.best-match-tag.protagonist {
-    background-color: #1e40af;
-    color: white;
+.gen-tag-chip.supporting-character,
+.best-match-tag.supporting-character,
+.targeted-tag-chip.supporting-character {
+    color: var(--cat-supporting);
+    border-color: color-mix(in srgb, var(--cat-supporting) 65%, transparent);
+    background: color-mix(in srgb, var(--cat-supporting) 16%, transparent);
 }
 
-.best-match-tag.antagonist {
-    background-color: #166534;
-    color: white;
+.gen-tag-chip.theme-event,
+.best-match-tag.theme-event,
+.targeted-tag-chip.theme-event {
+    color: var(--cat-theme-event);
+    border-color: color-mix(in srgb, var(--cat-theme-event) 65%, transparent);
+    background: color-mix(in srgb, var(--cat-theme-event) 17%, transparent);
 }
 
-.best-match-tag.setting {
-    background-color: #6d28d9;
-    color: white;
-}
-
-.best-match-tag.finale {
-    background-color: #be185d;
-    color: white;
+.gen-tag-chip.finale,
+.best-match-tag.finale,
+.targeted-tag-chip.finale {
+    color: var(--cat-finale);
+    border-color: color-mix(in srgb, var(--cat-finale) 65%, transparent);
+    background: color-mix(in srgb, var(--cat-finale) 17%, transparent);
 }
 
 /* Advertiser Recommendation Styles */
@@ -2827,18 +2842,21 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 /* Category text colors for dropdowns — readable on dark inputs, derived from game palette */
 :root {
-  --cat-genre-action: #c68367;
-  --cat-genre-adventure: #779e4f;
-  --cat-genre-comedy: #579dab;
-  --cat-genre-detective: #ba80ae;
-  --cat-genre-drama: #8690c3;
-  --cat-genre-romance: #67a070;
-  --cat-genre-thriller: #c5826f;
-  --cat-protagonist: #67a070;
-  --cat-antagonist: #9c89ca;
-  --cat-supporting: #7297ae;
-  --cat-theme-event: #c28575;
-  --cat-finale: #bf80a3;
+  --cat-genre-action: #804830;
+  --cat-genre-adventure: #486030;
+  --cat-genre-comedy: #305860;
+  --cat-genre-detective: #583050;
+  --cat-genre-drama: #303860;
+  --cat-genre-historical: var(--ha-genre-historical);
+  --cat-genre-horror: var(--ha-genre-horror);
+  --cat-genre-romance: #508058;
+  --cat-genre-science-fiction: var(--ha-genre-science-fiction);
+  --cat-genre-thriller: #784030;
+  --cat-protagonist: var(--ha-category-protagonist);
+  --cat-antagonist: var(--ha-category-antagonist);
+  --cat-supporting: var(--ha-category-supporting-character);
+  --cat-theme-event: var(--ha-category-theme-event);
+  --cat-finale: var(--ha-category-finale);
   --cat-setting: #8fa3d1; /* neutral fallback, placeholder pending image */
 }
 
@@ -2848,7 +2866,10 @@ option.genre-adventure { color: var(--cat-genre-adventure); }
 option.genre-comedy { color: var(--cat-genre-comedy); }
 option.genre-detective { color: var(--cat-genre-detective); }
 option.genre-drama { color: var(--cat-genre-drama); }
+option.genre-historical { color: var(--cat-genre-historical); }
+option.genre-horror { color: var(--cat-genre-horror); }
 option.genre-romance { color: var(--cat-genre-romance); }
+option.genre-science-fiction { color: var(--cat-genre-science-fiction); }
 option.genre-thriller { color: var(--cat-genre-thriller); }
 option.setting { color: var(--cat-setting); }
 option.protagonist { color: var(--cat-protagonist); }
@@ -2856,3 +2877,55 @@ option.antagonist { color: var(--cat-antagonist); }
 option.supporting-character { color: var(--cat-supporting); }
 option.theme-event { color: var(--cat-theme-event); }
 option.finale { color: var(--cat-finale); }
+
+option[data-selected-elsewhere="true"] {
+  color: #777 !important;
+}
+
+.gen-tag-chip.genre-action,
+.best-match-tag.genre-action,
+.targeted-tag-chip.genre-action { --tag-color: var(--cat-genre-action); }
+
+.gen-tag-chip.genre-adventure,
+.best-match-tag.genre-adventure,
+.targeted-tag-chip.genre-adventure { --tag-color: var(--cat-genre-adventure); }
+
+.gen-tag-chip.genre-comedy,
+.best-match-tag.genre-comedy,
+.targeted-tag-chip.genre-comedy { --tag-color: var(--cat-genre-comedy); }
+
+.gen-tag-chip.genre-detective,
+.best-match-tag.genre-detective,
+.targeted-tag-chip.genre-detective { --tag-color: var(--cat-genre-detective); }
+
+.gen-tag-chip.genre-drama,
+.best-match-tag.genre-drama,
+.targeted-tag-chip.genre-drama { --tag-color: var(--cat-genre-drama); }
+
+.gen-tag-chip.genre-historical,
+.best-match-tag.genre-historical,
+.targeted-tag-chip.genre-historical { --tag-color: var(--cat-genre-historical); }
+
+.gen-tag-chip.genre-horror,
+.best-match-tag.genre-horror,
+.targeted-tag-chip.genre-horror { --tag-color: var(--cat-genre-horror); }
+
+.gen-tag-chip.genre-romance,
+.best-match-tag.genre-romance,
+.targeted-tag-chip.genre-romance { --tag-color: var(--cat-genre-romance); }
+
+.gen-tag-chip.genre-science-fiction,
+.best-match-tag.genre-science-fiction,
+.targeted-tag-chip.genre-science-fiction { --tag-color: var(--cat-genre-science-fiction); }
+
+.gen-tag-chip.genre-thriller,
+.best-match-tag.genre-thriller,
+.targeted-tag-chip.genre-thriller { --tag-color: var(--cat-genre-thriller); }
+
+.gen-tag-chip[class*="genre-"],
+.best-match-tag[class*="genre-"],
+.targeted-tag-chip[class*="genre-"] {
+    color: var(--tag-color);
+    border-color: color-mix(in srgb, var(--tag-color) 65%, transparent);
+    background: color-mix(in srgb, var(--tag-color) 18%, transparent);
+}

@@ -260,11 +260,17 @@
         return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn" type="button" data-action="add-graves-best-match" data-tag-id="${candidate.id}" data-category="${candidate.category}">Add</button>`;
     }
 
+    function tagClass(tag) {
+        const categoryClass = categoryToElementSlug(tag.category);
+        const genreClass = tag.category === 'Genre' ? `genre-${toDomId(tag.id)}` : '';
+        return `${categoryClass} ${genreClass}`.trim();
+    }
+
     function rowMarkup(row, index) {
         return `
-            <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${row.band} ${categoryToElementSlug(row.candidate.category)}" data-role="graves-best-match" data-tag-id="${row.candidate.id}" data-category="${row.candidate.category}" data-score="${row.fitAverage.toFixed(2)}" data-band="${row.band}">
+            <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${row.band} ${tagClass(row.candidate)}" data-role="graves-best-match" data-tag-id="${row.candidate.id}" data-category="${row.candidate.category}" data-score="${row.fitAverage.toFixed(2)}" data-band="${row.band}">
                 <div class="best-match-pair">
-                    <span class="best-match-tag ${categoryToElementSlug(row.candidate.category)}">${row.candidate.name}</span>
+                    <span class="best-match-tag ${tagClass(row.candidate)}">${row.candidate.name}</span>
                     ${warningMarkup(row)}
                 </div>
                 <div class="best-match-meta">
@@ -336,11 +342,11 @@
         }
 
         list.innerHTML = matches.map((match, index) => `
-            <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${bandFor(match.score, match.score)} ${categoryToElementSlug(match.candidate.category)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${bandFor(match.score, match.score)}">
+            <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${bandFor(match.score, match.score)} ${tagClass(match.candidate)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${bandFor(match.score, match.score)}">
                 <div class="best-match-pair">
                     <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
                     <span class="best-match-arrow">&rarr;</span>
-                    <span class="best-match-tag ${categoryToElementSlug(match.candidate.category)}">${match.candidate.name}</span>
+                    <span class="best-match-tag ${tagClass(match.candidate)}">${match.candidate.name}</span>
                 </div>
                 <div class="best-match-meta">
                     <span class="best-match-category">${match.candidate.category}</span>

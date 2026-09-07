@@ -211,6 +211,7 @@
 
                 opt.disabled = isSelectedElsewhere || isExcluded;
                 opt.hidden = isExcluded;
+                opt.dataset.selectedElsewhere = String(isSelectedElsewhere);
                 opt.dataset.excluded = String(isExcluded);
             });
         });
