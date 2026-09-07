@@ -1,51 +1,81 @@
 (function(global) {
     "use strict";
 
+    let bootRetryBound = false;
+
+    // Bound outside the start-up sequence: the retry control has to work precisely
+    // when that sequence has failed.
+    function bindBootRetry() {
+        if (bootRetryBound) return;
+        const button = document.getElementById('retryBootButton');
+        if (!button) return;
+        button.addEventListener('click', () => initializeApp());
+        bootRetryBound = true;
+    }
+
+    function setBootError(message) {
+        const detail = document.getElementById('app-boot-error-detail');
+        if (detail) detail.innerText = message;
+
+        const banner = document.getElementById('app-boot-error');
+        if (!banner) return;
+        banner.hidden = message === '';
+        banner.classList.toggle('hidden', message === '');
+    }
+
+    function failBoot(error) {
+        console.error('Failed to start:', error);
+        setBootError(error.message || 'The data files could not be reached.');
+        window.dispatchEvent(new CustomEvent('hollywood:failed', { detail: { error } }));
+    }
+
     async function initializeApp() {
+        bindBootRetry();
+        setBootError('');
+
+        // Only this stretch reaches the network, so it is the only part that can
+        // fail in a way the user can act on.
         try {
             await changeLanguage('English', false);
             await loadExternalData();
-            initializeSelectors('advertisers');
-            initializeSelectors('synergy');
-            initializeSelectors('graves');
-
-            // Init generator tab selectors (Locked and Excluded)
-            initializeSelectors('generator');
-            initializeSelectors('excluded');
-
-            // Setup global search filtering (once, for all contexts)
-            setupGlobalCategorySearch();
-            setupDomEventBindings();
-
-            buildSearchIndex();
-            setupSearchListeners();
-            setupScoreSync();
-            setupGeneratorControls();
-
-            // Setup Distribution Calculator (Immediate Interaction)
-            setupDistributionLogic();
-
-            // Initialize Collapsible Sections
-            setupCollapsibleSections();
-
-            // Initialize Targeted Ads Tab
-            initializeTargetedAdsTab();
-
-            // Initialize Distribution Toggles (Striking Image, etc.)
-            initializeDistributionToggles();
-
-            // Initialize Default Profile
-            setGeneratorProfile('custom');
-
-            // RENDER PINNED SECTION IMMEDIATELY (To show Save/Load buttons)
-            renderPinnedScripts();
-
-            window.dispatchEvent(new CustomEvent('hollywood:ready'));
-            console.log("Initialization Complete.");
         } catch (error) {
-            console.error("Failed to load data:", error);
+            failBoot(error);
+            return;
         }
 
+        // data.js ships tags: {}, so a load that returns nothing leaves every panel
+        // an empty shell. Say so rather than rendering one.
+        if (Object.keys(GAME_DATA.tags).length === 0) {
+            failBoot(new Error('No story elements were returned, so nothing can be selected.'));
+            return;
+        }
+
+        // Everything below builds the interface from data already in memory. A throw
+        // here is a bug worth surfacing, not a condition to swallow — the old
+        // catch-all turned any of it into a silently half-rendered page.
+        initializeSelectors('advertisers');
+        initializeSelectors('synergy');
+        initializeSelectors('graves');
+        initializeSelectors('generator');
+        initializeSelectors('excluded');
+
+        setupGlobalCategorySearch();
+        setupDomEventBindings();
+
+        buildSearchIndex();
+        setupSearchListeners();
+        setupScoreSync();
+        setupGeneratorControls();
+        setupDistributionLogic();
+        setupCollapsibleSections();
+        initializeTargetedAdsTab();
+        initializeDistributionToggles();
+        setGeneratorProfile('custom');
+
+        // Rendered up front so the Save/Load controls are present from the start.
+        renderPinnedScripts();
+
+        window.dispatchEvent(new CustomEvent('hollywood:ready'));
     }
 
     function switchTab(tabName) {

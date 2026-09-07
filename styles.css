@@ -643,6 +643,44 @@ select:focus { outline: none; border-color: var(--accent); }
     color: #ffd6d6;
 }
 
+/* Boot failure. Without story elements every panel is an empty shell, so this
+   says so rather than leaving the user to wonder why nothing is selectable. */
+.app-boot-error {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 95, 95, 0.45);
+    border-radius: 8px;
+    background: rgba(255, 95, 95, 0.12);
+    color: #ffd6d6;
+}
+
+.app-boot-error-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 240px;
+    flex: 1 1 auto;
+}
+
+.app-boot-error-detail {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.app-boot-error .analyze-btn {
+    flex: 0 0 auto;
+    /* .analyze-btn is full-width by default, which would stretch the retry across
+       the banner once it wraps. */
+    width: auto;
+    margin: 0;
+}
+
 .app-feedback-success {
     border-color: rgba(76, 217, 100, 0.45);
     background: rgba(76, 217, 100, 0.12);
@@ -2652,6 +2690,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: rgba(255, 159, 10, 0.08);
     color: var(--text-main);
     font-size: 0.85rem;
+}
+
+.graves-exclusion-notice.hidden {
+    display: none;
 }
 
 .exclusion-jump-btn {

@@ -37,6 +37,15 @@
             </div>
         </header>
 
+        <!-- BOOT FAILURE -->
+        <div id="app-boot-error" class="app-boot-error hidden" role="alert" aria-live="assertive" hidden>
+            <div class="app-boot-error-copy">
+                <strong id="app-boot-error-title">The calculator could not load its story elements.</strong>
+                <p id="app-boot-error-detail" class="app-boot-error-detail"></p>
+            </div>
+            <button id="retryBootButton" class="analyze-btn" type="button">Try again</button>
+        </div>
+
         <!-- PRODUCT AREA NAVIGATION -->
         <nav id="primary-tabs" class="tab-nav product-area-nav" aria-label="Product areas">
             <button id="tab-generator-button" class="tab-btn product-area-btn" type="button" aria-pressed="false" data-tab="generator">

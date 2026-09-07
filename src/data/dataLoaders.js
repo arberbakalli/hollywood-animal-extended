@@ -8,7 +8,9 @@
                 fetch('data/TagData.json'),
                 fetch('data/TagsAudienceWeights.json')
             ]);
-            if (!tagRes.ok || !weightRes.ok) return;
+            if (!tagRes.ok || !weightRes.ok) {
+                throw new Error(`story element data responded ${tagRes.status} / ${weightRes.status}`);
+            }
             const tagDataRaw = await tagRes.json();
             const weightDataRaw = await weightRes.json();
             for (const [tagId, data] of Object.entries(tagDataRaw)) {
@@ -36,8 +38,10 @@
                     weights: parseWeights(weightDataRaw[tagId].weights)
                 };
             }
-        } catch(e) {
-            console.warn("External JSON load failed, relying on data.js default", e);
+        } catch (e) {
+            // There is no local fallback to relax into: data.js ships tags: {}, so
+            // swallowing this leaves the app with no story elements at all.
+            throw new Error(`Story element data could not be loaded: ${e.message}`, { cause: e });
         }
     }
 

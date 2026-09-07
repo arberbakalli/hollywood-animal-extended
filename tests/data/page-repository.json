@@ -6,7 +6,10 @@
         { "elementName": "buildTab", "selector": { "css": "#tab-generator-button" } },
         { "elementName": "evaluateTab", "selector": { "css": "#tab-synergy-button" } },
         { "elementName": "marketTab", "selector": { "css": "#tab-advertisers-button" } },
-        { "elementName": "languageSelector", "selector": { "css": "#languageSelector" } }
+        { "elementName": "languageSelector", "selector": { "css": "#languageSelector" } },
+        { "elementName": "bootError", "selector": { "css": "#app-boot-error" } },
+        { "elementName": "bootErrorDetail", "selector": { "css": "#app-boot-error-detail" } },
+        { "elementName": "retryBootButton", "selector": { "css": "#retryBootButton" } }
       ]
     },
     {
