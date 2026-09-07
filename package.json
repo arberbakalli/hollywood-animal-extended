@@ -12,7 +12,8 @@
     "test:e2e:report": "playwright show-report",
     "test:e2e:show": "achilles-show",
     "test:repair": "achilles-self-repair",
-    "test:mutate": "achilles-mutate"
+    "test:mutate": "node tools/run-achilles-mutate.mjs",
+    "test:mutate:calibrate": "node tools/run-achilles-mutate.mjs --calibrate"
   },
   "devDependencies": {
     "@civitas-cerebrum/achilles": "file:../achilles",

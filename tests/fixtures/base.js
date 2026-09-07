@@ -14,6 +14,17 @@ const configured = baseFixture(base, 'tests/data/page-repository.json', {
 // effect — selectors exist well before the controls that use them are wired.
 export const test = configured.extend({
   page: async ({ page }, use) => {
+    if (process.env.E2E_MUTATION_INIT) {
+      await page.addInitScript({ content: process.env.E2E_MUTATION_INIT });
+    }
+
+    if (process.env.E2E_MUTATION_CSS) {
+      const css = process.env.E2E_MUTATION_CSS;
+      page.on('load', () => {
+        page.addStyleTag({ content: css }).catch(() => {});
+      });
+    }
+
     await page.addInitScript(() => {
       window.__hollywoodReady = false;
       window.addEventListener('hollywood:ready', () => {

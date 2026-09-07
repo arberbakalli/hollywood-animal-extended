@@ -104,8 +104,8 @@ Feature: Script Evaluation — Colman Graves
     When the user adds the first suggestion
     Then that element joins the current script selection
 
-  # [verified] An exclusion notice with a jump-back control exists, hidden by
-  # default.
+  # [unverified] Markup includes this notice and it is hidden by default, but the
+  # banned-element warning journey has not been reproduced yet.
   Scenario: Warning when the script uses elements banned in Script Lab
     Given the user has banned an element in Script Lab
     And that element is part of the Graves script

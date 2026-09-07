@@ -176,3 +176,23 @@ they do not define availability.
 
 **Current verified baseline.** Early script creation requires at least one
 Genre, one Setting, and one Protagonist before choosing the remaining elements.
+
+---
+
+## 10. A hidden class is not proof the element is hidden
+
+**What broke.** The Colman Graves exclusion notice carried the `hidden` class,
+but the notice was still visible on the page.
+
+**The real cause.** `.hidden { display: none; }` appeared earlier in the CSS,
+while `.graves-exclusion-notice { display: flex; }` appeared later with the
+same specificity. Source order won, so the more specific feature styling
+overrode the generic hidden state.
+
+**The rule.** For UI state, assert the browser result, not just the markup
+intent. A class assertion would have passed here. A computed visibility check
+caught the bug.
+
+**Cheap check for next time.** When an element combines a global utility class
+with component-level display rules, add a component-specific hidden selector:
+`.component.hidden { display: none; }`.
