@@ -53,13 +53,18 @@
         const selectedAdvertisers = Array.from(document.querySelectorAll('.targeted-advertiser-checkbox:checked')).map(cb => cb.value);
         const selectedTags = collectTagInputs('targeted');
 
-        if (selectedAudiences.length === 0 && selectedAdvertisers.length === 0) {
-            showFeedbackMessage('targetedFeedbackMessage', 'Please select at least one audience or advertiser.', 'accent');
+        const storyElementTags = selectedTags.filter(tag => {
+            const t = GAME_DATA.tags[tag.id];
+            return t && t.category !== 'Genre' && t.category !== 'Settings';
+        });
+
+        if (storyElementTags.length < 5) {
+            showFeedbackMessage('targetedFeedbackMessage', `Select at least 5 story elements. You selected ${storyElementTags.length} (Genre and Settings don't count).`, 'accent');
             return;
         }
 
-        if (selectedTags.length > 6) {
-            showFeedbackMessage('targetedFeedbackMessage', `Pick 6 or fewer optional tags. You selected ${selectedTags.length}.`, 'accent');
+        if (storyElementTags.length > 10) {
+            showFeedbackMessage('targetedFeedbackMessage', `Select up to 10 story elements. You selected ${storyElementTags.length} (Genre and Settings don't count).`, 'accent');
             return;
         }
 
@@ -67,15 +72,18 @@
         let targetAgencies = [];
         if (selectedAdvertisers.length > 0) {
             targetAgencies = GAME_DATA.adAgents.filter(a => selectedAdvertisers.includes(a.id));
-        } else {
+        } else if (selectedAudiences.length > 0) {
             // Find agencies that reach the selected audiences
             targetAgencies = GAME_DATA.adAgents.filter(agency =>
                 selectedAudiences.some(aud => agency.targets.includes(aud))
             );
+        } else {
+            // No filter: show combinations ranked by overall quality against all agencies
+            targetAgencies = GAME_DATA.adAgents;
         }
 
         if (targetAgencies.length === 0) {
-            showFeedbackMessage('targetedFeedbackMessage', 'No agencies reach the selected audiences.', 'accent');
+            showFeedbackMessage('targetedFeedbackMessage', 'No agencies available. Please select different audiences or advertisers.', 'accent');
             return;
         }
 

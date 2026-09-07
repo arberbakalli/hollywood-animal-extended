@@ -224,3 +224,27 @@ older markup or external data may still emit them.
 
 **Cheap check for next time.** In the browser, inspect the exact option class
 and computed color for the tag before calling the mapping done.
+
+---
+
+## 12. Tag validation must count by category, not by total count
+
+**What broke.** Build for Target rejected scripts with "Pick 6 or fewer optional tags" even though the user selected only one tag from each category. The validation counted Genre tags alongside story element tags, enforcing a flat 6-tag ceiling instead of the correct rule: 5-10 story elements (Genre and Settings excluded).
+
+**The real cause.** Tag input collection returns all selected tags mixed together. The validation applied a generic limit without understanding which categories don't consume the story element budget. One of each category easily exceeded 6 tags in a complete script.
+
+**The rule.** When a product rule partitions tags by category (e.g., "Genre is always 1, Settings is always 1, story elements are 5-10"), validation must count each partition independently. A flat count hides the real constraint.
+
+**Cheap check for next time.** Add a unit test that selects one tag from each category (if categories like Genre, Settings, Protagonist, etc. exist) and verifies the error message is about story elements, not total tags.
+
+---
+
+## 13. "No filter" state must produce results, not errors
+
+**What broke.** Build for Target's "Find Top Combinations" button required the user to select at least one audience or advertiser before running. With neither selected, it threw "Please select at least one audience or advertiser." Yet the app had enough data to recommend combinations ranked by overall appeal.
+
+**The real cause.** The validation checked for an audience/advertiser presence but did not handle the case where neither was selected. The downstream logic could work with "all agencies" (when no specific audience/advertiser narrows the list), but the gate prevented that path.
+
+**The rule.** When a filter is optional, define what "no filter" means: show all results, rank by default metric, or disable the feature. Do not treat missing input as an error if the feature has a sensible unfiltered behavior.
+
+**Cheap check for next time.** For each optional filter in the UI, document its three states: (1) filter applied, (2) no filter selected (unfiltered behavior), (3) no valid results after filter. Only state 3 should error.
