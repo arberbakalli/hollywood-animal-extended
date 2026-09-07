@@ -1,0 +1,9 @@
+# Keep retrieval on the application, not the scaffolding around it.
+.claude/
+.achilles/
+.idea/
+graphify-out/
+.arber/
+localization/
+data/
+package-lock.json
