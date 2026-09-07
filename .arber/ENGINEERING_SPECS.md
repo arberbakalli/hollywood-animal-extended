@@ -164,85 +164,34 @@ buttons Graves first, then Advertisers, matching the pipeline.
 
 ---
 
-## Spec 3 - Behemoth studio policy toggle
+## Spec 3 - Distribution calculator source of truth
 
 ### Source
 
-In-game Behemoth policy, two distribution-relevant bonuses:
+Extracted game-file distribution grid:
 
-- "When a film's production budget exceeds $1,000,000, the number of viewers in
-  the first week of release will increase by 25%."
-- "Attendance of films with a commercial rating above 9 will fall 25% more slowly."
+    const BASE = 1000;
+    const W1_MULT = 2;
+    const W2_MULT = 1;
+    const DECAY = 0.8;
+
+    W1 = commercialScore * W1_MULT * BASE
+    W2 = commercialScore * W2_MULT * BASE
+    W3+ = previousWeek * DECAY
 
 ### Change
 
-Add a third toggle, `behemothToggle`, beside Striking Image and Artistic Ability,
-using the same markup and CSS pattern. Label it so the budget condition is
-explicit, for example "Behemoth (budget over $1M)". The toggle asserts the
-condition; do not add a currency input.
+Do not include artistic score in screening requirements. Do not include
+community-estimated Behemoth decay or budget modifiers in this calculator unless
+the exact formula is extracted from the game files.
 
-In `src/marketing/distributionPlanner.js`:
-
-**Week 1 boost.** Behemoth multiplies week 1 only by 1.25. This is a different
-shape from the existing boost, which covers weeks 1 to 4, so it needs its own
-multiplier rather than folding into `getDistributionMultiplier()`.
-
-    week 1     = base * openingViewerMultiplier * (behemoth ? 1.25 : 1)
-    weeks 2-4  = base * openingViewerMultiplier
-    weeks 5-8  = base
-
-This budget boost stays week 1 only. The separate decay bonus below also lifts
-week 2 - see "As shipped" for the amended behaviour.
-
-**Decay.** `DECAY` is currently the constant `0.8`, a 20% weekly drop. "Falls 25%
-more slowly" reduces that drop by a quarter, 20% to 15%, so retention becomes
-`0.85`. Apply only when Behemoth is on AND the commercial score exceeds 9. The
-commercial score is already an input (`comScoreInput`), so this condition is
-checked automatically - no new UI.
-
-    getDecayRate() => (behemoth && commercialScore > 9) ? 0.85 : 0.8
-
-Register `behemothToggle` in `initializeDistributionToggles()` so it triggers
-`recalculateDistribution` on change.
-
-### As shipped, and the open item
-
-Amended after review: the slower fall applies to week 2 as well. Week 2 keeps
-half of week 1, which is a retention step like every later week, so an in-game
-screenshot showing the Behemoth icon on weeks 2 and 3 reads as the bonus
-covering that step too. Week 2 was previously written as an independent
-multiplier, which no decay modifier could reach.
-
-Both retentions now derive from one factor rather than separate literals:
-
-    BEHEMOTH_SLOWER_FALL = 0.75      // "falls 25% more slowly"
-    easedRetention(0.8) -> 0.85      // weeks 3-8
-    easedRetention(0.5) -> 0.625     // week 1 -> week 2
-
-Later weeks compound from the lifted week 2 rather than stepping back down.
-The rate is rounded, because `1 - (1 - 0.8) * 0.75` evaluates to
-0.8500000000000001 and the grid rounds up, surfacing as a whole extra
-screening in week 3.
-
-Decision: shipped on this inference rather than held. It is opt-in behind a
-toggle, so the default is untouched, and `BEHEMOTH_SLOWER_FALL` is read in
-exactly one place - changing that single constant repoints every week.
-
-To verify: in game with Behemoth active and a commercial rating above 9, take
-week 3 divided by week 2. 0.85 confirms the model. Anything else is the real
-rate and goes straight into that constant.
-
-### Explicitly out of scope
-
-Striking Image and Artistic Ability currently do not stack: either one checked
-gives x2, both checked still gives x2. This differs from an earlier build where
-they compounded to x3. Left as-is by decision, pending in-game confirmation. Do
-not change it as part of this spec.
+Owned screenings are capacity only. They split demand into owned/rented/spare
+after the weekly demand has been calculated; they do not change audience demand
+or retention.
 
 ### Acceptance
 
-- Behemoth off reproduces today's numbers exactly for every week.
-- Behemoth on with commercial score 9.5 raises week 1 by 25% and slows decay from
-  week 3 onward.
-- Behemoth on with commercial score 7 raises week 1 by 25% and leaves decay at 0.8.
-- The toggle matches the existing two visually and in interaction.
+- Commercial score 5.0 produces demand `[10000, 5000, 4000, 3200, 2560, 2048, 1638, 1310]`.
+- Changing artistic score does not change the distribution grid.
+- Changing owned screenings changes the owned/rented split, not the demand.
+- Any future modifier must cite an extracted game-file formula before shipping.

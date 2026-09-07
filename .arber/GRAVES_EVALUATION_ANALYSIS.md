@@ -103,9 +103,9 @@ Artistic Movie Score = (Script Synergy × Artistic Weights)
 ```
 
 These directly affect:
-- **Week 1 Screenings:** Synergy multiplier (higher = wider distribution)
+- **Week 1 Screenings:** higher commercial movie score means wider distribution
 - **Advertising Spend Efficiency:** Higher synergy = better ROI
-- **Holdover Potential:** Script synergy affects Week 2+ retention
+- **Holdover Demand:** later weeks follow the extracted distribution decay grid
 
 ## Practical Implications for the Calculator
 

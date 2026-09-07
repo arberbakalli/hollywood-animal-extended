@@ -7,20 +7,15 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 ## Data Correctness
 
-- **The distribution demand curve has no verified provenance.** The maths is adapted from
-  aalbertinib's Hollywood Animal Master (credited in `README.md`), imported wholesale in `65c7cf5`.
-  The `x 1000` base, the week-one `x2` and the 0.8 decay are not derived anywhere in this repo and
-  are not extracted game data — `data/` holds tag compatibility and per-tag demographic weights,
-  which describe *who* the audience is, not how many screenings a film needs. Only the game itself
-  can settle whether the curve is right. The capacity split built on top of it is independently
-  correct; the curve it splits is inherited on trust.
-- **Behemoth's week-two lift is an unverified inference.**
-  `BASE_WEEK_TWO_RETENTION` is 0.5 because week two's demand is half of week one's. That now holds
-  exactly, since both are seeded from the score before capacity is subtracted.
-  `easedRetention(0.5) / 0.5` then lifts week two by 1.25 when the decay bonus is active. Whether
-  1.25 matches the game is unverified — `.arber/ENGINEERING_SPECS.md` records it as an inference
-  shipped behind a toggle. To check: with Behemoth active and a commercial rating above 9, read
-  week 3 divided by week 2 in game.
+- **Distribution formula is game-file sourced, not inferred.** Week 1 = commercial score × 2 × 1,000;
+  Week 2 = commercial score × 1 × 1,000; weeks 3-8 = previous week × 0.8 (20% decay). Extracted
+  from the game files and documented in `.arber/ENGINEERING_SPECS.md`. The formula uses commercial
+  score only; artistic score does not affect distribution. Capacity (owned theatres) is subtracted
+  after demand is calculated, splitting it into owned/rented/spare, never changing the demand itself.
+- **Behemoth and community-guide modifiers are not in the extracted formula.** The game-file grid is
+  simpler than the implementations often inferred from policy text or community guides. If Behemoth or
+  other bonuses apply, they must be extracted from game files and cited before shipping, not inferred
+  from player reports or policy text. Currently shipping only the extracted base formula.
 
 ## Behaviour
 

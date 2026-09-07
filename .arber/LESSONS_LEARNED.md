@@ -120,16 +120,24 @@ lines and cost nothing.
 
 ---
 
-## 7. Verified numbers beat inferred ones, but say which you have
+## 7. Distribution formulas need game-file proof, not community estimates
 
-Behemoth's "falls 25% more slowly" was implemented as a retention change
-derived from a single factor, and shipped with the inference labelled in both
-the code comment and the spec, behind an opt-in toggle. The rate lives in one
-constant so a confirmed figure is a one-line change.
+**What broke.** The distribution calculator shipped a Behemoth/retention model
+from policy text and community-style interpretation, even though the extracted
+game-file grid was simpler: commercial score only, week 1 `score * 2 * 1000`,
+week 2 `score * 1 * 1000`, then `0.8` weekly decay.
 
-**The rule.** Shipping an inference is fine when the default is untouched, the
-patch point is single, and the uncertainty is written down where the next
-person will read it. Shipping it as though it were measured is not.
+**The real cause.** We treated labelled uncertainty as enough protection. It was
+not. Once the modifier was in the UI and tests, the app looked authoritative
+while disagreeing with the game files.
+
+**The rule.** For formulas, game files beat community guides, screenshots, and
+agent inference. If the exact game-file formula is not extracted, keep the
+feature out of the source data and out of the calculator.
+
+**Cheap check for next time.** Add a regression test with exact week values from
+the extracted formula. For commercial score `5.0`, distribution demand must be
+`[10000, 5000, 4000, 3200, 2560, 2048, 1638, 1310]`.
 
 ---
 
