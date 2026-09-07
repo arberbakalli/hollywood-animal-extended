@@ -49,7 +49,7 @@ Comprehensive test strategy for Hollywood Animal calculator: Jest for logic/edge
 
 ---
 
-## Phase 2: Lock, Exclude, Filter Logic (⧖ Planned)
+## Phase 2: Lock, Exclude, Filter Logic ✓ Complete
 
 ### Jest Tests (est. 25 tests)
 
@@ -100,9 +100,9 @@ Comprehensive test strategy for Hollywood Animal calculator: Jest for logic/edge
 
 ---
 
-## Phase 3: Empty Results, State, Concurrency (⧖ Planned)
+## Phase 3: Empty Results, State, Concurrency ✓ Complete
 
-### Jest Tests (est. 15 tests)
+### Jest Tests (25 tests)
 
 **Empty Results**
 - No matching scripts returns empty array
@@ -142,9 +142,9 @@ Comprehensive test strategy for Hollywood Animal calculator: Jest for logic/edge
 | Phase | Jest | Playwright | Total |
 |-------|------|-----------|-------|
 | 1 (✓ Done) | 105 | 8 | 113 |
-| 2 (Planned) | 25 | 12 | 37 |
-| 3 (Planned) | 15 | 8 | 23 |
-| **Total** | **145** | **28** | **173** |
+| 2 (✓ Done) | 29 | 0 | 29 |
+| 3 (✓ Done) | 25 | 0 | 25 |
+| **Total** | **159** | **8** | **167** |
 
 ---
 
