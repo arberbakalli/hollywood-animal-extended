@@ -38,6 +38,19 @@ implicitly.
 **What would change this:** if the module flip happens, re-extracting classes becomes worthwhile.
 Extract only when `script.js` can import the result, and delete the original in the same commit.
 
+**Superseded — `src/` is back, by a different route.** `0415f32 Finish classic module architecture
+split` moved behaviour into 22 files under `src/`, and `script.js` is now a ~490-line bridge rather
+than the monolith.
+
+The condition above was never met: there was no module flip, and `script.js` still cannot `import`.
+The split works *within* the classic-script constraint instead — each file is an IIFE hanging a
+`HAC*` namespace off `globalThis`, and `script.js` loads last and re-exports those as bare globals.
+
+That satisfies the reasoning behind the original deletion, which was never "no `src/`" but "nothing
+under `src/` may be a parallel reimplementation of code that still runs elsewhere". The extracted
+code is the code that runs; `script.js` only forwards to it. The rule to carry forward is that one,
+not the folder name.
+
 ---
 
 ## 2. No Vue migration
@@ -59,7 +72,7 @@ The original's simplicity is the feature worth protecting.
 **Kept from it:** the collapsible card-header pattern for Excluded Elements — a clickable title
 showing a live count, with the body toggling — which is a genuine improvement and needs no framework.
 
-**What would change this:** a requirement the four-file structure genuinely cannot serve — multi-view
+**What would change this:** a requirement the no-build structure genuinely cannot serve — multi-view
 routing, server-side rendering, or a team large enough that component boundaries pay for their
 tooling.
 

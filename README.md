@@ -6,7 +6,8 @@ A web tool for [Hollywood Animal](https://store.steampowered.com/) players: gene
 story-element synergy, and find the best advertisers for a movie.
 
 An extended continuation of [CallOn84's original calculator](https://github.com/CallOn84/Hollywood-Animal-Calculator),
-kept deliberately simple — four files, no build step, no framework.
+kept deliberately simple — no build step, no framework, no bundler. Everything loads as plain
+classic scripts.
 
 ## What's different here
 
@@ -33,22 +34,29 @@ kept deliberately simple — four files, no build step, no framework.
 
 - A golden-master test suite over the scoring core, so changes to score maths show up as a failing
   snapshot instead of a silent drift
-- 598 lines of unreachable class scaffolding removed — see [docs/DECISIONS.md](docs/DECISIONS.md)
+- An end-to-end suite driving a real browser, covering the flows the unit tests structurally cannot
+  reach — tab switching, dropdown population, exclusion propagation, the distribution calculator
+- Behaviour split out of one 2,000-line file into `src/`, grouped by area. An earlier attempt at this
+  was deleted for being unreachable; both the deletion and the eventual split are recorded in
+  [docs/DECISIONS.md](docs/DECISIONS.md)
 
 ## Running it
 
-It is a static site. Open `index.html` through any local web server — the JSON fixtures are fetched
-at runtime, so `file://` will not work.
+It is a static site, but the JSON fixtures are fetched at runtime, so `file://` will not work — it
+has to be served.
 
 ```bash
-npx http-server -c-1
+npm run serve
 ```
+
+That runs `tools/static-server.mjs` (no dependencies) at http://127.0.0.1:4173.
 
 ## Development
 
 ```bash
 npm install
-npm test        # Jest, 18 tests across 2 suites
+npm test          # Jest — 80 tests, 6 suites, over a VM harness
+npm run test:e2e  # Playwright — 62 tests in a real browser
 ```
 
 `npm test` is the entry point, not `npx jest` — the suite is native ESM and needs a Node flag that no

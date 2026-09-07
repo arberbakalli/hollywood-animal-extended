@@ -20,20 +20,34 @@ Not a fork on GitHub — its own repository, with the original's commit history 
 
 ## Project Layout
 
-The entire application is four files. There is no build step, no framework, and no bundler.
+There is no build step, no framework, and no bundler.
 
 | Path | Purpose |
 | --- | --- |
-| `index.html` | Markup and the only two `<script>` tags |
-| `script.js` | All behaviour — scoring, generation, DOM wiring (~2,000 lines) |
-| `data.js` | `GAME_DATA` constants consumed by `script.js` |
+| `index.html` | Markup, and the 24 `<script>` tags that load everything below |
+| `src/**/*.js` | All behaviour, 22 files grouped by area — `app/`, `data/`, `selectors/`, `generator/`, `evaluation/`, `marketing/`, `ui/` |
+| `script.js` | Thin bridge layer (~490 lines): re-exports the `src/` namespaces as bare globals |
+| `data.js` | `GAME_DATA` — tags, categories, ad agents, demographics |
 | `styles.css` | All styling |
 | `data/*.json` | Tag, compatibility, genre-pair and audience-weight fixtures |
 | `localization/*.json` | Display names, ten languages |
-| `tests/` | Jest suite driving `script.js` through a VM harness |
+| `tools/` | Static server for tests and preview, plus achilles CLI wrappers |
+| `tests/` | Jest suite over a VM harness, plus a Playwright E2E suite |
 
-`index.html` loads `data.js` then `script.js` as **classic scripts**. Neither is a module. This
-single fact governs most of the constraints below.
+`index.html` loads every file as a **classic script** — none is a module. That single fact governs
+most of the constraints below.
+
+Each file under `src/` is an IIFE that hangs a namespace off `globalThis` (`HACAppShell`,
+`HACDomIds`, `HACScoreFormatting`, …). `script.js` loads last and re-exports those as bare
+globals, so the other classic scripts can call them unqualified:
+
+```js
+function toDomId(value) {
+    return HACDomIds.toDomId(value);
+}
+```
+
+Those wrappers are not duplicates — deleting one breaks every caller of the bare name.
 
 ## Current Priority
 
