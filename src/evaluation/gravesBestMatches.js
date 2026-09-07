@@ -5,11 +5,10 @@
     const CONFLICT_PAIR_THRESHOLD = 2.0;
     // Same bar getGravesVerdict calls Success.
     const STRONG_FIT_THRESHOLD = 4.0;
-    // Capped per band, not across the whole list. A conflicting candidate always
-    // sorts below clean ones, so a global cap would truncate away the very
-    // warnings a user needs before picking one.
-    const MAX_ROWS_PER_BAND = 10;
-    const MAX_ROWS = 30;
+    // Removed caps to show all matches. Users can scroll through unlimited results.
+    // Conflicting candidates sort below clean ones, so ordering handles priority.
+    const MAX_ROWS_PER_BAND = Infinity;
+    const MAX_ROWS = Infinity;
 
     let bestMatchMode = 'additions';
     let lastSelectedTags = [];
