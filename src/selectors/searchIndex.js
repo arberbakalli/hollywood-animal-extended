@@ -68,6 +68,16 @@
 
         if (!container) return;
 
+        // BUGFIX: Ensure search wrapper stays visible during search
+        const searchWrapper = searchInput.closest('.category-search-wrapper');
+        if (searchWrapper) {
+            searchWrapper.classList.remove('hidden');
+            searchWrapper.style.display = '';
+        }
+        // Ensure search input itself stays visible and focused
+        searchInput.classList.remove('hidden');
+        searchInput.style.display = '';
+
         let totalMatches = 0;  // Count visible options for feedback
 
         // Filter rows and options in all selects in this category
@@ -75,19 +85,10 @@
                 const select = row.querySelector('.tag-selector');
                 if (!select) return;
 
-                // Get the selected option's text
-                const selectedOption = select.options[select.selectedIndex];
-                const selectedText = selectedOption ? selectedOption.innerText.toLowerCase() : '';
-
-                // Show/hide the entire row based on whether selected value matches search
-                if (searchTerm === '') {
-                    // No search: show all rows
-                    row.classList.remove('hidden');
-                } else {
-                    // Search active: show only if selected value matches OR if nothing is selected yet
-                    const rowMatches = selectedText.includes(searchTerm) || selectedText === '-- select ' + category.toLowerCase() + ' --' || selectedText === '';
-                    row.classList.toggle('hidden', !rowMatches);
-                }
+                // Keep the selector itself visible while searching. The search term
+                // filters the dropdown options; hiding the row strands the user
+                // without a control to finish the selection.
+                row.classList.remove('hidden');
 
                 // Also filter the dropdown options (for when user clicks to select)
                 select.querySelectorAll('option:not(:first-child)').forEach(opt => {

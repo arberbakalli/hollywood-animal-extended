@@ -146,4 +146,19 @@ test.describe('Script Evaluation — Compatibility Numbers', () => {
     await steps.on('resultsSection', 'ScriptEvaluation').verifyState('hidden');
     await steps.expect('genreSelect', 'ScriptEvaluation').value.toBe('');
   });
+
+  test('TC02-000010 category search keeps an empty selector visible while filtering options', async ({ steps, page }) => {
+    await steps.on('finaleSearch', 'ScriptEvaluation').fill('heroical');
+
+    await steps.on('finaleSearch', 'ScriptEvaluation').verifyState('visible');
+    await steps.on('finaleRow', 'ScriptEvaluation').verifyState('visible');
+
+    await expect
+      .poll(() => page
+        .locator('#inputs-finale-synergy select.tag-selector option:not(:first-child)')
+        .evaluateAll(options => options
+          .filter(option => !option.hidden)
+          .map(option => option.textContent.trim())))
+      .toEqual(['Protagonist Dies Heroically']);
+  });
 });

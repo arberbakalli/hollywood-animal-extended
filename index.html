@@ -52,7 +52,7 @@
                 <span class="product-area-kicker">Build</span>
                 <span class="product-area-label">Script Lab</span>
             </button>
-            <button id="tab-synergy-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="synergy">
+            <button id="tab-synergy-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="graves">
                 <span class="product-area-kicker">Evaluate</span>
                 <span class="product-area-label">Script Evaluation</span>
             </button>
@@ -188,7 +188,7 @@
             </section>
 
             <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COMPATIBILITY NUMBERS -->
-            <section id="tab-synergy" class="tab-content app-tab-panel active" aria-labelledby="tab-synergy-button" aria-hidden="false">
+            <section id="tab-synergy" class="tab-content app-tab-panel hidden" aria-label="Legacy compatibility numbers" aria-hidden="true" hidden>
                 <div id="evaluation-mode-nav-synergy" class="product-mode-nav" role="group" aria-label="Script evaluation modes">
                     <button id="evaluation-mode-compatibility-button" class="product-mode-btn active" type="button" aria-pressed="true" data-feature-tab="synergy">Compatibility Numbers</button>
                     <button id="evaluation-mode-graves-button" class="product-mode-btn" type="button" aria-pressed="false" data-feature-tab="graves">Colman Graves</button>
@@ -278,12 +278,7 @@
             </section>
 
             <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COLMAN GRAVES -->
-            <section id="tab-graves" class="tab-content app-tab-panel hidden" aria-label="Colman Graves" aria-hidden="true" hidden>
-                <div id="evaluation-mode-nav-graves" class="product-mode-nav" role="group" aria-label="Script evaluation modes">
-                    <button id="graves-mode-compatibility-button" class="product-mode-btn" type="button" aria-pressed="false" data-feature-tab="synergy">Compatibility Numbers</button>
-                    <button id="graves-mode-graves-button" class="product-mode-btn active" type="button" aria-pressed="true" data-feature-tab="graves">Colman Graves</button>
-                </div>
-
+            <section id="tab-graves" class="tab-content app-tab-panel active" aria-labelledby="tab-synergy-button" aria-hidden="false">
                 <div id="graves-intro-panel" class="card graves-case-card">
                     <div id="graves-heading-block" class="graves-heading-block">
                         <div id="graves-monogram" class="graves-monogram" aria-hidden="true">CG</div>
@@ -354,7 +349,16 @@
                     <div id="graves-actions" class="action-area">
                         <div id="gravesFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="evaluateGravesButton" class="analyze-btn" type="button">Evaluate Script</button>
-                        <button id="generateBestMatchesButton" class="analyze-btn best-matches-btn" type="button">Generate Best Matches</button>
+
+                        <div id="graves-best-matches-controls" class="best-matches-control-group">
+                            <div class="best-matches-mode-toggle">
+                                <button id="bestMatchMode-additions" class="best-match-mode-btn active" type="button" data-best-match-mode="additions" title="Show best tags to add">Additions</button>
+                                <button id="bestMatchMode-swaps" class="best-match-mode-btn" type="button" data-best-match-mode="swaps" title="Swap suggestions for selected tags">Swaps</button>
+                                <button id="bestMatchMode-pairwise" class="best-match-mode-btn" type="button" data-best-match-mode="pairwise" title="Pairwise score breakdown">Pairwise</button>
+                            </div>
+                            <button id="generateBestMatchesButton" class="analyze-btn best-matches-btn" type="button">Generate Best Matches</button>
+                        </div>
+
                         <button id="saveGravesScriptButton" class="analyze-btn save-script-btn" type="button" data-save-script="graves">&#9734; Save to Script Library</button>
                     </div>
                 </div>
@@ -383,6 +387,39 @@
                         <h3>Graves Analysis</h3>
                         <div id="gravesVerdictText" class="graves-reading-text"></div>
                         <div id="gravesMethodList" class="graves-method-list"></div>
+                    </div>
+
+                    <div id="graves-breakdown-panel" class="card result-card breakdown-container">
+                        <div class="breakdown-col left-col">
+                            <h4 class="col-header">Compatibility Breakdown</h4>
+                            <div class="breakdown-row">
+                                <span class="b-label">Script Synergy:</span>
+                                <span class="b-value" id="gravesBreakdownBaseScore">0.00</span>
+                            </div>
+                            <div class="breakdown-row">
+                                <span class="b-label">Commercial Bonus:</span>
+                                <span class="b-value" id="gravesBreakdownComBonus">0</span>
+                            </div>
+                            <div class="breakdown-row">
+                                <span class="b-label">Artistic Bonus:</span>
+                                <span class="b-value" id="gravesBreakdownArtBonus">0</span>
+                            </div>
+                            <p class="context-text">
+                                Same compatibility math, presented through Graves so there is one evaluation source.
+                            </p>
+                        </div>
+                        <div class="breakdown-col right-col">
+                            <h4 class="col-header highlight-header">Movie Score</h4>
+                            <div class="total-row">
+                                <span class="t-label">Commercial Movie Score:</span>
+                                <span class="t-value" id="gravesTotalComScore">0.00</span>
+                            </div>
+                            <div class="total-row">
+                                <span class="t-label">Artistic Movie Score:</span>
+                                <span class="t-value" id="gravesTotalArtScore">0.00</span>
+                            </div>
+                            <div id="gravesScoreCapLabel" class="score-cap-label"></div>
+                        </div>
                     </div>
 
                     <div id="graves-best-matches-panel" class="card result-card graves-best-matches-panel hidden">

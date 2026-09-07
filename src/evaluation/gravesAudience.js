@@ -110,7 +110,7 @@
         const verdict = getGravesVerdict(matrix.rawAverage);
 
         document.getElementById('results-graves').classList.remove('hidden');
-        ['graves-summary-row', 'graves-reading-panel', 'graves-detail-row'].forEach(panelId => {
+        ['graves-summary-row', 'graves-reading-panel', 'graves-breakdown-panel', 'graves-detail-row'].forEach(panelId => {
             const panel = document.getElementById(panelId);
             if (panel) panel.classList.remove('hidden');
         });
@@ -130,6 +130,29 @@
         const artisticEl = document.getElementById('gravesArtisticScoreDisplay');
         artisticEl.textContent = formatMovieScore(movieScores.artistic);
         setToneClass(artisticEl, movieScores.artistic > 0 ? 'art' : 'danger');
+
+        const breakdownBase = document.getElementById('gravesBreakdownBaseScore');
+        breakdownBase.textContent = formatScore(matrix.totalScore);
+        setToneClass(breakdownBase, matrix.totalScore >= 0 ? 'success' : 'danger');
+
+        const breakdownCom = document.getElementById('gravesBreakdownComBonus');
+        breakdownCom.textContent = formatSimpleScore(evaluation.bonuses.com);
+        setToneClass(breakdownCom, evaluation.bonuses.com > 0 ? 'success' : (evaluation.bonuses.com < 0 ? 'danger' : 'neutral'));
+
+        const breakdownArt = document.getElementById('gravesBreakdownArtBonus');
+        breakdownArt.textContent = formatSimpleScore(evaluation.bonuses.art);
+        setToneClass(breakdownArt, evaluation.bonuses.art > 0 ? 'art' : (evaluation.bonuses.art < 0 ? 'danger' : 'neutral'));
+
+        const totalComEl = document.getElementById('gravesTotalComScore');
+        totalComEl.textContent = formatMovieScore(movieScores.commercial);
+        setToneClass(totalComEl, movieScores.commercial > 0 ? 'accent' : 'danger');
+
+        const totalArtEl = document.getElementById('gravesTotalArtScore');
+        totalArtEl.textContent = formatMovieScore(movieScores.artistic);
+        setToneClass(totalArtEl, movieScores.artistic > 0 ? 'art' : 'danger');
+
+        document.getElementById('gravesScoreCapLabel').innerHTML =
+            `Max Score Capped at <strong>${movieScores.tagCap}.0</strong> (${movieScores.scoringCount} Scoring Elements)`;
 
         document.getElementById('gravesVerdictText').textContent = verdict.text;
         document.getElementById('gravesMethodList').innerHTML = `
