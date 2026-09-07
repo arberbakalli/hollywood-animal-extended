@@ -248,3 +248,26 @@ and computed color for the tag before calling the mapping done.
 **The rule.** When a filter is optional, define what "no filter" means: show all results, rank by default metric, or disable the feature. Do not treat missing input as an error if the feature has a sensible unfiltered behavior.
 
 **Cheap check for next time.** For each optional filter in the UI, document its three states: (1) filter applied, (2) no filter selected (unfiltered behavior), (3) no valid results after filter. Only state 3 should error.
+
+---
+
+## 14. Do not hide a panel while focus is still inside it
+
+**What broke.** Switching between Compatibility Numbers, Colman Graves, Analyze
+Script, and Build for Target could leave keyboard focus on a button inside the
+panel being hidden. The browser then blocked `aria-hidden` because a focused
+element cannot be hidden from assistive technology while it still owns focus.
+
+**The real cause.** `switchTab(...)` updated `hidden` and `aria-hidden` before
+moving focus. The visual UI changed correctly, but the accessibility tree still
+had a focused descendant in the panel that was being removed.
+
+**The rule.** Before hiding any interactive subtree, move focus to a visible
+stable control outside that subtree, or blur as a fallback. Hidden tab panels
+should also be marked `inert` so their controls cannot be reached while the
+panel is unavailable.
+
+**Cheap check for next time.** Add a Playwright test that clicks a control
+inside the outgoing panel, switches tabs, then asserts `document.activeElement`
+is not inside `.tab-content[aria-hidden="true"]` and no "Blocked aria-hidden"
+console warning fired.

@@ -58,13 +58,15 @@
             return t && t.category !== 'Genre' && t.category !== 'Settings';
         });
 
+        const maxElements = parseInt(document.getElementById('targetedElementsSlider')?.value || '10');
+
         if (storyElementTags.length < 5) {
             showFeedbackMessage('targetedFeedbackMessage', `Select at least 5 story elements. You selected ${storyElementTags.length} (Genre and Settings don't count).`, 'accent');
             return;
         }
 
-        if (storyElementTags.length > 10) {
-            showFeedbackMessage('targetedFeedbackMessage', `Select up to 10 story elements. You selected ${storyElementTags.length} (Genre and Settings don't count).`, 'accent');
+        if (storyElementTags.length > maxElements) {
+            showFeedbackMessage('targetedFeedbackMessage', `Select up to ${maxElements} story elements. You selected ${storyElementTags.length} (Genre and Settings don't count).`, 'accent');
             return;
         }
 

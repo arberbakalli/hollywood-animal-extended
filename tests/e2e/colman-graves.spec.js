@@ -152,4 +152,28 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('resultsSection', 'ColmanGraves').verifyState('hidden');
     await steps.expect('genreSelect', 'ColmanGraves').value.toBe('');
   });
+
+  test('TC03-000010 switching evaluation modes does not hide focused controls from accessibility', async ({ page }) => {
+    const ariaWarnings = [];
+    page.on('console', message => {
+      if (message.text().includes('Blocked aria-hidden')) {
+        ariaWarnings.push(message.text());
+      }
+    });
+
+    await page.locator('#graves-mode-compatibility-button').click();
+    await expect(page.locator('#tab-synergy')).toBeVisible();
+
+    await page.locator('#evaluation-mode-graves-button').click();
+    await expect(page.locator('#tab-graves')).toBeVisible();
+
+    const hiddenFocusedPanelId = await page.evaluate(() => {
+      const activeElement = document.activeElement;
+      const hiddenPanel = activeElement && activeElement.closest('.tab-content[aria-hidden="true"]');
+      return hiddenPanel ? hiddenPanel.id : null;
+    });
+
+    expect(hiddenFocusedPanelId).toBeNull();
+    expect(ariaWarnings).toEqual([]);
+  });
 });

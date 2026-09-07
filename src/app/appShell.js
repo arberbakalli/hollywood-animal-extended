@@ -81,6 +81,15 @@
     function switchTab(tabName) {
         currentTab = tabName;
         const primaryTab = PRIMARY_TAB_BY_FEATURE[tabName] || tabName;
+        const activeElement = document.activeElement;
+        const nextPrimaryButton = document.querySelector(`.tab-btn[data-tab="${primaryTab}"]`);
+        const focusWillBeHidden = activeElement && Array.from(document.querySelectorAll('.tab-content'))
+            .some(content => content.id !== `tab-${tabName}` && content.contains(activeElement));
+
+        if (focusWillBeHidden) {
+            if (nextPrimaryButton) nextPrimaryButton.focus({ preventScroll: true });
+            else activeElement.blur();
+        }
 
         document.querySelectorAll('.tab-btn[data-tab]').forEach(button => {
             const isActive = button.dataset.tab === primaryTab;
@@ -99,6 +108,7 @@
             const isActive = content.id === `tab-${tabName}`;
             content.classList.toggle('hidden', !isActive);
             content.hidden = !isActive;
+            content.inert = !isActive;
             content.setAttribute('aria-hidden', String(!isActive));
         });
     }

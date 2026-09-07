@@ -280,10 +280,6 @@
 
             <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COLMAN GRAVES -->
             <section id="tab-graves" class="tab-content app-tab-panel hidden" aria-label="Colman Graves" aria-hidden="true" hidden>
-                <div id="evaluation-mode-nav-graves" class="product-mode-nav" role="group" aria-label="Script evaluation modes">
-                    <button id="graves-mode-compatibility-button" class="product-mode-btn" type="button" aria-pressed="false" data-feature-tab="synergy">Compatibility Numbers</button>
-                    <button id="graves-mode-graves-button" class="product-mode-btn active" type="button" aria-pressed="true" data-feature-tab="graves">Colman Graves</button>
-                </div>
 
                 <div id="graves-intro-panel" class="card graves-case-card">
                     <div id="graves-heading-block" class="graves-heading-block">
@@ -376,6 +372,39 @@
                         <h3>Graves Analysis</h3>
                         <div id="gravesVerdictText" class="graves-reading-text"></div>
                         <div id="gravesMethodList" class="graves-method-list"></div>
+                    </div>
+
+                    <div id="graves-breakdown-panel" class="card result-card breakdown-container">
+                        <div class="breakdown-col left-col">
+                            <h4 class="col-header">Compatibility Breakdown</h4>
+                            <div class="breakdown-row">
+                                <span class="b-label">Script Synergy:</span>
+                                <span class="b-value" id="gravesBreakdownBaseScore">0.00</span>
+                            </div>
+                            <div class="breakdown-row">
+                                <span class="b-label">Commercial Bonus:</span>
+                                <span class="b-value" id="gravesBreakdownComBonus">0</span>
+                            </div>
+                            <div class="breakdown-row">
+                                <span class="b-label">Artistic Bonus:</span>
+                                <span class="b-value" id="gravesBreakdownArtBonus">0</span>
+                            </div>
+                            <p class="context-text">
+                                Same compatibility math, presented through Graves so there is one evaluation source.
+                            </p>
+                        </div>
+                        <div class="breakdown-col right-col">
+                            <h4 class="col-header highlight-header">Movie Score</h4>
+                            <div class="total-row">
+                                <span class="t-label">Commercial Movie Score:</span>
+                                <span class="t-value" id="gravesTotalComScore">0.00</span>
+                            </div>
+                            <div class="total-row">
+                                <span class="t-label">Artistic Movie Score:</span>
+                                <span class="t-value" id="gravesTotalArtScore">0.00</span>
+                            </div>
+                            <div id="gravesScoreCapLabel" class="score-cap-label"></div>
+                        </div>
                     </div>
 
                     <div id="graves-best-matches-panel" class="card result-card graves-best-matches-panel hidden">
@@ -588,6 +617,16 @@
                             <div class="targeted-field-label">Or Select Advertiser</div>
                             <div id="targeted-advertiser-checkboxes" class="targeted-checkbox-list"></div>
                         </div>
+                    </div>
+
+                    <!-- Story Elements Range -->
+                    <div class="targeted-range-control">
+                        <div class="targeted-field-label">
+                            <span>Story Elements (5-10)</span>
+                            <span id="targetedElementCount" class="range-display">5-10</span>
+                        </div>
+                        <input type="range" id="targetedElementsSlider" class="styled-slider" min="5" max="10" value="10" title="Max story elements to allow in combinations">
+                        <p class="subtitle score-help-text">Genre and Settings are always included; adjust how many other story elements to use.</p>
                     </div>
 
                     <!-- Tag Builder -->
