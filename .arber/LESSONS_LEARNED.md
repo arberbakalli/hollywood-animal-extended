@@ -196,3 +196,23 @@ caught the bug.
 **Cheap check for next time.** When an element combines a global utility class
 with component-level display rules, add a component-specific hidden selector:
 `.component.hidden { display: none; }`.
+
+---
+
+## 11. Human-equivalent names are not code-equivalent names
+
+**What broke.** Science-Fiction did not receive the `#404860` in-game color
+because the app data uses `SCIENCE_FICTION` while the CSS and UI expectation
+used a hyphenated class like `science-fiction`.
+
+**The real cause.** The code treated display names, ids, and DOM classes as if
+spaces, hyphens, and underscores were interchangeable. They are interchangeable
+to a human reading "Science Fiction," but not to a selector, slug, or lookup key.
+
+**The rule.** Every tag color or rule needs a verified mapping across actual
+tag id, display name, generated DOM class, and CSS selector. Normalize through
+one shared slug helper where possible, and deliberately add aliases only when
+older markup or external data may still emit them.
+
+**Cheap check for next time.** In the browser, inspect the exact option class
+and computed color for the tag before calling the mapping done.

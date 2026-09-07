@@ -95,4 +95,38 @@ test.describe('Script Evaluation — genre mix', () => {
     expect(await percent(steps, 'genreRow1Percent')).toBe(95);
     expect(await percent(steps, 'genreRow2Percent')).toBe(5);
   });
+
+  test('TC06-000008 removing genre rows re-enables those genre options', async ({ steps, page }) => {
+    const genres = ['ACTION', 'ADVENTURE', 'COMEDY', 'DETECTIVE', 'DRAMA'];
+
+    for (const genre of genres) {
+      await page.locator('#inputs-genre-synergy .genre-row:first-child select.tag-selector').selectOption(genre);
+      if (genre !== genres[genres.length - 1]) {
+        await steps.on('genreAddButton', 'ScriptEvaluation').click();
+      }
+    }
+
+    await page.locator('#inputs-genre-synergy .genre-row').evaluateAll(rows => {
+      rows.slice(0, 4).forEach(row => row.querySelector('.remove-btn').click());
+    });
+
+    const states = await page.locator('#inputs-genre-synergy select.tag-selector').first().evaluate((select, genreIds) =>
+      genreIds.map(id => {
+        const option = Array.from(select.options).find(opt => opt.value === id);
+        return {
+          id,
+          disabled: option.disabled,
+          selectedElsewhere: option.dataset.selectedElsewhere,
+          selected: select.value === id,
+        };
+      }), genres);
+
+    expect(states).toEqual([
+      { id: 'ACTION', disabled: false, selectedElsewhere: 'false', selected: true },
+      { id: 'ADVENTURE', disabled: false, selectedElsewhere: 'false', selected: false },
+      { id: 'COMEDY', disabled: false, selectedElsewhere: 'false', selected: false },
+      { id: 'DETECTIVE', disabled: false, selectedElsewhere: 'false', selected: false },
+      { id: 'DRAMA', disabled: false, selectedElsewhere: 'false', selected: false },
+    ]);
+  });
 });

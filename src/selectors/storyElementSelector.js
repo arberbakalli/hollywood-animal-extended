@@ -307,7 +307,7 @@
             opt.innerText = tag.name;
             opt.dataset.searchText = tag.name.toLowerCase();
             if (category === 'Genre') {
-                opt.className = `genre-${tag.id.toLowerCase()}`;
+                opt.className = `genre-${toDomId(tag.id)}`;
             } else {
                 const categorySlug = category
                     .toLowerCase()
@@ -384,6 +384,7 @@
             removeBtn.innerHTML = '×';
             removeBtn.addEventListener('click', () => {
                 row.remove();
+                refreshCategoryDropdowns(category, context);
                 if (category === 'Genre' && context !== 'excluded') updateGenreControls(context);
                 if (context === 'excluded') updateExcludedCount();
             });
@@ -514,6 +515,8 @@
                 if (selects.length > 0) selects[0].value = tagObj.id;
             }
         }
+        refreshCategoryDropdowns(category, context);
+        if (category === 'Genre') updateGenreControls(context);
         const group = document.getElementById(`group-${categoryToElementSlug(category)}-${context}`);
         if (group) {
             group.classList.add('is-highlighted');

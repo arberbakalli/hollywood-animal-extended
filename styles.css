@@ -2869,7 +2869,8 @@ option.genre-drama { color: var(--cat-genre-drama); }
 option.genre-historical { color: var(--cat-genre-historical); }
 option.genre-horror { color: var(--cat-genre-horror); }
 option.genre-romance { color: var(--cat-genre-romance); }
-option.genre-science-fiction { color: var(--cat-genre-science-fiction); }
+option.genre-science-fiction,
+option.genre-science_fiction { color: var(--cat-genre-science-fiction); }
 option.genre-thriller { color: var(--cat-genre-thriller); }
 option.setting { color: var(--cat-setting); }
 option.protagonist { color: var(--cat-protagonist); }
@@ -2915,8 +2916,11 @@ option[data-selected-elsewhere="true"] {
 .targeted-tag-chip.genre-romance { --tag-color: var(--cat-genre-romance); }
 
 .gen-tag-chip.genre-science-fiction,
+.gen-tag-chip.genre-science_fiction,
 .best-match-tag.genre-science-fiction,
-.targeted-tag-chip.genre-science-fiction { --tag-color: var(--cat-genre-science-fiction); }
+.best-match-tag.genre-science_fiction,
+.targeted-tag-chip.genre-science-fiction,
+.targeted-tag-chip.genre-science_fiction { --tag-color: var(--cat-genre-science-fiction); }
 
 .gen-tag-chip.genre-thriller,
 .best-match-tag.genre-thriller,
