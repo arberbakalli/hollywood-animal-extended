@@ -38,10 +38,24 @@ Same class of problem as the Python one, still open. `package.json` declares:
 "@civitas-cerebrum/achilles": "file:../achilles"
 ```
 
-Anyone cloning this repo without the sibling `achilles` checkout next to it
-cannot `npm install` at all — and neither can CI. Fine while achilles is being
-developed alongside; needs to become a published version range before anyone
-else builds this.
+That is a path on disk, not a package name. It resolves only because
+`../achilles` exists next to this repo. Anyone cloning just this project — a new
+machine, a colleague, CI — has no sibling folder, so `npm install` fails
+outright. Not a failing test; no install at all.
+
+**Blocked, not just undone.** The obvious fix is to point at the published
+package, but that does not work yet:
+
+- npm has `@civitas-cerebrum/achilles@0.1.7`; the local copy is `0.1.8`.
+- `0.1.8` is **unreleased** — tags stop at `0.1.7`, with 52 commits since.
+- `playwright.config.js` uses `@civitas-cerebrum/achilles/reporter`, and
+  `reporter/` was added *after* the `0.1.7` tag. Pinning `^0.1.7` would break the
+  reporter on the next clean install.
+
+So the order is: publish `0.1.8`, then change the dependency to `^0.1.8`, and use
+`npm link ../achilles` locally when developing achilles itself. Until achilles is
+published, leave the `file:` path alone — swapping it early trades a portability
+problem for a broken build.
 
 ---
 
@@ -57,25 +71,37 @@ product call, not a bug.
 
 ---
 
-## 3. `src/app/domIds.js` is dead
+## 3. ~~`src/app/domIds.js` is dead~~ — WRONG, it is load-bearing
 
-It exposes `HACDomIds = { toDomId, categoryToElementSlug }`, and **nothing imports
-it**. Every caller uses the duplicate global `toDomId` defined at `script.js:11`.
-Left over from the classic-module split. Either migrate callers onto it or delete
-it — right now it is two copies of the same function, one of which is a lie.
+Retracted. `script.js:11` is not a second copy of `toDomId`, it is a delegation
+wrapper:
+
+```js
+function toDomId(value) {
+    return HACDomIds.toDomId(value);
+}
+```
+
+That is the module-split pattern throughout this codebase: `src/**` holds the
+implementation in an IIFE exposing a namespaced global, and `script.js`
+re-exports it as a bare global for the other classic scripts. Deleting
+`domIds.js` leaves `HACDomIds` undefined and breaks every caller. It is also
+loaded by `tests/helpers/legacyHarness.js` and asserted by `domStructure.test.js`.
+
+The original claim came from grepping for `function toDomId`, seeing two hits and
+not reading the two lines underneath. Nothing to remove.
 
 ---
 
-## 4. Is a commercial movie score of 0.0 expected?
+## 4. ~~Is a commercial movie score of 0.0 expected?~~ — ANSWERED
 
-While de-vacuuming the assertions I asserted that a scored five-element script
-produces a non-zero commercial and artistic movie score. It does not — both
-legitimately floor at `0.0`, so I removed the assertion rather than encode a rule
-the app does not have.
+Yes. A zero movie score is a real outcome, it just takes a genuinely bad
+combination to reach — the five-element script the tests build scores `-3.13`
+synergy. So the test is right not to assert a non-zero score.
 
-Worth a product check: is 0.0 the intended output for a weak-but-valid script, or
-a scoring gap? If it is intended, nothing to do. If not, there is a bug behind it
-and the tests should pin the corrected behaviour.
+Display only: an exact zero now renders as `0` rather than `0.0`, matching what
+`formatScore`/`formatSimpleScore` already did for the other figures. One decimal
+is kept everywhere else, since `0.1` is reachable.
 
 ---
 

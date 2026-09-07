@@ -58,7 +58,7 @@
 
         function formatFinalRating(val) {
             if (val >= 10) return "10.0";
-            return val.toFixed(1);
+            return formatMovieScore(val);
         }
 
         totalComEl.innerHTML = formatFinalRating(movieScores.commercial);

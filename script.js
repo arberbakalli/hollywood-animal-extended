@@ -472,6 +472,10 @@ function formatSimpleScore(num) {
     return HACScoreFormatting.formatSimpleScore(num);
 }
 
+function formatMovieScore(num) {
+    return HACScoreFormatting.formatMovieScore(num);
+}
+
 function setToneClass(element, tone) {
     return HACScoreFormatting.setToneClass(element, tone);
 }

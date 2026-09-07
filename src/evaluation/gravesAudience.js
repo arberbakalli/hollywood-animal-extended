@@ -124,11 +124,11 @@
         setToneClass(averageEl, matrix.rawAverage >= 4.0 ? 'success' : (matrix.rawAverage < 3.0 ? 'danger' : 'accent'));
 
         const commercialEl = document.getElementById('gravesCommercialScoreDisplay');
-        commercialEl.textContent = movieScores.commercial.toFixed(1);
+        commercialEl.textContent = formatMovieScore(movieScores.commercial);
         setToneClass(commercialEl, movieScores.commercial > 0 ? 'accent' : 'danger');
 
         const artisticEl = document.getElementById('gravesArtisticScoreDisplay');
-        artisticEl.textContent = movieScores.artistic.toFixed(1);
+        artisticEl.textContent = formatMovieScore(movieScores.artistic);
         setToneClass(artisticEl, movieScores.artistic > 0 ? 'art' : 'danger');
 
         document.getElementById('gravesVerdictText').textContent = verdict.text;
