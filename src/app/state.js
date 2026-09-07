@@ -6,11 +6,11 @@ var searchIndex = [];
 // split: searchIndex.js kept using it after the declaration stayed behind, so
 // every keystroke threw and no filtering ran.
 var searchDebounceTimers = new Map();
-var currentTab = 'graves';
+var currentTab = 'synergy';
 var PRIMARY_TAB_BY_FEATURE = {
     generator: 'generator',
-    graves: 'synergy',
     synergy: 'synergy',
+    graves: 'synergy',
     advertisers: 'advertisers',
     targeted: 'advertisers'
 };

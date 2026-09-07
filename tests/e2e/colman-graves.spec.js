@@ -142,25 +142,6 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.expect('themeEventSelect', 'ColmanGraves').value.not.toBe('');
   });
 
-  test('TC03-000009 best matches can reveal more rows on demand', async ({ steps, page }) => {
-    await buildValidScript(steps);
-    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
-      type: DropdownSelectType.VALUE,
-      value: '0',
-    });
-    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
-
-    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
-    await steps.on('bestMatchShowMoreButton', 'ColmanGraves').verifyState('visible');
-    const before = await page.locator('#gravesBestMatchesList [data-role="graves-best-match"]').count();
-
-    await steps.on('bestMatchShowMoreButton', 'ColmanGraves').click();
-
-    await expect
-      .poll(() => page.locator('#gravesBestMatchesList [data-role="graves-best-match"]').count())
-      .toBeGreaterThan(before);
-  });
-
   test('TC03-000006 resetting clears the submission and hides the verdict', async ({ steps }) => {
     await buildValidScript(steps);
     await steps.on('evaluateButton', 'ColmanGraves').click();

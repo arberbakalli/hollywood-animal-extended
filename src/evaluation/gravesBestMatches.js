@@ -10,18 +10,9 @@
     // warnings a user needs before picking one.
     const MAX_ROWS_PER_BAND = 10;
     const MAX_ROWS = 30;
-    const INITIAL_ROWS_PER_BAND = 5;
-    const ROW_INCREMENT_PER_BAND = 5;
-    const INITIAL_PAIRWISE_ROWS = 10;
-    const PAIRWISE_ROW_INCREMENT = 10;
 
     let bestMatchMode = 'additions';
     let lastSelectedTags = [];
-    let visibleRowsByMode = {
-        additions: INITIAL_ROWS_PER_BAND,
-        swaps: INITIAL_ROWS_PER_BAND,
-        pairwise: INITIAL_PAIRWISE_ROWS
-    };
 
     function hideGravesBestMatches() {
         const panel = document.getElementById('graves-best-matches-panel');
@@ -35,7 +26,6 @@
         const evaluationPanels = [
             'graves-summary-row',
             'graves-reading-panel',
-            'graves-breakdown-panel',
             'graves-detail-row'
         ];
 
@@ -297,22 +287,10 @@
         unsuccessful: 'Unsuccessful combinations'
     };
 
-    function showMoreMarkup(hiddenCount, mode) {
-        if (hiddenCount <= 0) return '';
-
-        return `<button id="graves-best-match-show-more" class="best-match-show-more-btn" type="button" data-action="show-more-graves-best-matches" data-mode="${mode}">
-            Show ${Math.min(hiddenCount, mode === 'pairwise' ? PAIRWISE_ROW_INCREMENT : ROW_INCREMENT_PER_BAND)} more
-        </button>`;
-    }
-
-    function groupedMarkup(rows, mode) {
+    function groupedMarkup(rows) {
         let index = 0;
-        let hiddenCount = 0;
-        const limit = visibleRowsByMode[mode] || INITIAL_ROWS_PER_BAND;
-        const bands = ['successful', 'common', 'unsuccessful'].map(band => {
-            const bandRows = rows.filter(row => row.band === band).slice(0, MAX_ROWS_PER_BAND);
-            const banded = bandRows.slice(0, limit);
-            hiddenCount += Math.max(0, bandRows.length - banded.length);
+        return ['successful', 'common', 'unsuccessful'].map(band => {
+            const banded = rows.filter(row => row.band === band).slice(0, MAX_ROWS_PER_BAND);
             if (banded.length === 0) return '';
 
             const body = banded.map(row => rowMarkup(row, index++)).join('');
@@ -321,8 +299,6 @@
                 ${body}
             </div>`;
         }).join('');
-
-        return `${bands}${showMoreMarkup(hiddenCount, mode)}`;
     }
 
     function emptyMarkup(message) {
@@ -332,7 +308,7 @@
     function renderAdditions(list, selectedTags) {
         const rows = buildAdditions(selectedTags);
         list.innerHTML = rows.length
-            ? groupedMarkup(rows, 'additions')
+            ? groupedMarkup(rows)
             : emptyMarkup('No additions clear the minimum fit. Try a lower fit or a different category.');
     }
 
@@ -354,7 +330,7 @@
             <div class="best-match-slot-note">
                 Weakest element: <strong>${slotName}</strong>. Replacing it with any of these raises the script average.
             </div>
-            ${groupedMarkup(result.rows, 'swaps')}`;
+            ${groupedMarkup(result.rows)}`;
     }
 
     function renderPairwise(list, selectedTags) {
@@ -365,8 +341,7 @@
             return;
         }
 
-        const visibleMatches = matches.slice(0, visibleRowsByMode.pairwise || INITIAL_PAIRWISE_ROWS);
-        list.innerHTML = visibleMatches.map((match, index) => `
+        list.innerHTML = matches.map((match, index) => `
             <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${bandFor(match.score, match.score)} ${tagClass(match.candidate)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${bandFor(match.score, match.score)}">
                 <div class="best-match-pair">
                     <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
@@ -379,7 +354,7 @@
                     ${addButtonMarkup(match.candidate, index)}
                 </div>
             </div>
-        `).join('') + showMoreMarkup(matches.length - visibleMatches.length, 'pairwise');
+        `).join('');
     }
 
     function bindAddButtons(list) {
@@ -394,14 +369,6 @@
                     renderBestMatches();
                 }
             });
-        });
-        list.querySelector('[data-action="show-more-graves-best-matches"]')?.addEventListener('click', () => {
-            if (bestMatchMode === 'pairwise') {
-                visibleRowsByMode.pairwise = Math.min(MAX_ROWS, visibleRowsByMode.pairwise + PAIRWISE_ROW_INCREMENT);
-            } else {
-                visibleRowsByMode[bestMatchMode] = Math.min(MAX_ROWS_PER_BAND, visibleRowsByMode[bestMatchMode] + ROW_INCREMENT_PER_BAND);
-            }
-            renderBestMatches();
         });
     }
 
@@ -471,11 +438,6 @@
         }
 
         lastSelectedTags = selectedTags;
-        visibleRowsByMode = {
-            additions: INITIAL_ROWS_PER_BAND,
-            swaps: INITIAL_ROWS_PER_BAND,
-            pairwise: INITIAL_PAIRWISE_ROWS
-        };
         renderBestMatches();
         document.getElementById('graves-best-matches-panel')
             ?.scrollIntoView({ behavior: 'smooth', block: 'center' });

@@ -2198,59 +2198,15 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     text-align: right;
 }
 
-/* Best matches control group and mode toggle */
-.best-matches-control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 12px;
-}
-
-.best-matches-mode-toggle {
-    display: flex;
-    gap: 8px;
-    background-color: var(--bg-secondary, #1a1a2e);
-    padding: 4px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-}
-
-.best-match-mode-btn {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid transparent;
-    background-color: transparent;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    font-weight: 600;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.best-match-mode-btn:hover {
-    background-color: rgba(81, 71, 199, 0.15);
-    color: #8BEAFF;
-}
-
-.best-match-mode-btn.active {
-    background-color: #5147C7;
-    color: #ffffff;
-    border-color: #5147C7;
-}
-
 .best-matches-btn {
-    border: 1px solid #5147C7;
-    background-color: rgba(81, 71, 199, 0.2);
-    color: #8BEAFF;
-    margin: 0;
-    font-weight: 800;
+    background-color: #92400e;
+    color: #1a1a1a;
+    margin-top: 12px;
+    font-weight: 600;
 }
 
 .best-matches-btn:hover {
-    border-color: #8BEAFF;
-    background-color: #5147C7;
-    color: #ffffff;
+    background-color: #78340a;
 }
 
 .save-script-btn {
@@ -2461,27 +2417,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .best-match-add-btn:hover {
     background: var(--accent);
     color: #171717;
-}
-
-.best-match-show-more-btn {
-    align-self: center;
-    min-width: 180px;
-    padding: 10px 16px;
-    border: 1px solid rgba(212, 175, 55, 0.55);
-    border-radius: 6px;
-    background: rgba(212, 175, 55, 0.08);
-    color: var(--ha-commercial);
-    cursor: pointer;
-    font-size: 0.82rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
-}
-
-.best-match-show-more-btn:hover {
-    border-color: var(--ha-commercial);
-    background: rgba(212, 175, 55, 0.16);
-    color: #ffe28a;
 }
 
 /* Category color coding */
