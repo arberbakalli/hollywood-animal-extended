@@ -30,43 +30,38 @@ will not serve `.git/` or a stray `.env` the way `python -m http.server` did.
 
 ---
 
-## 1b. `@civitas-cerebrum/achilles` is a `file:../achilles` dependency
+## 1b. ~~`@civitas-cerebrum/achilles` makes the repo uninstallable~~ — MOSTLY FIXED
 
-Same class of problem as the Python one, still open. `package.json` declares:
+The original diagnosis was wrong, and the correction matters more than the
+finding did.
 
-```json
-"@civitas-cerebrum/achilles": "file:../achilles"
-```
+**Claimed:** a missing `../achilles` makes `npm install` fail outright.
+**Actually:** npm symlinks a `file:` path without checking that it exists. The
+install reports success and leaves a dangling symlink behind; the failure
+surfaces later, when something resolves through it. Verified both ways — a
+missing `file:` target installs green as a `devDependency` *and* as an
+`optionalDependency`, exit 0 in both cases.
 
-That is a path on disk, not a package name. It resolves only because
-`../achilles` exists next to this repo. Anyone cloning just this project — a new
-machine, a colleague, CI — has no sibling folder, so `npm install` fails
-outright. Not a failing test; no install at all.
+That is worse than an install failure, not better. A fresh clone would go green
+on install and then crash on `npx playwright test` with a module-not-found
+raised from the config file, which reads as a broken test suite rather than as a
+missing checkout.
 
-**Blocked, not just undone.** The obvious fix is to point at the published
-package, but that does not work yet:
+**Fixed** by treating the reporter as optional. `playwright.config.js` resolves
+`@civitas-cerebrum/achilles/reporter` inside a try/catch and drops it from the
+reporter list when it is absent, so the suite runs anywhere. The dependency moved
+to `optionalDependencies` to state the same intent in `package.json`. Both
+branches were exercised before committing.
 
-- npm has `@civitas-cerebrum/achilles@0.1.7`; the local copy is `0.1.8`.
-- `0.1.8` is **unreleased** — tags stop at `0.1.7`, with 52 commits since.
-- `playwright.config.js` uses `@civitas-cerebrum/achilles/reporter`, and
-  `reporter/` was added *after* the `0.1.7` tag. Pinning `^0.1.7` would break the
-  reporter on the next clean install.
+**Still true, and accepted:** the achilles-only scripts (`test:e2e:show`,
+`test:repair`, `test:mutate`) need the sibling checkout and fail without it.
+That is the right trade for optional tooling — they fail on their own with a
+clear error instead of taking the whole suite down.
 
-**Not ours to unblock.** achilles is an upstream project we consume, not one we
-release, so bumping and publishing it is not an option here. `7f48345 chore:
-0.1.8` bumped the version on upstream main, but no `0.1.8` tag or release exists
-yet.
-
-Until upstream tags and publishes `0.1.8`, leave `file:../achilles` alone —
-switching to `^0.1.7` early trades a portability problem for a broken reporter.
-When that release lands, the fix is one line: `"^0.1.8"`.
-
-Meanwhile the practical cost is bounded and worth stating plainly: this repo
-cannot be installed by anyone who does not also have `achilles` checked out
-beside it, which includes CI. Everything except the achilles-specific scripts
-(`test:e2e:show`, `test:repair`, `test:mutate`) and the reporter entry in
-`playwright.config.js` would work without it, so dropping those is the fallback
-if the repo needs to become independently installable before upstream releases.
+**Upstream note, unchanged:** npm has `0.1.7`; the local copy is an unreleased
+`0.1.8`, and `reporter/` landed after the `0.1.7` tag, so pinning `^0.1.7` would
+still break the reporter. When upstream tags `0.1.8` the fix is one line. There
+is no longer any urgency, because nothing breaks while we wait.
 
 ---
 

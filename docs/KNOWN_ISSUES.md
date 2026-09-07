@@ -47,8 +47,11 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   module flip.
 - Bare `npx jest` fails all suites. See `AGENTS.md` for the reason and the workaround.
 - There is no linter or formatter configured.
-- The E2E suite depends on `@civitas-cerebrum/achilles` being present as `file:../achilles`. Without
-  that sibling checkout `npm install` fails outright — see `TODO.md`.
+- `@civitas-cerebrum/achilles` is wired in as `file:../achilles`. A clone without that sibling
+  checkout installs *green* — npm symlinks a `file:` path without checking it exists — so the
+  absence surfaces at runtime rather than at install. The Playwright reporter is optional and
+  degrades cleanly; the achilles-only scripts (`test:e2e:show`, `test:repair`, `test:mutate`) do
+  not, and fail without the checkout.
 
 ## Testing Gaps
 

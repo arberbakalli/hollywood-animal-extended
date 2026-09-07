@@ -1,4 +1,19 @@
 import { defineConfig, devices } from '@playwright/test';
+import { createRequire } from 'node:module';
+
+// achilles is an upstream tool we consume, not one we release, and it is wired
+// in as file:../achilles. A clone without that sibling checkout still installs
+// green -- npm symlinks a file: path without checking it exists -- and would
+// then crash here on a module that is not there. Treat the reporter as optional
+// so the suite runs anywhere; it is richer output, not a requirement.
+const optionalReporters = (() => {
+  try {
+    createRequire(import.meta.url).resolve('@civitas-cerebrum/achilles/reporter');
+    return [['@civitas-cerebrum/achilles/reporter']];
+  } catch {
+    return [];
+  }
+})();
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -10,7 +25,7 @@ export default defineConfig({
   workers: 4,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: [['list'], ['html', { open: 'never' }], ['@civitas-cerebrum/achilles/reporter']],
+  reporter: [['list'], ['html', { open: 'never' }], ...optionalReporters],
   use: {
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
