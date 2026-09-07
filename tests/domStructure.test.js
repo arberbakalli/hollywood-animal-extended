@@ -99,6 +99,42 @@ describe('HTML structure', () => {
         requiredIds.forEach(id => expect(ids.has(id)).toBe(true));
     });
 
+    test('keeps the Compatibility Numbers score breakdown available as a reusable source panel', async () => {
+        const html = await readProjectFile('index.html');
+        const ids = new Set(getIds(html));
+
+        [
+            'results-synergy',
+            'synergy-summary-row',
+            'synergy-average-card',
+            'synergyAverageDisplay',
+            'synergy-total-card',
+            'synergyTotalDisplay',
+            'synergy-breakdown-panel',
+            'breakdownBaseScore',
+            'breakdownComBonus',
+            'breakdownArtBonus',
+            'totalComScore',
+            'totalArtScore',
+            'scoreCapLabel',
+            'synergy-conflicts-panel',
+            'spoilerDisplay',
+            'transferTagsButton'
+        ].forEach(id => expect(ids.has(id)).toBe(true));
+
+        [
+            'Average Compatibility',
+            'Script Synergy',
+            'Bonuses',
+            'Commercial Bonus:',
+            'Artistic Bonus:',
+            'Potential Movie Score',
+            'Commercial Movie Score:',
+            'Artistic Movie Score:',
+            'Max Score Capped'
+        ].forEach(text => expect(html).toContain(text));
+    });
+
     test('loads feature modules before the bootstrap shim', async () => {
         const html = await readProjectFile('index.html');
         const scriptSources = getScriptSources(html);
