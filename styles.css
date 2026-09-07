@@ -2674,7 +2674,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     height: 24px;
     padding: 0 6px;
     background: var(--danger);
-    color: white;
+    color: #e0e0e0;
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 700;
@@ -2710,6 +2710,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .distribution-toggle-label--artistic {
     color: #8beaff;
+}
+
+.distribution-toggle-label--behemoth {
+    color: #4cd964;
 }
 
 .graves-exclusion-notice {
@@ -2793,6 +2797,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .distribution-toggle--artistic > .toggle-checkbox:checked + .toggle-track {
     background-color: #8beaff;
+}
+
+.distribution-toggle--behemoth > .toggle-checkbox:checked + .toggle-track {
+    background-color: #4cd964;
 }
 
 /* Toggle Thumb */
