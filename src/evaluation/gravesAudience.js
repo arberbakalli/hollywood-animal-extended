@@ -123,14 +123,6 @@
         averageEl.innerHTML = `${matrix.rawAverage.toFixed(1)} <span class="sub-value">/ 5.0</span>`;
         setToneClass(averageEl, matrix.rawAverage >= 4.0 ? 'success' : (matrix.rawAverage < 3.0 ? 'danger' : 'accent'));
 
-        const commercialEl = document.getElementById('gravesCommercialScoreDisplay');
-        commercialEl.textContent = formatMovieScore(movieScores.commercial);
-        setToneClass(commercialEl, movieScores.commercial > 0 ? 'accent' : 'danger');
-
-        const artisticEl = document.getElementById('gravesArtisticScoreDisplay');
-        artisticEl.textContent = formatMovieScore(movieScores.artistic);
-        setToneClass(artisticEl, movieScores.artistic > 0 ? 'art' : 'danger');
-
         document.getElementById('gravesVerdictText').textContent = verdict.text;
         document.getElementById('gravesMethodList').innerHTML = `
             <div class="graves-method-row">
