@@ -202,6 +202,8 @@
         { "elementName": "weekOneValue", "selector": { "css": "#dist-week-1-value" } },
         { "elementName": "weekEightCard", "selector": { "css": "#dist-week-8" } },
         { "elementName": "weekEightValue", "selector": { "css": "#dist-week-8-value" } },
+        { "elementName": "weekOneSplit", "selector": { "css": "#dist-week-1-split" } },
+        { "elementName": "weekEightSplit", "selector": { "css": "#dist-week-8-split" } },
 
         { "elementName": "resultsSection", "selector": { "css": "#results-advertisers" } },
         { "elementName": "targetAudience", "selector": { "css": "#targetAudienceDisplay" } },

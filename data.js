@@ -25,7 +25,7 @@ const GAME_DATA = {
                 ROUND_UP_UNTIL_INDEX: 4
             },
             defaults: {
-                AVAILABLE_SCREENINGS: 3200
+                AVAILABLE_SCREENINGS: 3185
             }
         }
     },

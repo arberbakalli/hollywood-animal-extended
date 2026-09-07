@@ -38,16 +38,16 @@ describe('data.js KINOMARK block', () => {
 });
 
 describe('declared defaults vs the live UI', () => {
-    test('the screenings default in data.js does not match the input the user sees', async () => {
-        // data.js declares 3200; index.html ships 3185. Nothing consumes the
-        // data.js value — updateDistributionGrid hardcodes its own locals — so
-        // this documents a real inconsistency rather than asserting either is
-        // correct. Picking one is a game-domain call.
+    test('the screenings default in data.js matches the input the user sees', async () => {
+        // These used to disagree — data.js declared 3200 against the input's 3185 —
+        // and nothing read the declared value, so the divergence was invisible.
+        // 3185 is the game's starting theatre count, so the input was the one telling
+        // the truth. The planner now reads this block, which makes a future
+        // divergence a behaviour change rather than a silent one.
         const declared = gameData.constants.DISTRIBUTION.defaults.AVAILABLE_SCREENINGS;
         const live = await readInputDefault('ownedScreeningsInput');
 
-        expect(declared).toBe(3200);
-        expect(live).toBe(3185);
-        expect(live).not.toBe(declared);
+        expect(declared).toBe(3185);
+        expect(live).toBe(declared);
     });
 });

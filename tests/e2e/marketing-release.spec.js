@@ -85,14 +85,48 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await steps.expect('artisticScoreInput', 'MarketingRelease').value.toMatch(/^3(\.0)?$/);
   });
 
-  test('TC04-000007 changing owned theatres recalculates screening projections', async ({ steps }) => {
-    const before = await screenings(steps, 'weekOneValue');
+  const attr = async (steps, element, name) =>
+    Number(await steps.on(element, 'MarketingRelease').getAttribute(name));
+
+  test('TC04-000007 owning more theatres shifts the split without moving demand', async ({ steps }) => {
+    const demandBefore = await screenings(steps, 'weekOneValue');
+    const rentedBefore = await attr(steps, 'weekOneCard', 'data-rented');
 
     await steps.on('ownedScreeningsInput', 'MarketingRelease').fill('5000');
 
     await expect
-      .poll(async () => screenings(steps, 'weekOneValue'))
-      .toBeLessThan(before);
+      .poll(async () => attr(steps, 'weekOneCard', 'data-rented'))
+      .toBeLessThan(rentedBefore);
+
+    // Demand belongs to the film. Owning more theatres changes who supplies the
+    // screenings, never how many the audience wants. This assertion is the whole
+    // reason capacity is subtracted after the weekly modifiers rather than before.
+    expect(await screenings(steps, 'weekOneValue')).toBe(demandBefore);
+  });
+
+  test('TC04-000011 every week splits its demand between owned and rented screenings', async ({ steps }) => {
+    const read = name =>
+      steps.getAll('weekCards', 'MarketingRelease', { extractAttribute: name });
+
+    const [demand, fromOwned, rented] = await Promise.all([
+      read('data-demand'), read('data-from-owned'), read('data-rented'),
+    ]);
+
+    expect(demand).toHaveLength(8);
+    demand.forEach((total, i) => {
+      expect(Number(fromOwned[i]) + Number(rented[i])).toBe(Number(total));
+    });
+  });
+
+  test('TC04-000012 a late week inside owned capacity reports spare screens, not a rental', async ({ steps }) => {
+    // At the default score the audience has fallen below the theatres the player
+    // already owns by week 8, so nothing needs renting. The old maths decayed the
+    // shortfall instead of the audience and still demanded screenings here.
+    expect(await attr(steps, 'weekEightCard', 'data-rented')).toBe(0);
+    expect(await attr(steps, 'weekEightCard', 'data-owned-spare')).toBeGreaterThan(0);
+
+    await steps.on('weekEightSplit', 'MarketingRelease').verifyTextContains('spare');
+    await steps.on('weekOneSplit', 'MarketingRelease').verifyTextContains('rent');
   });
 
   test('TC04-000008 the Striking Image bonus raises the week one projection', async ({ steps }) => {

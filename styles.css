@@ -1799,6 +1799,30 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: #fff;
 }
 
+/* The demand figure stays neutral and the line beneath it says what that costs.
+   Gold rather than red for renting: it is a normal choice, not a failure. */
+.week-split {
+    font-size: 0.72rem;
+    margin-top: 5px;
+    letter-spacing: 0.3px;
+}
+
+.week-split.rent {
+    color: var(--accent);
+}
+
+.week-split.spare {
+    color: var(--success);
+}
+
+.week-box.needs-rent {
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.week-box.has-spare {
+    border-color: rgba(76, 217, 100, 0.28);
+}
+
 /* ========================================= */
 /* --- FILE MANAGEMENT STYLES --- */
 /* ========================================= */

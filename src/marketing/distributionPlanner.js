@@ -44,57 +44,96 @@
         updateDistributionGrid(score, owned);
     }
 
-    function updateDistributionGrid(commercialScore, availableScreenings) {
-        const BASE = 1000;
-        const W1_MULT = 2;
-        const W2_MULT = 1;
+    // The publish window. The game commits a film for four weeks with an optional
+    // four-week extension, and both the opening-viewer boost and the round-up rule
+    // track that window, which is why one bound serves both.
+    function distributionConfig() {
+        const config = GAME_DATA.constants.DISTRIBUTION;
+        return {
+            base: config.multipliers.BASE,
+            weekOneMultiplier: config.multipliers.WEEK_ONE,
+            weekTwoMultiplier: config.multipliers.WEEK_TWO,
+            weeks: config.weeklyCalculation.NUMBER_OF_WEEKS,
+            // Weeks 1 and 2 are seeded from the score; every later week decays from
+            // its predecessor. This is the index of the first decayed week, so it
+            // must equal the number of seeded weeks below.
+            decayFromIndex: config.weeklyCalculation.REDUCTION_START_INDEX,
+            openingWindow: config.rounding.ROUND_UP_UNTIL_INDEX
+        };
+    }
+
+    // Audience demand per week, in screenings, before any theatre capacity is
+    // considered. Every game modifier belongs here: the Behemoth policy text talks
+    // about "the number of viewers" and "attendance", and both are demand.
+    function weeklyDemand(commercialScore) {
+        const config = distributionConfig();
         const decay = getDecayRate(commercialScore);
         const openingViewerMultiplier = getDistributionMultiplier();
         const behemothWeekOne = isBehemothActive() ? BEHEMOTH_WEEK_ONE_BOOST : 1;
-        // Week 2 is a retention step too, so the slower fall lifts it by the same
-        // ratio the rate improved. Later weeks then compound from the lifted value.
         const weekTwoRatio = hasDecayBonus(commercialScore)
             ? easedRetention(BASE_WEEK_TWO_RETENTION) / BASE_WEEK_TWO_RETENTION
             : 1;
 
-        const rawW1 = (commercialScore * W1_MULT * BASE) - availableScreenings;
-        const w1 = Math.max(0.0, rawW1);
-
-        const rawW2 = (commercialScore * W2_MULT * BASE) - availableScreenings;
-        const w2 = Math.max(0.0, rawW2) * weekTwoRatio;
-
-        let calcValues = [w1, w2];
-        let currentDecayBase = w2;
-
-        for (let i = 2; i < 8; i++) {
-            currentDecayBase *= decay;
-            calcValues.push(currentDecayBase);
+        const demand = [
+            commercialScore * config.weekOneMultiplier * config.base,
+            commercialScore * config.weekTwoMultiplier * config.base * weekTwoRatio
+        ];
+        for (let i = config.decayFromIndex; i < config.weeks; i++) {
+            demand.push(demand[demand.length - 1] * decay);
         }
 
-        const finalResults = calcValues.map((val, index) => {
-            // The opening boost covers weeks 1-4; Behemoth's is week 1 only.
-            let boostedValue = index < 4 ? val * openingViewerMultiplier : val;
-            if (index === 0) boostedValue *= behemothWeekOne;
-            return index < 4 ? Math.ceil(boostedValue) : Math.floor(boostedValue);
+        return demand.map((value, index) => {
+            const inOpeningWindow = index < config.openingWindow;
+            let boosted = inOpeningWindow ? value * openingViewerMultiplier : value;
+            if (index === 0) boosted *= behemothWeekOne;
+            return inOpeningWindow ? Math.ceil(boosted) : Math.floor(boosted);
         });
+    }
 
+    // Splits each week's demand between the theatres the player owns and the
+    // screenings they would have to rent. Renting is treated as unlimited, so
+    // demand is always met and the only question is the split.
+    //
+    // Capacity is subtracted once, here, after every modifier has been applied to
+    // demand. Subtracting it earlier and then decaying or boosting the remainder
+    // compounds the capacity too, which is what this function replaced.
+    function weeklyDistribution(commercialScore, availableScreenings) {
+        const owned = Math.max(0, availableScreenings);
+        return weeklyDemand(commercialScore).map((demand, index) => ({
+            week: index + 1,
+            demand,
+            fromOwned: Math.min(demand, owned),
+            rented: Math.max(0, demand - owned),
+            ownedSpare: Math.max(0, owned - demand)
+        }));
+    }
+
+    function updateDistributionGrid(commercialScore, availableScreenings) {
         const grid = document.getElementById('dist-results-grid');
-        if(!grid) return;
+        if (!grid) return;
 
         grid.innerHTML = '';
-        finalResults.forEach((val, index) => {
-            const weekNum = index + 1;
+
+        weeklyDistribution(commercialScore, availableScreenings).forEach(week => {
+            const needsRent = week.rented > 0;
             const box = document.createElement('div');
-            box.className = 'week-box';
-            box.id = `dist-week-${weekNum}`;
-            box.dataset.week = String(weekNum);
-            box.dataset.screenings = String(val);
-            // Highlight active weeks
-            if (val > 0) box.classList.add('active-week');
+            box.className = `week-box ${needsRent ? 'needs-rent' : 'has-spare'}`;
+            box.id = `dist-week-${week.week}`;
+            box.dataset.week = String(week.week);
+            box.dataset.demand = String(week.demand);
+            box.dataset.fromOwned = String(week.fromOwned);
+            box.dataset.rented = String(week.rented);
+            box.dataset.ownedSpare = String(week.ownedSpare);
+            if (week.demand > 0) box.classList.add('active-week');
+
+            const splitLabel = needsRent
+                ? `rent ${week.rented.toLocaleString()}`
+                : `${week.ownedSpare.toLocaleString()} spare`;
 
             box.innerHTML = `
-                <span class="week-label" id="dist-week-${weekNum}-label">Week ${weekNum}</span>
-                <span class="week-val ${val > 0 ? 'active' : ''}" id="dist-week-${weekNum}-value">${val.toLocaleString()}</span>
+                <span class="week-label" id="dist-week-${week.week}-label">Week ${week.week}</span>
+                <span class="week-val ${week.demand > 0 ? 'active' : ''}" id="dist-week-${week.week}-value">${week.demand.toLocaleString()}</span>
+                <span class="week-split ${needsRent ? 'rent' : 'spare'}" id="dist-week-${week.week}-split">${splitLabel}</span>
             `;
             grid.appendChild(box);
         });
@@ -133,6 +172,9 @@
         setupDistributionLogic,
         recalculateDistribution,
         updateDistributionGrid,
+        weeklyDemand,
+        weeklyDistribution,
+        distributionConfig,
         initializeDistributionToggles,
         getDistributionMultiplier,
         isBehemothActive,

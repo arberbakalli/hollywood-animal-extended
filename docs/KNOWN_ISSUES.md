@@ -7,21 +7,20 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 ## Data Correctness
 
-- **The whole `constants.DISTRIBUTION` block in `data.js` is inert.** Nothing anywhere in `src/` or
-  `script.js` reads `constants.DISTRIBUTION`. `src/marketing/distributionPlanner.js` re-declares
-  every value as its own local: `multipliers.BASE: 1000` against `const BASE = 1000`,
-  `WEEKLY_REDUCTION_RATE: 0.8` against `const BASE_DECAY = 0.8`, `NUMBER_OF_WEEKS: 8` against a
-  hardcoded loop bound, `ROUND_UP_UNTIL_INDEX: 4` against a hardcoded `index < 4`. Nothing reads
-  `REDUCTION_START_INDEX: 2` at all.
-
-  This is worse than dead code: the block reads as authoritative configuration. Editing
-  `WEEKLY_REDUCTION_RATE` changes nothing, silently. Either the planner should read the constants —
-  the values all match, so that is behaviour-preserving — or the block should go and
-  `tests/liveData.test.js` be updated with it. Both are deliberate changes, not cleanup.
-- `constants.DISTRIBUTION.defaults.AVAILABLE_SCREENINGS` is `3200`, while the input the user actually
-  sees (`#ownedScreeningsInput`) ships `3185`. Picking one is a game-domain call, and it is the one
-  value above that does *not* match its counterpart. `tests/liveData.test.js` asserts the divergence,
-  so either side moving trips the suite.
+- **The distribution demand curve has no verified provenance.** The maths is adapted from
+  aalbertinib's Hollywood Animal Master (credited in `README.md`), imported wholesale in `65c7cf5`.
+  The `x 1000` base, the week-one `x2` and the 0.8 decay are not derived anywhere in this repo and
+  are not extracted game data — `data/` holds tag compatibility and per-tag demographic weights,
+  which describe *who* the audience is, not how many screenings a film needs. Only the game itself
+  can settle whether the curve is right. The capacity split built on top of it is independently
+  correct; the curve it splits is inherited on trust.
+- **Behemoth's week-two lift is an unverified inference.**
+  `BASE_WEEK_TWO_RETENTION` is 0.5 because week two's demand is half of week one's. That now holds
+  exactly, since both are seeded from the score before capacity is subtracted.
+  `easedRetention(0.5) / 0.5` then lifts week two by 1.25 when the decay bonus is active. Whether
+  1.25 matches the game is unverified — `.arber/ENGINEERING_SPECS.md` records it as an inference
+  shipped behind a toggle. To check: with Behemoth active and a commercial rating above 9, read
+  week 3 divided by week 2 in game.
 
 ## Behaviour
 
