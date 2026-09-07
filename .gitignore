@@ -4,10 +4,16 @@ dist/
 
 .idea/
 .playwright-cli/
+.claude/skills/
 test-results/
 playwright-report/
 graphify-out/
 output/
+show-recordings/
+.achilles/history/
+.achilles/runs/
+.achilles/show/
+.achilles/self-repair/
 .DS_Store
 
 npm-debug.log*

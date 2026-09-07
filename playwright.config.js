@@ -4,21 +4,20 @@ export default defineConfig({
   testDir: './tests/e2e',
   timeout: 60000,
   fullyParallel: true,
-  // python -m http.server cannot keep up with parallel workers each pulling
-  // ~24 script files per page load; swap in a real static server to raise this.
-  workers: 1,
+  // Measured on the Node static server: 1 worker 103s, 4 workers 58s, 8 workers
+  // 55s. The gain flattens after 4, so the suite is CPU-bound from there rather
+  // than server-bound. (Under python -m http.server this had to be 1.)
+  workers: 4,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never' }], ['@civitas-cerebrum/achilles/reporter']],
   use: {
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
   webServer: {
-    // HTTP/1.1 for keep-alive: the page pulls ~24 scripts, and the default
-    // HTTP/1.0 closes the connection after each one.
-    command: 'python -m http.server 4173 --bind 127.0.0.1 --protocol HTTP/1.1',
+    command: 'node tools/static-server.mjs 4173 .',
     url: 'http://127.0.0.1:4173/index.html',
     reuseExistingServer: !process.env.CI,
     timeout: 60000,

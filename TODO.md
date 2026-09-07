@@ -8,25 +8,40 @@ Last commit: `02c197b`.
 
 ---
 
-## 1. Move the test static server off Python
+## 1. ~~Move the test static server off Python~~ — DONE
 
-**Why it matters more than speed:** `playwright.config.js` runs
-`python -m http.server`. Nothing in `package.json` declares that, so Python is an
-undeclared system dependency of a JavaScript project. Anyone cloning this needs
-it on PATH, and a standard Node CI image will not have it — the suite would fail
-there for reasons unrelated to the app. The `--protocol HTTP/1.1` flag also needs
-Python 3.11+, and nothing pins or checks that.
+Replaced by `tools/static-server.mjs`, a zero-dependency Node server. Python is
+no longer required to run the suite.
 
-**Suggested:** add `serve` (or `http-server`) as a devDependency and point
-`webServer.command` at it. A ~25-line zero-dep Node script also works but becomes
-code to maintain, MIME types included.
+Measured, two runs each:
 
-**Honest caveat:** the portability argument is provable. The *stability* argument
-is not — it is inferred from a single flake that could equally have been the
-app's own boot. Measure before and after rather than assuming.
+| server | workers | run 1 | run 2 | result |
+|---|---|---|---|---|
+| `python -m http.server` | 1 | 114s | 108s | one flake |
+| Node | 1 | 103s | 103s | green |
+| Node | 4 | 58s | 58s | green |
+| Node | 8 | 55s | 55s | green |
 
-**Knock-on:** `workers: 1` in `playwright.config.js` exists only because the
-Python server could not keep up. Retry raising it after the swap.
+Parallelism was the real gain, not raw throughput — Python forced `workers: 1`.
+Settled on 4, since 8 buys almost nothing and the suite is CPU-bound from there.
+
+The server also sends `cache-control: no-store` and refuses dotfile paths, so it
+will not serve `.git/` or a stray `.env` the way `python -m http.server` did.
+
+---
+
+## 1b. `@civitas-cerebrum/achilles` is a `file:../achilles` dependency
+
+Same class of problem as the Python one, still open. `package.json` declares:
+
+```json
+"@civitas-cerebrum/achilles": "file:../achilles"
+```
+
+Anyone cloning this repo without the sibling `achilles` checkout next to it
+cannot `npm install` at all — and neither can CI. Fine while achilles is being
+developed alongside; needs to become a published version range before anyone
+else builds this.
 
 ---
 

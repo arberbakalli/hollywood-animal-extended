@@ -6,11 +6,16 @@
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "serve": "node tools/static-server.mjs 4173 .",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:show": "achilles-show",
+    "test:repair": "achilles-self-repair",
+    "test:mutate": "achilles-mutate"
   },
   "devDependencies": {
+    "@civitas-cerebrum/achilles": "file:../achilles",
     "@civitas-cerebrum/element-interactions": "^0.3.9",
     "@jest/globals": "^29.7.0",
     "@playwright/test": "^1.63.0",
