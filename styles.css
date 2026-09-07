@@ -2199,14 +2199,14 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .best-matches-btn {
-    background-color: #92400e;
-    color: #1a1a1a;
+    background-color: #5147C7;
+    color: #ffffff;
     margin-top: 12px;
     font-weight: 600;
 }
 
 .best-matches-btn:hover {
-    background-color: #78340a;
+    background-color: #3d35a0;
 }
 
 .save-script-btn {
