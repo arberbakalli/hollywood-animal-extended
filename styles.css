@@ -2715,6 +2715,12 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: #4cd964;
 }
 
+/* Boutique gates on the artistic rating, so it carries the same gold the
+   artistic score slider uses, against Behemoth's commercial green. */
+.distribution-toggle-label--boutique {
+    color: #d4af37;
+}
+
 .graves-exclusion-notice {
     display: flex;
     align-items: center;
@@ -2800,6 +2806,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .distribution-toggle--behemoth > .toggle-checkbox:checked + .toggle-track {
     background-color: #4cd964;
+}
+
+.distribution-toggle--boutique > .toggle-checkbox:checked + .toggle-track {
+    background-color: #d4af37;
 }
 
 /* Toggle Thumb */

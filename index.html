@@ -431,9 +431,18 @@
                                     </div>
                                 </div>
                                 <div class="toggle-wrapper">
-                                    <span class="toggle-label-text distribution-toggle-label--behemoth" title="Behemoth adds 25% to week 1. Requires commercial rating above 9.">Behemoth <small>(budget over $1M)</small></span>
+                                    <span class="toggle-label-text distribution-toggle-label--behemoth" title="Behemoth adds 25% to week 1 when the production budget is at least $1,000,000. Its slower decay is a separate perk, gated on commercial rating above 9.">Behemoth <small>(budget over $1M)</small></span>
                                     <div class="toggle-container distribution-toggle distribution-toggle--behemoth">
                                         <input type="checkbox" class="toggle-checkbox" id="behemothToggle" role="switch" aria-label="Behemoth studio policy distribution bonus">
+                                        <div class="toggle-track" aria-hidden="true">
+                                            <div class="toggle-thumb" aria-hidden="true"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="toggle-wrapper">
+                                    <span class="toggle-label-text distribution-toggle-label--boutique" title="Boutique slows attendance decay. Requires artistic rating above 9.">Boutique <small>(art rating over 9)</small></span>
+                                    <div class="toggle-container distribution-toggle distribution-toggle--boutique">
+                                        <input type="checkbox" class="toggle-checkbox" id="boutiqueToggle" role="switch" aria-label="Boutique studio policy distribution bonus">
                                         <div class="toggle-track" aria-hidden="true">
                                             <div class="toggle-thumb" aria-hidden="true"></div>
                                         </div>

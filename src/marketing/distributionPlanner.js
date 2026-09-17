@@ -5,6 +5,17 @@
     const BEHEMOTH_DECAY = 0.85;
     const BEHEMOTH_DECAY_MIN_SCORE = 9;
     const BEHEMOTH_WEEK_ONE_BOOST = 1.25;
+    const BOUTIQUE_DECAY_MIN_SCORE = 9;
+
+    // Behemoth and Boutique each slow the weekly fall by a quarter of the base
+    // 20%, on different gates: commercial rating for Behemoth, artistic rating
+    // for Boutique. A studio can hold both, so a film clearing 9 on both axes
+    // carries both modifiers. Stacking is additive on the fall (20% -> 15% ->
+    // 10%), not compounding, which is the repository owner's reading; the game
+    // text states the effect but not how two of them combine. Listed as exact
+    // rates rather than computed, so the arithmetic cannot drift in floating
+    // point.
+    const DECAY_BY_ACTIVE_MODIFIERS = [BASE_DECAY, BEHEMOTH_DECAY, 0.9];
 
     function setupDistributionLogic() {
         const comInput = document.getElementById('comScoreInput');
@@ -15,6 +26,11 @@
         if(comInput) comInput.addEventListener('input', recalculateDistribution);
         if(comSlider) comSlider.addEventListener('input', recalculateDistribution);
         if(ownedInput) ownedInput.addEventListener('input', recalculateDistribution);
+        // Boutique gates on the artistic rating, so the grid has to react to it.
+        ['artScoreInput', 'artScoreSlider']
+            .map(id => document.getElementById(id))
+            .filter(Boolean)
+            .forEach(el => el.addEventListener('input', recalculateDistribution));
 
         // Initial run
         recalculateDistribution();
@@ -56,7 +72,7 @@
     // 80% of the previous week (or 85% if Behemoth policy active and score > 9).
     function weeklyDemand(commercialScore) {
         const config = distributionConfig();
-        const decay = getDecayRate(commercialScore);
+        const decay = getDecayRate(commercialScore, getArtisticScore());
         const openingViewerMultiplier = getDistributionMultiplier();
         const behemothWeekOne = isBehemothActive() ? BEHEMOTH_WEEK_ONE_BOOST : 1;
 
@@ -127,7 +143,7 @@
     }
 
     function initializeDistributionToggles() {
-        ['strikingImageToggle', 'artisticAbilityToggle', 'behemothToggle']
+        ['strikingImageToggle', 'artisticAbilityToggle', 'behemothToggle', 'boutiqueToggle']
             .map(id => document.getElementById(id))
             .filter(Boolean)
             .forEach(toggle => toggle.addEventListener('change', recalculateDistribution));
@@ -145,14 +161,30 @@
         return Boolean(document.getElementById('behemothToggle')?.checked);
     }
 
-    // Behemoth slows attendance decay by 1.25x (15% drop instead of 20%), but only
-    // above a commercial rating of 9. Base decay is 0.8 (20% weekly drop); Behemoth
-    // decay is 0.85 (15% weekly drop) when score > 9.
-    // NOTE: Behemoth values are from community interpretation, not verified game-file
-    // extraction. Use with caution. See Lesson 7 in LESSONS_LEARNED.md.
-    function getDecayRate(commercialScore) {
-        const qualifies = isBehemothActive() && commercialScore > BEHEMOTH_DECAY_MIN_SCORE;
-        return qualifies ? BEHEMOTH_DECAY : BASE_DECAY;
+    function isBoutiqueActive() {
+        return Boolean(document.getElementById('boutiqueToggle')?.checked);
+    }
+
+    function getArtisticScore() {
+        return parseFloat(document.getElementById('artScoreInput')?.value) || 0;
+    }
+
+    // Both policies are quoted verbatim in the game's own string table:
+    //   localization/English.json:12479  Behemoth — "Attendance of films with a
+    //     commercial rating above 9 will fall 25% more slowly."
+    //   localization/English.json:12490  Boutique — "Attendance for films with an
+    //     artistic rating above 9 will fall 25% more slowly."
+    // Both gates are strictly above 9, matching "above" in those strings.
+    function resolveDecayRate(commercialScore, artisticScore, behemothActive, boutiqueActive) {
+        const modifiers =
+            (behemothActive && commercialScore > BEHEMOTH_DECAY_MIN_SCORE ? 1 : 0) +
+            (boutiqueActive && artisticScore > BOUTIQUE_DECAY_MIN_SCORE ? 1 : 0);
+
+        return DECAY_BY_ACTIVE_MODIFIERS[Math.min(modifiers, DECAY_BY_ACTIVE_MODIFIERS.length - 1)];
+    }
+
+    function getDecayRate(commercialScore, artisticScore = getArtisticScore()) {
+        return resolveDecayRate(commercialScore, artisticScore, isBehemothActive(), isBoutiqueActive());
     }
 
     global.HACDistributionPlanner = {
@@ -165,6 +197,9 @@
         initializeDistributionToggles,
         getDistributionMultiplier,
         isBehemothActive,
+        isBoutiqueActive,
+        getArtisticScore,
+        resolveDecayRate,
         getDecayRate
     };
 })(globalThis);
