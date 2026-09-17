@@ -304,4 +304,111 @@ test.describe('Marketing and Release — Build for Target', () => {
     // The checkbox stays visible either way; what reset must do is uncheck it.
     await steps.on('checkedAudienceCheckboxes', 'BuildForTarget').verifyCount({ exactly: 0 });
   });
+
+  // ---------------------------------------------------------------------
+  // Restored coverage. These behaviours lost their only tests when
+  // tests/e2e/find-top-combinations.spec.js was deleted in 2ce5229, while the
+  // feature itself stayed in the product. Rewritten against the current
+  // story-element-budget model rather than the old fixed-size search.
+  // ---------------------------------------------------------------------
+
+  // Given the budget is set to its minimum
+  // Then each combination carries that many story elements, plus Genre and Setting
+  test('TC05-000009 a budget of 5 produces seven-tag combinations', async ({ steps }) => {
+    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(5);
+
+    await steps.on('findCombinationsButton', 'BuildForTarget').click();
+
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+    await steps.on('firstCombinationTagChips', 'BuildForTarget').verifyCount({ exactly: 7 });
+  });
+
+  // Given the budget is set to its maximum
+  // Then the combination widens by exactly the extra budget
+  test('TC05-000010 a budget of 10 produces twelve-tag combinations', async ({ steps }) => {
+    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(10);
+
+    await steps.on('findCombinationsButton', 'BuildForTarget').click();
+
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+    await steps.on('firstCombinationTagChips', 'BuildForTarget').verifyCount({ exactly: 12 });
+  });
+
+  // Given the slider and its number input are two views of one budget
+  // Then moving either one moves the other
+  test('TC05-000011 the budget slider and number input stay in step', async ({ steps }) => {
+    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(7);
+    await steps.expect('elementsInput', 'BuildForTarget').value.toBe('7');
+
+    await steps.on('elementsInput', 'BuildForTarget').fill('5');
+    await steps.expect('elementsSlider', 'BuildForTarget').value.toBe('5');
+  });
+
+  // Given more story elements are picked than the budget allows
+  // Then the search is refused and the message names both numbers
+  test('TC05-000012 exceeding the budget is refused and names both numbers', async ({ steps }) => {
+    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(5);
+
+    // Supporting Character is multi-select, so its "+" is the only way to push
+    // the selection past a budget whose slider floor is 5.
+    await steps.on('addSupportingCharacterRow', 'BuildForTarget').click();
+    await steps.on('supportingCharacterSelects', 'BuildForTarget').verifyCount({ exactly: 2 });
+
+    await steps.selectDropdown('supportingCharacterSelect', 'BuildForTarget', FIRST_OPTION);
+    await steps.selectDropdown('supportingCharacterSelectRow2', 'BuildForTarget', {
+      type: DropdownSelectType.INDEX,
+      index: 2,
+    });
+
+    for (const select of ['protagonistSelect', 'antagonistSelect', 'themeEventSelect', 'finaleSelect']) {
+      await steps.selectDropdown(select, 'BuildForTarget', FIRST_OPTION);
+    }
+
+    await steps.on('findCombinationsButton', 'BuildForTarget').click();
+
+    await steps.on('feedbackMessage', 'BuildForTarget').verifyState('visible');
+    await steps.on('feedbackMessage', 'BuildForTarget').verifyTextContains('5');
+    await steps.on('feedbackMessage', 'BuildForTarget').verifyTextContains('6');
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('hidden');
+  });
+
+  // Given an element is banned in Script Lab
+  // When Build for Target searches
+  // Then that element never appears in a suggested combination
+  test('TC05-000013 an element excluded in Script Lab is absent from combinations', async ({ steps }) => {
+    await steps.on('buildTab', 'Navigation').click();
+    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: SIDEKICK,
+    });
+
+    await steps.on('marketTab', 'Navigation').click();
+    await steps.on('buildForTargetModeButton', 'MarketingRelease').click();
+    await steps.on('allTagSelects', 'BuildForTarget').waitForState('visible');
+    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(10);
+
+    await steps.on('findCombinationsButton', 'BuildForTarget').click();
+
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+    const listed = await steps.on('resultsList', 'BuildForTarget').getText();
+    expect(listed).not.toContain('Sidekick');
+  });
+
+  // Given combinations are listed
+  // Then they descend by advertiser fit, best first
+  test('TC05-000014 combinations are ranked by descending advertiser fit', async ({ steps }) => {
+    await steps.on('audienceCheckboxes', 'BuildForTarget').first().check();
+
+    await steps.on('findCombinationsButton', 'BuildForTarget').click();
+
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+    await steps.on('combinationCards', 'BuildForTarget').verifyCount({ greaterThan: 1 });
+
+    const first = Number(await steps.on('combinationScores', 'BuildForTarget').first().getText());
+    const second = Number(await steps.on('combinationScores', 'BuildForTarget').nth(1).getText());
+
+    expect(Number.isNaN(first)).toBe(false);
+    expect(Number.isNaN(second)).toBe(false);
+    expect(first).toBeGreaterThanOrEqual(second);
+  });
 });

@@ -212,7 +212,15 @@
         { "elementName": "feedbackMessage", "selector": { "css": "#targetedFeedbackMessage" } },
         { "elementName": "findCombinationsButton", "selector": { "css": "#findCombinationsButton" } },
         { "elementName": "resultsPanel", "selector": { "css": "#targeted-results-panel" } },
-        { "elementName": "resultsList", "selector": { "css": "#targetedResultsList" } }
+        { "elementName": "resultsList", "selector": { "css": "#targetedResultsList" } },
+        { "elementName": "elementsSlider", "selector": { "css": "#targetedElementsSlider" } },
+        { "elementName": "elementsInput", "selector": { "css": "#targetedElementsInput" } },
+        { "elementName": "combinationCards", "selector": { "css": "#targetedResultsList .targeted-combination-card" } },
+        { "elementName": "combinationScores", "selector": { "css": "#targetedResultsList .targeted-score-value" } },
+        { "elementName": "firstCombinationTagChips", "selector": { "css": "#targetedResultsList .targeted-combination-card:first-child .targeted-tag-chip" } },
+        { "elementName": "addSupportingCharacterRow", "selector": { "css": "#add-supporting-character-targeted-button" } },
+        { "elementName": "supportingCharacterSelects", "selector": { "css": "#inputs-supporting-character-targeted select.tag-selector" } },
+        { "elementName": "supportingCharacterSelectRow2", "selector": { "css": "#inputs-supporting-character-targeted > *:nth-child(2) select.tag-selector" } }
       ]
     }
   ]

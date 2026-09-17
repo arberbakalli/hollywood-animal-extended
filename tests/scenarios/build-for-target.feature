@@ -59,7 +59,7 @@ Feature: Build for Target
     Then the top combinations panel becomes visible
     And combinations are listed
 
-  # [verified] The Max Story Elements slider sets the budget; Genre and Setting
+  # [automated] The Max Story Elements slider sets the budget; Genre and Setting
   # sit outside it, so a budget of N yields combinations N + 2 tags wide.
   Scenario Outline: The story element budget sets the combination width
     Given the user sets the maximum story elements to <budget>
@@ -71,7 +71,8 @@ Feature: Build for Target
       | 5      | 7     |
       | 10     | 12    |
 
-  # [verified] Selecting more story elements than the budget names both numbers.
+  # [automated] Selecting more story elements than the budget names both numbers.
+  # The slider floor is 5, so exceeding it needs a multi-select category's "+".
   Scenario: Selecting more story elements than the budget is refused
     Given the user sets the maximum story elements to 5
     When the user adds six story elements to the tag builder
@@ -90,6 +91,38 @@ Feature: Build for Target
     When the user selects the Analyze Script mode
     Then the Analyze Script panel is shown
     And the Build for Target panel is hidden
+
+  # ---------------------------------------------------------------------
+  # Restored: these lost their only coverage when find-top-combinations.spec.js
+  # was deleted, while the behaviour stayed in the product.
+  # ---------------------------------------------------------------------
+
+  # [automated] The exclusion list is owned by Script Lab and filters this search.
+  Scenario: An element banned in Script Lab never appears in a combination
+    Given the user has banned a Supporting Character in Script Lab
+    When the user searches for top combinations
+    Then no combination contains that element
+
+  # [automated] Ranking is the whole point of "top" combinations.
+  Scenario: Combinations are ranked by descending advertiser fit
+    Given the user has selected a target audience
+    When the user searches for top combinations
+    Then the first combination scores at least as high as the second
+
+  # [automated] The slider and its number field are two views of one budget.
+  Scenario: The budget slider and number input stay in step
+    When the user moves the budget slider to 7
+    Then the budget number field reads 7
+    When the user types 5 into the budget number field
+    Then the budget slider reads 5
+
+  # [unverified] displayTargetedResults renders an empty state when the search
+  # returns nothing, but no reachable input has been found that produces zero
+  # combinations. Do not automate until a real path to it is confirmed.
+  Scenario: An empty state is shown when nothing matches
+    Given constraints that no combination can satisfy
+    When the user searches for top combinations
+    Then an empty state explains that nothing matched
 
   # [unverified] Whether a selected audience and a selected advertiser combine
   # or conflict has not been observed.
