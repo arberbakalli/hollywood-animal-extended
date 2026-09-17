@@ -2738,7 +2738,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .distribution-toggle-label--behemoth {
-    color: #f0f0f0;
+    color: #ffffe3;
 }
 
 /* Boutique uses green; Behemoth uses ivory. Both are active distribution modifiers. */
@@ -2830,7 +2830,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .distribution-toggle--behemoth > .toggle-checkbox:checked + .toggle-track {
-    background-color: #f0f0f0;
+    background-color: #ffffe3;
 }
 
 .distribution-toggle--boutique > .toggle-checkbox:checked + .toggle-track {
