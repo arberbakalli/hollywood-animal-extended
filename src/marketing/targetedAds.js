@@ -193,32 +193,98 @@
         return total / targetAgencies.length;
     }
 
+    // The game caps most categories at one pick. Only Genre, Supporting Character
+    // and Theme & Event repeat (MULTI_SELECT_CATEGORIES in src/app/state.js), and
+    // the combination width is budget + 2 because exactly one Genre and one
+    // Setting sit outside the story-element budget — so Genre is capped at 1 here
+    // even though the selector UI allows a pair.
+    const TARGETED_CATEGORY_LIMITS = {
+        'Genre': 1,
+        'Setting': 1,
+        'Protagonist': 1,
+        'Antagonist': 1,
+        'Finale': 1
+    };
+
+    // Every script the game accepts carries one of each of these. Seeding them
+    // first is what makes a suggested combination something the player can
+    // actually build, rather than a pile of high-scoring themes.
+    const TARGETED_MANDATORY_CATEGORIES = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale'];
+
+    function categoryLimitFor(category) {
+        return Object.prototype.hasOwnProperty.call(TARGETED_CATEGORY_LIMITS, category)
+            ? TARGETED_CATEGORY_LIMITS[category]
+            : Infinity;
+    }
+
+    function countByCategory(tags) {
+        return tags.reduce((counts, tag) => {
+            counts[tag.category] = (counts[tag.category] || 0) + 1;
+            return counts;
+        }, {});
+    }
+
+    // Walks the advertiser-ranked list from `offset`, taking the best tag that
+    // still fits its category cap. Mandatory categories are seeded first so a
+    // combination is never missing a Setting or a Finale.
+    function fillWithinCategoryLimits(ranked, offset, slots, seedCounts) {
+        const counts = Object.assign({}, seedCounts);
+        const taken = new Set();
+        const picked = [];
+
+        const canTake = tag => !taken.has(tag.id) && (counts[tag.category] || 0) < categoryLimitFor(tag.category);
+
+        const take = tag => {
+            taken.add(tag.id);
+            counts[tag.category] = (counts[tag.category] || 0) + 1;
+            picked.push(tag);
+        };
+
+        TARGETED_MANDATORY_CATEGORIES.forEach(category => {
+            if (picked.length >= slots) return;
+            const pool = ranked.filter(tag => tag.category === category && canTake(tag));
+            if (pool.length > 0) take(pool[offset % pool.length]);
+        });
+
+        for (let step = 0; step < ranked.length && picked.length < slots; step++) {
+            const tag = ranked[(offset + step) % ranked.length];
+            if (canTake(tag)) take(tag);
+        }
+
+        return picked;
+    }
+
     function generateTargetedCombinations(allTags, lockedTags, targetAgencies, size = 6, limit = 80) {
         const lockedIds = new Set(lockedTags.map(tag => tag.id));
         const slotsToFill = Math.max(0, size - lockedTags.length);
 
         if (slotsToFill === 0) return [lockedTags.slice(0, size)];
 
-        const rankedCandidates = allTags
+        const ranked = allTags
             .filter(tag => !lockedIds.has(tag.id))
             .map(tag => ({ tag, score: scoreTagForTargetAgencies(tag, targetAgencies) }))
             .sort((a, b) =>
                 b.score - a.score ||
                 a.tag.category.localeCompare(b.tag.category) ||
                 a.tag.name.localeCompare(b.tag.name)
-            );
+            )
+            .map(entry => entry.tag);
 
+        if (ranked.length === 0) return [];
+
+        const lockedCounts = countByCategory(lockedTags);
         const combos = [];
-        const maxStart = Math.max(1, rankedCandidates.length - slotsToFill + 1);
+        const seen = new Set();
 
-        for (let start = 0; start < maxStart && combos.length < limit; start++) {
-            const fillTags = rankedCandidates
-                .slice(start, start + slotsToFill)
-                .map(entry => entry.tag);
+        for (let offset = 0; offset < ranked.length && combos.length < limit; offset++) {
+            const fillTags = fillWithinCategoryLimits(ranked, offset, slotsToFill, lockedCounts);
+            if (fillTags.length !== slotsToFill) continue;
 
-            if (fillTags.length === slotsToFill) {
-                combos.push([...lockedTags, ...fillTags]);
-            }
+            const signature = fillTags.map(tag => tag.id).sort().join('|');
+            if (seen.has(signature)) continue;
+            seen.add(signature);
+
+            combos.push([...lockedTags, ...fillTags]);
         }
 
         return combos;
