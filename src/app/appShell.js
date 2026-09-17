@@ -71,6 +71,10 @@
         initializeDistributionToggles();
         setGeneratorProfile('custom');
 
+        // After the profile, which rebuilds the excluded list and would wipe a
+        // restore that ran before it.
+        HACExclusionStore.setupExclusionPersistence();
+
         // Rendered up front so the Save/Load controls are present from the start.
         renderPinnedScripts();
 

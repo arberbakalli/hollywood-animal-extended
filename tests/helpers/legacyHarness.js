@@ -18,6 +18,7 @@ const CLASSIC_MODULES = [
     'src/evaluation/movieScoreEstimator.js',
     'src/generator/scriptGenerator.js',
     'src/library/scriptLibrary.js',
+    'src/library/exclusionStore.js',
     'src/evaluation/scriptEvaluation.js',
     'src/evaluation/gravesAudience.js',
     'src/evaluation/gravesBestMatches.js',
