@@ -11,13 +11,15 @@ Feature: App Shell
     Given the Hollywood Animal Calculator is open
 
   # [automated] Primary tabs are the entry points for Build, Evaluate and Market.
-  Scenario: Primary product tabs switch visible panels
-    When the user opens the Build tab
-    Then the Script Lab panel is visible
-    When the user opens the Evaluate tab
-    Then the Colman Graves panel is visible
-    When the user opens the Market tab
-    Then the Marketing and Release panel is visible
+  Scenario Outline: Primary product tabs switch visible panels
+    When the user opens the <tab> tab
+    Then the <panel> panel is visible
+
+    Examples:
+      | tab      | panel                 |
+      | Build    | Script Lab            |
+      | Evaluate | Colman Graves         |
+      | Market   | Marketing and Release |
 
   # [automated] Changing language re-renders tag names without changing tag ids.
   Scenario: Language selector updates story element names

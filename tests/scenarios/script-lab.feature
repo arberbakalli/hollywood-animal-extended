@@ -80,47 +80,52 @@ Feature: Script Lab
 
   # [automated] Generated result action buttons should carry the generated
   # script into the richer analysis surfaces.
-  Scenario: Transferring a generated script to Graves
+  Scenario Outline: Transferring a generated script to another product surface
     Given the user has generated scripts
-    When the user opens a generated script in Graves
-    Then the Colman Graves panel is visible
-    And evaluation results are shown
+    When the user opens a generated script in <destination>
+    Then the <panel> panel is visible
+    And <results> are shown
 
-  # [automated]
-  Scenario: Transferring a generated script to Marketing and Release
-    Given the user has generated scripts
-    When the user opens a generated script in Marketing and Release
-    Then the Marketing and Release panel is visible
-    And marketing analysis results are shown
+    Examples:
+      | destination           | panel                 | results                    |
+      | Graves                | Colman Graves         | evaluation results         |
+      | Marketing and Release | Marketing and Release | marketing analysis results |
 
   # [automated] Regression: only 2 of the 7 categories used to render.
-  Scenario: Every story element category offers a picker
-    Then a picker is offered for Genre
-    And a picker is offered for Setting
-    And a picker is offered for Protagonist
-    And a picker is offered for Antagonist
-    And a picker is offered for Supporting Character
-    And a picker is offered for Theme & Event
-    And a picker is offered for Finale
+  Scenario Outline: Every story element category offers a picker
+    Then a picker is offered for <category>
+
+    Examples:
+      | category             |
+      | Genre                |
+      | Setting              |
+      | Protagonist          |
+      | Antagonist           |
+      | Supporting Character |
+      | Theme & Event        |
+      | Finale               |
 
   # [automated] Regression: a counter shared across all six panels made row ids
   # shift whenever any other panel added a row.
-  Scenario: Tag selector row ids are numbered per category and context
-    Then the first Supporting Character row in Script Lab is numbered 1
-    And the first Genre row in Script Lab is numbered 1
-    And the first Supporting Character row in Script Evaluation is numbered 1
+  Scenario Outline: Tag selector row ids are numbered per category and context
+    Then the first <category> row in <context> is numbered 1
+
+    Examples:
+      | category             | context           |
+      | Supporting Character | Script Lab        |
+      | Genre                | Script Lab        |
+      | Supporting Character | Script Evaluation |
 
   # [automated] Collapsible sections exist and default to expanded.
-  Scenario: Collapsing the Locked Elements section hides its selectors
-    Given the Locked Elements section is expanded
-    When the user collapses the Locked Elements section
-    Then the locked tag selectors are hidden
+  Scenario Outline: Collapsing a Script Lab section hides its selectors
+    Given the <section> section is expanded
+    When the user collapses the <section> section
+    Then the <selector_group> tag selectors are hidden
 
-  # [automated] Excluded Elements uses the same collapsible contract.
-  Scenario: Collapsing the Excluded Elements section hides its selectors
-    Given the Excluded Elements section is expanded
-    When the user collapses the Excluded Elements section
-    Then the excluded tag selectors are hidden
+    Examples:
+      | section           | selector_group |
+      | Locked Elements   | locked         |
+      | Excluded Elements | excluded       |
 
   # [automated] Only Supporting Character and Theme & Event render as selectors.
   Scenario: Locking a tag constrains the generated scripts
@@ -135,25 +140,25 @@ Feature: Script Lab
     Then no locked Supporting Character remains selected
     And generated results are hidden
 
-  # [automated] The "+" control adds another dropdown row per category.
-  Scenario: Adding a second selector row for the same category
-    When the user adds another Supporting Character row
-    Then two Supporting Character dropdowns are available
+  # [automated] The "+" control adds another dropdown row per category and context.
+  Scenario Outline: Adding a second selector row for the same category
+    When the user adds another <row> row
+    Then two <dropdowns> dropdowns are available
 
-  # [automated] The excluded list has the same multi-row behavior.
-  Scenario: Adding a second excluded selector row for the same category
-    When the user adds another excluded Supporting Character row
-    Then two excluded Supporting Character dropdowns are available
+    Examples:
+      | row                           | dropdowns                     |
+      | Supporting Character          | Supporting Character          |
+      | excluded Supporting Character | excluded Supporting Character |
 
   # [automated] A per-category search box filters that category's options.
-  Scenario: Filtering a category's options by search text
-    When the user types "Sidekick" into the Supporting Character search box
-    Then only matching options remain selectable in that category
+  Scenario Outline: Filtering a category's options by search text
+    When the user types "Sidekick" into the <search_box> search box
+    Then only matching <option_type> remain selectable in that category
 
-  # [automated] Excluded Elements search must filter without hiding the input.
-  Scenario: Filtering excluded options by search text
-    When the user types "Sidekick" into the excluded Supporting Character search box
-    Then only matching ban options remain selectable in that category
+    Examples:
+      | search_box                    | option_type |
+      | Supporting Character          | options     |
+      | excluded Supporting Character | ban options |
 
   # [automated] The movie-score slider updates the required-elements hint.
   Scenario: Raising the target movie score changes the required element count

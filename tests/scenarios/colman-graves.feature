@@ -173,11 +173,7 @@ Feature: Script Evaluation — Colman Graves
 
   # [verified] The verdict label and tone are banded off the average fit,
   # with "Success" at 4.0 and above.
-  Scenario Outline: The verdict follows the average fit
-    Given a script whose average fit is <fit>
+  Scenario: The verdict follows a successful average fit
+    Given a script whose average fit is 4.2
     When the user evaluates the script
-    Then the verdict reads "<verdict>"
-
-    Examples:
-      | fit | verdict |
-      | 4.2 | Success |
+    Then the verdict reads "Success"
