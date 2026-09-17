@@ -31,9 +31,37 @@
         // Initialize tag selectors for Targeted Ads
         initializeSelectors('targeted');
 
+        setupTargetedElementBudget();
+
         // Attach event listeners
         document.getElementById('findCombinationsButton')?.addEventListener('click', findTargetedCombinations);
         document.getElementById('resetTargetedButton')?.addEventListener('click', resetTargetedTab);
+    }
+
+    function setupTargetedElementBudget() {
+        const slider = document.getElementById('targetedElementsSlider');
+        const input = document.getElementById('targetedElementsInput');
+        if (!slider || !input) return;
+
+        const clamp = value => Math.min(10, Math.max(5, value));
+
+        const sync = (value, { updateSlider, updateInput }) => {
+            if (updateSlider) slider.value = String(value);
+            if (updateInput) input.value = String(value);
+            updateSliderTrack(slider, '#d4af37');
+        };
+
+        slider.addEventListener('input', e => {
+            sync(clamp(parseInt(e.target.value, 10)), { updateInput: true });
+        });
+
+        input.addEventListener('input', e => {
+            const value = parseInt(e.target.value, 10);
+            if (Number.isNaN(value)) return;
+            sync(clamp(value), { updateSlider: true });
+        });
+
+        sync(clamp(parseInt(slider.value, 10)), { updateInput: true });
     }
 
     function resetTargetedTab() {
@@ -53,20 +81,11 @@
         const selectedAdvertisers = Array.from(document.querySelectorAll('.targeted-advertiser-checkbox:checked')).map(cb => cb.value);
         const selectedTags = collectTagInputs('targeted');
 
-        const storyElementTags = selectedTags.filter(tag => {
-            const t = GAME_DATA.tags[tag.id];
-            return t && t.category !== 'Genre' && t.category !== 'Settings';
-        });
-
-        const maxElements = parseInt(document.getElementById('targetedElementsSlider')?.value || '10');
-
-        if (storyElementTags.length < 5) {
-            showFeedbackMessage('targetedFeedbackMessage', `Select at least 5 story elements. You selected ${storyElementTags.length} (Genre and Settings don't count).`, 'accent');
-            return;
-        }
+        const maxElements = getTargetedElementBudget();
+        const storyElementTags = scoringElementsOf(selectedTags);
 
         if (storyElementTags.length > maxElements) {
-            showFeedbackMessage('targetedFeedbackMessage', `Select up to ${maxElements} story elements. You selected ${storyElementTags.length} (Genre and Settings don't count).`, 'accent');
+            showFeedbackMessage('targetedFeedbackMessage', `Max Story Elements is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise the slider or remove a tag (Genre and Setting do not count).`, 'accent');
             return;
         }
 
@@ -90,18 +109,33 @@
         }
 
         // Find combinations that score A+ for target agencies
-        const combinations = await searchForTargetCombinations(targetAgencies, selectedTags, selectedAudiences);
+        const combinations = await searchForTargetCombinations(targetAgencies, selectedTags, selectedAudiences, 20, maxElements);
 
         displayTargetedResults(combinations, targetAgencies, selectedAudiences);
     }
 
-    async function searchForTargetCombinations(targetAgencies, constraintTags = [], constraintAudiences = [], maxResults = 20) {
+    // Genre and Setting are structural picks every script carries, so they never
+    // spend the story-element budget the slider controls.
+    function scoringElementsOf(tags) {
+        return tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting');
+    }
+
+    function getTargetedElementBudget() {
+        const slider = document.getElementById('targetedElementsSlider');
+        const value = parseInt(slider?.value, 10);
+        return Number.isNaN(value) ? 10 : value;
+    }
+
+    async function searchForTargetCombinations(targetAgencies, constraintTags = [], constraintAudiences = [], maxResults = 20, storyElementBudget = 10) {
         await ensureCompatibilityLoaded();
 
         const excludedIds = getGeneratorExcludedIds();
         const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id && !excludedIds.has(t.id));
         const lockedTags = resolveTargetedTagInputs(constraintTags);
-        const combinations = generateTargetedCombinations(allTags, lockedTags, targetAgencies, 6, maxResults * 4);
+        // Genre and Setting sit outside the story-element budget, so a script of
+        // N story elements is N + 2 tags wide.
+        const comboSize = storyElementBudget + 2;
+        const combinations = generateTargetedCombinations(allTags, lockedTags, targetAgencies, comboSize, maxResults * 4);
         const scoredCombinations = [];
 
         for (const combo of combinations) {
@@ -248,6 +282,9 @@
         resetTargetedTab,
         findTargetedCombinations,
         searchForTargetCombinations,
+        scoringElementsOf,
+        getTargetedElementBudget,
+        setupTargetedElementBudget,
         resolveTargetedTagInputs,
         withCompatibilityWeights,
         scoreTagForTargetAgencies,

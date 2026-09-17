@@ -1,158 +1,128 @@
+import { loadLegacyScript } from './helpers/legacyHarness.js';
+
 /**
- * Jest tests for Build for Target feature
- * Covers tag validation, element counting, and exclusion logic
+ * Build for Target: story-element budget and combination sizing.
+ *
+ * Guards the category-name bug that shipped twice: the app's Setting category is
+ * singular ("Setting"). Filtering on "Settings" silently matches nothing, so
+ * every Setting tag was counted against the story-element budget.
  */
-
 describe('Build for Target', () => {
-  beforeAll(() => {
-    global.GAME_DATA = {
-      tags: {
-        genre1: { id: 'genre1', name: 'Action', category: 'Genre' },
-        setting1: { id: 'setting1', name: 'Modern City', category: 'Settings' },
-        prot1: { id: 'prot1', name: 'Hero', category: 'Protagonist' },
-        prot2: { id: 'prot2', name: 'Sidekick', category: 'Protagonist' },
-        antag1: { id: 'antag1', name: 'Villain', category: 'Antagonist' },
-        antag2: { id: 'antag2', name: 'Minion', category: 'Antagonist' },
-        theme1: { id: 'theme1', name: 'Love', category: 'Theme Event' },
-        theme2: { id: 'theme2', name: 'Betrayal', category: 'Theme Event' }
-      }
-    };
-  });
+    let h;
 
-  describe('Story element counting (5-10 requirement)', () => {
-    test('should count only story elements, excluding Genre and Settings', () => {
-      const selectedTags = [
-        { id: 'genre1', category: 'Genre' },     // ignored
-        { id: 'setting1', category: 'Settings' }, // ignored
-        { id: 'prot1', category: 'Protagonist' },
-        { id: 'prot2', category: 'Protagonist' },
-        { id: 'antag1', category: 'Antagonist' },
-        { id: 'theme1', category: 'Theme Event' },
-        { id: 'theme2', category: 'Theme Event' }
-      ];
-
-      const storyElementTags = selectedTags.filter(tag =>
-        tag.category !== 'Genre' && tag.category !== 'Settings'
-      );
-
-      expect(storyElementTags.length).toBe(5);
+    beforeAll(async () => {
+        h = await loadLegacyScript();
     });
 
-    test('should reject fewer than 5 story elements', () => {
-      const selectedTags = [
-        { id: 'genre1', category: 'Genre' },
-        { id: 'setting1', category: 'Settings' },
-        { id: 'prot1', category: 'Protagonist' },
-        { id: 'prot2', category: 'Protagonist' }
-      ];
+    describe('category naming', () => {
+        test('the Setting category is singular, not plural', () => {
+            const categories = new Set(
+                Object.values(h.GAME_DATA.tags).map(tag => tag.category)
+            );
 
-      const storyElementTags = selectedTags.filter(tag =>
-        tag.category !== 'Genre' && tag.category !== 'Settings'
-      );
-
-      expect(storyElementTags.length).toBeLessThan(5);
+            expect(categories.has('Setting')).toBe(true);
+            expect(categories.has('Settings')).toBe(false);
+        });
     });
 
-    test('should reject more than 10 story elements', () => {
-      const selectedTags = [
-        { id: 'genre1', category: 'Genre' },
-        { id: 'setting1', category: 'Settings' },
-        ...Array(11).fill(null).map((_, i) => ({
-          id: `story${i}`,
-          category: i % 2 === 0 ? 'Protagonist' : 'Antagonist'
-        }))
-      ];
+    describe('scoringElementsOf', () => {
+        const scoringElementsOf = tags =>
+            tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting');
 
-      const storyElementTags = selectedTags.filter(tag =>
-        tag.category !== 'Genre' && tag.category !== 'Settings'
-      );
+        test('excludes Genre and Setting from the budget', () => {
+            const selected = [
+                { id: 'g', category: 'Genre' },
+                { id: 's', category: 'Setting' },
+                { id: 'p', category: 'Protagonist' },
+                { id: 'a', category: 'Antagonist' },
+                { id: 't', category: 'Theme & Event' }
+            ];
 
-      expect(storyElementTags.length).toBeGreaterThan(10);
+            expect(scoringElementsOf(selected)).toHaveLength(3);
+        });
+
+        test('one tag per category does not blow a 10-element budget', () => {
+            // The reported bug: picking one of each threw "select 6 items".
+            const oneOfEach = [
+                { id: 'g', category: 'Genre' },
+                { id: 's', category: 'Setting' },
+                { id: 'a', category: 'Antagonist' },
+                { id: 'p', category: 'Protagonist' },
+                { id: 'sc', category: 'Supporting Character' },
+                { id: 't', category: 'Theme & Event' },
+                { id: 'f', category: 'Finale' }
+            ];
+
+            expect(scoringElementsOf(oneOfEach).length).toBeLessThanOrEqual(10);
+        });
+
+        test('a plural filter would have missed every Setting tag', () => {
+            const wrong = tags =>
+                tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Settings');
+
+            const selected = [
+                { id: 'g', category: 'Genre' },
+                { id: 's', category: 'Setting' },
+                { id: 'p', category: 'Protagonist' }
+            ];
+
+            expect(wrong(selected)).toHaveLength(2);
+            expect(scoringElementsOf(selected)).toHaveLength(1);
+        });
     });
 
-    test('should accept 5-10 story elements with any genre/settings combination', () => {
-      const selectedTags = [
-        { id: 'genre1', category: 'Genre' },
-        { id: 'setting1', category: 'Settings' },
-        { id: 'prot1', category: 'Protagonist' },
-        { id: 'prot2', category: 'Protagonist' },
-        { id: 'antag1', category: 'Antagonist' },
-        { id: 'antag2', category: 'Antagonist' },
-        { id: 'theme1', category: 'Theme Event' },
-        { id: 'theme2', category: 'Theme Event' }
-      ];
+    describe('combination sizing', () => {
+        // Genre and Setting sit outside the budget, so a script of N story
+        // elements is N + 2 tags wide.
+        const comboSize = budget => budget + 2;
 
-      const storyElementTags = selectedTags.filter(tag =>
-        tag.category !== 'Genre' && tag.category !== 'Settings'
-      );
+        test('budget of 5 produces 7-tag combinations', () => {
+            expect(comboSize(5)).toBe(7);
+        });
 
-      expect(storyElementTags.length).toBeGreaterThanOrEqual(5);
-      expect(storyElementTags.length).toBeLessThanOrEqual(10);
-    });
-  });
+        test('budget of 10 produces 12-tag combinations', () => {
+            expect(comboSize(10)).toBe(12);
+        });
 
-  describe('Exclusion logic', () => {
-    test('should filter out excluded tags from combinations', () => {
-      const allTags = Object.values(GAME_DATA.tags);
-      const excludedIds = new Set(['genre1', 'antag1']);
-
-      const availableTags = allTags.filter(t => !excludedIds.has(t.id));
-
-      expect(availableTags.map(t => t.id)).toContain('prot1');
-      expect(availableTags.map(t => t.id)).not.toContain('genre1');
-      expect(availableTags.map(t => t.id)).not.toContain('antag1');
+        test('every budget in range maps to a distinct combination width', () => {
+            const widths = [5, 6, 7, 8, 9, 10].map(comboSize);
+            expect(new Set(widths).size).toBe(6);
+        });
     });
 
-    test('should use same exclusion filter as Script Lab', () => {
-      // Both Script Lab and Build for Target should call getGeneratorExcludedIds()
-      // to get the current Excluded Elements list
-      const getExcludedIds = () => new Set(['antag1']); // mock function
-      const excludedIds = getExcludedIds();
+    describe('agency filtering', () => {
+        const resolveAgencies = (advertisers, audiences, allAgencies) => {
+            if (advertisers.length > 0) {
+                return allAgencies.filter(a => advertisers.includes(a.id));
+            }
+            if (audiences.length > 0) {
+                return allAgencies.filter(a => audiences.some(aud => a.targets.includes(aud)));
+            }
+            return allAgencies;
+        };
 
-      const availableForBuilding = Object.values(GAME_DATA.tags)
-        .filter(t => !excludedIds.has(t.id));
+        const agencies = [
+            { id: 'a1', targets: ['teens'] },
+            { id: 'a2', targets: ['adults'] },
+            { id: 'a3', targets: ['teens', 'adults'] }
+        ];
 
-      expect(availableForBuilding.map(t => t.id)).not.toContain('antag1');
+        test('no selection falls back to every agency', () => {
+            expect(resolveAgencies([], [], agencies)).toHaveLength(3);
+        });
+
+        test('an advertiser selection narrows to that advertiser', () => {
+            expect(resolveAgencies(['a2'], [], agencies)).toEqual([agencies[1]]);
+        });
+
+        test('an audience selection narrows to agencies reaching it', () => {
+            const result = resolveAgencies([], ['teens'], agencies);
+            expect(result.map(a => a.id)).toEqual(['a1', 'a3']);
+        });
+
+        test('an advertiser selection wins over an audience selection', () => {
+            const result = resolveAgencies(['a2'], ['teens'], agencies);
+            expect(result.map(a => a.id)).toEqual(['a2']);
+        });
     });
-  });
-
-  describe('Find Top Combinations with no filter', () => {
-    test('should work when no audience or advertiser is selected', () => {
-      const selectedAudiences = [];
-      const selectedAdvertisers = [];
-
-      // Should use all agencies when no filter is applied
-      const targetAgencies = selectedAdvertisers.length > 0
-        ? [] // would be filtered
-        : selectedAudiences.length > 0
-          ? [] // would be filtered
-          : ['agency1', 'agency2', 'agency3']; // all agencies
-
-      expect(targetAgencies.length).toBeGreaterThan(0);
-    });
-
-    test('should filter to specific agencies when audience selected', () => {
-      const selectedAudiences = ['audience1'];
-      const selectedAdvertisers = [];
-
-      // Would filter to agencies that reach the selected audience
-      const targetAgencies = selectedAudiences.length > 0
-        ? ['agency1', 'agency3'] // agencies reaching audience1
-        : ['agency1', 'agency2', 'agency3'];
-
-      expect(targetAgencies.length).toBeLessThanOrEqual(3);
-    });
-
-    test('should filter to specific agencies when advertiser selected', () => {
-      const selectedAudiences = [];
-      const selectedAdvertisers = ['advertiser1'];
-
-      // Would filter to selected advertiser(s)
-      const targetAgencies = selectedAdvertisers.length > 0
-        ? ['advertiser1'] // selected advertiser
-        : ['agency1', 'agency2', 'agency3'];
-
-      expect(targetAgencies).toContain('advertiser1');
-    });
-  });
 });

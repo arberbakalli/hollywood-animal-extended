@@ -52,7 +52,7 @@
                 <span class="product-area-kicker">Build</span>
                 <span class="product-area-label">Script Lab</span>
             </button>
-            <button id="tab-synergy-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="synergy">
+            <button id="tab-synergy-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="graves">
                 <span class="product-area-kicker">Evaluate</span>
                 <span class="product-area-label">Script Evaluation</span>
             </button>
@@ -188,7 +188,7 @@
             </section>
 
             <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COMPATIBILITY NUMBERS -->
-            <section id="tab-synergy" class="tab-content app-tab-panel active" aria-labelledby="tab-synergy-button" aria-hidden="false">
+            <section id="tab-synergy" class="tab-content app-tab-panel hidden" aria-label="Legacy compatibility numbers" aria-hidden="true" hidden>
 
                 <div id="synergy-search-panel" class="card search-card">
                     <h3>Quick Search</h3>
@@ -275,7 +275,7 @@
             </section>
 
             <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COLMAN GRAVES -->
-            <section id="tab-graves" class="tab-content app-tab-panel hidden" aria-label="Colman Graves" aria-hidden="true" hidden>
+            <section id="tab-graves" class="tab-content app-tab-panel active" aria-labelledby="tab-synergy-button" aria-hidden="false">
 
                 <div id="graves-intro-panel" class="card graves-case-card">
                     <div id="graves-heading-block" class="graves-heading-block">
@@ -616,13 +616,15 @@
                     </div>
 
                     <!-- Story Elements Range -->
-                    <div class="targeted-range-control">
-                        <div class="targeted-field-label">
-                            <span>Story Elements (5-10)</span>
-                            <span id="targetedElementCount" class="range-display">5-10</span>
+                    <div id="targeted-elements-control" class="score-control-group">
+                        <div class="score-label-row">
+                            <label for="targetedElementsInput">Max Story Elements</label>
+                            <input type="number" id="targetedElementsInput" class="score-number-display" step="1" min="5" max="10" value="10">
                         </div>
-                        <input type="range" id="targetedElementsSlider" class="styled-slider" min="5" max="10" value="10" title="Max story elements to allow in combinations">
-                        <p class="subtitle score-help-text">Genre and Settings are always included; adjust how many other story elements to use.</p>
+                        <div class="range-wrapper">
+                            <input type="range" id="targetedElementsSlider" class="styled-slider art-slider" min="5" max="10" step="1" value="10">
+                        </div>
+                        <p class="subtitle score-help-text">Genre and Settings always included. Adjust how many other story elements to allow.</p>
                     </div>
 
                     <!-- Tag Builder -->
