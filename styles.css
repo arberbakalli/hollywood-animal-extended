@@ -2979,3 +2979,46 @@ option[data-selected-elsewhere="true"] {
 .holiday-row-selectable.is-selected .hol-boost {
     opacity: 1;
 }
+
+/* Conflicts panel: the banner and severity colouring only appear when a script
+   actually has clashes, so a clean result stays quiet. */
+.graves-conflict-summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border-left: 3px solid currentColor;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.graves-conflict-summary.tone-mild { color: #d4af37; }
+.graves-conflict-summary.tone-serious { color: #e8863c; }
+.graves-conflict-summary.tone-severe { color: #e2574c; }
+
+.graves-conflict-headline {
+    font-weight: 600;
+}
+
+.graves-conflict-tally {
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
+.graves-conflict-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.graves-conflict-categories {
+    font-size: 0.78em;
+    opacity: 0.6;
+}
+
+.graves-conflict-row.severity-severe .graves-raw-score { color: #e2574c; }
+.graves-conflict-row.severity-serious .graves-raw-score { color: #e8863c; }
+.graves-conflict-row.severity-mild .graves-raw-score { color: #d4af37; }

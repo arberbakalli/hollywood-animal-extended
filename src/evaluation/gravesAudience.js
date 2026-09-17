@@ -88,16 +88,68 @@
             .sort((a, b) => b.score - a.score);
     }
 
+    const GRAVES_DANGER_LINE = 2.0;
+    const GRAVES_SEVERE_BELOW = 1.0;
+    const GRAVES_SERIOUS_BELOW = 1.5;
+
+    // A script with one marginal clash and a structurally broken one both used to
+    // render as an undifferentiated list. Grading the pairs is what lets the panel
+    // say how much trouble the player is actually in.
+    function gravesConflictSeverity(rawScore) {
+        if (rawScore >= GRAVES_DANGER_LINE) return 'none';
+        if (rawScore < GRAVES_SEVERE_BELOW) return 'severe';
+        if (rawScore < GRAVES_SERIOUS_BELOW) return 'serious';
+        return 'mild';
+    }
+
+    function summarizeGravesConflicts(conflicts) {
+        const empty = {
+            total: 0, severe: 0, serious: 0, mild: 0,
+            worst: null, tone: 'none', headline: ''
+        };
+        if (!conflicts || conflicts.length === 0) return empty;
+
+        const counts = conflicts.reduce((acc, conflict) => {
+            const band = gravesConflictSeverity(conflict.rawScore);
+            if (acc[band] !== undefined) acc[band] += 1;
+            return acc;
+        }, { severe: 0, serious: 0, mild: 0 });
+
+        const worst = conflicts.reduce((lowest, conflict) =>
+            conflict.rawScore < lowest.rawScore ? conflict : lowest);
+        const tone = gravesConflictSeverity(worst.rawScore);
+
+        const noun = conflicts.length === 1 ? 'pair' : 'pairs';
+        const headline = `${conflicts.length} ${noun} below the danger line — worst is ${tone}`;
+
+        return { total: conflicts.length, ...counts, worst, tone, headline };
+    }
+
     function findGravesConflicts(tags) {
         const conflicts = [];
+
+        const describe = tag => {
+            const known = GAME_DATA.tags[tag.id];
+            return {
+                name: known ? known.name : tag.id,
+                category: known ? known.category : ''
+            };
+        };
 
         for (let i = 0; i < tags.length; i++) {
             for (let j = i + 1; j < tags.length; j++) {
                 const rawScore = getRawCompatibilityScore(tags[i], tags[j]);
-                if (rawScore < 2.0) {
-                    const firstName = GAME_DATA.tags[tags[i].id] ? GAME_DATA.tags[tags[i].id].name : tags[i].id;
-                    const secondName = GAME_DATA.tags[tags[j].id] ? GAME_DATA.tags[tags[j].id].name : tags[j].id;
-                    conflicts.push({ firstName, secondName, rawScore });
+                if (rawScore < GRAVES_DANGER_LINE) {
+                    const first = describe(tags[i]);
+                    const second = describe(tags[j]);
+                    conflicts.push({
+                        firstName: first.name,
+                        secondName: second.name,
+                        firstCategory: first.category,
+                        secondCategory: second.category,
+                        severity: gravesConflictSeverity(rawScore),
+                        rawScore
+                    });
                 }
             }
         }
@@ -186,15 +238,44 @@
 
         const conflictContainer = document.getElementById('gravesConflictDisplay');
         const conflicts = evaluation.conflicts;
+        const conflictPanel = document.getElementById('graves-conflicts-panel');
+        const summary = summarizeGravesConflicts(conflicts);
+
+        // The severity banner only earns its space when something is actually
+        // wrong; a clean script gets the plain empty state it always had.
+        if (conflictPanel) {
+            conflictPanel.classList.toggle('has-conflicts', summary.total > 0);
+            conflictPanel.dataset.conflictTone = summary.tone;
+            conflictPanel.dataset.conflictCount = String(summary.total);
+        }
+
         if (conflicts.length === 0) {
             conflictContainer.innerHTML = '<div class="empty-state">No severe Graves conflicts found.</div>';
         } else {
-            conflictContainer.innerHTML = conflicts.map((conflict, index) => `
-                <div id="graves-conflict-${index + 1}" class="spoiler-row graves-conflict-row">
-                    ${conflict.firstName} clashes with ${conflict.secondName}
+            const tally = [
+                summary.severe ? `${summary.severe} severe` : '',
+                summary.serious ? `${summary.serious} serious` : '',
+                summary.mild ? `${summary.mild} mild` : ''
+            ].filter(Boolean).join(' · ');
+
+            const banner = `
+                <div id="graves-conflict-summary" class="graves-conflict-summary tone-${summary.tone}">
+                    <span class="graves-conflict-headline">${summary.headline}</span>
+                    <span class="graves-conflict-tally">${tally}</span>
+                </div>
+            `;
+
+            const rows = conflicts.map((conflict, index) => `
+                <div id="graves-conflict-${index + 1}" class="spoiler-row graves-conflict-row severity-${conflict.severity}" data-severity="${conflict.severity}">
+                    <span class="graves-conflict-pair">
+                        ${conflict.firstName} clashes with ${conflict.secondName}
+                        <span class="graves-conflict-categories">${conflict.firstCategory} &times; ${conflict.secondCategory}</span>
+                    </span>
                     <span class="graves-raw-score">${conflict.rawScore.toFixed(1)}</span>
                 </div>
             `).join('');
+
+            conflictContainer.innerHTML = banner + rows;
         }
 
         document.getElementById('results-graves').scrollIntoView({ behavior: 'smooth' });
@@ -205,6 +286,8 @@
         getGravesVerdict,
         calculateGravesAudience,
         findGravesConflicts,
+        gravesConflictSeverity,
+        summarizeGravesConflicts,
         renderColmanGravesResults
     };
 })(globalThis);
