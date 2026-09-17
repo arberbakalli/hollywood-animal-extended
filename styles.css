@@ -2351,6 +2351,32 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: rgba(255, 95, 95, 0.12);
 }
 
+.best-match-show-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.best-match-show-more-btn {
+    padding: 10px 20px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.best-match-show-more-btn:hover {
+    background: var(--card-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
 .best-match-delta {
     display: inline-flex;
     align-items: center;
@@ -2712,13 +2738,12 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .distribution-toggle-label--behemoth {
-    color: #4cd964;
+    color: #f0f0f0;
 }
 
-/* Boutique gates on the artistic rating, so it carries the same gold the
-   artistic score slider uses, against Behemoth's commercial green. */
+/* Boutique uses green; Behemoth uses ivory. Both are active distribution modifiers. */
 .distribution-toggle-label--boutique {
-    color: #d4af37;
+    color: #4cd964;
 }
 
 .graves-exclusion-notice {
@@ -2805,11 +2830,11 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .distribution-toggle--behemoth > .toggle-checkbox:checked + .toggle-track {
-    background-color: #4cd964;
+    background-color: #f0f0f0;
 }
 
 .distribution-toggle--boutique > .toggle-checkbox:checked + .toggle-track {
-    background-color: #d4af37;
+    background-color: #4cd964;
 }
 
 /* Toggle Thumb */

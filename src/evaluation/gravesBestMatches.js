@@ -5,13 +5,14 @@
     const CONFLICT_PAIR_THRESHOLD = 2.0;
     // Same bar getGravesVerdict calls Success.
     const STRONG_FIT_THRESHOLD = 4.0;
-    // Removed caps to show all matches. Users can scroll through unlimited results.
-    // Conflicting candidates sort below clean ones, so ordering handles priority.
-    const MAX_ROWS_PER_BAND = Infinity;
-    const MAX_ROWS = Infinity;
+    // Pagination: show 10 rows initially, then offer "Show more" to load next batch.
+    const ROWS_PER_PAGE = 10;
+    const ROWS_INCREMENT = 10;
 
     let bestMatchMode = 'additions';
     let lastSelectedTags = [];
+    let visibleRowCount = ROWS_PER_PAGE;
+    let totalRowCount = 0;
 
     function hideGravesBestMatches() {
         const panel = document.getElementById('graves-best-matches-panel');
@@ -286,29 +287,59 @@
         unsuccessful: 'Unsuccessful combinations'
     };
 
-    function groupedMarkup(rows) {
+    function groupedMarkup(rows, rowLimit = visibleRowCount) {
         let index = 0;
-        return ['successful', 'common', 'unsuccessful'].map(band => {
-            const banded = rows.filter(row => row.band === band).slice(0, MAX_ROWS_PER_BAND);
+        let rowsRendered = 0;
+        const result = ['successful', 'common', 'unsuccessful'].map(band => {
+            const banded = rows.filter(row => row.band === band);
             if (banded.length === 0) return '';
 
-            const body = banded.map(row => rowMarkup(row, index++)).join('');
+            const limited = [];
+            for (const row of banded) {
+                if (rowsRendered >= rowLimit) break;
+                limited.push(row);
+                rowsRendered++;
+            }
+
+            const body = limited.map(row => rowMarkup(row, index++)).join('');
             return `<div class="best-match-band best-match-band-${band}">
                 <h4 class="best-match-band-title">${BAND_LABELS[band]}</h4>
                 ${body}
             </div>`;
         }).join('');
+
+        totalRowCount = rows.reduce((sum, row) => sum + 1, 0);
+        return result;
     }
 
     function emptyMarkup(message) {
         return `<div class="empty-state">${message}</div>`;
     }
 
+    function showMoreButton() {
+        return visibleRowCount < totalRowCount
+            ? `<div class="best-match-show-more-wrapper">
+                   <button id="graves-show-more-btn" class="best-match-show-more-btn">
+                       Show more suggestions (${totalRowCount - visibleRowCount} more available)
+                   </button>
+               </div>`
+            : '';
+    }
+
+    function expandMatches() {
+        visibleRowCount += ROWS_INCREMENT;
+        renderBestMatches();
+    }
+
     function renderAdditions(list, selectedTags) {
         const rows = buildAdditions(selectedTags);
-        list.innerHTML = rows.length
-            ? groupedMarkup(rows)
-            : emptyMarkup('No additions clear the minimum fit. Try a lower fit or a different category.');
+        if (rows.length === 0) {
+            list.innerHTML = emptyMarkup('No additions clear the minimum fit. Try a lower fit or a different category.');
+            return;
+        }
+        const markup = groupedMarkup(rows, visibleRowCount);
+        list.innerHTML = markup + showMoreButton();
+        bindShowMoreButton(list);
     }
 
     function renderSwaps(list, selectedTags) {
@@ -325,11 +356,13 @@
         }
 
         const slotName = displayName(result.slot.tag);
+        const markup = groupedMarkup(result.rows, visibleRowCount);
         list.innerHTML = `
             <div class="best-match-slot-note">
                 Weakest element: <strong>${slotName}</strong>. Replacing it with any of these raises the script average.
             </div>
-            ${groupedMarkup(result.rows)}`;
+            ${markup}` + showMoreButton();
+        bindShowMoreButton(list);
     }
 
     function renderPairwise(list, selectedTags) {
@@ -340,7 +373,9 @@
             return;
         }
 
-        list.innerHTML = matches.map((match, index) => `
+        totalRowCount = matches.length;
+        const limited = matches.slice(0, visibleRowCount);
+        list.innerHTML = limited.map((match, index) => `
             <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${bandFor(match.score, match.score)} ${tagClass(match.candidate)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${bandFor(match.score, match.score)}">
                 <div class="best-match-pair">
                     <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
@@ -353,7 +388,16 @@
                     ${addButtonMarkup(match.candidate, index)}
                 </div>
             </div>
-        `).join('');
+        `).join('') + showMoreButton();
+        bindShowMoreButton(list);
+    }
+
+    function bindShowMoreButton(list) {
+        if (!list || typeof list.querySelector !== 'function') return;
+        const btn = list.querySelector('#graves-show-more-btn');
+        if (btn) {
+            btn.addEventListener('click', expandMatches);
+        }
     }
 
     function bindAddButtons(list) {
@@ -427,6 +471,7 @@
             return;
         }
 
+        visibleRowCount = ROWS_PER_PAGE;
         lastSelectedTags = selectedTags;
         renderBestMatches();
         document.getElementById('graves-best-matches-panel')
