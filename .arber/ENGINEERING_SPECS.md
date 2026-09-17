@@ -192,6 +192,7 @@ or retention.
 ### Acceptance
 
 - Commercial score 5.0 produces demand `[10000, 5000, 4000, 3200, 2560, 2048, 1638, 1310]`.
-- Changing artistic score does not change the distribution grid.
+- Changing artistic score changes the distribution grid only when Boutique is active and the
+  rating is above 9 (localization/English.json:12490). With Boutique off it must not move the grid.
 - Changing owned screenings changes the owned/rented split, not the demand.
 - Any future modifier must cite an extracted game-file formula before shipping.

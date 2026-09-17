@@ -9,13 +9,26 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 - **Distribution formula is game-file sourced, not inferred.** Week 1 = commercial score × 2 × 1,000;
   Week 2 = commercial score × 1 × 1,000; weeks 3-8 = previous week × 0.8 (20% decay). Extracted
-  from the game files and documented in `.arber/ENGINEERING_SPECS.md`. The formula uses commercial
-  score only; artistic score does not affect distribution. Capacity (owned theatres) is subtracted
-  after demand is calculated, splitting it into owned/rented/spare, never changing the demand itself.
-- **Behemoth and community-guide modifiers are not in the extracted formula.** The game-file grid is
-  simpler than the implementations often inferred from policy text or community guides. If Behemoth or
-  other bonuses apply, they must be extracted from game files and cited before shipping, not inferred
-  from player reports or policy text. Currently shipping only the extracted base formula.
+  from the game files and documented in `.arber/ENGINEERING_SPECS.md`. Capacity (owned theatres) is
+  subtracted after demand is calculated, splitting it into owned/rented/spare, never changing the
+  demand itself.
+- **Studio policies are game-file sourced.** Both decay policies are quoted verbatim in the game's
+  own string table, which this repo ships: Behemoth at `localization/English.json:12479`
+  ("commercial rating above 9") and Boutique at `:12490` ("artistic rating above 9"). Each slows the
+  weekly fall by a quarter, 20% to 15%. They are separate policies and a studio can hold both, so
+  artistic score DOES now affect distribution, via Boutique. How two active modifiers compose is the
+  one part not stated anywhere: the app applies them additively on the fall (20% / 15% / 10%,
+  i.e. decay 0.80 / 0.85 / 0.90) on the repository owner's reading, pinned by
+  `tests/distribution-boutique.test.js`.
+- **Behemoth's week-one boost is gated on budget, not score.** `localization/English.json:12476`
+  ties the +25% opening bonus to a production budget over $1,000,000 — a different trigger from the
+  decay perk above. The calculator has no budget input, so the toggle stands for "my budget
+  qualifies".
+- **Attendance is deliberately not modelled.** The calculator outputs demand in screenings and
+  assumes it is met. The game reports an occupancy percentage instead, computed against
+  `localization/English.json:11269` ("400 seats per show") and surfaced as the
+  `RELEASE_RESULTS_OCCUPANCY` column. Deriving it needs a viewers model, which exists nowhere in
+  `src/` and must not be guessed — see Lesson 7 in `.arber/LESSONS_LEARNED.md`.
 
 ## Behaviour
 
