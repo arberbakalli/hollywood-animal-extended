@@ -89,6 +89,20 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await steps.expect('artisticScoreInput', 'MarketingRelease').value.toMatch(/^3(\.0)?$/);
   });
 
+  test('TC04-000016 typing movie scores updates sliders and distribution', async ({ steps }) => {
+    const weekOneBefore = await screenings(steps, 'weekOneValue');
+
+    await steps.on('commercialScoreInput', 'MarketingRelease').fill('7.5');
+    await steps.on('artisticScoreInput', 'MarketingRelease').fill('2.5');
+
+    await steps.expect('commercialScoreSlider', 'MarketingRelease').value.toBe('7.5');
+    await steps.expect('artisticScoreSlider', 'MarketingRelease').value.toBe('2.5');
+    await steps.on('distributionCommercialScore', 'MarketingRelease').verifyTextContains('7.5');
+    await expect
+      .poll(async () => screenings(steps, 'weekOneValue'))
+      .not.toBe(weekOneBefore);
+  });
+
   const attr = async (steps, element, name) =>
     Number(await steps.on(element, 'MarketingRelease').getAttribute(name));
 
@@ -151,6 +165,74 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await expect
       .poll(async () => screenings(steps, 'weekOneValue'))
       .toBeGreaterThan(before);
+  });
+
+  test('TC04-000013 the Behemoth policy changes week one and commercial-gated decay', async ({ steps }) => {
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8.5);
+    const week1Before = await attr(steps, 'weekOneCard', 'data-demand');
+    const week3Before = Number((await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    }))[2]);
+
+    await steps.on('behemothToggle', 'MarketingRelease').check();
+
+    await expect.poll(async () => attr(steps, 'weekOneCard', 'data-demand'))
+      .toBe(Math.ceil(week1Before * 1.25));
+    expect(Number((await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    }))[2])).toBe(week3Before);
+
+    await steps.on('behemothToggle', 'MarketingRelease').uncheck();
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 10);
+    const week3Normal = Number((await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    }))[2]);
+
+    await steps.on('behemothToggle', 'MarketingRelease').check();
+
+    const week3Behemoth = Number((await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    }))[2]);
+    expect(week3Behemoth).toBeGreaterThan(week3Normal);
+  });
+
+  test('TC04-000014 the Boutique policy slows later weeks only above artistic score 9', async ({ steps }) => {
+    await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 10);
+    const week1Before = await attr(steps, 'weekOneCard', 'data-demand');
+    const normalValues = (await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    })).map(Number);
+
+    await steps.on('boutiqueToggle', 'MarketingRelease').check();
+
+    const boutiqueValues = (await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    })).map(Number);
+    expect(boutiqueValues[0]).toBe(week1Before);
+    expect(boutiqueValues[1]).toBe(normalValues[1]);
+    expect(boutiqueValues[2]).toBeGreaterThan(normalValues[2]);
+
+    await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 9);
+
+    const thresholdValues = (await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    })).map(Number);
+    expect(thresholdValues[2]).toBe(normalValues[2]);
+  });
+
+  test('TC04-000015 Behemoth and Boutique stack their slower decay when both gates qualify', async ({ steps }) => {
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 10);
+    await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 10);
+    await steps.on('behemothToggle', 'MarketingRelease').check();
+    await steps.on('boutiqueToggle', 'MarketingRelease').check();
+
+    const values = (await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    })).map(Number);
+
+    expect(values[0]).toBe(25000);
+    expect(values[1]).toBe(10000);
+    expect(values[2]).toBe(9000);
   });
 
   test('TC04-000010 analysing a script produces a marketing profile', async ({ steps }) => {

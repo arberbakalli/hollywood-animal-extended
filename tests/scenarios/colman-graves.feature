@@ -1,5 +1,5 @@
 # Status key:
-#   [automated]  covered by tests/e2e/colman-graves.spec.js
+#   [automated]  covered by tests/e2e/colman-graves.spec.js or tests/graves.test.js
 #   [verified]   behaviour or markup confirmed against the app, not yet automated
 #   [unverified] plausible but NOT yet confirmed — do not automate until watched
 #
@@ -112,27 +112,28 @@ Feature: Script Evaluation — Colman Graves
     Then the results are hidden
     And no story element remains selected
 
-  # [verified] More than ten elements is refused with the count.
+  # [automated] More than ten elements is refused with the count.
   Scenario: More than ten elements is refused
     Given eleven story elements are selected
     When the user evaluates the script
     Then a message says Colman evaluates up to 10 story elements at once
+    And the message states that 11 were selected
 
-  # [verified] Category filter offers all seven categories.
+  # [automated] Category filter offers all seven categories and restricts rows.
   Scenario: Restricting best matches to one category
     Given the user has evaluated a script
     When the user restricts the match category to "Supporting Character"
     And the user generates best matches
     Then only supporting character suggestions are listed
 
-  # [verified] Minimum-fit filter offers 3.0+ through 5.0 only.
+  # [automated] Minimum-fit filter offers 3.0+ through 5.0 only.
   Scenario: Restricting best matches by minimum fit
     Given the user has evaluated a script
     When the user sets the minimum fit to "4.5+"
     And the user generates best matches
     Then every suggestion has a fit of at least 4.5
 
-  # [verified] A "Starting tags only" checkbox exists.
+  # [automated] A "Starting tags only" checkbox exists and filters rows.
   Scenario: Limiting suggestions to starting tags
     Given the user has evaluated a script
     When the user limits suggestions to starting tags only
@@ -144,6 +145,22 @@ Feature: Script Evaluation — Colman Graves
     Given best matches are listed
     When the user adds the first suggestion
     Then that element joins the current script selection
+
+  # [automated] Save to Script Library should write a reusable script card.
+  Scenario: Saving an evaluated script to the library
+    Given the user has evaluated a script
+    When the user saves the script to the library
+    Then the user is told the script was saved
+    And the script appears in the Script Library
+
+  # [automated] The Marketing & Release transfer is a workflow button, not a
+  # decorative link. It should carry the current script into analysis.
+  Scenario: Transferring an evaluated script to Marketing and Release
+    Given the user has evaluated a script
+    When the user transfers it to Marketing and Release
+    Then the Marketing and Release panel is shown
+    And the script's Genre is selected there
+    And marketing analysis results are shown
 
   # [unverified] Markup includes this notice and it is hidden by default, but the
   # banned-element warning journey has not been reproduced yet.

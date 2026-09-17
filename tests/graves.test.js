@@ -290,6 +290,26 @@ describe('Graves Evaluation', () => {
         expect(result).toContain('You selected 11');
     });
 
+    test('Evaluate Script rejects more than 10 selected elements', async () => {
+        const result = await h.evaluate(`(async () => {
+            const feedback = ${buildGravesBestMatchesDom(`[
+                { value: 'ACTION', dataset: { category: 'Genre' } },
+                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
+                { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } },
+                ...Array.from({ length: 8 }, (_, index) => ({
+                    value: 'TEST_TAG_' + index,
+                    dataset: { category: 'Supporting Character' }
+                }))
+            ]`)};
+
+            await evaluateColmanGravesScript();
+            return feedback.textContent;
+        })()`);
+
+        expect(result).toContain('up to 10 story elements');
+        expect(result).toContain('You selected 11');
+    });
+
     test('category colors are defined', () => {
         const categoryColors = {
             'Genre': '#92400e',

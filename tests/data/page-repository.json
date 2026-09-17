@@ -62,6 +62,8 @@
         { "elementName": "generatedCards", "selector": { "css": "#generatorResultsList .gen-card" } },
         { "elementName": "generatedTagChips", "selector": { "css": "#generatorResultsList .gen-tag-chip" } },
         { "elementName": "generatedPinButtons", "selector": { "css": "#generatorResultsList [id^='generated-script-pin-']" } },
+        { "elementName": "generatedGravesButtons", "selector": { "css": "#generatorResultsList [data-role='script-graves-button']" } },
+        { "elementName": "generatedMarketingButtons", "selector": { "css": "#generatorResultsList [data-role='script-transfer-button']" } },
         { "elementName": "generatedCardHeaders", "selector": { "css": "#generatorResultsList [data-role='script-card-header']" } },
         { "elementName": "generatedCardDetails", "selector": { "css": "#generatorResultsList .gen-details" } },
 
@@ -165,6 +167,8 @@
         { "elementName": "distributionCard", "selector": { "css": "#dist-wrapper" } },
         { "elementName": "strikingImageToggle", "selector": { "css": "#strikingImageToggle" } },
         { "elementName": "artisticAbilityToggle", "selector": { "css": "#artisticAbilityToggle" } },
+        { "elementName": "behemothToggle", "selector": { "css": "#behemothToggle" } },
+        { "elementName": "boutiqueToggle", "selector": { "css": "#boutiqueToggle" } },
         { "elementName": "ownedScreeningsInput", "selector": { "css": "#ownedScreeningsInput" } },
         { "elementName": "distributionCommercialScore", "selector": { "css": "#dist-com-score-display" } },
         { "elementName": "distributionGrid", "selector": { "css": "#dist-results-grid" } },

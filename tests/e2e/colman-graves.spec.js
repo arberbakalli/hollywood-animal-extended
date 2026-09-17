@@ -168,6 +168,87 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.expect('themeEventSelect', 'ColmanGraves').value.not.toBe('');
   });
 
+  test('TC03-000015 saving an evaluated script adds it to Script Library', async ({ steps }) => {
+    await buildValidScript(steps);
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+
+    await steps.on('saveToLibraryButton', 'ColmanGraves').click();
+
+    await steps.on('feedbackMessage', 'ColmanGraves')
+      .verifyTextContains('Saved to your script library');
+    await steps.on('buildTab', 'Navigation').click();
+    await steps.on('pinnedSection', 'ScriptLab').verifyState('visible');
+    await steps.on('pinnedCards', 'ScriptLab').verifyCount({ greaterThan: 0 });
+  });
+
+  test('TC03-000016 transferring a Graves script opens Marketing with analysis', async ({ steps }) => {
+    await buildValidScript(steps);
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+
+    await steps.on('transferToMarketButton', 'ColmanGraves').click();
+
+    await steps.on('panel', 'MarketingRelease').verifyState('visible');
+    await steps.expect('genreSelect', 'MarketingRelease').value.toBe('THRILLER');
+    await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
+    await steps.on('recommendedAdvertisers', 'MarketingRelease').verifyText();
+  });
+
+  test('TC03-000012 best-match category filter restricts suggestions', async ({ steps, page }) => {
+    await buildValidScript(steps);
+    await steps.selectDropdown('matchCategoryFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: 'Supporting Character',
+    });
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: '0',
+    });
+
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+
+    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+    const categories = await page.locator('#gravesBestMatchesList [data-role="graves-best-match"]')
+      .evaluateAll(rows => rows.map(row => row.dataset.category));
+    expect(categories.every(category => category === 'Supporting Character')).toBe(true);
+  });
+
+  test('TC03-000013 best-match minimum fit filter restricts scores', async ({ steps, page }) => {
+    await steps.selectDropdown('genreSelect', 'ColmanGraves', FIRST_OPTION);
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: '4.5',
+    });
+
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+
+    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+    const scores = await page.locator('#gravesBestMatchesList [data-role="graves-best-match"]')
+      .evaluateAll(rows => rows.map(row => Number(row.dataset.score)));
+    expect(scores.every(score => score >= 4.5)).toBe(true);
+  });
+
+  test('TC03-000014 starting-tags-only filter restricts suggestions to the starter deck', async ({ steps, page }) => {
+    await steps.selectDropdown('genreSelect', 'ColmanGraves', FIRST_OPTION);
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: '0',
+    });
+    await steps.on('startingTagsOnlyCheckbox', 'ColmanGraves').check();
+
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+
+    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+    const [suggestedIds, starterIds] = await page.evaluate(() => [
+      Array.from(document.querySelectorAll('#gravesBestMatchesList [data-role="graves-best-match"]'))
+        .map(row => row.dataset.tagId),
+      Array.from(HACAvailabilityFilter.getStarterAvailableIds()),
+    ]);
+    const starterSet = new Set(starterIds);
+    expect(suggestedIds.every(id => starterSet.has(id))).toBe(true);
+  });
+
   test('TC03-000006 resetting clears the submission and hides the verdict', async ({ steps }) => {
     await buildValidScript(steps);
     await steps.on('evaluateButton', 'ColmanGraves').click();

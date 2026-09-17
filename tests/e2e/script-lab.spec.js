@@ -30,6 +30,16 @@ test.describe('Script Lab — generator', () => {
     await steps.on('lockedContent', 'ScriptLab').verifyState('hidden');
   });
 
+  test('TC01-000019 collapsing Excluded Elements hides its selectors', async ({ steps }) => {
+    await steps.on('excludedContent', 'ScriptLab').verifyState('visible');
+    await steps.expect('excludedSectionToggle', 'ScriptLab').attributes.get('aria-expanded').toBe('true');
+
+    await steps.on('excludedSectionToggle', 'ScriptLab').click();
+
+    await steps.expect('excludedSectionToggle', 'ScriptLab').attributes.get('aria-expanded').toBe('false');
+    await steps.on('excludedContent', 'ScriptLab').verifyState('hidden');
+  });
+
   // Given the user is on Script Lab with default targets
   // When they generate
   // Then the results section appears with at least one script card
@@ -61,6 +71,19 @@ test.describe('Script Lab — generator', () => {
     for (const text of cardTexts) {
       expect(text).toContain('Sidekick');
     }
+  });
+
+  test('TC01-000020 Reset Locks clears locked selections', async ({ steps }) => {
+    await steps.selectDropdown('lockedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: SIDEKICK,
+    });
+    await steps.expect('lockedSupportingCharacterSelect', 'ScriptLab').value.toBe(SIDEKICK);
+
+    await steps.on('resetLocksButton', 'ScriptLab').click();
+
+    await steps.expect('lockedSupportingCharacterSelect', 'ScriptLab').value.toBe('');
+    await steps.on('resultsSection', 'ScriptLab').verifyState('hidden');
   });
 
   // Given the user is on Script Lab
@@ -137,6 +160,24 @@ test.describe('Script Lab — generator', () => {
     await steps.on('excludedCountBadge', 'ScriptLab').verifyText('0');
   });
 
+  test('TC01-000018 Excluded Elements persist after reload', async ({ steps, page }) => {
+    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: SIDEKICK,
+    });
+    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('1');
+
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('hac.excludedTags.v1')))
+      .toContain(SIDEKICK);
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await steps.verifyWindowProperty('__hollywoodReady', { truthy: true });
+    await steps.on('buildTab', 'Navigation').click();
+
+    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('1');
+    await steps.expect('excludedSupportingCharacterSelect', 'ScriptLab').value.toBe(SIDEKICK);
+  });
+
   // Given Custom is the active tag-availability profile
   // When the user switches to Starting Tags
   // Then the active state moves with them
@@ -162,6 +203,52 @@ test.describe('Script Lab — generator', () => {
     await steps.on('pinnedCards', 'ScriptLab').verifyCount({ greaterThan: 0 });
     await steps.on('savePinnedButton', 'ScriptLab').verifyState('visible');
     await steps.on('loadPinnedButton', 'ScriptLab').verifyState('visible');
+  });
+
+  test('TC01-000023 Save Library refuses an empty script library', async ({ steps }) => {
+    await steps.on('savePinnedButton', 'ScriptLab').click();
+
+    await steps.on('pinnedFeedbackMessage', 'ScriptLab')
+      .verifyTextContains('No pinned scripts to save');
+  });
+
+  test('TC01-000024 Load Library explains invalid JSON shape', async ({ steps, page }) => {
+    const chooserPromise = page.waitForEvent('filechooser');
+
+    await steps.on('loadPinnedButton', 'ScriptLab').click();
+    const chooser = await chooserPromise;
+    await chooser.setFiles({
+      name: 'not-a-script-library.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from('{}'),
+    });
+
+    await steps.on('pinnedFeedbackMessage', 'ScriptLab')
+      .verifyTextContains('Invalid file format');
+  });
+
+  test('TC01-000025 transferring a generated script opens Graves evaluation', async ({ steps }) => {
+    await steps.on('generateButton', 'ScriptLab').click();
+    await steps.on('generatedGravesButtons', 'ScriptLab').verifyCount({ greaterThan: 0 });
+    await steps.on('generatedCardHeaders', 'ScriptLab').first().click();
+
+    await steps.on('generatedGravesButtons', 'ScriptLab').first().click();
+
+    await steps.on('panel', 'ColmanGraves').verifyState('visible');
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+    await steps.on('verdict', 'ColmanGraves').verifyText();
+  });
+
+  test('TC01-000026 transferring a generated script opens Marketing analysis', async ({ steps }) => {
+    await steps.on('generateButton', 'ScriptLab').click();
+    await steps.on('generatedMarketingButtons', 'ScriptLab').verifyCount({ greaterThan: 0 });
+    await steps.on('generatedCardHeaders', 'ScriptLab').first().click();
+
+    await steps.on('generatedMarketingButtons', 'ScriptLab').first().click();
+
+    await steps.on('panel', 'MarketingRelease').verifyState('visible');
+    await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
+    await steps.on('recommendedAdvertisers', 'MarketingRelease').verifyText();
   });
 
   // Every category the data defines must offer a picker, not just the
@@ -204,6 +291,28 @@ test.describe('Script Lab — generator', () => {
     expect(visibleOptions.every(option => option.toLowerCase().includes('sidekick'))).toBe(true);
   });
 
+  test('TC01-000021 adding a second excluded row creates another ban picker', async ({ steps }) => {
+    await steps.on('excludedSupportingCharacterSelect', 'ScriptLab').verifyCount({ exactly: 1 });
+
+    await steps.on('addExcludedSupportingCharacterRow', 'ScriptLab').click();
+
+    await steps.on('excludedSupportingCharacterSelect', 'ScriptLab').verifyCount({ exactly: 2 });
+  });
+
+  test('TC01-000022 filtering excluded category search narrows banned options', async ({ steps, page }) => {
+    await steps.on('excludedSupportingCharacterSearch', 'ScriptLab').fill('Sidekick');
+
+    await expect(page.locator('#search-supporting-character-excluded-input')).toHaveClass(/has-matches/);
+    const visibleOptions = await page
+      .locator('#inputs-supporting-character-excluded select.tag-selector option:not(:first-child)')
+      .evaluateAll(options => options
+        .filter(option => !option.hidden)
+        .map(option => option.textContent.trim()));
+
+    expect(visibleOptions.length).toBeGreaterThan(0);
+    expect(visibleOptions.every(option => option.toLowerCase().includes('sidekick'))).toBe(true);
+  });
+
   // Row ids must be numbered within their own category and context. Regression:
   // a counter shared across all six panels made these shift unpredictably.
   test('TC01-000014 tag selector row ids are numbered per category and context', async ({ steps }) => {
@@ -217,23 +326,17 @@ test.describe('Script Lab — generator', () => {
       .attributes.get('id').toBe('tag-selector-row-graves-supporting-character-1-select');
   });
 
-  // Negative control for the generation test above: with the results section
-  // suppressed, that test's assertion must fail. Proves it observes real
-  // rendered state rather than passing vacuously.
-  test('TC01-000015 negative control: results assertion fails when the section is suppressed', async ({ steps, page }) => {
+  // Guard the locator used by the generation tests: with the results section
+  // suppressed, the harness must observe hidden rendered state rather than stale
+  // markup.
+  test('TC01-000015 results locator observes suppressed rendered state', async ({ steps, page }) => {
     // The one raw selector in the suite. It is a mutation target, not a locator —
-    // the point is to break the page, and the assertion below still resolves
-    // through the repository. Keep it in step with the resultsSection entry.
+    // The style injection simulates a broken visual state while the assertion
+    // still resolves through the repository. Keep it in step with the resultsSection entry.
     await page.addStyleTag({ content: '#results-generator { display: none !important; }' });
 
     await steps.on('generateButton', 'ScriptLab').click();
 
-    let assertionFailed = false;
-    try {
-      await steps.on('resultsSection', 'ScriptLab').timeout(3000).verifyState('visible');
-    } catch {
-      assertionFailed = true;
-    }
-    expect(assertionFailed).toBe(true);
+    await steps.on('resultsSection', 'ScriptLab').verifyState('hidden');
   });
 });

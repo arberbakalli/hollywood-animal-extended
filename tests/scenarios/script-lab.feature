@@ -43,6 +43,14 @@ Feature: Script Lab
     When the user resets the bans
     Then the excluded counter reads 0
 
+  # [automated] The Excluded Elements list is the source of truth across the
+  # app, so it must survive a browser reload.
+  Scenario: Excluded Elements persist after reload
+    Given the user has banned the supporting character "Sidekick"
+    When the user reloads the calculator
+    Then the excluded counter reads 1
+    And "Sidekick" remains selected in Excluded Elements
+
   # [automated]
   Scenario: The tag availability profile switches between Starting and Custom
     Given the Custom profile is active
@@ -57,6 +65,33 @@ Feature: Script Lab
     Then the Script Library section becomes visible
     And the pinned script is listed
     And the Save and Load controls are available
+
+  # [automated] Saving an empty library should explain the problem instead of
+  # starting a useless download.
+  Scenario: Save Library refuses an empty script library
+    Given no scripts are pinned
+    When the user saves the Script Library
+    Then a message says there are no pinned scripts to save
+
+  # [automated] Invalid imports must fail loudly and keep the library intact.
+  Scenario: Load Library explains invalid JSON shape
+    When the user loads a JSON file that is not a script array
+    Then a message says the file format is invalid
+
+  # [automated] Generated result action buttons should carry the generated
+  # script into the richer analysis surfaces.
+  Scenario: Transferring a generated script to Graves
+    Given the user has generated scripts
+    When the user opens a generated script in Graves
+    Then the Colman Graves panel is visible
+    And evaluation results are shown
+
+  # [automated]
+  Scenario: Transferring a generated script to Marketing and Release
+    Given the user has generated scripts
+    When the user opens a generated script in Marketing and Release
+    Then the Marketing and Release panel is visible
+    And marketing analysis results are shown
 
   # [automated] Regression: only 2 of the 7 categories used to render.
   Scenario: Every story element category offers a picker
@@ -81,21 +116,44 @@ Feature: Script Lab
     When the user collapses the Locked Elements section
     Then the locked tag selectors are hidden
 
+  # [automated] Excluded Elements uses the same collapsible contract.
+  Scenario: Collapsing the Excluded Elements section hides its selectors
+    Given the Excluded Elements section is expanded
+    When the user collapses the Excluded Elements section
+    Then the excluded tag selectors are hidden
+
   # [automated] Only Supporting Character and Theme & Event render as selectors.
   Scenario: Locking a tag constrains the generated scripts
     When the user locks the supporting character "Sidekick"
     And the user generates scripts
     Then every generated script includes "Sidekick"
 
+  # [automated] Reset Locks clears user picks rather than only repainting the panel.
+  Scenario: Reset Locks clears locked selections
+    Given the user has locked the supporting character "Sidekick"
+    When the user resets the locks
+    Then no locked Supporting Character remains selected
+    And generated results are hidden
+
   # [automated] The "+" control adds another dropdown row per category.
   Scenario: Adding a second selector row for the same category
     When the user adds another Supporting Character row
     Then two Supporting Character dropdowns are available
 
+  # [automated] The excluded list has the same multi-row behavior.
+  Scenario: Adding a second excluded selector row for the same category
+    When the user adds another excluded Supporting Character row
+    Then two excluded Supporting Character dropdowns are available
+
   # [automated] A per-category search box filters that category's options.
   Scenario: Filtering a category's options by search text
     When the user types "Sidekick" into the Supporting Character search box
     Then only matching options remain selectable in that category
+
+  # [automated] Excluded Elements search must filter without hiding the input.
+  Scenario: Filtering excluded options by search text
+    When the user types "Sidekick" into the excluded Supporting Character search box
+    Then only matching ban options remain selectable in that category
 
   # [automated] The movie-score slider updates the required-elements hint.
   Scenario: Raising the target movie score changes the required element count

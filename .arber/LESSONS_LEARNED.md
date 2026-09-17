@@ -271,3 +271,26 @@ panel is unavailable.
 inside the outgoing panel, switches tabs, then asserts `document.activeElement`
 is not inside `.tab-content[aria-hidden="true"]` and no "Blocked aria-hidden"
 console warning fired.
+
+---
+
+## 15. Negative-control browser tests should assert state, not force framework failures
+
+**What broke.** A Script Lab E2E test intentionally made the results panel
+invisible, expected a Playwright visibility assertion to fail, caught the
+failure, and passed. The test proved the locator was real, but the caught
+assertion still left Playwright trace/report cleanup in a bad state during the
+full suite.
+
+**The real cause.** A framework assertion failure is not just a boolean value.
+Even when caught, it can create artifacts, pending metadata, or cleanup paths
+that the rest of the run has to unwind.
+
+**The rule.** Negative-control tests should assert the broken state directly.
+If the panel is hidden, assert `hidden`. Do not deliberately trigger and catch
+framework assertion failures as proof that the assertion would have failed.
+
+**Cheap check for next time.** When a test has `try/catch` around an `expect`
+or around a page-object assertion, review it as suspicious. Prefer an explicit
+observable state check, or move the guard to a unit test where failure handling
+is not tied to browser artifacts.

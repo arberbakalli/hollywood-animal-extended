@@ -92,6 +92,10 @@ describe('HTML structure', () => {
             'selectors-container-advertisers',
             'analyzeMovieButton',
             'dist-wrapper',
+            'strikingImageToggle',
+            'artisticAbilityToggle',
+            'behemothToggle',
+            'boutiqueToggle',
             'results-advertisers',
         ];
 
@@ -150,6 +154,7 @@ describe('HTML structure', () => {
             'src/evaluation/movieScoreEstimator.js',
             'src/generator/scriptGenerator.js',
             'src/library/scriptLibrary.js',
+            'src/library/exclusionStore.js',
             'src/evaluation/scriptEvaluation.js',
             'src/evaluation/gravesAudience.js',
             'src/evaluation/gravesBestMatches.js',
