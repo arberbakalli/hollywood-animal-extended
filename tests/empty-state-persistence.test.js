@@ -27,7 +27,7 @@ describe('Generator — Empty Results, State Persistence, Concurrency', () => {
       expect(demand).toBe(0);
     });
 
-    test('no available synergy matches when all excluded', () => {
+    test('no available compatibility matches when all excluded', () => {
       const allTags = Object.keys(gameData.tags);
       const excluded = new Set(allTags);
       const available = allTags.filter(tag => !excluded.has(tag));

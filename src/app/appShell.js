@@ -54,7 +54,6 @@
         // here is a bug worth surfacing, not a condition to swallow — the old
         // catch-all turned any of it into a silently half-rendered page.
         initializeSelectors('advertisers');
-        initializeSelectors('synergy');
         initializeSelectors('graves');
         initializeSelectors('generator');
         initializeSelectors('excluded');
@@ -147,12 +146,10 @@
             ['generateScriptsButton', generateScripts],
             ['savePinnedScriptsButton', savePinnedScripts],
             ['loadPinnedScriptsButton', triggerLoadScripts],
-            ['calculateSynergyButton', calculateSynergy],
             ['evaluateGravesButton', evaluateColmanGravesScript],
             ['generateBestMatchesButton', generateBestMatches],
             ['unlockBlockedLocksButton', removeBlockedLockedPicks],
             ['gravesExclusionJumpButton', jumpToExclusionEditor],
-            ['transferTagsButton', () => transferTagsToAdvertisers('synergy')],
             ['transferGravesTagsButton', () => transferTagsToAdvertisers('graves')],
             ['analyzeMovieButton', analyzeMovie],
         ];

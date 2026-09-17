@@ -8,16 +8,22 @@ const scoreIn = async (steps, elementName) => {
 
 const FIRST_OPTION = { type: DropdownSelectType.INDEX, index: 1 };
 
-// Graves rejects a script unless Genre, Setting and Protagonist are all present
-// AND there are at least five elements in total. These five satisfy both.
-const REQUIRED_PLUS_TWO = [
-  'genreSelect', 'settingSelect', 'protagonistSelect',
-  'antagonistSelect', 'supportingCharacterSelect',
+const VALID_GRAVES_SCRIPT = [
+  ['genreSelect', 'THRILLER'],
+  ['settingSelect', 'MODERN_AMERICAN_CITY'],
+  ['protagonistSelect', 'PROTAGONIST_DETECTIVE'],
+  ['antagonistSelect', 'ANTAGONIST_OLD_FRIEND_ENEMY'],
+  ['supportingCharacterSelect', 'SUPPORTINGCHARACTER_KEY_WITNESS'],
+  ['themeEventSelect', 'THEME_WRONGFULLY_ACCUSED'],
+  ['finaleSelect', 'FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM'],
 ];
 
 const buildValidScript = async (steps) => {
-  for (const select of REQUIRED_PLUS_TWO) {
-    await steps.selectDropdown(select, 'ColmanGraves', FIRST_OPTION);
+  for (const [select, value] of VALID_GRAVES_SCRIPT) {
+    await steps.selectDropdown(select, 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value,
+    });
   }
 };
 
@@ -25,7 +31,6 @@ test.describe('Script Evaluation — Colman Graves', () => {
   test.beforeEach(async ({ steps }) => {
     await openHollywood(steps);
     await steps.on('evaluateTab', 'Navigation').click();
-    await steps.on('gravesModeButton', 'ScriptEvaluation').click();
     await steps.on('panel', 'ColmanGraves').waitForState('visible');
   });
 
@@ -66,6 +71,13 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('audienceDisplay', 'ColmanGraves').verifyText();
 
     expect(await scoreIn(steps, 'averageFit')).toBeGreaterThan(0);
+    expect(await scoreIn(steps, 'breakdownBaseScore')).not.toBe(0);
+    expect(await scoreIn(steps, 'breakdownCommercialBonus')).not.toBe(0);
+    expect(await scoreIn(steps, 'breakdownArtisticBonus')).not.toBe(0);
+    expect(await scoreIn(steps, 'commercialScore')).toBeGreaterThan(0);
+    expect(await scoreIn(steps, 'artisticScore')).toBeGreaterThan(0);
+    await steps.on('scoreCapLabel', 'ColmanGraves').verifyTextContains('Max Score Capped');
+    await steps.on('scoreCapLabel', 'ColmanGraves').verifyTextContains('Scoring Elements');
   });
 
   // Guard: a script missing a required category is refused by name.
@@ -123,6 +135,20 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
   });
 
+  test('TC03-000011 best matches can start from one seed element', async ({ steps }) => {
+    await steps.selectDropdown('genreSelect', 'ColmanGraves', FIRST_OPTION);
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: '0',
+    });
+
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+
+    await steps.on('bestMatchesPanel', 'ColmanGraves').verifyState('visible');
+    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+    await steps.on('feedbackMessage', 'ColmanGraves').verifyState('hidden');
+  });
+
   test('TC03-000008 adding a suggested Theme & Event joins the Graves script', async ({ steps }) => {
     await buildValidScript(steps);
     await steps.on('evaluateButton', 'ColmanGraves').click();
@@ -153,7 +179,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.expect('genreSelect', 'ColmanGraves').value.toBe('');
   });
 
-  test('TC03-000010 switching evaluation modes does not hide focused controls from accessibility', async ({ page }) => {
+  test('TC03-000010 switching away from Graves does not hide focused controls from accessibility', async ({ steps, page }) => {
     const ariaWarnings = [];
     page.on('console', message => {
       if (message.text().includes('Blocked aria-hidden')) {
@@ -161,11 +187,9 @@ test.describe('Script Evaluation — Colman Graves', () => {
       }
     });
 
-    await page.locator('#graves-mode-compatibility-button').click();
-    await expect(page.locator('#tab-synergy')).toBeVisible();
-
-    await page.locator('#evaluation-mode-graves-button').click();
-    await expect(page.locator('#tab-graves')).toBeVisible();
+    await page.locator('#generateBestMatchesButton').focus();
+    await steps.on('marketTab', 'Navigation').click();
+    await expect(page.locator('#tab-advertisers')).toBeVisible();
 
     const hiddenFocusedPanelId = await page.evaluate(() => {
       const activeElement = document.activeElement;

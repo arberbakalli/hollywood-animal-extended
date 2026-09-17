@@ -20,17 +20,17 @@
                 updateAllTagNames();
                 buildSearchIndex();
                 if (shouldRender) {
-                    const savedSynergy = collectTagInputs('synergy');
+                    const savedGraves = collectTagInputs('graves');
                     const savedAdvertisers = collectTagInputs('advertisers');
                     const savedGenerator = collectTagInputs('generator');
                     const savedExcluded = collectTagInputs('excluded');
 
-                    initializeSelectors('synergy');
+                    initializeSelectors('graves');
                     initializeSelectors('advertisers');
                     initializeSelectors('generator');
                     initializeSelectors('excluded');
 
-                    restoreSelection('synergy', savedSynergy);
+                    restoreSelection('graves', savedGraves);
                     restoreSelection('advertisers', savedAdvertisers);
                     restoreSelection('generator', savedGenerator);
                     restoreSelection('excluded', savedExcluded);

@@ -60,7 +60,7 @@ Comprehensive test strategy for Hollywood Animal calculator: Jest for logic/edge
 - Reset locks clears all locks
 - Cannot lock more than X tags (boundary test)
 - Locked + locked = no change (idempotent)
-- Locked tag in synergy blocks conflicting selections
+- Locked tag in Graves blocks conflicting selections
 
 **Exclude Logic**
 - Excluded tags do not appear in generator results
@@ -69,7 +69,7 @@ Comprehensive test strategy for Hollywood Animal calculator: Jest for logic/edge
 - Reset exclusions clears all bans
 - Cannot exclude more than Y tags
 - Excluded + excluded = no change (idempotent)
-- Excluded tag in synergy blocks evaluation
+- Excluded tag in Graves blocks evaluation
 
 **Filter Logic**
 - Search filters results by text match
@@ -108,7 +108,7 @@ Comprehensive test strategy for Hollywood Animal calculator: Jest for logic/edge
 - No matching scripts returns empty array
 - Empty genre mix is invalid
 - Zero score produces zero demand
-- No available synergy matches
+- No available compatibility matches
 - Null/undefined inputs handled safely
 
 **State Persistence**

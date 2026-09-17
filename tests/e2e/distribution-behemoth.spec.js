@@ -74,10 +74,12 @@ test.describe('Distribution Calculator — Behemoth Policy Feature', () => {
       expect(parseInt(week3After)).toBeGreaterThan(parseInt(week3Before));
     });
 
-    test('TC-BEH-006: Behemoth has no effect when score <= 9', async ({ page }) => {
+    // Below the decay threshold the two halves of the Behemoth policy part ways:
+    // the week 1 boost still applies, the slower decay does not.
+    test('TC-BEH-006: below score 9, Behemoth boosts week 1 but not the decay', async ({ page }) => {
       await page.click('button:has-text("Marketing & Release")');
 
-      // Set commercial score to 8.5 (below threshold)
+      // Set commercial score to 8.5 (below the decay threshold of 9)
       await page.fill('#comScoreInput', '8.5');
 
       // Get values without Behemoth
@@ -87,12 +89,13 @@ test.describe('Distribution Calculator — Behemoth Policy Feature', () => {
       // Enable Behemoth
       await page.check('#behemothToggle');
 
-      // Get values with Behemoth (should be same)
       const week1After = await page.getAttribute('#dist-week-1-value', 'data-demand');
       const week3After = await page.getAttribute('#dist-week-3-value', 'data-demand');
 
-      // Should be unchanged because score is below threshold
-      expect(week1After).toBe(week1Before);
+      // Week 1 takes the +25% at any score.
+      expect(parseInt(week1After)).toBe(Math.ceil(parseInt(week1Before) * 1.25));
+
+      // Weeks 3+ keep the base 0.8 decay until the score passes 9.
       expect(week3After).toBe(week3Before);
     });
 

@@ -105,12 +105,17 @@
         return conflicts.sort((a, b) => a.rawScore - b.rawScore);
     }
 
+    function formatFinalRating(value) {
+        if (value >= 10) return "10.0";
+        return formatMovieScore(value);
+    }
+
     function renderColmanGravesResults(evaluation) {
-        const { matrix, movieScores } = evaluation;
+        const { matrix, bonuses, movieScores } = evaluation;
         const verdict = getGravesVerdict(matrix.rawAverage);
 
         document.getElementById('results-graves').classList.remove('hidden');
-        ['graves-summary-row', 'graves-reading-panel', 'graves-detail-row'].forEach(panelId => {
+        ['graves-summary-row', 'graves-reading-panel', 'graves-breakdown-panel', 'graves-detail-row'].forEach(panelId => {
             const panel = document.getElementById(panelId);
             if (panel) panel.classList.remove('hidden');
         });
@@ -122,6 +127,29 @@
         const averageEl = document.getElementById('gravesAverageDisplay');
         averageEl.innerHTML = `${matrix.rawAverage.toFixed(1)} <span class="sub-value">/ 5.0</span>`;
         setToneClass(averageEl, matrix.rawAverage >= 4.0 ? 'success' : (matrix.rawAverage < 3.0 ? 'danger' : 'accent'));
+
+        const breakdownBase = document.getElementById('gravesBreakdownBaseScore');
+        breakdownBase.innerText = formatScore(matrix.totalScore);
+        setToneClass(breakdownBase, matrix.totalScore >= 0 ? 'success' : 'danger');
+
+        const breakdownCom = document.getElementById('gravesBreakdownComBonus');
+        breakdownCom.innerText = formatSimpleScore(bonuses.com);
+        setToneClass(breakdownCom, bonuses.com > 0 ? 'success' : (bonuses.com < 0 ? 'danger' : 'neutral'));
+
+        const breakdownArt = document.getElementById('gravesBreakdownArtBonus');
+        breakdownArt.innerText = formatSimpleScore(bonuses.art);
+        setToneClass(breakdownArt, bonuses.art > 0 ? 'art' : (bonuses.art < 0 ? 'danger' : 'neutral'));
+
+        const totalComEl = document.getElementById('gravesTotalComScore');
+        totalComEl.innerText = formatFinalRating(movieScores.commercial);
+        setToneClass(totalComEl, movieScores.commercial > 0 ? 'accent' : 'danger');
+
+        const totalArtEl = document.getElementById('gravesTotalArtScore');
+        totalArtEl.innerText = formatFinalRating(movieScores.artistic);
+        setToneClass(totalArtEl, movieScores.artistic > 0 ? 'art' : 'danger');
+
+        document.getElementById('gravesScoreCapLabel').innerHTML =
+            `Max Score Capped at <strong>${movieScores.tagCap}.0</strong> (${movieScores.scoringCount} Scoring Elements)`;
 
         document.getElementById('gravesVerdictText').textContent = verdict.text;
         document.getElementById('gravesMethodList').innerHTML = `

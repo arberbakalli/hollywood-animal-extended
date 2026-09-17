@@ -119,7 +119,7 @@
 
             box.innerHTML = `
                 <span class="week-label" id="dist-week-${week.week}-label">Week ${week.week}</span>
-                <span class="week-val ${week.demand > 0 ? 'active' : ''}" id="dist-week-${week.week}-value">${week.demand.toLocaleString()}</span>
+                <span class="week-val ${week.demand > 0 ? 'active' : ''}" id="dist-week-${week.week}-value" data-demand="${week.demand}">${week.demand.toLocaleString()}</span>
                 <span class="week-split ${needsRent ? 'rent' : 'spare'}" id="dist-week-${week.week}-split">${splitLabel}</span>
             `;
             grid.appendChild(box);

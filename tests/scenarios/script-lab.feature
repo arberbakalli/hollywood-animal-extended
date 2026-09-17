@@ -102,6 +102,28 @@ Feature: Script Lab
     When the user raises the target movie score
     Then the required story elements hint updates
 
+  # [automated] Regression: the hint used the movie score itself as the story
+  # element count at higher scores, so score 7 showed 7, score 9 showed 9, etc.
+  Scenario Outline: Target movie score shows the correct story element count
+    When the user sets the target movie score to <movie_score>
+    Then the required story elements hint says "~<story_elements> Story Elements"
+
+    Examples:
+      | movie_score | story_elements |
+      | 6           | 5              |
+      | 7           | 6              |
+      | 8           | 7              |
+      | 9           | 8              |
+      | 10          | 9              |
+
+  # [automated] Regression: white text on the red circular counter was hard to
+  # read and visually harsh. The counter should remain visible without eye strain.
+  Scenario: Excluded counter text is readable on the danger badge
+    Given the excluded counter is visible
+    When the excluded counter appears on its red badge
+    Then the counter text is black
+    And the counter remains legible against the badge background
+
   # [unverified] A feedback element and an unlock-blocked-locks button exist in
   # the markup, but the conditions that surface them have not been reproduced.
   Scenario: Conflicting locks surface a feedback message

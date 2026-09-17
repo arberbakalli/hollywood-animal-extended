@@ -418,7 +418,6 @@ h3 {
 .accent-empty { color: var(--accent); }
 
 #selectors-container-advertisers,
-#selectors-container-synergy,
 #selectors-container-generator,
 #selectors-container-excluded,
 #selectors-container-graves,
@@ -1437,7 +1436,7 @@ input[type="text"] {
 footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 @media (max-width: 800px) {
-    #selectors-container-advertisers, #selectors-container-synergy, #selectors-container-graves, #selectors-container-generator, #selectors-container-excluded, #selectors-container-targeted { grid-template-columns: 1fr; }
+    #selectors-container-advertisers, #selectors-container-graves, #selectors-container-generator, #selectors-container-excluded, #selectors-container-targeted { grid-template-columns: 1fr; }
     h1 { font-size: 1.8rem; }
     .score-controls-wrapper { flex-direction: column; gap: 15px; }
     .results-row { grid-template-columns: 1fr; }
@@ -2674,7 +2673,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     height: 24px;
     padding: 0 6px;
     background: var(--danger);
-    color: #e0e0e0;
+    color: #000;
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 700;

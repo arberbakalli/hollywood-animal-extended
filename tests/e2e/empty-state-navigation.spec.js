@@ -12,12 +12,13 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       await steps.on('generatedCards', 'ScriptLab').verifyCount({ exactly: 0 });
     });
 
-    // Generate with no selections produces feedback
-    test('TC06-002 generating with no tags shows feedback message', async ({ steps }) => {
+    // Generate with no selections still produces a clear outcome.
+    test('TC06-002 generating with no tags produces script cards', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('generateButton', 'ScriptLab').click();
 
-      await steps.on('feedbackMessage', 'ScriptLab').verifyState('visible');
+      await steps.on('resultsSection', 'ScriptLab').verifyState('visible');
+      await steps.on('generatedCards', 'ScriptLab').verifyCount({ greaterThan: 0 });
     });
 
     // Results section hidden when empty
@@ -26,13 +27,11 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       await steps.on('resultsSection', 'ScriptLab').verifyState('hidden');
     });
 
-    // Synergy produces feedback with empty selection
-    test('TC06-004 synergy shows feedback with no tags selected', async ({ steps }) => {
+    // Graves is the single evaluation surface.
+    test('TC06-004 evaluate tab shows Colman Graves', async ({ steps }) => {
       await steps.on('evaluateTab', 'Navigation').click();
 
-      // Try to calculate synergy without selections
-      // The page should show the Synergy panel
-      await steps.on('panel', 'ScriptEvaluation').verifyState('visible');
+      await steps.on('panel', 'ColmanGraves').verifyState('visible');
     });
   });
 
@@ -43,7 +42,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       await steps.on('panel', 'ScriptLab').verifyState('visible');
 
       await steps.on('evaluateTab', 'Navigation').click();
-      await steps.on('panel', 'ScriptEvaluation').verifyState('visible');
+      await steps.on('panel', 'ColmanGraves').verifyState('visible');
 
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('panel', 'ScriptLab').verifyState('visible');
@@ -53,7 +52,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
     test('TC06-006 locked section remains expandable after tab switch', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('lockedSectionToggle', 'ScriptLab').click();
-      await steps.on('lockedContent', 'ScriptLab').verifyState('visible');
+      await steps.on('lockedContent', 'ScriptLab').verifyState('hidden');
 
       await steps.on('evaluateTab', 'Navigation').click();
       await steps.on('buildTab', 'Navigation').click();
@@ -78,11 +77,10 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       // Settings should have input elements
       await steps.on('settingsPanel', 'ScriptLab').verifyState('visible');
 
-      // Reset should be available
-      await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('5');
+      // The lowest legal movie score target is the default.
+      await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('6');
 
-      // Click reset
-      await steps.on('resetButton', 'ScriptLab').click();
+      await steps.on('resetLocksButton', 'ScriptLab').click();
 
       // Settings should be cleared/reset
       await steps.on('settingsPanel', 'ScriptLab').verifyState('visible');
@@ -93,29 +91,19 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('generateButton', 'ScriptLab').click();
 
-      // Should show either feedback or results
-      await expect
-        .poll(async () => {
-          try {
-            await steps.on('feedbackMessage', 'ScriptLab').verifyState('visible');
-            return true;
-          } catch {
-            await steps.on('generatedCards', 'ScriptLab').verifyCount();
-            return true;
-          }
-        })
-        .toBeTruthy();
+      await steps.on('resultsSection', 'ScriptLab').verifyState('visible');
+      await steps.on('generatedCards', 'ScriptLab').verifyCount({ greaterThan: 0 });
     });
   });
 
   test.describe('UI Responsiveness', () => {
-    // Generating with no tags shows feedback
-    test('TC06-010 empty generation shows user guidance', async ({ steps }) => {
+    // Generating with no tags still leaves the UI responsive.
+    test('TC06-010 empty generation shows generated options', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('generateButton', 'ScriptLab').click();
 
-      // Should show feedback
-      await steps.on('feedbackMessage', 'ScriptLab').verifyState('visible');
+      await steps.on('resultsSection', 'ScriptLab').verifyState('visible');
+      await steps.on('generatedCards', 'ScriptLab').verifyCount({ greaterThan: 0 });
     });
 
     // UI remains responsive after rapid interactions

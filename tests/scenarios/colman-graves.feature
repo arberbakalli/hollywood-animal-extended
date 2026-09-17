@@ -16,7 +16,6 @@ Feature: Script Evaluation — Colman Graves
   Background:
     Given the Hollywood Animal Calculator is open
     And the Evaluate tab is selected
-    And the Colman Graves mode is active
 
   # [automated] Regression: before the category fix, Genre, Setting and
   # Protagonist had no picker at all, so Graves could never be satisfied.
@@ -31,8 +30,10 @@ Feature: Script Evaluation — Colman Graves
     Then the results become visible
     And a verdict is shown
     And an average fit out of 5.0 is shown
-    And a commercial score is shown
-    And an artistic score is shown
+    And the compatibility breakdown shows Script Synergy, Commercial Bonus and Artistic Bonus
+    And a commercial movie score is shown
+    And an artistic movie score is shown
+    And the score cap names the number of scoring elements
     And the Graves analysis text is shown
     And the likely audience is described
 
@@ -63,6 +64,46 @@ Feature: Script Evaluation — Colman Graves
     Then the panel is re-rendered for that mode
     When the user selects the Pairwise mode
     Then the panel is re-rendered for that mode
+
+  # [automated] Regression: Best Matches is exploratory, not a full script
+  # evaluation. It must work from one seed and suggest ideal additions around it.
+  Scenario: Best matches can start from one seed element
+    Given only one Genre is selected
+    When the user widens the minimum fit to any
+    And the user generates best matches
+    Then the best matches panel becomes visible
+    And suggestions are listed
+    And no full-script validation message is shown
+
+  # [automated] Regression: the full-script rules belong to Evaluate Script, not
+  # Generate Best Matches. Missing Genre, Setting or Protagonist must not block
+  # exploratory matching.
+  Scenario: Best matches do not require the full script structure
+    Given only an Antagonist, Supporting Character and Finale are selected
+    When the user widens the minimum fit to any
+    And the user generates best matches
+    Then the best matches panel becomes visible
+    And suggestions are listed
+    And no message says Genre, Setting or Protagonist is required
+
+  # [unverified] Source-of-truth expectation for Script Lab exclusions. Starting
+  # Tags may hide unavailable settings, but removing a setting from the exclusion
+  # list should make it selectable in Graves without a reload.
+  Scenario: Removing a Setting from Script Lab exclusions restores it in Graves
+    Given the Script Lab Starting Tags profile is active
+    And a Setting is hidden from Colman Graves because it is excluded
+    When the user removes that Setting from Excluded Elements in Script Lab
+    And the user returns to Colman Graves
+    Then that Setting is available in the Graves Setting picker
+
+  # [unverified] Guard against confusing source-of-truth behavior. If a setting
+  # is unavailable because the shared exclusion list bans it, Graves should make
+  # that reason visible rather than looking broken.
+  Scenario: Graves explains when excluded Settings are unavailable
+    Given the Script Lab exclusion list hides one or more Settings
+    When the user opens the Colman Graves Setting picker
+    Then excluded Settings are not selectable
+    And the Graves exclusion notice explains that Script Lab exclusions are hiding suggestions or choices
 
   # [automated]
   Scenario: Resetting clears the submission and hides the verdict

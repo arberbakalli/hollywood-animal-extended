@@ -264,10 +264,6 @@ function transferScriptToContext(uniqueId, targetContext) {
     return HACScriptLibrary.transferScriptToContext(uniqueId, targetContext);
 }
 
-async function calculateSynergy() {
-    return HACScriptEvaluation.calculateSynergy();
-}
-
 function calculateMatrixScore(tags) {
     return HACCompatibilityEngine.calculateMatrixScore(tags, GAME_DATA);
 }
@@ -292,11 +288,7 @@ function calculateScriptEvaluation(tags, matrix = null, bonuses = null) {
     return HACScriptEvaluation.calculateScriptEvaluation(tags, matrix, bonuses);
 }
 
-function renderSynergyResults(evaluation) {
-    return HACScriptEvaluation.renderSynergyResults(evaluation);
-}
-
-function transferTagsToAdvertisers(sourceContext = 'synergy') {
+function transferTagsToAdvertisers(sourceContext = 'graves') {
     return HACScriptEvaluation.transferTagsToAdvertisers(sourceContext);
 }
 

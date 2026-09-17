@@ -52,7 +52,7 @@
                 <span class="product-area-kicker">Build</span>
                 <span class="product-area-label">Script Lab</span>
             </button>
-            <button id="tab-synergy-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="graves">
+            <button id="tab-evaluate-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="graves">
                 <span class="product-area-kicker">Evaluate</span>
                 <span class="product-area-label">Script Evaluation</span>
             </button>
@@ -187,95 +187,8 @@
 
             </section>
 
-            <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COMPATIBILITY NUMBERS -->
-            <section id="tab-synergy" class="tab-content app-tab-panel hidden" aria-label="Legacy compatibility numbers" aria-hidden="true" hidden>
-
-                <div id="synergy-search-panel" class="card search-card">
-                    <h3>Quick Search</h3>
-                    <div class="search-wrapper">
-                        <input type="text" id="globalSearchSynergy" placeholder="Type to find a tag (e.g., 'Action', 'Cowboy')..." autocomplete="off">
-                        <div id="searchResultsSynergy" class="search-results hidden"></div>
-                    </div>
-                </div>
-
-                <div id="synergy-builder-panel" class="card builder-card">
-                    <div id="synergy-builder-header" class="card-header">
-                        <h3>Compatibility Numbers</h3>
-                        <button id="resetSynergyButton" class="reset-btn" type="button" data-reset-context="synergy">Reset</button>
-                    </div>
-                    <p class="subtitle">Select story elements to see how well they fit together.</p>
-
-                    <div id="selectors-container-synergy" class="tag-selector-grid"></div>
-
-                    <div id="synergy-actions" class="action-area">
-                        <div id="synergyFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
-                        <button id="calculateSynergyButton" class="analyze-btn" type="button">Check Compatibility</button>
-                        <button id="saveSynergyScriptButton" class="analyze-btn save-script-btn" type="button" data-save-script="synergy">&#9734; Save to Script Library</button>
-                    </div>
-                </div>
-
-                <!-- SYNERGY RESULTS -->
-                <div id="results-synergy" class="results-container hidden">
-                    <div id="synergy-summary-row" class="summary-row">
-                        <div id="synergy-average-card" class="summary-item">
-                            <h3>Average Compatibility</h3>
-                            <div id="synergyAverageDisplay" class="summary-value">0.0 <span class="sub-value">/ 5.0</span></div>
-                        </div>
-                        <div id="synergy-total-card" class="summary-item">
-                            <h3>Script Synergy</h3>
-                            <div id="synergyTotalDisplay" class="summary-value">0.00</div>
-                        </div>
-                    </div>
-
-                    <div id="synergy-breakdown-panel" class="card result-card breakdown-container">
-                        <div class="breakdown-col left-col">
-                            <h4 class="col-header">Bonuses</h4>
-                            <div class="breakdown-row">
-                                <span class="b-label">Script Synergy:</span>
-                                <span class="b-value" id="breakdownBaseScore">0.00</span>
-                            </div>
-                            <div class="breakdown-row">
-                                <span class="b-label">Commercial Bonus:</span>
-                                <span class="b-value" id="breakdownComBonus">0</span>
-                            </div>
-                            <div class="breakdown-row">
-                                <span class="b-label">Artistic Bonus:</span>
-                                <span class="b-value" id="breakdownArtBonus">0</span>
-                            </div>
-                            <p class="context-text">
-                                Script synergy is the foundation of your movie score, scaled by your scriptwriter's skill.
-                            </p>
-                        </div>
-                        <div class="breakdown-col right-col">
-                            <h4 class="col-header highlight-header">Potential Movie Score</h4>
-                            <div class="total-row">
-                                <span class="t-label">Commercial Movie Score:</span>
-                                <span class="t-value" id="totalComScore">0.00</span>
-                            </div>
-                            <div class="total-row">
-                                <span class="t-label">Artistic Movie Score:</span>
-                                <span class="t-value" id="totalArtScore">0.00</span>
-                            </div>
-                            <div id="scoreCapLabel" class="score-cap-label">Max Score Capped at <strong>0.0</strong> (0 Scoring Elements)</div>
-                        </div>
-                    </div>
-
-                    <div id="synergy-conflicts-panel" class="card result-card danger-accent-card">
-                        <h3>Conflicts</h3>
-                        <div class="list-subtitle">Severe clashes that ruin the script</div>
-                        <div id="spoilerDisplay" class="strategy-content">
-                            <div class="empty-state">No conflicts found.</div>
-                        </div>
-                    </div>
-
-                    <div id="synergy-transfer-actions" class="action-area action-area-flush">
-                        <button id="transferTagsButton" class="analyze-btn secondary-btn" type="button">Marketing &amp; Release &rarr;</button>
-                    </div>
-                </div>
-            </section>
-
             <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COLMAN GRAVES -->
-            <section id="tab-graves" class="tab-content app-tab-panel active" aria-labelledby="tab-synergy-button" aria-hidden="false">
+            <section id="tab-graves" class="tab-content app-tab-panel active" aria-labelledby="tab-evaluate-button" aria-hidden="false">
 
                 <div id="graves-intro-panel" class="card graves-case-card">
                     <div id="graves-heading-block" class="graves-heading-block">
@@ -399,7 +312,7 @@
                                 <span class="t-label">Artistic Movie Score:</span>
                                 <span class="t-value" id="gravesTotalArtScore">0.00</span>
                             </div>
-                            <div id="gravesScoreCapLabel" class="score-cap-label"></div>
+                            <div id="gravesScoreCapLabel" class="score-cap-label">Max Score Capped at <strong>0.0</strong> (0 Scoring Elements)</div>
                         </div>
                     </div>
 

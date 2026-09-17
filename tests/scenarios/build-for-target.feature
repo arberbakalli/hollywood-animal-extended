@@ -19,13 +19,14 @@ Feature: Build for Target
     And a picker is offered for each of the seven story element categories
     And no results are shown yet
 
-  # [automated] Guard: the app must say what is missing, not fail silently.
-  Scenario: Searching with neither an audience nor an advertiser is refused
+  # [automated] Both filters are optional. With neither set, every agency is in
+  # scope and the ranking answers "what plays best overall".
+  Scenario: Searching with neither an audience nor an advertiser ranks against every agency
     Given no audience is selected
     And no advertiser is selected
     When the user searches for top combinations
-    Then a message asks for at least one audience or advertiser
-    And no results are shown
+    Then the top combinations panel becomes visible
+    And combinations are listed
 
   # [automated]
   Scenario: Choosing an audience produces top combinations
@@ -48,13 +49,34 @@ Feature: Build for Target
     And the user searches for top combinations
     Then the combinations returned all include that story element
 
-  # [automated] findTargetedCombinations refuses more than six optional tags.
-  Scenario: More than six optional tags is refused
+  # [automated] Regression: one pick per category used to be refused, because
+  # Genre and Setting were counted against the story element budget. They are
+  # structural picks every script carries, so seven selections is five elements.
+  Scenario: One pick per category is accepted
     Given the user has selected a target audience
-    When the user adds seven story elements to the tag builder
+    When the user adds one story element of each category to the tag builder
     And the user searches for top combinations
-    Then a message says to pick six or fewer optional tags
-    And the count the user selected is named in the message
+    Then the top combinations panel becomes visible
+    And combinations are listed
+
+  # [verified] The Max Story Elements slider sets the budget; Genre and Setting
+  # sit outside it, so a budget of N yields combinations N + 2 tags wide.
+  Scenario Outline: The story element budget sets the combination width
+    Given the user sets the maximum story elements to <budget>
+    When the user searches for top combinations
+    Then each combination contains <width> story elements
+
+    Examples:
+      | budget | width |
+      | 5      | 7     |
+      | 10     | 12    |
+
+  # [verified] Selecting more story elements than the budget names both numbers.
+  Scenario: Selecting more story elements than the budget is refused
+    Given the user sets the maximum story elements to 5
+    When the user adds six story elements to the tag builder
+    And the user searches for top combinations
+    Then a message names the budget and the number selected
 
   # [automated] An advertiser selection takes precedence over audiences when
   # choosing which agencies to target.

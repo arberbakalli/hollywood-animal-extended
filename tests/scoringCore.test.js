@@ -182,13 +182,13 @@ describe('extracted scoring modules', () => {
 
 describe('getRequiredElementCount', () => {
     // Regression guard: the help text and the generator previously kept
-    // separate tables that disagreed at scores 6, 7 and 10.
+    // separate tables that disagreed at scores 7, 9 and 10.
     test('is the single source consumed by both the UI and the generator', () => {
         const table = {};
         for (let score = 6; score <= 10; score++) {
             table[score] = h.call('getRequiredElementCount', score);
         }
-        expect(table).toEqual({ 6: 5, 7: 7, 8: 8, 9: 9, 10: 9 });
+        expect(table).toEqual({ 6: 5, 7: 6, 8: 7, 9: 8, 10: 9 });
     });
 
     test('is monotonic — a higher target never needs fewer elements', () => {
@@ -265,7 +265,7 @@ describe('generator availability', () => {
     });
 
     test('excluded elements are the shared source of truth for every script builder', () => {
-        const contexts = ['generator', 'synergy', 'graves', 'advertisers', 'targeted'];
+        const contexts = ['generator', 'graves', 'advertisers', 'targeted'];
 
         expect(
             contexts.map(context =>

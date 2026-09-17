@@ -24,10 +24,31 @@ function buildGravesBestMatchesDom(selectorsExpression) {
             className: '',
             classList: { add() {}, remove() {} }
         };
+        const hiddenState = new Set(['hidden']);
+        const panelClassList = {
+            add(name) { hiddenState.add(name); },
+            remove(name) { hiddenState.delete(name); },
+            contains(name) { return hiddenState.has(name); }
+        };
         const generic = {
             classList: { add() {}, remove() {} },
             scrollIntoView() {}
         };
+        const bestMatchesPanel = {
+            classList: panelClassList,
+            scrollIntoView() {}
+        };
+        const bestMatchesList = {
+            innerHTML: '',
+            querySelectorAll(selector) {
+                if (selector !== '[data-action="add-graves-best-match"]') return [];
+                const matches = [...this.innerHTML.matchAll(/data-action="add-graves-best-match"/g)];
+                return matches.map(() => ({ addEventListener() {} }));
+            }
+        };
+        const scoreFilter = { value: '4.0' };
+        const categoryFilter = { value: '' };
+        const starterOnlyFilter = { checked: false };
         const emptyContainer = { querySelectorAll() { return []; } };
         const gravesContainer = {
             querySelectorAll(selector) {
@@ -56,11 +77,22 @@ function buildGravesBestMatchesDom(selectorsExpression) {
                 if (id === 'selectors-container-graves') return gravesContainer;
                 if (id === 'selectors-container-excluded') return emptyContainer;
                 if (id === 'inputs-genre-graves') return genreContainer;
+                if (id === 'graves-best-matches-panel') return bestMatchesPanel;
+                if (id === 'gravesBestMatchesList') return bestMatchesList;
+                if (id === 'gravesBestScoreFilter') return scoreFilter;
+                if (id === 'gravesBestCategoryFilter') return categoryFilter;
+                if (id === 'gravesStarterOnlyFilter') return starterOnlyFilter;
                 if (id.startsWith('inputs-')) return null;
                 return generic;
             },
             querySelector() { return null; },
-            querySelectorAll() { return []; }
+            querySelectorAll(selector) {
+                if (selector === '#gravesBestMatchesList [data-role="graves-best-match"]') {
+                    const matches = [...bestMatchesList.innerHTML.matchAll(/data-role="graves-best-match"/g)];
+                    return matches.map(() => ({}));
+                }
+                return [];
+            }
         };
 
         return feedback;
@@ -196,37 +228,46 @@ describe('Graves Evaluation', () => {
         expect(score).toBe(3.0);
     });
 
-    test('Generate Best Matches requires at least 5 selected elements', async () => {
+    test('Generate Best Matches works from one seed element', async () => {
         const result = await h.evaluate(`(async () => {
             const feedback = ${buildGravesBestMatchesDom(`[
-                { value: 'ACTION', dataset: { category: 'Genre' } },
-                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
-                { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } }
+                { value: 'ACTION', dataset: { category: 'Genre' } }
             ]`)};
+            document.getElementById('gravesBestScoreFilter').value = '0';
 
             await generateBestMatches();
-            return feedback.textContent;
+            return {
+                feedback: feedback.textContent,
+                panelHidden: document.getElementById('graves-best-matches-panel').classList.contains('hidden'),
+                rows: document.querySelectorAll('#gravesBestMatchesList [data-role="graves-best-match"]').length
+            };
         })()`);
 
-        expect(result).toContain('at least 5 story elements');
-        expect(result).toContain('You selected 3');
+        expect(result.feedback).toBe('');
+        expect(result.panelHidden).toBe(false);
+        expect(result.rows).toBeGreaterThan(0);
     });
 
-    test('Generate Best Matches requires Genre, Setting, and Protagonist', async () => {
+    test('Generate Best Matches does not require Genre, Setting, and Protagonist', async () => {
         const result = await h.evaluate(`(async () => {
             const feedback = ${buildGravesBestMatchesDom(`[
-                { value: 'ACTION', dataset: { category: 'Genre' } },
-                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
                 { value: 'ANTAGONIST_BANDIT', dataset: { category: 'Antagonist' } },
                 { value: 'SUPPORTINGCHARACTER_MENTOR', dataset: { category: 'Supporting Character' } },
                 { value: 'FINALE_ANTAGONIST_GETS_KILLED', dataset: { category: 'Finale' } }
             ]`)};
+            document.getElementById('gravesBestScoreFilter').value = '0';
 
             await generateBestMatches();
-            return feedback.textContent;
+            return {
+                feedback: feedback.textContent,
+                panelHidden: document.getElementById('graves-best-matches-panel').classList.contains('hidden'),
+                rows: document.querySelectorAll('#gravesBestMatchesList [data-role="graves-best-match"]').length
+            };
         })()`);
 
-        expect(result).toContain('at least one Protagonist');
+        expect(result.feedback).toBe('');
+        expect(result.panelHidden).toBe(false);
+        expect(result.rows).toBeGreaterThan(0);
     });
 
     test('Generate Best Matches rejects more than 10 selected elements', async () => {

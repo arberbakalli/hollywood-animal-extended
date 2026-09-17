@@ -417,17 +417,8 @@
         hideGravesEvaluationResults();
 
         const selectedTags = collectTagInputs('graves');
-        const missingRequiredCategories = getRequiredScriptCategories().filter(category =>
-            !selectedTags.some(tag => tag.category === category)
-        );
-
-        if (missingRequiredCategories.length > 0) {
-            showFeedbackMessage('gravesFeedbackMessage', `A script needs at least one ${missingRequiredCategories.join(', ')} before suggesting best matches.`, 'accent');
-            return;
-        }
-
-        if (selectedTags.length < 5) {
-            showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements before suggesting best matches. You selected ${selectedTags.length}.`, 'accent');
+        if (selectedTags.length === 0) {
+            showFeedbackMessage('gravesFeedbackMessage', 'Select at least one element to find strong matches.', 'accent');
             return;
         }
 

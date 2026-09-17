@@ -28,11 +28,9 @@
     }
 
     function getRequiredElementCount(targetScore) {
-        if (targetScore >= 9) return 9;
-        if (targetScore === 8) return 8;  // reaches cap 8
-        if (targetScore === 7) return 7;  // reaches cap 8 (safe)
-        if (targetScore === 6) return 5;  // reaches cap 6
-        return 4;                         // below the slider minimum
+        if (targetScore >= 10) return 9;
+        if (targetScore >= 6) return targetScore - 1;
+        return 5;
     }
 
     function setupGeneratorControls() {

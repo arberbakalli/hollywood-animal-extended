@@ -78,10 +78,26 @@ test.describe('Script Lab — generator', () => {
   test('TC01-000006 raising the target movie score updates the required-elements hint', async ({ steps }) => {
     await steps.on('requiredTagsHint', 'ScriptLab').verifyTextContains('~5');
 
-    await steps.setSliderValue('movieScoreSlider', 'ScriptLab', 8);
+    await steps.setSliderValue('movieScoreSlider', 'ScriptLab', 9);
 
-    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('8');
+    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('9');
     await steps.on('requiredTagsHint', 'ScriptLab').verifyTextContains('~8');
+  });
+
+  test('TC01-000016 target movie score maps to the correct story-element hint', async ({ steps }) => {
+    const expectedCounts = [
+      [6, '~5'],
+      [7, '~6'],
+      [8, '~7'],
+      [9, '~8'],
+      [10, '~9'],
+    ];
+
+    for (const [score, expectedHint] of expectedCounts) {
+      await steps.setSliderValue('movieScoreSlider', 'ScriptLab', score);
+      await steps.expect('movieScoreInput', 'ScriptLab').value.toBe(String(score));
+      await steps.on('requiredTagsHint', 'ScriptLab').verifyTextContains(expectedHint);
+    }
   });
 
   // Given the excluded-elements section is open
@@ -96,6 +112,14 @@ test.describe('Script Lab — generator', () => {
     });
 
     await steps.on('excludedCountBadge', 'ScriptLab').verifyText('1');
+  });
+
+  test('TC01-000017 excluded counter uses readable black text on the danger badge', async ({ page }) => {
+    const color = await page.locator('#excluded-count').evaluate(element =>
+      getComputedStyle(element).color
+    );
+
+    expect(color).toBe('rgb(0, 0, 0)');
   });
 
   // Given a tag has been banned
@@ -189,8 +213,8 @@ test.describe('Script Lab — generator', () => {
     await steps.expect('lockedGenreSelect', 'ScriptLab')
       .attributes.get('id').toBe('tag-selector-row-generator-genre-1-select');
 
-    await steps.expect('supportingCharacterSelect', 'ScriptEvaluation')
-      .attributes.get('id').toBe('tag-selector-row-synergy-supporting-character-1-select');
+    await steps.expect('supportingCharacterSelect', 'ColmanGraves')
+      .attributes.get('id').toBe('tag-selector-row-graves-supporting-character-1-select');
   });
 
   // Negative control for the generation test above: with the results section

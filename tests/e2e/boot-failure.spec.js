@@ -30,7 +30,7 @@ test.describe('Start-up failure', () => {
     await steps.verifyWindowProperty('__hollywoodReady', { truthy: true });
     await steps.on('bootError', 'Navigation').verifyState('hidden');
     await steps.on('evaluateTab', 'Navigation').click();
-    await steps.on('genreSelect', 'ScriptEvaluation').verifyState('visible');
+    await steps.on('genreSelect', 'ColmanGraves').verifyState('visible');
   });
 
   test('TC07-000003 a healthy load shows no failure banner', async ({ steps }) => {

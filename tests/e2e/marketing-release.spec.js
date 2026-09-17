@@ -210,16 +210,14 @@ test.describe('Marketing and Release — Build for Target', () => {
     await steps.on('resultsPanel', 'BuildForTarget').verifyState('hidden');
   });
 
-  // Given no audience and no advertiser is chosen
+  // Given neither an audience nor an advertiser is chosen
   // When the user searches for combinations
-  // Then the app explains what is missing instead of failing silently
-  test('TC05-000002 searching with no audience or advertiser explains what is missing', async ({ steps }) => {
+  // Then every agency is in scope and combinations are still produced
+  test('TC05-000002 searching with no audience or advertiser ranks against every agency', async ({ steps }) => {
     await steps.on('findCombinationsButton', 'BuildForTarget').click();
 
-    await steps.on('feedbackMessage', 'BuildForTarget').verifyState('visible');
-    await steps.on('feedbackMessage', 'BuildForTarget')
-      .verifyTextContains('at least one audience or advertiser');
-    await steps.on('resultsPanel', 'BuildForTarget').verifyState('hidden');
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+    await steps.on('resultsList', 'BuildForTarget').verifyText();
   });
 
   // Given an audience is chosen
@@ -247,7 +245,10 @@ test.describe('Marketing and Release — Build for Target', () => {
     await steps.on('resultsList', 'BuildForTarget').verifyTextContains('Sidekick');
   });
 
-  test('TC05-000005 more than six optional tags is refused with the selected count', async ({ steps }) => {
+  // Regression: one pick per category used to be refused, because Genre and
+  // Setting were counted against the story element budget. They are structural
+  // picks every script carries, so seven selections is only five story elements.
+  test('TC05-000005 one pick per category is accepted, not refused', async ({ steps }) => {
     await steps.on('audienceCheckboxes', 'BuildForTarget').first().check();
     for (const select of [
       'genreSelect',
@@ -263,9 +264,8 @@ test.describe('Marketing and Release — Build for Target', () => {
 
     await steps.on('findCombinationsButton', 'BuildForTarget').click();
 
-    await steps.on('feedbackMessage', 'BuildForTarget').verifyTextContains('Pick 6 or fewer optional tags');
-    await steps.on('feedbackMessage', 'BuildForTarget').verifyTextContains('You selected 7');
-    await steps.on('resultsPanel', 'BuildForTarget').verifyState('hidden');
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+    await steps.on('resultsList', 'BuildForTarget').verifyText();
   });
 
   test('TC05-000006 selecting an advertiser targets that agency directly', async ({ steps, page }) => {

@@ -54,7 +54,7 @@ describe('HTML structure', () => {
             'app-shell',
             'primary-tabs',
             'tab-generator-button',
-            'tab-synergy-button',
+            'tab-evaluate-button',
             'tab-advertisers-button',
             'marketing-mode-advertisers-button',
             'marketing-mode-targeted-button',
@@ -69,12 +69,6 @@ describe('HTML structure', () => {
             'generateScriptsButton',
             'pinned-scripts-container',
             'results-generator',
-            'synergy-search-panel',
-            'synergy-builder-panel',
-            'selectors-container-synergy',
-            'calculateSynergyButton',
-            'results-synergy',
-            'synergy-conflicts-panel',
             'graves-search-panel',
             'graves-builder-panel',
             'selectors-container-graves',
@@ -82,6 +76,15 @@ describe('HTML structure', () => {
             'evaluateGravesButton',
             'generateBestMatchesButton',
             'results-graves',
+            'graves-summary-row',
+            'gravesAverageDisplay',
+            'graves-breakdown-panel',
+            'gravesBreakdownBaseScore',
+            'gravesBreakdownComBonus',
+            'gravesBreakdownArtBonus',
+            'gravesTotalComScore',
+            'gravesTotalArtScore',
+            'gravesScoreCapLabel',
             'graves-best-matches-panel',
             'gravesBestMatchesList',
             'advertisers-search-panel',
@@ -95,36 +98,34 @@ describe('HTML structure', () => {
         requiredIds.forEach(id => expect(ids.has(id)).toBe(true));
     });
 
-    test('keeps the Compatibility Numbers score breakdown available as a reusable source panel', async () => {
+    test('keeps the compatibility score breakdown available through Colman Graves', async () => {
         const html = await readProjectFile('index.html');
         const ids = new Set(getIds(html));
 
         [
-            'results-synergy',
-            'synergy-summary-row',
-            'synergy-average-card',
-            'synergyAverageDisplay',
-            'synergy-total-card',
-            'synergyTotalDisplay',
-            'synergy-breakdown-panel',
-            'breakdownBaseScore',
-            'breakdownComBonus',
-            'breakdownArtBonus',
-            'totalComScore',
-            'totalArtScore',
-            'scoreCapLabel',
-            'synergy-conflicts-panel',
-            'spoilerDisplay',
-            'transferTagsButton'
+            'results-graves',
+            'graves-summary-row',
+            'graves-average-card',
+            'gravesAverageDisplay',
+            'graves-breakdown-panel',
+            'gravesBreakdownBaseScore',
+            'gravesBreakdownComBonus',
+            'gravesBreakdownArtBonus',
+            'gravesTotalComScore',
+            'gravesTotalArtScore',
+            'gravesScoreCapLabel',
+            'graves-conflicts-panel',
+            'gravesConflictDisplay',
+            'transferGravesTagsButton'
         ].forEach(id => expect(ids.has(id)).toBe(true));
 
         [
-            'Average Compatibility',
+            'Average Fit',
             'Script Synergy',
-            'Bonuses',
+            'Compatibility Breakdown',
             'Commercial Bonus:',
             'Artistic Bonus:',
-            'Potential Movie Score',
+            'Movie Score',
             'Commercial Movie Score:',
             'Artistic Movie Score:',
             'Max Score Capped'

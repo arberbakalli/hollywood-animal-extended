@@ -2,7 +2,6 @@
     "use strict";
 
     const SAVED_SCRIPT_SOURCE = {
-        synergy: 'Compatibility',
         graves: 'Graves',
         advertisers: 'Marketing'
     };

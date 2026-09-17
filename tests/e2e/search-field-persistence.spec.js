@@ -13,14 +13,14 @@ test.describe('Search Field Persistence Bug', () => {
     // Finalize has "Protagonist Dies Heroically" and other items.
     // User expects to search and filter while the search field remains visible.
 
-    // Navigate to a context where Finale appears with search (typically synergy context)
+    // Navigate to a context where Finale appears with search (typically Graves context)
     await steps.on('evaluateTab', 'Navigation').click();
 
     // Wait for the panel to load
-    await steps.on('panel', 'ScriptEvaluation').verifyState('visible');
+    await steps.on('panel', 'ColmanGraves').verifyState('visible');
 
     // Find the Finale search input (if Finale has > 5 items, search should exist)
-    const searchInputSelector = '#search-finale-synergy-input';
+    const searchInputSelector = '#search-finale-graves-input';
     const searchInput = page.locator(searchInputSelector);
 
     // Verify search input is initially visible
@@ -54,9 +54,11 @@ test.describe('Search Field Persistence Bug', () => {
 
     await steps.on('buildTab', 'Navigation').click();
 
-    // Open the excluded section (multi-select, always shows search for large categories)
+    // Ensure the excluded section is open (multi-select, always shows search for large categories)
     const excludedToggle = page.locator('#toggleExcludedElementsButton');
-    await excludedToggle.click();
+    if (!await page.locator('#excluded-content').isVisible()) {
+      await excludedToggle.click();
+    }
 
     // Wait for excluded content to show
     await page.locator('#excluded-content').waitFor({ state: 'visible' });
@@ -80,10 +82,10 @@ test.describe('Search Field Persistence Bug', () => {
     // so user can modify their search or clear it
 
     await steps.on('evaluateTab', 'Navigation').click();
-    await steps.on('panel', 'ScriptEvaluation').verifyState('visible');
+    await steps.on('panel', 'ColmanGraves').verifyState('visible');
 
     // Type in a search with something unlikely to match
-    const searchInput = page.locator('#search-finale-synergy-input');
+    const searchInput = page.locator('#search-finale-graves-input');
     await searchInput.focus();
     await searchInput.type('xyzabc123notaword');
 
@@ -91,7 +93,7 @@ test.describe('Search Field Persistence Bug', () => {
     await expect(searchInput).toBeVisible({ timeout: 5000 });
 
     // The wrapper containing the search input should also be visible
-    const searchWrapper = page.locator('#search-finale-synergy-wrapper');
+    const searchWrapper = page.locator('#search-finale-graves-wrapper');
     await expect(searchWrapper).toBeVisible({ timeout: 5000 });
   });
 });

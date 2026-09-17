@@ -8,7 +8,6 @@
 
     const SCRIPT_BUILDER_CONTEXTS = new Set([
         'generator',
-        'synergy',
         'graves',
         'advertisers',
         'targeted'
@@ -127,7 +126,7 @@
             label.innerText = category;
             header.appendChild(label);
 
-            // Add search input for large categories (>5 items) in generator/synergy/excluded contexts
+            // Add search input for large categories (>5 items) in script-building contexts.
             if (tagsInCategory.length > 5) {
                 const searchWrapper = document.createElement('div');
                 searchWrapper.className = 'category-search-wrapper';
@@ -261,7 +260,7 @@
         const container = document.getElementById(containerId);
         if (!container) return;
 
-        // Logic for Single-select categories in 'synergy' or 'generator' (locked) context
+        // Logic for single-select categories in script-building contexts.
         if (context !== 'excluded' && !MULTI_SELECT_CATEGORIES.includes(category) && container.children.length > 0) {
             const select = container.querySelector('select');
             if (selectedId) select.value = selectedId;
@@ -333,7 +332,7 @@
         // Initial refresh to disable already-selected options
         setTimeout(() => refreshCategoryDropdowns(category, context), 0);
 
-        // Add percent slider only for Genre in Synergy/Advertisers (not Excluded or simple Lock)
+        // Add percent slider only for Genre in script builders (not Excluded).
         if (category === 'Genre' && context !== 'excluded') {
             const percentWrapper = document.createElement('div');
             percentWrapper.className = 'genre-percent-wrapper hidden';
