@@ -69,12 +69,22 @@
     // Audience demand per week, in screenings, before any theatre capacity is
     // considered. The extracted game-file grid uses Commercial only: week 1 is
     // score * 2 * 1000, week 2 is score * 1 * 1000, then each later week keeps
-    // 80% of the previous week (or 85% if Behemoth policy active and score > 9).
-    function weeklyDemand(commercialScore) {
+    // 80% of the previous week (or slower, if a studio policy qualifies).
+    //
+    // Pure: every modifier arrives as an argument, so the curve can be tested
+    // without a DOM. weeklyDemand() below supplies the live UI state.
+    function weeklyDemandFor(commercialScore, options = {}) {
         const config = distributionConfig();
-        const decay = getDecayRate(commercialScore, getArtisticScore());
-        const openingViewerMultiplier = getDistributionMultiplier();
-        const behemothWeekOne = isBehemothActive() ? BEHEMOTH_WEEK_ONE_BOOST : 1;
+        const behemoth = Boolean(options.behemoth);
+        const boutique = Boolean(options.boutique);
+        const artisticScore = options.artisticScore || 0;
+        const openingMultiplier = options.openingMultiplier || 1;
+        const holidayBonusPercent = options.holidayBonusPercent || 0;
+
+        const decay = resolveDecayRate(commercialScore, artisticScore, behemoth, boutique);
+        // Both week-one effects multiply the same slot: Behemoth's flat 25% and
+        // the holiday's audience-dependent turnout bonus.
+        const weekOneBoost = (behemoth ? BEHEMOTH_WEEK_ONE_BOOST : 1) * (1 + holidayBonusPercent / 100);
 
         const demand = [
             commercialScore * config.weekOneMultiplier * config.base,
@@ -86,10 +96,19 @@
 
         return demand.map((value, index) => {
             const inOpeningWindow = index < config.openingWindow;
-            let boosted = inOpeningWindow ? value * openingViewerMultiplier : value;
-            // Behemoth adds 25% to week 1 only
-            if (index === 0) boosted *= behemothWeekOne;
+            let boosted = inOpeningWindow ? value * openingMultiplier : value;
+            if (index === 0) boosted *= weekOneBoost;
             return inOpeningWindow ? Math.ceil(boosted) : Math.floor(boosted);
+        });
+    }
+
+    function weeklyDemand(commercialScore) {
+        return weeklyDemandFor(commercialScore, {
+            behemoth: isBehemothActive(),
+            boutique: isBoutiqueActive(),
+            artisticScore: getArtisticScore(),
+            openingMultiplier: getDistributionMultiplier(),
+            holidayBonusPercent: getHolidayBonusPercent()
         });
     }
 
@@ -161,6 +180,28 @@
         return Boolean(document.getElementById('behemothToggle')?.checked);
     }
 
+    // The chosen release window, set from the Holiday Release panel. Null means
+    // no holiday was picked, which is the ordinary case.
+    let holidayRelease = null;
+
+    function setHolidayRelease(holiday) {
+        holidayRelease = holiday;
+        recalculateDistribution();
+    }
+
+    function clearHolidayRelease() {
+        holidayRelease = null;
+        recalculateDistribution();
+    }
+
+    function getHolidayRelease() {
+        return holidayRelease;
+    }
+
+    function getHolidayBonusPercent() {
+        return holidayRelease ? holidayRelease.bonusPercent : 0;
+    }
+
     function isBoutiqueActive() {
         return Boolean(document.getElementById('boutiqueToggle')?.checked);
     }
@@ -192,7 +233,12 @@
         recalculateDistribution,
         updateDistributionGrid,
         weeklyDemand,
+        weeklyDemandFor,
         weeklyDistribution,
+        setHolidayRelease,
+        clearHolidayRelease,
+        getHolidayRelease,
+        getHolidayBonusPercent,
         distributionConfig,
         initializeDistributionToggles,
         getDistributionMultiplier,

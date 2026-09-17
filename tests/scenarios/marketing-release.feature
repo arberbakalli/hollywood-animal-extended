@@ -28,6 +28,15 @@ Feature: Marketing and Release
     Then the commercial score input reads 8.0
     And the artistic score input reads 3.0
 
+  # [automated] Typing in the number fields is a separate interaction path from
+  # dragging the sliders and must drive the same state.
+  Scenario: Typing movie scores updates sliders and distribution
+    When the user types 7.5 into the commercial score field
+    And the user types 2.5 into the artistic score field
+    Then the commercial score slider reads 7.5
+    And the artistic score slider reads 2.5
+    And the distribution calculator reports a target commercial score of 7.5
+
   # [automated]
   Scenario: The distribution calculator follows the commercial score
     When the user sets the commercial score to 8.0
@@ -61,6 +70,30 @@ Feature: Marketing and Release
       | Striking Image   |
       | Artistic Ability |
 
+  # [automated] Behemoth has two separate effects: a week-one boost whenever it
+  # is active, plus slower decay only above commercial score 9.
+  Scenario: Behemoth applies its own distribution policy
+    When the user enables the Behemoth studio policy
+    Then week 1 demand increases
+    When the user raises the commercial score above 9
+    Then week 3 keeps more attendance than the normal grid
+
+  # [automated] Boutique is the artistic counterpart: it never changes week 1,
+  # and its slower decay is gated by artistic score above 9.
+  Scenario: Boutique slows later weeks only for highly artistic films
+    When the user sets the artistic score to 10
+    And the user enables the Boutique studio policy
+    Then week 1 demand is unchanged
+    And week 3 keeps more attendance than the normal grid
+
+  # [automated] Both studio policies can apply to the same film; they stack on
+  # the decay rate while leaving week 2 seeded directly from commercial score.
+  Scenario: Behemoth and Boutique decay policies stack
+    When the user sets both movie scores to 10
+    And the user enables the Behemoth and Boutique studio policies
+    Then week 2 remains seeded from the commercial score
+    And week 3 uses the stacked studio decay rate
+
   # [automated] Analyze control and results markup exist.
   Scenario: Analysing a script produces a marketing profile
     When the user selects story elements for the script
@@ -93,3 +126,36 @@ Feature: Marketing and Release
     Given the user has analysed a script
     When the user saves the script to the library
     Then the script appears in the Script Library
+
+  # ---------------------------------------------------------------------
+  # Holiday release window
+  # ---------------------------------------------------------------------
+
+  # [automated] Each holiday carries a per-demographic bonus (data.js:80). The
+  # figure shown is the mean across the film's primary audience, not the sum the
+  # ranking uses — a sum grows with how many demographics a film reaches, which
+  # is an ordering score rather than a turnout multiplier.
+  Scenario: Holiday rows show the turnout bonus for this film's audience
+    Given the user has analysed a script
+    Then each suggested holiday shows a week 1 bonus percentage
+
+  # [automated] Selecting a window feeds the distribution grid.
+  Scenario: Choosing a holiday lifts opening demand
+    Given the user has analysed a script
+    When the user selects a holiday release window
+    Then week 1 demand rises by that holiday's bonus
+    And week 2 is unchanged
+
+  # [automated] Selecting the active window again is the only route back.
+  Scenario: Deselecting a holiday restores the base curve
+    Given the user has selected a holiday release window
+    When the user selects that same holiday again
+    Then the distribution grid returns to its unboosted figures
+
+  # [unverified] ASSUMPTION, not traced to any extracted file: the holiday bonus
+  # is applied to week 1 alone. Release timing plausibly moves the opening rather
+  # than the whole run, but nothing in the game data states this. Confirm against
+  # a real release before trusting the later weeks.
+  Scenario: The holiday bonus affects only the opening week
+    Given the user has selected a holiday release window
+    Then weeks 3 through 8 match their unboosted figures

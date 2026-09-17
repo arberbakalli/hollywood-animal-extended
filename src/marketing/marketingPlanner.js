@@ -165,6 +165,7 @@
                 return {
                     name: h.name,
                     totalScore: totalScore,
+                    bonusPercent: holidayBonusFor(h, primaryTargets),
                     contextText: contextText
                 };
             });
@@ -180,15 +181,7 @@
                 bestHeader.innerText = "Best Option";
                 holidayContainer.appendChild(bestHeader);
 
-                const bestRow = document.createElement('div');
-                bestRow.className = 'holiday-row best';
-                bestRow.innerHTML = `
-                    <div class="hol-left">
-                        <span class="hol-name">${best.name}</span>
-                        <span class="hol-target">${best.contextText}</span>
-                    </div>
-                `;
-                holidayContainer.appendChild(bestRow);
+                holidayContainer.appendChild(buildHolidayRow(best, 'holiday-row best'));
 
                 const alternatives = viableHolidays.slice(1, 4);
                 if(alternatives.length > 0) {
@@ -198,15 +191,7 @@
                     holidayContainer.appendChild(altHeader);
 
                     alternatives.forEach(alt => {
-                        const row = document.createElement('div');
-                        row.className = 'holiday-row';
-                        row.innerHTML = `
-                            <div class="hol-left">
-                                <span class="hol-name">${alt.name}</span>
-                                <span class="hol-target">${alt.contextText}</span>
-                            </div>
-                        `;
-                        holidayContainer.appendChild(row);
+                        holidayContainer.appendChild(buildHolidayRow(alt, 'holiday-row'));
                     });
                 }
             }
@@ -291,8 +276,69 @@
         container.innerHTML = `<div class="advertiser-recommendation">${sections.join('')}</div>`;
     }
 
+    // Picking a release window feeds the distribution grid, so the rows are
+    // buttons rather than static text. Selecting the active one clears it, which
+    // is the only way back to no holiday.
+    function buildHolidayRow(holiday, className) {
+        const active = HACDistributionPlanner.getHolidayRelease();
+        const isActive = Boolean(active && active.name === holiday.name);
+
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = `${className} holiday-row-selectable${isActive ? ' is-selected' : ''}`;
+        row.dataset.holiday = holiday.name;
+        row.setAttribute('aria-pressed', String(isActive));
+        row.innerHTML = `
+            <div class="hol-left">
+                <span class="hol-name">${holiday.name}</span>
+                <span class="hol-target">${holiday.contextText}</span>
+            </div>
+            <span class="hol-boost">+${holiday.bonusPercent.toFixed(1)}% week 1</span>
+        `;
+
+        row.addEventListener('click', () => {
+            const active = HACDistributionPlanner.getHolidayRelease();
+
+            if (active && active.name === holiday.name) {
+                HACDistributionPlanner.clearHolidayRelease();
+            } else {
+                HACDistributionPlanner.setHolidayRelease({
+                    name: holiday.name,
+                    bonusPercent: holiday.bonusPercent
+                });
+            }
+
+            syncHolidayRowStates();
+        });
+
+        return row;
+    }
+
+    function syncHolidayRowStates() {
+        const active = HACDistributionPlanner.getHolidayRelease();
+
+        document.querySelectorAll('.holiday-row-selectable').forEach(row => {
+            const selected = Boolean(active && active.name === row.dataset.holiday);
+            row.classList.toggle('is-selected', selected);
+            row.setAttribute('aria-pressed', String(selected));
+        });
+    }
+
+    // Each holiday carries a per-demographic bonus percentage. The ranked list
+    // above sums them, which is fine for ordering but grows with how many
+    // demographics a film happens to reach. For a turnout multiplier the mean is
+    // the honest figure: "your audience turns out N% harder".
+    function holidayBonusFor(holiday, targetIds) {
+        if (!holiday || !holiday.bonuses || !targetIds || targetIds.length === 0) return 0;
+
+        const total = targetIds.reduce((sum, id) => sum + (holiday.bonuses[id] || 0), 0);
+        return total / targetIds.length;
+    }
+
     global.HACMarketingPlanner = {
         analyzeMovie,
-        displayAdvertiserRecommendations
+        displayAdvertiserRecommendations,
+        holidayBonusFor,
+        syncHolidayRowStates
     };
 })(globalThis);

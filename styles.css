@@ -2942,3 +2942,40 @@ option[data-selected-elsewhere="true"] {
     border-color: color-mix(in srgb, var(--tag-color) 65%, transparent);
     background: color-mix(in srgb, var(--tag-color) 18%, transparent);
 }
+
+/* Holiday rows double as the release-window picker, so they need button reset
+   and a selected state. The boost figure is what the distribution grid applies. */
+.holiday-row-selectable {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.holiday-row-selectable:hover {
+    border-color: rgba(212, 175, 55, 0.45);
+}
+
+.holiday-row-selectable.is-selected {
+    border-color: #d4af37;
+    background-color: rgba(212, 175, 55, 0.12);
+}
+
+.holiday-row-selectable .hol-boost {
+    flex-shrink: 0;
+    font-size: 0.82em;
+    color: #d4af37;
+    opacity: 0.75;
+}
+
+.holiday-row-selectable.is-selected .hol-boost {
+    opacity: 1;
+}
