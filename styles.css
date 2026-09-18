@@ -403,7 +403,6 @@ h3 {
 .generator-required-tags,
 .text-accent { color: var(--accent); }
 .text-main { color: #fff; }
-.danger-heading { color: var(--danger); }
 .empty-state {
     color: #666;
     font-size: 0.95rem;
@@ -415,7 +414,6 @@ h3 {
     font-size: 0.9rem;
     padding: 10px 0;
 }
-.accent-empty { color: var(--accent); }
 
 #selectors-container-advertisers,
 #selectors-container-generator,
@@ -1084,23 +1082,6 @@ input[type="text"] {
     flex-direction: column;
     gap: 15px;
 }
-.advertiser-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-.advertiser-row:last-child { border-bottom: none; }
-.advertiser-name { font-weight: 600; font-size: 1rem; color: #fff; }
-.advertiser-type {
-    font-size: 0.75rem;
-    background: rgba(255,255,255,0.1);
-    padding: 4px 8px;
-    border-radius: 4px;
-    color: #aaa;
-    text-transform: uppercase;
-}
 .list-subtitle {
     font-size: 0.75rem;
     color: var(--text-muted);
@@ -1515,17 +1496,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     flex-wrap: wrap;
 }
 
-.toggle-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-}
-
-.toggle-text {
-    font-size: 0.9rem;
-}
-
 .targeted-selection-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1871,86 +1841,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     transform: translateY(1px);
 }
 
-/* ========================================= */
-/* --- EXCLUSION UI (Stage 3) --- */
-/* ========================================= */
-
-.excl-search-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.excl-search-wrap {
-    position: relative;
-    flex: 1;
-}
-
-.excl-search-input,
-.excl-filter-input {
-    width: 100%;
-    padding: 8px 12px;
-    background: var(--bg-input, #1a1a2e);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text-main);
-    font-size: 0.9rem;
-    box-sizing: border-box;
-}
-
-.excl-search-input:focus,
-.excl-filter-input:focus {
-    outline: none;
-    border-color: var(--danger);
-}
-
-.excl-badge {
-    flex-shrink: 0;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--danger);
-    white-space: nowrap;
-    min-width: 60px;
-    text-align: right;
-}
-
-.excl-filter-row {
-    display: flex;
-    margin-bottom: 8px;
-}
-
-.excl-filter-row.hidden {
-    display: none;
-}
-
-.excl-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--border);
-}
-
-.excl-tag-name {
-    flex: 1;
-    font-size: 0.9rem;
-    color: var(--text-main);
-}
-
-.excl-tag-cat {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-right: 4px;
-}
-
-.excl-empty {
-    padding: 16px 8px;
-    color: var(--text-muted);
-    font-style: italic;
-    font-size: 0.88rem;
-}
-
 /* Category search for excluded elements */
 .category-search-wrapper {
     flex: 1;
@@ -1990,65 +1880,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
 }
 
-/* Dropdown search wrapper (for locked elements) */
-.dropdown-search-wrap {
-    margin-bottom: 8px;
-    width: 100%;
-}
-
-.dropdown-search-input {
-    width: 100%;
-    padding: 6px 10px;
-    background: var(--bg-input, #1a1a2e);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--text-main);
-    font-size: 0.8rem;
-    box-sizing: border-box;
-}
-
-.dropdown-search-input::placeholder {
-    color: var(--text-muted);
-    font-size: 0.75rem;
-}
-
-.dropdown-search-input:focus {
-    outline: none;
-    border-color: var(--accent);
-}
-
-/* Sort controls for excluded list */
-.excl-sort-controls {
-    display: flex;
-    gap: 4px;
-    margin-left: auto;
-}
-
-.sort-btn {
-    padding: 4px 8px;
-    background: var(--bg-input, #1a1a2e);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--text-main);
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
-    white-space: nowrap;
-}
-
-.sort-btn:hover {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: #000;
-}
-
-.sort-btn.active {
-    background: var(--accent);
-    color: #000;
-    border-color: var(--accent);
-    font-weight: 600;
-}
-
 .week-box.active-week {
     border-color: rgba(212, 175, 55, 0.3);
 }
@@ -2056,145 +1887,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .percent-unit {
     color: #888;
     font-size: 0.8rem;
-}
-
-/* GRAVES EVALUATION TAB */
-.graves-card {
-    background: linear-gradient(135deg, #2a2415 0%, #1e1e1e 100%);
-    border: 2px solid var(--accent);
-}
-
-.graves-verdict-area {
-    padding: 1.5rem;
-}
-
-.graves-verdict {
-    background: rgba(212, 175, 55, 0.1);
-    border-left: 4px solid var(--accent);
-    padding: 1rem;
-    border-radius: 4px;
-}
-
-.verdict-score {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.verdict-label {
-    color: var(--text-muted);
-}
-
-.verdict-value {
-    color: var(--accent);
-    font-weight: bold;
-    font-size: 1.3rem;
-}
-
-.verdict-quote {
-    font-style: italic;
-    color: var(--text-muted);
-    margin: 1rem 0;
-    padding: 0.5rem 0;
-    border-top: 1px solid rgba(212, 175, 55, 0.2);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.verdict-status {
-    margin-top: 1rem;
-    padding: 0.5rem;
-    border-radius: 4px;
-    font-weight: 500;
-}
-
-.verdict-status.success {
-    background: rgba(76, 217, 100, 0.2);
-    color: var(--success);
-}
-
-.verdict-status.moderate {
-    background: rgba(255, 159, 10, 0.2);
-    color: var(--moderate);
-}
-
-.verdict-status.danger {
-    background: rgba(255, 95, 95, 0.2);
-    color: var(--danger);
-}
-
-.graves-suggestions-card {
-    margin-top: 1.5rem;
-    background: linear-gradient(135deg, #1e2415 0%, #1e1e1e 100%);
-    border: 2px solid var(--success);
-}
-
-#suggestPerfectScripts {
-    width: 100%;
-}
-
-.graves-results-section {
-    margin-bottom: 1.5rem;
-}
-
-.graves-section-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.75rem;
-    padding: 0.5rem 0;
-}
-
-.graves-section-title.successful {
-    color: var(--success);
-}
-
-.graves-section-title.common {
-    color: var(--moderate);
-}
-
-.graves-section-title.unsuccessful {
-    color: var(--danger);
-}
-
-.graves-combinations {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.graves-combo {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.graves-combo-tags {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    flex: 1;
-}
-
-.graves-combo-tag {
-    background: var(--accent);
-    color: var(--bg-color);
-    padding: 0.35rem 0.6rem;
-    border-radius: 3px;
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.graves-combo-score {
-    font-weight: 600;
-    min-width: 3rem;
-    text-align: right;
 }
 
 .best-matches-btn {

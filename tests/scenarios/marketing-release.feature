@@ -1,5 +1,6 @@
 # Status key:
-#   [automated]  covered by an e2e spec
+#   [automated]  covered by Marketing specs, including tests/e2e/marketing-release.spec.js,
+#                tests/e2e/distribution-max-score.spec.js and tests/e2e/distribution-behemoth.spec.js
 #   [verified]   behaviour or markup confirmed against the app, not yet automated
 #   [unverified] plausible but NOT yet confirmed — do not automate until watched
 #

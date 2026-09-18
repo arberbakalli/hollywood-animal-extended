@@ -1,5 +1,6 @@
 # Status key:
-#   [automated]  covered by tests/e2e/script-lab.spec.js
+#   [automated]  covered by Script Lab specs, including tests/e2e/script-lab.spec.js,
+#                tests/e2e/empty-state-navigation.spec.js and tests/e2e/search-field-persistence.spec.js
 #   [verified]   behaviour observed in the live app, not yet automated
 #   [unverified] plausible but NOT yet confirmed against the app — do not
 #                automate until someone has watched it happen

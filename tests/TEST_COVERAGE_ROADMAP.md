@@ -6,7 +6,7 @@ Comprehensive test strategy for Hollywood Animal calculator: Jest for logic/edge
 
 Current verified baseline as of 2026-09-18:
 
-- Jest/unit: 243 tests, 18 suites.
+- Jest/unit: 244 tests, 19 suites.
 - Playwright/E2E: 117 tests.
 - Scenario files: `tests/scenarios/*.feature` remain the BDD behavior map.
 
@@ -147,7 +147,7 @@ Current verified baseline as of 2026-09-18:
 
 | Area | Jest | Playwright | Total |
 |------|------|------------|-------|
-| Current green baseline | 243 | 117 | 360 |
+| Current green baseline | 244 | 117 | 361 |
 
 The phase notes above are historical planning notes. Use the current green
 baseline and `.arber/CODEX_QA_TEST_COVERAGE_AUDIT.md` for present coverage.

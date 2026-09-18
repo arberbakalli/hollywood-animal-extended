@@ -17,7 +17,7 @@ Date: 2026-09-18
 
 ## Verification Result
 
-- Unit/Jest: `243 passed`, `18 passed` suites.
+- Unit/Jest: `244 passed`, `19 passed` suites.
 - E2E/Playwright: `117 passed`.
 
 ## Coverage Added Or Confirmed
@@ -99,6 +99,9 @@ Date: 2026-09-18
   That prevents guessed behavior from becoming false source of truth.
 - Improved: E2E test IDs now have a unit guard. Duplicate leading IDs fail the
   Jest suite before they can make traceability ambiguous again.
+- Improved: BDD status markers now have a unit guard. Every scenario must keep
+  exactly one `[automated]`, `[verified]`, or `[unverified]` marker in the
+  scenario comment block.
 - Improved: E2E behavior from boot failure, genre mix, search persistence,
   maximum-score distribution, Behemoth UI, and empty-state navigation now has a
   named home in the feature files instead of living only in spec titles.

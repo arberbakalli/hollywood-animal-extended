@@ -1,5 +1,7 @@
 # Status key:
-#   [automated]  covered by tests/e2e/colman-graves.spec.js or tests/graves.test.js
+#   [automated]  covered by Colman Graves specs, including tests/e2e/colman-graves.spec.js,
+#                tests/e2e/genre-mix.spec.js, tests/e2e/search-field-persistence.spec.js
+#                and tests/graves.test.js
 #   [verified]   behaviour or markup confirmed against the app, not yet automated
 #   [unverified] plausible but NOT yet confirmed — do not automate until watched
 #
