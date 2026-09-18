@@ -50,8 +50,14 @@ Feature: Marketing and Release
     And the week 8 figure is lower than the week 1 figure
 
   # [automated] Extracted game-file formula: commercial only.
-  Scenario: Screening projections follow the extracted distribution grid
-    Then commercial score 5.0 produces 10000, 5000, 4000, 3200, 2560, 2048, 1638, and 1310 screenings
+  Scenario Outline: Screening projections follow the extracted distribution grid
+    When the user sets the commercial score to <score>
+    Then the screening projections are <week_1>, <week_2>, <week_3>, <week_4>, <week_5>, <week_6>, <week_7>, and <week_8>
+
+    Examples:
+      | score | week_1 | week_2 | week_3 | week_4 | week_5 | week_6 | week_7 | week_8 |
+      | 5.0   | 10000  | 5000   | 4000   | 3200   | 2560   | 2048   | 1638   | 1310   |
+      | 10.0  | 20000  | 10000  | 8000   | 6400   | 5120   | 4096   | 3277   | 2621   |
 
   # [automated] Owned Theatres input defaults to 3185.
   Scenario: Changing the number of owned theatres
@@ -77,6 +83,13 @@ Feature: Marketing and Release
     Then week 1 demand increases
     When the user raises the commercial score above 9
     Then week 3 keeps more attendance than the normal grid
+
+  # [automated] The control should explain that the week-one boost represents
+  # the Behemoth budget policy rather than a score-only rule.
+  Scenario: Behemoth control explains its budget requirement
+    Then the Behemoth policy toggle is visible
+    And its label mentions the budget over $1M requirement
+    And its tooltip explains the 25 percent week 1 boost
 
   # [automated] Boutique is the artistic counterpart: it never changes week 1,
   # and its slower decay is gated by artistic score above 9.
@@ -126,6 +139,13 @@ Feature: Marketing and Release
     Given the user has analysed a script
     When the user saves the script to the library
     Then the script appears in the Script Library
+
+  # [automated] Reset returns Analyze Script to a clean selection state.
+  Scenario: Resetting after analysis clears the marketing selection
+    Given the user has selected story elements
+    When the user resets
+    Then no Genre remains selected
+    And analysis results are hidden
 
   # ---------------------------------------------------------------------
   # Holiday release window

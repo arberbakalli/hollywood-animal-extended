@@ -7,13 +7,13 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
 
   test.describe('Empty State Rendering', () => {
     // When no selections are made, show empty state
-    test('TC06-001 generator shows empty state initially', async ({ steps }) => {
+    test('TC08-000001 generator shows empty state initially', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('generatedCards', 'ScriptLab').verifyCount({ exactly: 0 });
     });
 
     // Generate with no selections still produces a clear outcome.
-    test('TC06-002 generating with no tags produces script cards', async ({ steps }) => {
+    test('TC08-000002 generating with no tags produces script cards', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('generateButton', 'ScriptLab').click();
 
@@ -22,13 +22,13 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
     });
 
     // Results section hidden when empty
-    test('TC06-003 results section hidden when no scripts generated', async ({ steps }) => {
+    test('TC08-000003 results section hidden when no scripts generated', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('resultsSection', 'ScriptLab').verifyState('hidden');
     });
 
     // Graves is the single evaluation surface.
-    test('TC06-004 evaluate tab shows Colman Graves', async ({ steps }) => {
+    test('TC08-000004 evaluate tab shows Colman Graves', async ({ steps }) => {
       await steps.on('evaluateTab', 'Navigation').click();
 
       await steps.on('panel', 'ColmanGraves').verifyState('visible');
@@ -37,7 +37,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
 
   test.describe('State Across Tab Navigation', () => {
     // Switching tabs works correctly
-    test('TC06-005 can switch between Build and Evaluate tabs', async ({ steps }) => {
+    test('TC08-000005 can switch between Build and Evaluate tabs', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('panel', 'ScriptLab').verifyState('visible');
 
@@ -49,7 +49,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
     });
 
     // Locked section persists when toggled
-    test('TC06-006 locked section remains expandable after tab switch', async ({ steps }) => {
+    test('TC08-000006 locked section remains expandable after tab switch', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('lockedSectionToggle', 'ScriptLab').click();
       await steps.on('lockedContent', 'ScriptLab').verifyState('hidden');
@@ -62,7 +62,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
     });
 
     // Market tab navigation works
-    test('TC06-007 marketing tab remains accessible', async ({ steps }) => {
+    test('TC08-000007 marketing tab remains accessible', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('marketTab', 'Navigation').click();
       await steps.on('panel', 'MarketingRelease').verifyState('visible');
@@ -71,7 +71,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
 
   test.describe('Recovery and Reset Workflows', () => {
     // Reset clears state
-    test('TC06-008 reset button clears the generator state', async ({ steps }) => {
+    test('TC08-000008 reset button clears the generator state', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
 
       // Settings should have input elements
@@ -87,7 +87,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
     });
 
     // Generate produces some result or feedback
-    test('TC06-009 generate button produces output or feedback', async ({ steps }) => {
+    test('TC08-000009 generate button produces output or feedback', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('generateButton', 'ScriptLab').click();
 
@@ -98,7 +98,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
 
   test.describe('UI Responsiveness', () => {
     // Generating with no tags still leaves the UI responsive.
-    test('TC06-010 empty generation shows generated options', async ({ steps }) => {
+    test('TC08-000010 empty generation shows generated options', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('generateButton', 'ScriptLab').click();
 
@@ -107,7 +107,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
     });
 
     // UI remains responsive after rapid interactions
-    test('TC06-011 rapid tab switching remains responsive', async ({ steps }) => {
+    test('TC08-000011 rapid tab switching remains responsive', async ({ steps }) => {
       for (let i = 0; i < 2; i++) {
         await steps.on('buildTab', 'Navigation').click();
         await steps.on('evaluateTab', 'Navigation').click();

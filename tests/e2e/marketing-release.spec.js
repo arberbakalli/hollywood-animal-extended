@@ -250,7 +250,7 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await steps.on('campaignDuration', 'MarketingRelease').verifyTextContains('Total Duration');
   });
 
-  test('TC04-000011 saving an analysed script adds it to Script Library', async ({ steps }) => {
+  test('TC04-000017 saving an analysed script adds it to Script Library', async ({ steps }) => {
     await buildMarketingScript(steps);
     await steps.on('analyzeScriptButton', 'MarketingRelease').click();
     await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
@@ -264,7 +264,7 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await steps.on('pinnedCards', 'ScriptLab').verifyCount({ greaterThan: 0 });
   });
 
-  test('TC04-000012 resetting clears the marketing selection', async ({ steps }) => {
+  test('TC04-000018 resetting clears the marketing selection', async ({ steps }) => {
     await buildMarketingScript(steps);
     await steps.expect('genreSelect', 'MarketingRelease').value.not.toBe('');
 

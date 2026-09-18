@@ -26,6 +26,12 @@ Feature: Script Lab
     And at least one script card is listed
     And each card shows its story element chips
 
+  # [automated] Empty state should be explicit before the first generation run.
+  Scenario: Generated results start empty
+    Given the user has not generated scripts yet
+    Then no generated script cards are listed
+    And the generated results section is hidden
+
   # [automated]
   Scenario: The compatibility slider drives its paired number input
     When the user sets the target average compatibility slider to 5
@@ -140,6 +146,13 @@ Feature: Script Lab
     Then no locked Supporting Character remains selected
     And generated results are hidden
 
+  # [automated] A collapsed section should stay recoverable after tab navigation.
+  Scenario: Locked Elements remains expandable after tab switching
+    Given the user has collapsed the Locked Elements section
+    When the user opens Script Evaluation
+    And the user returns to Script Lab
+    Then the Locked Elements toggle is still visible
+
   # [automated] The "+" control adds another dropdown row per category and context.
   Scenario Outline: Adding a second selector row for the same category
     When the user adds another <row> row
@@ -159,6 +172,13 @@ Feature: Script Lab
       | search_box                    | option_type |
       | Supporting Character          | options     |
       | excluded Supporting Character | ban options |
+
+  # [automated] Search inputs should not disappear while filtering or when no
+  # option matches the search text.
+  Scenario: Excluded search stays visible while filtering
+    Given the Excluded Elements section is expanded
+    When the user searches excluded Genre options for "action"
+    Then the excluded Genre search field remains visible
 
   # [automated] The movie-score slider updates the required-elements hint.
   Scenario: Raising the target movie score changes the required element count

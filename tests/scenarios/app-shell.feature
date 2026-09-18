@@ -28,3 +28,26 @@ Feature: App Shell
     When the user selects German in the language selector
     Then the Supporting Character picker contains "Kumpan"
     And the Supporting Character picker still stores the Sidekick tag id
+
+  # [automated] Data-loading failure should be visible and recoverable.
+  Scenario: Start-up failure is reported instead of showing an empty app
+    Given the story element data fails to load
+    When the calculator starts
+    Then a boot failure message is shown
+    And the retry control is visible
+    And the app does not claim to be ready
+
+  # [automated] Retrying should rebuild the app once data becomes available.
+  Scenario: Retrying after a start-up failure recovers the app
+    Given the story element data failed to load
+    When data becomes available again
+    And the user retries start-up
+    Then the app becomes ready
+    And the boot failure message is hidden
+    And Colman Graves selectors are available
+
+  # [automated] Fast navigation should not leave tabs in a broken state.
+  Scenario: Rapid tab switching remains responsive
+    When the user switches between Build and Evaluate several times
+    Then the Build tab can still be opened
+    And the Script Lab panel is visible

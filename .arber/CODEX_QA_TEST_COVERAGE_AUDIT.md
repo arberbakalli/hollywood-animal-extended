@@ -1,6 +1,6 @@
 # Codex QA Test Coverage Audit
 
-Date: 2026-09-17
+Date: 2026-09-18
 
 ## Standard Used
 
@@ -17,7 +17,7 @@ Date: 2026-09-17
 
 ## Verification Result
 
-- Unit/Jest: `242 passed`, `17 passed` suites.
+- Unit/Jest: `243 passed`, `18 passed` suites.
 - E2E/Playwright: `117 passed`.
 
 ## Coverage Added Or Confirmed
@@ -97,6 +97,11 @@ Date: 2026-09-17
   trivia. They describe intent in owner language and point to real specs.
 - Strong: unverified assumptions are explicitly marked and were not automated.
   That prevents guessed behavior from becoming false source of truth.
+- Improved: E2E test IDs now have a unit guard. Duplicate leading IDs fail the
+  Jest suite before they can make traceability ambiguous again.
+- Improved: E2E behavior from boot failure, genre mix, search persistence,
+  maximum-score distribution, Behemoth UI, and empty-state navigation now has a
+  named home in the feature files instead of living only in spec titles.
 - Improved: missing scenarios were added for empty-library save, invalid
   library load, Script Lab generated-script transfers, Excluded Elements
   collapse/search/add-row behavior, Graves save/transfer behavior, Graves

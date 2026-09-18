@@ -22,6 +22,45 @@ Feature: Script Evaluation — Colman Graves
   Scenario: All seven story element categories are offered
     Then a picker is offered for each of the seven categories
 
+  # [automated] Only the categories the game allows to repeat should expose "+"
+  # controls. A broad "all categories" rule once broke genre mixing.
+  Scenario: Only repeatable categories accept multiple selections
+    Then Genre accepts multiple selections
+    And Supporting Character accepts multiple selections
+    And Theme & Event accepts multiple selections
+    And Setting does not accept multiple selections
+    And Protagonist does not accept multiple selections
+    And Antagonist does not accept multiple selections
+    And Finale does not accept multiple selections
+
+  # [automated] Genre mix is always a 100% allocation in five-point steps.
+  Scenario: Adding genres keeps the mix visible, stepped and balanced
+    Given only one Genre row is shown
+    Then that Genre owns 100 percent of the mix
+    When the user adds a second Genre row
+    Then the genre percentage controls are visible
+    And the two Genres split the mix evenly
+    When the user adds a third Genre row
+    Then the genre mix still totals 100 percent
+    And every Genre share is at least 5 percent
+    And every Genre share uses five-point steps
+
+  # [automated] Moving one Genre should rebalance the rest without breaking the
+  # 100% total or the 5% floor.
+  Scenario: Genre mix sliders preserve the total and minimum share
+    Given the user has two Genre rows
+    When the user raises the first Genre to 70 percent
+    Then the second Genre is lowered to 30 percent
+    When the user raises the first Genre beyond the available share
+    Then the first Genre is capped at 95 percent
+    And the second Genre keeps 5 percent
+
+  # [automated] Removed Genre rows must release their options for reuse.
+  Scenario: Removing Genre rows re-enables their options
+    Given several Genre rows are selected
+    When the user removes those Genre rows
+    Then the removed Genre options can be selected again
+
   # [automated]
   Scenario: Submitting a valid script produces a verdict and scores
     Given no results are shown
@@ -177,3 +216,13 @@ Feature: Script Evaluation — Colman Graves
     Given a script whose average fit is 4.2
     When the user evaluates the script
     Then the verdict reads "Success"
+
+  # [automated] Search fields must not disappear while the user is typing or
+  # after a search has no matches.
+  Scenario: Category search fields stay visible while filtering
+    Given the Colman Graves Finale search field is visible
+    When the user searches for "protagonist dies heroically"
+    Then the Finale search field remains visible
+    When the user searches for text with no matching Finale
+    Then the Finale search field remains visible
+    And the Finale search wrapper remains visible
