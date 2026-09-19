@@ -183,6 +183,9 @@
         { "elementName": "resultsSection", "selector": { "css": "#results-advertisers" } },
         { "elementName": "targetAudience", "selector": { "css": "#targetAudienceDisplay" } },
         { "elementName": "holidayRelease", "selector": { "css": "#holidayDisplay" } },
+        { "elementName": "holidayRows", "selector": { "css": "#holidayDisplay .holiday-row-selectable" } },
+        { "elementName": "holidayTopPick", "selector": { "css": "#holidayDisplay .holiday-row-selectable" } },
+        { "elementName": "holidayTopPickBoost", "selector": { "css": "#holidayDisplay .holiday-row-selectable .hol-boost" } },
         { "elementName": "movieLean", "selector": { "css": "#movieLeanDisplay" } },
         { "elementName": "recommendedAdvertisers", "selector": { "css": "#adAgentDisplay" } },
         { "elementName": "campaignDuration", "selector": { "css": "#campaignStrategyDisplay" } }

@@ -155,19 +155,25 @@ Feature: Marketing and Release
   # [automated] Each holiday carries a per-demographic bonus (data.js:80). The
   # figure shown is the mean across the film's primary audience, not the sum the
   # ranking uses — a sum grows with how many demographics a film reaches, which
-  # is an ordering score rather than a turnout multiplier.
+  # is an ordering score rather than a turnout multiplier. TC04-000019 reads the
+  # rendered percentage; the mean-not-sum rule itself is pinned by
+  # tests/holiday-release.test.js:35.
   Scenario: Holiday rows show the turnout bonus for this film's audience
     Given the user has analysed a script
     Then each suggested holiday shows a week 1 bonus percentage
 
-  # [automated] Selecting a window feeds the distribution grid.
+  # [automated] TC04-000019 selects the top holiday row and asserts week 1 rises
+  # by the percentage the row advertises while week 2 holds. Until that spec
+  # existed this was marked automated on the strength of a unit test that fed the
+  # bonus straight into the planner, so an unwired row would not have failed.
   Scenario: Choosing a holiday lifts opening demand
     Given the user has analysed a script
     When the user selects a holiday release window
     Then week 1 demand rises by that holiday's bonus
     And week 2 is unchanged
 
-  # [automated] Selecting the active window again is the only route back.
+  # [automated] TC04-000020. Selecting the active window again is the only route
+  # back, and nothing asserted that path before that spec.
   Scenario: Deselecting a holiday restores the base curve
     Given the user has selected a holiday release window
     When the user selects that same holiday again

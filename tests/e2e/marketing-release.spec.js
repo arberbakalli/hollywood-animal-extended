@@ -250,6 +250,63 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await steps.on('campaignDuration', 'MarketingRelease').verifyTextContains('Total Duration');
   });
 
+  // The holiday rows only render once a script has been analysed. These drive the
+  // real control; the suite previously asserted only that the holiday panel was
+  // non-empty, so an unwired row went unnoticed. Verified by mutation: removing
+  // the holiday term from weekOneBoost fails both of these.
+  //
+  // LIMIT, stated so nobody reads more into these than they prove: the expected
+  // rise is derived from the percentage the row itself advertises, so these check
+  // that the label and the grid AGREE, not that the figure is right. A regression
+  // from the mean to the sum moves both together and passes — confirmed by
+  // mutation. Pinning the mean needs a fixture with a known audience, and
+  // holidayBonusFor's mean-not-sum rule is covered at unit level in
+  // tests/holiday-release.test.js:35.
+  test('TC04-000019 selecting a holiday lifts week one by the bonus it advertises', async ({ steps }) => {
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
+    await buildMarketingScript(steps);
+    await steps.on('analyzeScriptButton', 'MarketingRelease').click();
+    await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
+
+    // Label reads "+18.5% week 1" — take only the figure before the %, or the
+    // trailing week number joins the percentage and skews the expectation.
+    const boostLabel = await steps.on('holidayTopPickBoost', 'MarketingRelease').getText();
+    const bonusPercent = Number(boostLabel.match(/([\d.]+)\s*%/)[1]);
+    expect(bonusPercent).toBeGreaterThan(0);
+
+    const weekTwoDemand = async () => Number((await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    }))[1]);
+
+    const week1Before = await attr(steps, 'weekOneCard', 'data-demand');
+    const week2Before = await weekTwoDemand();
+
+    await steps.on('holidayTopPick', 'MarketingRelease').click();
+
+    await expect.poll(async () => attr(steps, 'weekOneCard', 'data-demand'))
+      .toBe(Math.ceil(week1Before * (1 + bonusPercent / 100)));
+    // Week 2 is seeded from the commercial score and must never move.
+    expect(await weekTwoDemand()).toBe(week2Before);
+  });
+
+  test('TC04-000020 selecting the active holiday again restores the base curve', async ({ steps }) => {
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
+    await buildMarketingScript(steps);
+    await steps.on('analyzeScriptButton', 'MarketingRelease').click();
+    await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
+
+    const week1Base = await attr(steps, 'weekOneCard', 'data-demand');
+
+    await steps.on('holidayTopPick', 'MarketingRelease').click();
+    await expect.poll(async () => attr(steps, 'weekOneCard', 'data-demand'))
+      .toBeGreaterThan(week1Base);
+
+    await steps.on('holidayTopPick', 'MarketingRelease').click();
+
+    await expect.poll(async () => attr(steps, 'weekOneCard', 'data-demand'))
+      .toBe(week1Base);
+  });
+
   test('TC04-000017 saving an analysed script adds it to Script Library', async ({ steps }) => {
     await buildMarketingScript(steps);
     await steps.on('analyzeScriptButton', 'MarketingRelease').click();
