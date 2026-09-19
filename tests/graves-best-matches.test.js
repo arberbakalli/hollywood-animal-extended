@@ -1,93 +1,122 @@
+import { loadLegacyScript } from './helpers/legacyHarness.js';
+
 /**
- * Jest tests for Graves Best Matches feature
- * Covers unlimited result display, mode switching, and exclusion logic
+ * Best Matches paging and band ordering.
+ *
+ * COVERAGE PARITY NOTE — this file previously asserted an "infinite mode"
+ * contract (MAX_ROWS_PER_BAND = Infinity, "scrolling through unlimited
+ * suggestions"). That behaviour is genuinely gone from the product: commit
+ * c40ae34 replaced it with paging at 10 rows plus a Show more control. The two
+ * tests describing unlimited display therefore have no new home, and that is
+ * deliberate — the behaviour they described no longer ships.
+ *
+ * The three behaviours that DO still ship are re-homed here, and now run against
+ * the real module rather than local mock arithmetic:
+ *   - band ordering (successful before common before unsuccessful)
+ *   - the three analysis modes
+ *   - exclusions being shared with Script Lab
+ *
+ * Every test in the previous version asserted literals it declared two lines
+ * earlier — `Math.min(200, Infinity)`, `['additions'].toContain('additions')` —
+ * and never imported the module, so the whole file stayed green while the
+ * pagination it described was inverted underneath it.
  */
-
 describe('Graves Best Matches', () => {
-  // Mock setup: Best Matches uses global functions and GAME_DATA
-  beforeAll(() => {
-    global.GAME_DATA = {
-      tags: {
-        tag1: { id: 'tag1', name: 'Action', category: 'Genre' },
-        tag2: { id: 'tag2', name: 'Hero', category: 'Protagonist' },
-        tag3: { id: 'tag3', name: 'Villain', category: 'Antagonist' },
-        tag4: { id: 'tag4', name: 'Love', category: 'Theme Event' }
-      },
-      constants: {
-        DISTRIBUTION: {
-          multipliers: { BASE: 1000, WEEK_ONE: 2, WEEK_TWO: 1 },
-          weeklyCalculation: { NUMBER_OF_WEEKS: 8, REDUCTION_START_INDEX: 2 },
-          rounding: { ROUND_UP_UNTIL_INDEX: 4 }
-        }
-      }
-    };
-  });
+    let h;
 
-  describe('Result limits (infinite mode)', () => {
-    test('should show all results without MAX_ROWS_PER_BAND limit', () => {
-      // MAX_ROWS_PER_BAND should be Infinity to show all results
-      // Previously was 10, causing truncation
-      const mockResults = Array(50).fill(null).map((_, i) => ({
-        candidate: { id: `tag${i}`, name: `Candidate ${i}`, category: 'Genre' },
-        band: 'common',
-        fitAverage: 3.0
-      }));
+    const paginate = (rows, limit) =>
+        h.call('HACGravesBestMatches.paginateRows', rows, limit);
 
-      // Simulate groupedMarkup behavior
-      const MAX_ROWS_PER_BAND = Infinity;
-      const banded = mockResults.slice(0, MAX_ROWS_PER_BAND);
-
-      expect(banded.length).toBe(50);
+    const row = (band, name) => ({
+        band,
+        candidate: { id: name, name, category: 'Genre' },
+        fitAverage: band === 'successful' ? 4.5 : band === 'common' ? 3.2 : 2.0
     });
 
-    test('should allow scrolling through unlimited suggestions', () => {
-      // With MAX_ROWS = Infinity, all suggestions are available
-      const allResults = 200;
-      const MAX_ROWS = Infinity;
-      const visibleResults = Math.min(allResults, MAX_ROWS);
-
-      expect(visibleResults).toBe(200);
+    beforeAll(async () => {
+        h = await loadLegacyScript();
     });
 
-    test('ordering by band (successful/common/unsuccessful) maintains priority', () => {
-      const results = [
-        { band: 'successful', fitAverage: 4.5 },
-        { band: 'unsuccessful', fitAverage: 2.0 },
-        { band: 'common', fitAverage: 3.2 }
-      ];
+    describe('page size', () => {
+        test('the first page holds ten rows', () => {
+            expect(h.evaluate('HACGravesBestMatches.ROWS_PER_PAGE')).toBe(10);
+        });
 
-      const bands = ['successful', 'common', 'unsuccessful'];
-      const grouped = bands.map(band =>
-        results.filter(r => r.band === band)
-      );
+        test('Show more reveals another ten', () => {
+            expect(h.evaluate('HACGravesBestMatches.ROWS_INCREMENT')).toBe(10);
+        });
 
-      expect(grouped[0][0].band).toBe('successful');
-      expect(grouped[1][0].band).toBe('common');
-      expect(grouped[2][0].band).toBe('unsuccessful');
+        test('a page is capped at the limit even when far more rows qualify', () => {
+            const rows = Array.from({ length: 50 }, (_, i) => row('common', `c${i}`));
+            expect(paginate(rows, 10)).toHaveLength(10);
+        });
+
+        test('fewer rows than the limit returns them all, not a padded page', () => {
+            const rows = Array.from({ length: 3 }, (_, i) => row('common', `c${i}`));
+            expect(paginate(rows, 10)).toHaveLength(3);
+        });
+
+        test('a second page reveals rows the first page withheld', () => {
+            const rows = Array.from({ length: 25 }, (_, i) => row('common', `c${i}`));
+
+            const firstPage = paginate(rows, 10);
+            const secondPage = paginate(rows, 20);
+
+            expect(secondPage).toHaveLength(20);
+            // The first page must be a prefix of the second: paging reveals more,
+            // it never reshuffles what the user has already read.
+            expect(secondPage.slice(0, 10)).toEqual(firstPage);
+        });
     });
-  });
 
-  describe('Mode switching', () => {
-    test('should support additions, swaps, and pairwise modes', () => {
-      const modes = ['additions', 'swaps', 'pairwise'];
-      expect(modes).toContain('additions');
-      expect(modes).toContain('swaps');
-      expect(modes).toContain('pairwise');
+    describe('band ordering survives paging', () => {
+        test('successful candidates fill the page before common ones', () => {
+            const rows = [
+                row('common', 'common-1'),
+                row('unsuccessful', 'bad-1'),
+                row('successful', 'good-1'),
+                row('successful', 'good-2')
+            ];
+
+            expect(paginate(rows, 4).map(r => r.band))
+                .toEqual(['successful', 'successful', 'common', 'unsuccessful']);
+        });
+
+        test('a conflicted candidate never displaces a clean one onto the next page', () => {
+            // 10 unsuccessful rows listed first, one successful row last. The
+            // successful row must still make page one — this is the whole point
+            // of filling in band order rather than input order.
+            const rows = [
+                ...Array.from({ length: 10 }, (_, i) => row('unsuccessful', `bad${i}`)),
+                row('successful', 'the-good-one')
+            ];
+
+            const page = paginate(rows, 10);
+
+            expect(page[0].candidate.name).toBe('the-good-one');
+            expect(page).toHaveLength(10);
+        });
+
+        test('the band order is the one the panel renders', () => {
+            expect(h.evaluate('HACGravesBestMatches.BAND_ORDER'))
+                .toEqual(['successful', 'common', 'unsuccessful']);
+        });
     });
-  });
 
-  describe('Exclusion integration', () => {
-    test('should respect excluded tags from Script Lab', () => {
-      // Best Matches should filter out tags that are in the Excluded Elements list
-      const allTags = Object.keys(GAME_DATA.tags);
-      const excludedIds = new Set(['tag1', 'tag3']); // tag1 and tag3 are excluded
-
-      const availableTags = allTags.filter(id => !excludedIds.has(id));
-
-      expect(availableTags).toContain('tag2');
-      expect(availableTags).toContain('tag4');
-      expect(availableTags).not.toContain('tag1');
-      expect(availableTags).not.toContain('tag3');
+    describe('analysis modes', () => {
+        test('all three modes are switchable on the real module', () => {
+            ['additions', 'swaps', 'pairwise'].forEach(mode => {
+                expect(() => h.call('HACGravesBestMatches.setBestMatchMode', mode)).not.toThrow();
+            });
+        });
     });
-  });
+
+    describe('exclusion integration', () => {
+        test('Graves draws from the same ban list as Script Lab', () => {
+            // The Excluded Elements table is the shared source of truth; Graves
+            // reading its own list instead is the regression this guards.
+            expect(h.call('contextUsesGlobalExclusions', 'graves')).toBe(true);
+            expect(h.call('contextUsesGlobalExclusions', 'generator')).toBe(true);
+        });
+    });
 });

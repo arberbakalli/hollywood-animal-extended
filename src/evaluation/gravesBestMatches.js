@@ -287,29 +287,35 @@
         unsuccessful: 'Unsuccessful combinations'
     };
 
+    const BAND_ORDER = ['successful', 'common', 'unsuccessful'];
+
+    // The page fills in band order, so the strongest candidates always occupy the
+    // first page and a conflicted one can never push a clean one onto page two.
+    function paginateRows(rows, rowLimit) {
+        const visible = [];
+        BAND_ORDER.forEach(band => {
+            rows.filter(row => row.band === band).forEach(row => {
+                if (visible.length < rowLimit) visible.push(row);
+            });
+        });
+        return visible;
+    }
+
     function groupedMarkup(rows, rowLimit = visibleRowCount) {
+        totalRowCount = rows.length;
+        const visible = paginateRows(rows, rowLimit);
+
         let index = 0;
-        let rowsRendered = 0;
-        const result = ['successful', 'common', 'unsuccessful'].map(band => {
-            const banded = rows.filter(row => row.band === band);
+        return BAND_ORDER.map(band => {
+            const banded = visible.filter(row => row.band === band);
             if (banded.length === 0) return '';
 
-            const limited = [];
-            for (const row of banded) {
-                if (rowsRendered >= rowLimit) break;
-                limited.push(row);
-                rowsRendered++;
-            }
-
-            const body = limited.map(row => rowMarkup(row, index++)).join('');
+            const body = banded.map(row => rowMarkup(row, index++)).join('');
             return `<div class="best-match-band best-match-band-${band}">
                 <h4 class="best-match-band-title">${BAND_LABELS[band]}</h4>
                 ${body}
             </div>`;
         }).join('');
-
-        totalRowCount = rows.reduce((sum, row) => sum + 1, 0);
-        return result;
     }
 
     function emptyMarkup(message) {
@@ -485,6 +491,10 @@
         renderBestMatches,
         setBestMatchMode,
         updateGravesExclusionNotice,
-        jumpToExclusionEditor
+        jumpToExclusionEditor,
+        paginateRows,
+        BAND_ORDER,
+        ROWS_PER_PAGE,
+        ROWS_INCREMENT
     };
 })(globalThis);

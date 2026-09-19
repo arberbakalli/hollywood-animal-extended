@@ -1,28 +1,32 @@
 import { describe, test, expect, beforeAll } from '@jest/globals';
-import { loadGameData } from './helpers/legacyHarness.js';
+import { loadGameData, loadLegacyScript } from './helpers/legacyHarness.js';
 
 let gameData;
+let h;
 
 beforeAll(async () => {
   gameData = await loadGameData();
+  h = await loadLegacyScript();
 });
 
+/**
+ * Edge cases for the distribution grid.
+ *
+ * These drive the real weeklyDemandFor() out of src/marketing/distributionPlanner.js.
+ * They previously asserted against a local copy of the formula declared in this
+ * file, so a regression in the planner could not fail them. Expected values are
+ * unchanged; only the function under test is now the shipped one.
+ */
 describe('Distribution calculator — edge cases', () => {
-  const BASE = 1000;
-  const W1_MULT = 2;
-  const W2_MULT = 1;
-  const DECAY = 0.8;
-
-  function weeklyDemand(score) {
-    const demand = [
-      score * W1_MULT * BASE,
-      score * W2_MULT * BASE
-    ];
-    for (let i = 2; i < 8; i++) {
-      demand.push(demand[demand.length - 1] * DECAY);
-    }
-    return demand.map((v, i) => i < 4 ? Math.ceil(v) : Math.floor(v));
-  }
+  // No studio policy and no holiday: these pin the base curve on its own.
+  const weeklyDemand = score =>
+    h.call('HACDistributionPlanner.weeklyDemandFor', score, {
+      behemoth: false,
+      boutique: false,
+      artisticScore: 0,
+      openingMultiplier: 1,
+      holidayBonusPercent: 0
+    });
 
   test('score 0 produces zero demand all weeks', () => {
     const demand = weeklyDemand(0);

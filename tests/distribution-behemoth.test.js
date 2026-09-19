@@ -1,3 +1,5 @@
+import { loadLegacyScript } from './helpers/legacyHarness.js';
+
 /**
  * Behemoth policy effects on the distribution grid.
  *
@@ -5,38 +7,33 @@
  * and its slower decay applies to weeks 3+ (which are derived from week 2).
  * Week 2 is seeded directly from the commercial score, so it must never move.
  * That has regressed more than once during refactors of this calculator.
+ *
+ * These drive the real weeklyDemandFor() out of src/marketing/distributionPlanner.js.
+ * They previously asserted against a local copy of the formula declared in this
+ * file, which meant a regression in the planner could not fail them — every
+ * assertion below held whatever the product did. The expected values are
+ * unchanged; only the function under test is now the shipped one.
  */
 describe('Distribution — Behemoth policy', () => {
-    const BASE = 1000;
-    const WEEK_ONE_MULT = 2;
-    const WEEK_TWO_MULT = 1;
-    const WEEKS = 8;
-    const DECAY_FROM_INDEX = 2;
-    const OPENING_WINDOW = 4;
+    let h;
 
-    const BASE_DECAY = 0.8;
-    const BEHEMOTH_DECAY = 0.85;
-    const BEHEMOTH_DECAY_MIN_SCORE = 9;
+    const WEEKS = 8;
     const BEHEMOTH_WEEK_ONE_BOOST = 1.25;
 
-    // Mirrors weeklyDemand() in src/marketing/distributionPlanner.js.
-    function weeklyDemand(score, { behemoth = false, openingBoost = false } = {}) {
-        const decay = behemoth && score > BEHEMOTH_DECAY_MIN_SCORE ? BEHEMOTH_DECAY : BASE_DECAY;
-        const openingMultiplier = openingBoost ? 2 : 1;
-        const weekOneBoost = behemoth ? BEHEMOTH_WEEK_ONE_BOOST : 1;
-
-        const demand = [score * WEEK_ONE_MULT * BASE, score * WEEK_TWO_MULT * BASE];
-        for (let i = DECAY_FROM_INDEX; i < WEEKS; i++) {
-            demand.push(demand[demand.length - 1] * decay);
-        }
-
-        return demand.map((value, index) => {
-            const inOpeningWindow = index < OPENING_WINDOW;
-            let boosted = inOpeningWindow ? value * openingMultiplier : value;
-            if (index === 0) boosted *= weekOneBoost;
-            return inOpeningWindow ? Math.ceil(boosted) : Math.floor(boosted);
+    // Behemoth is the subject here, so Boutique stays off and the artistic score
+    // stays at 0 — otherwise its decay modifier would stack onto these figures.
+    const weeklyDemand = (score, { behemoth = false, openingBoost = false } = {}) =>
+        h.call('HACDistributionPlanner.weeklyDemandFor', score, {
+            behemoth,
+            boutique: false,
+            artisticScore: 0,
+            openingMultiplier: openingBoost ? 2 : 1,
+            holidayBonusPercent: 0
         });
-    }
+
+    beforeAll(async () => {
+        h = await loadLegacyScript();
+    });
 
     describe('week 2 is never touched', () => {
         test.each([5, 8, 9, 9.5, 10])('score %p leaves week 2 unchanged', score => {

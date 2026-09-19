@@ -181,6 +181,38 @@ Feature: Script Evaluation — Colman Graves
     And the user generates best matches
     Then no suggestion falls outside the starting tag set
 
+  # [automated] The first page holds ten suggestions; tests/graves-best-matches.test.js
+  # pins the page size and the cap against the shipped paginateRows().
+  Scenario: Only the first ten suggestions are listed
+    Given the user has evaluated a script
+    When the user generates best matches
+    Then the first ten suggestions are listed
+
+  # [automated] The page fills in band order, so a conflicted candidate can never
+  # push a clean one onto page two. Covered by tests/graves-best-matches.test.js.
+  Scenario: Stronger suggestions fill the first page before weaker ones
+    Given more than ten suggestions qualify
+    When the user generates best matches
+    Then successful suggestions are listed before common ones
+    And common suggestions are listed before unsuccessful ones
+
+  # [automated] A second page is a superset of the first, never a reshuffle, so
+  # what the user has already read stays where it was.
+  Scenario: Revealing more suggestions keeps the ones already read in place
+    Given more than ten suggestions qualify
+    When the next ten suggestions are revealed
+    Then the first ten remain in their original order
+
+  # [verified] Watched in the app on 2026-09-19 with Action seeded: the panel
+  # opened with 10 rows and "Show more suggestions (122 more available)"; one
+  # click took it to 20 rows, left the first ten untouched, and relabelled the
+  # control to 112. No spec clicks the button yet, so this is not [automated].
+  Scenario: The Show more control names how many suggestions remain
+    Given more than ten suggestions qualify
+    When the user generates best matches
+    Then a Show more control states how many suggestions remain
+    And the control disappears once every suggestion is listed
+
   # [automated] Each suggestion row carries an Add control.
   Scenario: Adding a suggested element to the script
     Given best matches are listed
