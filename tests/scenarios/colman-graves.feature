@@ -213,6 +213,29 @@ Feature: Script Evaluation — Colman Graves
     Then a Show more control states how many suggestions remain
     And the control disappears once every suggestion is listed
 
+  # [unverified] DISCOVERED BUG: Swap Suggestions identifies a weakest element
+  # but then suggests additions instead of replacements. The panel says
+  # "Weakest element: Worried Wife" but every suggestion is either a different
+  # category or not a Supporting Character that could replace her. The mode
+  # should only suggest candidates that can actually swap for the weak slot.
+  Scenario: Swap Suggestions gives candidates that can replace the weakest element
+    Given the user has evaluated a script with multiple Supporting Characters
+    When the user generates Swap Suggestions
+    Then the UI names the weakest element
+    And every suggestion is a candidate of the same category
+    And selecting a suggestion improves the script average
+
+  # [unverified] DISCOVERED BUG: Best Additions suggests categories that are
+  # already at their cardinality limit. A script with two Genres (limit 2) and
+  # one Setting, Protagonist, Antagonist, Supporting Character and Theme & Event
+  # should not be offered more Genres in additions. The mode should only suggest
+  # categories that can accept more members.
+  Scenario: Best Additions respects per-category selection limits
+    Given the user has evaluated a script at the cardinality limit
+    When the user generates Best Additions
+    Then no suggestion is a category already at its maximum
+    And every suggestion is for a category that can accept more members
+
   # [automated] Each suggestion row carries an Add control.
   Scenario: Adding a suggested element to the script
     Given best matches are listed

@@ -27,6 +27,92 @@ const buildValidScript = async (steps) => {
   }
 };
 
+// Build a script with multiple Supporting Characters for swap testing
+const buildMultiSupportingScript = async (steps) => {
+  await steps.selectDropdown('genreSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'THRILLER',
+  });
+  await steps.selectDropdown('settingSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'MODERN_AMERICAN_CITY',
+  });
+  await steps.selectDropdown('protagonistSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'PROTAGONIST_DETECTIVE',
+  });
+  await steps.selectDropdown('antagonistSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'ANTAGONIST_OLD_FRIEND_ENEMY',
+  });
+  // Add first Supporting Character
+  await steps.selectDropdown('supportingCharacterSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'SUPPORTINGCHARACTER_KEY_WITNESS',
+  });
+  // Add second Supporting Character via the "+" button
+  await steps.on('supportingCharacterAddButton', 'ColmanGraves').click();
+  // Select a different one for the second row
+  const selects = await steps.getAll('supportingCharacterSelect', 'ColmanGraves');
+  if (selects.length > 1) {
+    await steps.selectDropdown(selects[1], 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: 'SUPPORTINGCHARACTER_WORRIED_WIFE',
+    });
+  }
+  await steps.selectDropdown('themeEventSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'THEME_WRONGFULLY_ACCUSED',
+  });
+  await steps.selectDropdown('finaleSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM',
+  });
+};
+
+// Build a script at the cardinality limit (can't add more of certain categories)
+const buildCardinalityLimitScript = async (steps) => {
+  // Single-select categories: 1 each
+  await steps.selectDropdown('settingSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'MODERN_AMERICAN_CITY',
+  });
+  await steps.selectDropdown('protagonistSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'PROTAGONIST_DETECTIVE',
+  });
+  await steps.selectDropdown('antagonistSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'ANTAGONIST_OLD_FRIEND_ENEMY',
+  });
+  await steps.selectDropdown('finaleSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM',
+  });
+  // Two Genres (the max)
+  await steps.selectDropdown('genreSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'THRILLER',
+  });
+  await steps.on('genreAddButton', 'ColmanGraves').click();
+  const genreSelects = await steps.getAll('genreSelect', 'ColmanGraves');
+  if (genreSelects.length > 1) {
+    await steps.selectDropdown(genreSelects[1], 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: 'DRAMA',
+    });
+  }
+  // Supporting Character and Theme & Event: 1 each (not at limit)
+  await steps.selectDropdown('supportingCharacterSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'SUPPORTINGCHARACTER_KEY_WITNESS',
+  });
+  await steps.selectDropdown('themeEventSelect', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'THEME_WRONGFULLY_ACCUSED',
+  });
+};
+
 test.describe('Script Evaluation — Colman Graves', () => {
   test.beforeEach(async ({ steps }) => {
     await openHollywood(steps);
@@ -147,6 +233,65 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('bestMatchesPanel', 'ColmanGraves').verifyState('visible');
     await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
     await steps.on('feedbackMessage', 'ColmanGraves').verifyState('hidden');
+  });
+
+  // Bug discovered: Swap Suggestions identifies the weakest element but then
+  // suggests additions instead of replacements. This test verifies the bug:
+  // suggestions must be candidates that can actually swap for the weak slot.
+  test('TC03-000027 Swap Suggestions gives candidates that can replace the weakest element', async ({ steps, page }) => {
+    await buildMultiSupportingScript(steps);
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: '0',
+    });
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+    await steps.on('bestMatchesPanel', 'ColmanGraves').verifyState('visible');
+
+    // Switch to Swap Suggestions mode
+    await steps.on('swapSuggestionsTab', 'ColmanGraves').click();
+    await steps.expect('swapSuggestionsTab', 'ColmanGraves').attributes.get('class').toContain('active');
+
+    // Verify suggestions exist and check their categories
+    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+    // The test will fail if suggestions are not Supporting Characters (categories differ)
+    const categories = await page.locator('#gravesBestMatchesList [data-category]').evaluateAll(
+      (els) => els.map((el) => el.getAttribute('data-category'))
+    );
+    expect(categories.length).toBeGreaterThan(0);
+    // For Swap Suggestions, all should be Supporting Character (same as weakest slot)
+    expect(categories.every((c) => c === 'Supporting Character' || c === 'SUPPORTINGCHARACTER')).toBe(true);
+  });
+
+  // Bug discovered: Best Additions suggests categories at their cardinality limit.
+  // This test verifies the bug: suggestions must only be for categories that can accept more.
+  test('TC03-000028 Best Additions respects per-category selection limits', async ({ steps, page }) => {
+    await buildCardinalityLimitScript(steps);
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: '0',
+    });
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+    await steps.on('bestMatchesPanel', 'ColmanGraves').verifyState('visible');
+
+    // Switch to Best Additions (default) or ensure it's active
+    await steps.on('bestAdditionsTab', 'ColmanGraves').click();
+    await steps.expect('bestAdditionsTab', 'ColmanGraves').attributes.get('class').toContain('active');
+
+    // Verify no Genre or single-select categories are suggested
+    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+    const categories = await page.locator('#gravesBestMatchesList [data-category]').evaluateAll(
+      (els) => els.map((el) => el.getAttribute('data-category'))
+    );
+    const forbiddenCategories = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale'];
+    for (const category of categories) {
+      expect(forbiddenCategories).not.toContain(category);
+    }
   });
 
   test('TC03-000008 adding a suggested Theme & Event joins the Graves script', async ({ steps }) => {

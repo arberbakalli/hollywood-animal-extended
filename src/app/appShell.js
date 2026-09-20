@@ -114,6 +114,12 @@
             content.inert = !isActive;
             content.setAttribute('aria-hidden', String(!isActive));
         });
+
+        // When returning to the Build tab, update the exclusion badge in case
+        // dropdowns changed while the tab was hidden.
+        if (tabName === 'build' && typeof updateExcludedCount === 'function') {
+            updateExcludedCount();
+        }
     }
 
     function setupDomEventBindings() {

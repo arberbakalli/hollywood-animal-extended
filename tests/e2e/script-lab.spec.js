@@ -178,6 +178,40 @@ test.describe('Script Lab — generator', () => {
     await steps.expect('excludedSupportingCharacterSelect', 'ScriptLab').value.toBe(SIDEKICK);
   });
 
+  // Given the user switched to Custom profile and removed an exclusion
+  // When they switch to another tab and back
+  // Then the removed element stays available and the exclusion list is consistent
+  test('TC01-000026 Exclusion state stays consistent when switching tabs', async ({ steps }) => {
+    // Start with Custom profile (default)
+    await steps.expect('customProfile', 'ScriptLab').attributes.get('class').toContain('active');
+
+    // Exclude Sidekick
+    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: SIDEKICK,
+    });
+    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('1');
+
+    // Remove the exclusion by clearing the dropdown
+    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: '',
+    });
+    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('0');
+
+    // Switch to Graves tab
+    await steps.on('evaluateTab', 'Navigation').click();
+    await steps.verifyElementPresence('panel', 'ColmanGraves', { shouldBeVisible: true });
+
+    // Return to Script Lab
+    await steps.on('buildTab', 'Navigation').click();
+    await steps.on('panel', 'ScriptLab').verifyState('visible');
+
+    // Verify the exclusion is gone and Sidekick is available
+    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('0');
+    await steps.expect('excludedSupportingCharacterSelect', 'ScriptLab').value.toBe('');
+  });
+
   // Given Custom is the active tag-availability profile
   // When the user switches to Starting Tags
   // Then the active state moves with them

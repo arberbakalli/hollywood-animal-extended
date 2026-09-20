@@ -58,6 +58,17 @@ Feature: Script Lab
     Then the excluded counter reads 1
     And "Sidekick" remains selected in Excluded Elements
 
+  # [automated] TC01-000026: exclusion state is restored from localStorage when
+  # returning to the Build tab, ensuring the badge count and dropdown selections
+  # stay in sync across tab switches.
+  Scenario: Exclusion state stays consistent when switching tabs
+    Given the user has switched to Custom profile
+    And removed a Supporting Character from Excluded Elements
+    When the user switches to the Evaluate tab
+    And back to the Build tab
+    Then the removed Supporting Character is available in the picker
+    And the Excluded Elements list reflects the change
+
   # [automated]
   Scenario: The tag availability profile switches between Starting and Custom
     Given the Custom profile is active
