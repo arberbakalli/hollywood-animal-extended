@@ -53,13 +53,10 @@ const buildMultiSupportingScript = async (steps) => {
   // Add second Supporting Character via the "+" button
   await steps.on('supportingCharacterAddButton', 'ColmanGraves').click();
   // Select a different one for the second row
-  const selects = await steps.getAll('supportingCharacterSelect', 'ColmanGraves');
-  if (selects.length > 1) {
-    await steps.selectDropdown(selects[1], 'ColmanGraves', {
-      type: DropdownSelectType.VALUE,
-      value: 'SUPPORTINGCHARACTER_WORRIED_WIFE',
-    });
-  }
+  await steps.selectDropdown('supportingCharacterSelectRow2', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'SUPPORTINGCHARACTER_WORRIED_WIFE',
+  });
   await steps.selectDropdown('themeEventSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
     value: 'THEME_WRONGFULLY_ACCUSED',
@@ -95,13 +92,10 @@ const buildCardinalityLimitScript = async (steps) => {
     value: 'THRILLER',
   });
   await steps.on('genreAddButton', 'ColmanGraves').click();
-  const genreSelects = await steps.getAll('genreSelect', 'ColmanGraves');
-  if (genreSelects.length > 1) {
-    await steps.selectDropdown(genreSelects[1], 'ColmanGraves', {
-      type: DropdownSelectType.VALUE,
-      value: 'DRAMA',
-    });
-  }
+  await steps.selectDropdown('genreSelectRow2', 'ColmanGraves', {
+    type: DropdownSelectType.VALUE,
+    value: 'DRAMA',
+  });
   // Supporting Character and Theme & Event: 1 each (not at limit)
   await steps.selectDropdown('supportingCharacterSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,

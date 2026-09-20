@@ -136,6 +136,21 @@
             ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
+    function categoryCardinality(selectedTags) {
+        const counts = {};
+        selectedTags.forEach(tag => {
+            counts[tag.category] = (counts[tag.category] || 0) + 1;
+        });
+        return counts;
+    }
+
+    function isCategoryFull(category, counts) {
+        // Genre can have up to 2; single-select categories max 1; others unlimited.
+        const maxForCategory = category === 'Genre' ? 2 :
+            MULTI_SELECT_CATEGORIES.includes(category) ? Infinity : 1;
+        return (counts[category] || 0) >= maxForCategory;
+    }
+
     function collectCandidates(selectedTags) {
         const selectedIds = new Set(selectedTags.map(tag => tag.id));
         const excludedIds = getGeneratorExcludedIds();
@@ -165,8 +180,12 @@
 
     function buildAdditions(selectedTags) {
         const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
+        const counts = categoryCardinality(selectedTags);
+        const candidates = collectCandidates(selectedTags).filter(candidate =>
+            !isCategoryFull(candidate.category, counts)
+        );
 
-        return rankCandidates(collectCandidates(selectedTags), selectedTags, minimumFit())
+        return rankCandidates(candidates, selectedTags, minimumFit())
             .map(row => Object.assign({}, row, {
                 currentAverage,
                 resultingAverage: averageWith(currentAverage, selectedTags.length, row.newPairSum),
@@ -199,7 +218,10 @@
 
         const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
 
-        const rows = rankCandidates(collectCandidates(selectedTags), slot.rest, minimumFit())
+        const candidates = collectCandidates(selectedTags).filter(candidate =>
+            candidate.category === slot.tag.category
+        );
+        const rows = rankCandidates(candidates, slot.rest, minimumFit())
             .map(row => Object.assign({}, row, {
                 currentAverage,
                 resultingAverage: averageWith(slot.averageWithout, slot.rest.length, row.newPairSum),

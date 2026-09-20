@@ -201,7 +201,7 @@ test.describe('Script Lab — generator', () => {
 
     // Switch to Graves tab
     await steps.on('evaluateTab', 'Navigation').click();
-    await steps.verifyElementPresence('panel', 'ColmanGraves', { shouldBeVisible: true });
+    await steps.on('panel', 'ColmanGraves').verifyState('visible');
 
     // Return to Script Lab
     await steps.on('buildTab', 'Navigation').click();
