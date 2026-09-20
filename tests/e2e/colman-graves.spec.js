@@ -289,6 +289,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
 
     // Verify no Genre or single-select categories are suggested
     await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+
     const categories = await page.locator('#gravesBestMatchesList [data-category]').evaluateAll(
       (els) => els.map((el) => el.getAttribute('data-category'))
     );
