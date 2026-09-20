@@ -273,7 +273,9 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
     await steps.on('bestMatchesPanel', 'ColmanGraves').verifyState('visible');
 
-    // Switch to Best Additions (default) or ensure it's active
+    // Explicitly set and verify Best Additions mode is active
+    // (module state from other tests might have changed it)
+    await page.evaluate(() => window.HACGravesBestMatches?.setBestMatchMode?.('additions'));
     await steps.on('bestAdditionsTab', 'ColmanGraves').click();
     await steps.expect('bestAdditionsTab', 'ColmanGraves').attributes.get('class').toContain('active');
 
@@ -283,9 +285,10 @@ test.describe('Script Evaluation — Colman Graves', () => {
       (els) => els.map((el) => el.getAttribute('data-category'))
     );
     const forbiddenCategories = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale'];
-    for (const category of categories) {
-      expect(forbiddenCategories).not.toContain(category);
-    }
+    const allowedCategories = categories.filter(cat => !forbiddenCategories.includes(cat));
+    console.log('Suggestions found:', { total: categories.length, allowed: allowedCategories.length, categories, allowedCategories });
+    expect(allowedCategories.length).toBeGreaterThan(0);
+    expect(categories.every(cat => allowedCategories.includes(cat))).toBe(true);
   });
 
   test('TC03-000008 adding a suggested Theme & Event joins the Graves script', async ({ steps }) => {

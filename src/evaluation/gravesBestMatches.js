@@ -233,7 +233,10 @@
     }
 
     function buildPairwise(selectedTags) {
-        const candidates = collectCandidates(selectedTags);
+        const counts = categoryCardinality(selectedTags);
+        const candidates = collectCandidates(selectedTags).filter(candidate =>
+            !isCategoryFull(candidate.category, counts)
+        );
         const minimum = minimumFit();
         const matches = [];
 
