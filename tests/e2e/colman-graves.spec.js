@@ -55,7 +55,7 @@ const buildMultiSupportingScript = async (steps) => {
   // Select a different one for the second row
   await steps.selectDropdown('supportingCharacterSelectRow2', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'SUPPORTINGCHARACTER_WORRIED_WIFE',
+    value: 'SUPPORTINGCHARACTER_CONCERNED_WIFE',
   });
   await steps.selectDropdown('themeEventSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
@@ -256,7 +256,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
     );
     expect(categories.length).toBeGreaterThan(0);
     // For Swap Suggestions, all should be Supporting Character (same as weakest slot)
-    expect(categories.every((c) => c === 'Supporting Character' || c === 'SUPPORTINGCHARACTER')).toBe(true);
+    expect(categories.every((c) => c === 'Supporting Character')).toBe(true);
   });
 
   // Bug discovered: Best Additions suggests categories at their cardinality limit.
