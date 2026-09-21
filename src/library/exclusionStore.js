@@ -92,6 +92,9 @@
         pendingSave = setTimeout(() => {
             pendingSave = null;
             saveExclusions();
+            if (typeof updateExcludedCount === 'function') {
+                updateExcludedCount();
+            }
         }, 0);
     }
 
