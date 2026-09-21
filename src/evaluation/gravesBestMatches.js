@@ -182,10 +182,17 @@
 
     function buildAdditions(selectedTags) {
         const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
+        const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
+            ? HACScriptGenerator.getMaxElementPoolSize()
+            : 10;
         const counts = categoryCardinality(selectedTags);
-        const candidates = collectCandidates(selectedTags).filter(candidate =>
-            !isCategoryFull(candidate.category, counts)
-        );
+        const candidates = collectCandidates(selectedTags).filter(candidate => {
+            // Check both category-specific limits and total pool size
+            if (isCategoryFull(candidate.category, counts)) return false;
+            // If adding this element would exceed the pool size, filter it out
+            if (selectedTags.length >= maxPoolSize) return false;
+            return true;
+        });
 
         return rankCandidates(candidates, selectedTags, minimumFit())
             .map(row => Object.assign({}, row, {
