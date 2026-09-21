@@ -99,6 +99,10 @@
                 const mappedScore = Math.min(poolVal + 1, 10);
                 genScoreSlider.value = mappedScore;
                 genScoreInput.value = mappedScore;
+                // Update the yellow fill track for Target Movie Score slider
+                const scorePercent = ((mappedScore - 6) / (10 - 6)) * 100;
+                genScoreSlider.style.setProperty('--slider-fill-color', '#d4af37');
+                genScoreSlider.style.setProperty('--slider-fill-percent', scorePercent + '%');
             }
             updateElementPoolSliderStyle(slider);
         });
@@ -115,6 +119,10 @@
                     const mappedScore = Math.min(val + 1, 10);
                     genScoreSlider.value = mappedScore;
                     genScoreInput.value = mappedScore;
+                    // Update the yellow fill track for Target Movie Score slider
+                    const scorePercent = ((mappedScore - 6) / (10 - 6)) * 100;
+                    genScoreSlider.style.setProperty('--slider-fill-color', '#d4af37');
+                    genScoreSlider.style.setProperty('--slider-fill-percent', scorePercent + '%');
                 }
                 updateElementPoolSliderStyle(slider);
             }
