@@ -169,8 +169,56 @@
             setTimeout(buildExcludedList, 0);
         }
 
+        function saveExclusionProfile() {
+            const exclusions = collectTagInputs('excluded');
+            const data = {
+                version: 1,
+                timestamp: new Date().toISOString(),
+                exclusions: exclusions.map(tag => ({ id: tag.id, category: tag.category }))
+            };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hollywood-exclusions-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function loadExclusionProfile() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.addEventListener('change', e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (!Array.isArray(data.exclusions)) {
+                            alert('Invalid profile format');
+                            return;
+                        }
+                        resetSelectors('excluded');
+                        data.exclusions.forEach(({ id, category }) => {
+                            addDropdown(category, id, 'excluded');
+                        });
+                        updateExcludedCount();
+                    } catch (error) {
+                        alert('Failed to load profile: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            });
+            input.click();
+        }
+
         const clickBindings = [
             ['applyStartingTagsButton', applyStartingTagsExclusions],
+            ['saveExclusionProfileButton', saveExclusionProfile],
+            ['loadExclusionProfileButton', loadExclusionProfile],
             ['generateScriptsButton', generateScripts],
             ['savePinnedScriptsButton', savePinnedScripts],
             ['loadPinnedScriptsButton', triggerLoadScripts],
