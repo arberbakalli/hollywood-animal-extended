@@ -72,6 +72,28 @@
         initializeDistributionToggles();
         setGeneratorProfile('custom');
 
+        // Initialize sliders in sync on app load
+        const poolInput = document.getElementById('globalElementPoolInput');
+        const genScoreInput = document.getElementById('genScoreInput');
+        const genScoreSlider = document.getElementById('genScoreSlider');
+        if (poolInput && genScoreInput && genScoreSlider) {
+            const poolVal = parseInt(poolInput.value);
+            const scoreVal = parseInt(genScoreInput.value);
+            // If pool is at max (10) but score isn't, sync score to max
+            if (poolVal === 10 && scoreVal !== 10) {
+                genScoreSlider.value = 10;
+                genScoreInput.value = 10;
+                // Update slider track style
+                genScoreSlider.style.setProperty('--slider-fill-color', '#d4af37');
+                genScoreSlider.style.setProperty('--slider-fill-percent', '100%');
+                // Update help text
+                const requiredTagsDisplay = document.getElementById('genTagsRequiredDisplay');
+                if (requiredTagsDisplay) {
+                    requiredTagsDisplay.innerText = 'Requires ~10 Story Elements (excluding Genre & Setting).';
+                }
+            }
+        }
+
         // After the profile, which rebuilds the excluded list and would wipe a
         // restore that ran before it.
         HACExclusionStore.setupExclusionPersistence();
