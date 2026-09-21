@@ -167,7 +167,7 @@
 
                 // Refresh all script builder dropdowns to re-filter based on new exclusions
                 if (typeof refreshCategoryDropdowns === 'function') {
-                    ['generator', 'graves', 'advertisers'].forEach(context => {
+                    ['generator', 'graves', 'advertisers', 'targeted'].forEach(context => {
                         GAME_DATA.categories.forEach(category => {
                             refreshCategoryDropdowns(category, context);
                         });
