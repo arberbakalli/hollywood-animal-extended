@@ -18,7 +18,7 @@ test.describe('Exclusion Dropdown Refresh', () => {
     await page.close();
   });
 
-  test('TC04-000001 Script Lab dropdowns filter correctly after applying starting tags', async () => {
+  test('TC09-000001 Script Lab dropdowns filter correctly after applying starting tags', async () => {
     // Navigate to Build tab
     await steps.on('scriptLabTab').click();
 
@@ -58,7 +58,7 @@ test.describe('Exclusion Dropdown Refresh', () => {
     expect(disabledProtagonists.length).toBeGreaterThan(0);
   });
 
-  test('TC04-000002 Colman Graves dropdowns filter correctly after applying starting tags', async () => {
+  test('TC09-000002 Colman Graves dropdowns filter correctly after applying starting tags', async () => {
     // Navigate to Script Evaluation tab
     await steps.on('scriptEvaluationTab').click();
 
@@ -95,7 +95,7 @@ test.describe('Exclusion Dropdown Refresh', () => {
     expect(disabledGravesProtagonists.length).toBeGreaterThan(0);
   });
 
-  test('TC04-000003 Marketing & Release dropdowns filter correctly after applying starting tags', async () => {
+  test('TC09-000003 Marketing & Release dropdowns filter correctly after applying starting tags', async () => {
     // Navigate to Marketing & Release tab
     await steps.on('marketingTab').click();
 
@@ -111,7 +111,7 @@ test.describe('Exclusion Dropdown Refresh', () => {
     expect(disabledTargetedFinales.length).toBeGreaterThan(0);
   });
 
-  test('TC04-000004 Excluded items consistency across tab switches', async () => {
+  test('TC09-000004 Excluded items consistency across tab switches', async () => {
     // Go to Build tab and apply starting tags
     await steps.on('scriptLabTab').click();
     await steps.on('applyStartingTagsButton').click();

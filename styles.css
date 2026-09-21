@@ -1088,8 +1088,14 @@ input[type="text"] {
     padding: 12px 14px;
     border-radius: 6px;
     border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
-.holiday-row.best {
+.holiday-row:hover {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: rgba(212, 175, 55, 0.5);
+}
+.holiday-row[aria-pressed="true"] {
     background: rgba(212, 175, 55, 0.1);
     border-color: var(--accent);
 }
@@ -1325,6 +1331,35 @@ input[type="text"] {
 
 .graves-verdict-value {
     font-size: 2rem;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.graves-verdict-value.tone-success {
+    background: rgba(16, 185, 129, 0.12);
+    border-left: 4px solid #10b981;
+    color: #10b981;
+}
+
+.graves-verdict-value.tone-accent {
+    background: rgba(245, 158, 11, 0.12);
+    border-left: 4px solid #f59e0b;
+    color: #f59e0b;
+}
+
+.graves-verdict-value.tone-danger {
+    background: rgba(255, 95, 95, 0.12);
+    border-left: 4px solid var(--danger);
+    color: var(--danger);
+}
+
+.graves-verdict-value.tone-neutral {
+    background: rgba(255, 255, 255, 0.08);
+    border-left: 4px solid var(--text-muted);
+    color: var(--text-main);
 }
 
 .graves-reading-card {

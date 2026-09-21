@@ -12,8 +12,8 @@ Feature: Exclusion Dropdown Refresh
   Background:
     Given the Hollywood Animal Calculator is open
 
-  # [unverified] — waiting for E2E implementation
-  Scenario: Script Lab dropdowns filter correctly after applying starting tags
+  # [automated] — TC09-000001
+  Scenario: TC09-000001 Script Lab dropdowns filter correctly after applying starting tags
     Given the Build tab is selected
     And no exclusions have been applied
     When the user clicks "Apply Starting Tags"
@@ -22,8 +22,8 @@ Feature: Exclusion Dropdown Refresh
     And the Antagonist dropdown shows only available items (non-excluded)
     And the Protagonist dropdown shows only available items (non-excluded)
 
-  # [unverified] — waiting for E2E implementation
-  Scenario: Colman Graves dropdowns filter correctly after applying starting tags
+  # [automated] — TC09-000002
+  Scenario: TC09-000002 Colman Graves dropdowns filter correctly after applying starting tags
     Given the Script Evaluation tab is selected
     When the user clicks "Apply Starting Tags"
     Then the Submit Script section Finale dropdown shows only available items
@@ -31,14 +31,14 @@ Feature: Exclusion Dropdown Refresh
     And the Submit Script section Antagonist dropdown shows only available items
     And the Submit Script section Protagonist dropdown shows only available items
 
-  # [unverified] — waiting for E2E implementation
-  Scenario: Marketing & Release dropdowns filter correctly after applying starting tags
+  # [automated] — TC09-000003
+  Scenario: TC09-000003 Marketing & Release dropdowns filter correctly after applying starting tags
     Given the Marketing & Release tab is selected
     When the user clicks "Apply Starting Tags"
     Then all targeted dropdowns show only available items (non-excluded)
 
-  # [unverified] — waiting for E2E implementation
-  Scenario: Excluded items remain disabled across tab switches
+  # [automated] — TC09-000004
+  Scenario: TC09-000004 Excluded items remain disabled across tab switches
     Given the Build tab is selected
     And the user has clicked "Apply Starting Tags"
     When the user opens the Finale dropdown

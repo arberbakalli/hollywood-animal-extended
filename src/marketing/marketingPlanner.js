@@ -181,7 +181,7 @@
                 bestHeader.innerText = "Best Option";
                 holidayContainer.appendChild(bestHeader);
 
-                holidayContainer.appendChild(buildHolidayRow(best, 'holiday-row best'));
+                holidayContainer.appendChild(buildHolidayRow(best, 'holiday-row'));
 
                 const alternatives = viableHolidays.slice(1, 4);
                 if(alternatives.length > 0) {
