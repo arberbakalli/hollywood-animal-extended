@@ -79,26 +79,68 @@
         initializeDistributionToggles();
         setGeneratorProfile('custom');
 
-        // Auto-apply starting tags only on first page load, not on reload
-        // Use sessionStorage to track if we've already auto-applied in this session
-        if (!sessionStorage.getItem('HAC_starting_tags_applied')) {
-            requestAnimationFrame(() => {
-                const applyButton = document.getElementById('applyStartingTagsButton');
-                if (applyButton) {
-                    applyButton.click();
-                    sessionStorage.setItem('HAC_starting_tags_applied', 'true');
-                }
-            });
-        }
+        // Read before the restore below populates the DOM.
+        const needsStartingTags = !HACExclusionStore.hasSeededStartingTags();
 
         // After the profile, which rebuilds the excluded list and would wipe a
         // restore that ran before it.
         HACExclusionStore.setupExclusionPersistence();
 
+        // First run only. Clicking this with a restored list present would
+        // rebuild the excluded selectors from the whitelist and the store's own
+        // MutationObserver would then save that rebuild over the player's bans —
+        // which is exactly how a returning player's list was destroyed before.
+        if (needsStartingTags) {
+            const applyButton = document.getElementById('applyStartingTagsButton');
+            if (applyButton) applyButton.click();
+            HACExclusionStore.markStartingTagsSeeded();
+        }
+
         // Rendered up front so the Save/Load controls are present from the start.
         renderPinnedScripts();
 
         window.dispatchEvent(new CustomEvent('hollywood:ready'));
+    }
+
+    // The pool slider and the Target Movie Score slider are two views of one
+    // choice: a score of N needs N-1 story elements. Score 10 is the exception —
+    // 9 elements can reach it if every pick lands, 10 only improves the odds, so
+    // the pool may sit at either and both map back to 10.
+    //
+    // Pure and exported so the mapping can be tested without a DOM. These were
+    // previously inlined twice in this file and once in scriptGenerator.js, and
+    // the unit tests asserted against a fourth hand-copied duplicate declared in
+    // the test file — which meant no assertion here could fail when the product
+    // broke.
+    const POOL_MIN = 5;
+    const POOL_MAX = 10;
+    const SCORE_MIN = 6;
+    const SCORE_MAX = 10;
+
+    function poolSizeToTargetScore(poolSize) {
+        return Math.min(poolSize + 1, SCORE_MAX);
+    }
+
+    function targetScoreToPoolSize(score) {
+        return score === SCORE_MAX ? SCORE_MAX - 1 : score - 1;
+    }
+
+    function targetScoreTrackPercent(score) {
+        return ((score - SCORE_MIN) / (SCORE_MAX - SCORE_MIN)) * 100;
+    }
+
+    function poolSizeTrackPercent(poolSize) {
+        return ((poolSize - POOL_MIN) / (POOL_MAX - POOL_MIN)) * 100;
+    }
+
+    // Both pool controls drive the score the same way; only the source differs.
+    function syncTargetScoreToPool(poolVal, genScoreSlider, genScoreInput) {
+        if (!genScoreSlider || !genScoreInput) return;
+        const mappedScore = poolSizeToTargetScore(poolVal);
+        genScoreSlider.value = mappedScore;
+        genScoreInput.value = mappedScore;
+        genScoreSlider.style.setProperty('--slider-fill-color', '#d4af37');
+        genScoreSlider.style.setProperty('--slider-fill-percent', targetScoreTrackPercent(mappedScore) + '%');
     }
 
     function setupGlobalElementPoolControl() {
@@ -112,37 +154,17 @@
         slider.addEventListener('input', (e) => {
             const poolVal = parseInt(e.target.value);
             input.value = poolVal;
-            // Proportional mapping: poolSize 5-10 maps to genScore 6-10
-            // genScore = poolSize + 1, except poolSize 9 or 10 both map to genScore 10
-            if (genScoreSlider && genScoreInput) {
-                const mappedScore = Math.min(poolVal + 1, 10);
-                genScoreSlider.value = mappedScore;
-                genScoreInput.value = mappedScore;
-                // Update the yellow fill track for Target Movie Score slider
-                const scorePercent = ((mappedScore - 6) / (10 - 6)) * 100;
-                genScoreSlider.style.setProperty('--slider-fill-color', '#d4af37');
-                genScoreSlider.style.setProperty('--slider-fill-percent', scorePercent + '%');
-            }
+            syncTargetScoreToPool(poolVal, genScoreSlider, genScoreInput);
             updateElementPoolSliderStyle(slider);
         });
 
         input.addEventListener('input', (e) => {
             let val = parseInt(e.target.value);
-            if (val > 10) val = 10;
-            if (val < 5) val = 5;
+            if (val > POOL_MAX) val = POOL_MAX;
+            if (val < POOL_MIN) val = POOL_MIN;
             if (!isNaN(val)) {
                 slider.value = val;
-                // Sync with Target Movie Score: poolSize 5-10 maps to genScore 6-10
-                // Both poolSize 9 and 10 map to genScore 10
-                if (genScoreSlider && genScoreInput) {
-                    const mappedScore = Math.min(val + 1, 10);
-                    genScoreSlider.value = mappedScore;
-                    genScoreInput.value = mappedScore;
-                    // Update the yellow fill track for Target Movie Score slider
-                    const scorePercent = ((mappedScore - 6) / (10 - 6)) * 100;
-                    genScoreSlider.style.setProperty('--slider-fill-color', '#d4af37');
-                    genScoreSlider.style.setProperty('--slider-fill-percent', scorePercent + '%');
-                }
+                syncTargetScoreToPool(val, genScoreSlider, genScoreInput);
                 updateElementPoolSliderStyle(slider);
             }
         });
@@ -327,6 +349,10 @@
     global.HACAppShell = {
         initializeApp,
         switchTab,
-        setupDomEventBindings
+        setupDomEventBindings,
+        poolSizeToTargetScore,
+        targetScoreToPoolSize,
+        targetScoreTrackPercent,
+        poolSizeTrackPercent
     };
 })(globalThis);

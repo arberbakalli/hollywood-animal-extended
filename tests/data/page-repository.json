@@ -6,6 +6,8 @@
         { "elementName": "buildTab", "selector": { "css": "#tab-generator-button" } },
         { "elementName": "evaluateTab", "selector": { "css": "#tab-evaluate-button" } },
         { "elementName": "marketTab", "selector": { "css": "#tab-advertisers-button" } },
+        { "elementName": "elementPoolInput", "selector": { "css": "#globalElementPoolInput" } },
+        { "elementName": "elementPoolSlider", "selector": { "css": "#globalElementPoolSlider" } },
         { "elementName": "languageSelector", "selector": { "css": "#languageSelector" } },
         { "elementName": "bootError", "selector": { "css": "#app-boot-error" } },
         { "elementName": "bootErrorDetail", "selector": { "css": "#app-boot-error-detail" } },
@@ -19,7 +21,6 @@
         { "elementName": "settingsPanel", "selector": { "css": "#generator-settings-panel" } },
 
         { "elementName": "startingTagsProfile", "selector": { "css": "#btn-profile-starting" } },
-        { "elementName": "customProfile", "selector": { "css": "#btn-profile-custom" } },
         { "elementName": "profileDescription", "selector": { "css": "#profile-desc-text" } },
 
         { "elementName": "compatibilityInput", "selector": { "css": "#genCompInput" } },
@@ -47,8 +48,11 @@
         { "elementName": "excludedSectionToggle", "selector": { "css": "#toggleExcludedElementsButton" } },
         { "elementName": "excludedContent", "selector": { "css": "#excluded-content" } },
         { "elementName": "excludedCountBadge", "selector": { "css": "#excluded-count" } },
+        { "elementName": "applyStartingTagsButton", "selector": { "css": "#applyStartingTagsButton" } },
+        { "elementName": "resetExcludedBansButton", "selector": { "css": "#resetExcludedBansButton" } },
         { "elementName": "resetBansButton", "selector": { "css": "#resetExcludedBansButton" } },
         { "elementName": "excludedSupportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-excluded select.tag-selector" } },
+        { "elementName": "excludedSettingSelect", "selector": { "css": "#inputs-setting-excluded select.tag-selector" } },
         { "elementName": "excludedThemeEventSelect", "selector": { "css": "#inputs-theme-event-excluded select.tag-selector" } },
         { "elementName": "excludedSupportingCharacterSearch", "selector": { "css": "#search-supporting-character-excluded-input" } },
         { "elementName": "addExcludedSupportingCharacterRow", "selector": { "css": "#add-supporting-character-excluded-button" } },
@@ -190,7 +194,12 @@
         { "elementName": "holidayTopPickBoost", "selector": { "css": "#holidayDisplay .holiday-row-selectable .hol-boost" } },
         { "elementName": "movieLean", "selector": { "css": "#movieLeanDisplay" } },
         { "elementName": "recommendedAdvertisers", "selector": { "css": "#adAgentDisplay" } },
-        { "elementName": "campaignDuration", "selector": { "css": "#campaignStrategyDisplay" } }
+        { "elementName": "campaignDuration", "selector": { "css": "#campaignStrategyDisplay" } },
+        { "elementName": "factoryPolicyToggle", "selector": { "css": "#factoryPolicyToggle" } },
+        { "elementName": "campaignPreRelease", "selector": { "css": "#campaignPreReleaseValue" } },
+        { "elementName": "campaignRelease", "selector": { "css": "#campaignReleaseValue" } },
+        { "elementName": "campaignPostRelease", "selector": { "css": "#campaignPostReleaseValue" } },
+        { "elementName": "campaignTotalWeeks", "selector": { "css": "#campaignTotalWeeks" } }
       ]
     },
     {
@@ -222,7 +231,6 @@
         { "elementName": "findCombinationsButton", "selector": { "css": "#findCombinationsButton" } },
         { "elementName": "resultsPanel", "selector": { "css": "#targeted-results-panel" } },
         { "elementName": "resultsList", "selector": { "css": "#targetedResultsList" } },
-        { "elementName": "elementsSlider", "selector": { "css": "#targetedElementsSlider" } },
         { "elementName": "elementsInput", "selector": { "css": "#targetedElementsInput" } },
         { "elementName": "combinationCards", "selector": { "css": "#targetedResultsList .targeted-combination-card" } },
         { "elementName": "combinationScores", "selector": { "css": "#targetedResultsList .targeted-score-value" } },

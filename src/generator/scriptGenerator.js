@@ -102,15 +102,16 @@
 
         if (!genScoreSlider || !globalPoolSlider) return;
 
-        // Proportional mapping: genScore 6-10 maps to poolSize 5-10
-        // genScore 10 can use poolSize 9 (if done right) or 10 (better odds)
-        // Formula: poolSize = genScore - 1 for genScore 6-9; poolSize = 9 for genScore 10
+        // Mapping lives in HACAppShell so the pool control and this one cannot
+        // drift apart; resolved at call time, so load order does not matter.
         const updatePoolFromScore = (scoreVal) => {
-            const mappedPool = scoreVal === 10 ? 9 : scoreVal - 1;
+            const mappedPool = HACAppShell.targetScoreToPoolSize(scoreVal);
             globalPoolSlider.value = mappedPool;
             globalPoolInput.value = mappedPool;
-            const percent = ((mappedPool - 5) / (10 - 5)) * 100;
-            globalPoolSlider.style.setProperty('--slider-fill-percent', percent + '%');
+            globalPoolSlider.style.setProperty(
+                '--slider-fill-percent',
+                HACAppShell.poolSizeTrackPercent(mappedPool) + '%'
+            );
         };
 
         genScoreSlider.addEventListener('input', () => {

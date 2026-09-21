@@ -95,6 +95,7 @@ describe('HTML structure', () => {
             'artisticAbilityToggle',
             'behemothToggle',
             'boutiqueToggle',
+            'factoryPolicyToggle',
             'results-advertisers',
         ];
 

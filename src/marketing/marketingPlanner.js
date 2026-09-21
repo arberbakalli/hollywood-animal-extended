@@ -197,67 +197,7 @@
             }
         }
 
-        let preDuration = 6;
-        let releaseDuration = 4;
-        let postDuration = 0;
-        let totalWeeks = 10;
-
-        // Factory Policy: 50% reduction to pre-release advertising
-        const factoryPolicyToggle = document.getElementById('factoryPolicyToggle');
-        const factoryEnabled = factoryPolicyToggle && factoryPolicyToggle.checked;
-        if (factoryEnabled) {
-            preDuration = Math.ceil(preDuration * 0.5); // 6 weeks → 3 weeks
-            totalWeeks = preDuration + releaseDuration + postDuration;
-        }
-
-        if (inputCom >= 9.0) {
-            postDuration = 4;
-            totalWeeks = preDuration + releaseDuration + postDuration;
-        }
-
-        // Ensure factory policy toggle exists (create if missing from static HTML)
-        const panel = document.getElementById('campaign-duration-panel');
-        if (panel && !document.getElementById('factoryPolicyToggle')) {
-            const h3 = panel.querySelector('h3');
-            if (h3) {
-                const toggleWrapper = document.createElement('div');
-                toggleWrapper.className = 'toggle-wrapper campaign-duration-toggle';
-                toggleWrapper.innerHTML = `
-                    <span class="toggle-label-text" title="Factory Policy reduces pre-release advertising duration by 50%, cutting preparation time for efficient marketing rollout.">Factory Policy</span>
-                    <div class="toggle-container">
-                        <input type="checkbox" class="toggle-checkbox" id="factoryPolicyToggle" role="switch" aria-label="Factory Policy marketing efficiency bonus">
-                        <div class="toggle-track" aria-hidden="true">
-                            <div class="toggle-thumb" aria-hidden="true"></div>
-                        </div>
-                    </div>
-                `;
-                h3.parentElement.insertBefore(toggleWrapper, h3.nextSibling);
-                setupFactoryPolicyListener();
-            }
-        }
-
-        document.getElementById('campaignStrategyDisplay').innerHTML = `
-            <div class="strategy-row">
-                <div class="campaign-block pre">
-                    <span class="camp-title">Pre-Release</span>
-                    <span class="camp-value">${preDuration} wks</span>
-                </div>
-
-                <div class="campaign-block release">
-                    <span class="camp-title">Release</span>
-                    <span class="camp-value">${releaseDuration} wks</span>
-                </div>
-
-                <div class="campaign-block post ${postDuration > 0 ? '' : 'is-dimmed'}">
-                    <span class="camp-title">Post-Release</span>
-                    <span class="camp-value">${postDuration} wks</span>
-                </div>
-            </div>
-
-            <div class="total-duration-footer">
-                Total Duration: <strong class="text-main">${totalWeeks} Weeks</strong>
-            </div>
-        `;
+        renderCampaignDuration(inputCom);
 
         // --- DYNAMICALLY MOVE DISTRIBUTION CALCULATOR TO RESULTS ---
         const distCard = document.getElementById('dist-wrapper');
@@ -365,18 +305,65 @@
         return total / targetIds.length;
     }
 
-    // Wire up factory policy toggle to recalculate campaign duration
+    // Pre-release is the only stretch Factory Policy shortens; release is fixed by
+    // the game and post-release is gated on the commercial score. Rendering lives
+    // here rather than inline in analyzeMovie() so the toggle can redraw this one
+    // panel: re-running the whole analysis also re-ran scrollIntoView, which threw
+    // the player ~1400px away from the control they had just clicked, and it left
+    // the panel stale whenever analyzeMovie() returned early on an empty selection.
+    const BASE_PRE_RELEASE_WEEKS = 6;
+    const FACTORY_PRE_RELEASE_MULTIPLIER = 0.5;
+    const RELEASE_WEEKS = 4;
+    const POST_RELEASE_WEEKS = 4;
+    const POST_RELEASE_MIN_SCORE = 9.0;
+
+    function renderCampaignDuration(commercialScore) {
+        const display = document.getElementById('campaignStrategyDisplay');
+        if (!display) return;
+
+        const toggle = document.getElementById('factoryPolicyToggle');
+        const preDuration = toggle && toggle.checked
+            ? Math.ceil(BASE_PRE_RELEASE_WEEKS * FACTORY_PRE_RELEASE_MULTIPLIER)
+            : BASE_PRE_RELEASE_WEEKS;
+        const postDuration = commercialScore >= POST_RELEASE_MIN_SCORE ? POST_RELEASE_WEEKS : 0;
+        const totalWeeks = preDuration + RELEASE_WEEKS + postDuration;
+
+        display.innerHTML = `
+            <div class="strategy-row">
+                <div class="campaign-block pre">
+                    <span class="camp-title">Pre-Release</span>
+                    <span class="camp-value" id="campaignPreReleaseValue">${preDuration} wks</span>
+                </div>
+
+                <div class="campaign-block release">
+                    <span class="camp-title">Release</span>
+                    <span class="camp-value" id="campaignReleaseValue">${RELEASE_WEEKS} wks</span>
+                </div>
+
+                <div class="campaign-block post ${postDuration > 0 ? '' : 'is-dimmed'}">
+                    <span class="camp-title">Post-Release</span>
+                    <span class="camp-value" id="campaignPostReleaseValue">${postDuration} wks</span>
+                </div>
+            </div>
+
+            <div class="total-duration-footer">
+                Total Duration: <strong class="text-main" id="campaignTotalWeeks">${totalWeeks} Weeks</strong>
+            </div>
+        `;
+    }
+
     function setupFactoryPolicyListener() {
         const toggle = document.getElementById('factoryPolicyToggle');
-        if (toggle) {
-            toggle.addEventListener('change', () => {
-                // Only recalculate if results are already displayed
-                const resultsSection = document.getElementById('results-advertisers');
-                if (resultsSection && !resultsSection.classList.contains('hidden')) {
-                    analyzeMovie();
-                }
-            });
-        }
+        if (!toggle) return;
+
+        toggle.addEventListener('change', () => {
+            // The panel only exists once an analysis has been rendered.
+            const resultsSection = document.getElementById('results-advertisers');
+            if (!resultsSection || resultsSection.classList.contains('hidden')) return;
+
+            const comInput = document.getElementById('comScoreInput');
+            renderCampaignDuration(parseFloat(comInput && comInput.value) || 0);
+        });
     }
 
     // Initialize factory policy listener on DOM ready
@@ -391,6 +378,7 @@
         displayAdvertiserRecommendations,
         holidayBonusFor,
         syncHolidayRowStates,
-        setupFactoryPolicyListener
+        setupFactoryPolicyListener,
+        renderCampaignDuration
     };
 })(globalThis);

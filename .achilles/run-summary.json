@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "timestamp": "2026-09-21T21:50:04Z",
+    "git_sha": "eac46072a40c9d7266a57dcf3e2f7e49424b5a0f",
+    "achilles_version": "0.1.8",
+    "schema": "run-summary/v2"
+  },
+  "phases": [],
+  "scenarios": {
+    "files": [
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/app-shell.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/boot-failure.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/colman-graves.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/distribution-behemoth.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/distribution-max-score.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/empty-state-navigation.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/exclusion-dropdown-refresh.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/genre-mix.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/marketing-release.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/script-lab.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/search-field-persistence.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/slider-syncing.spec.js"
+    ]
+  },
+  "bugs": {
+    "ids": [],
+    "by_severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "info": 0
+    }
+  },
+  "tests": {
+    "passing": null,
+    "failing": null,
+    "flaky": null,
+    "skipped": null,
+    "total": null,
+    "status": null
+  },
+  "journey_map": {
+    "journeys": 0
+  }
+}

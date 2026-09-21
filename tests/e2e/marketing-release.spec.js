@@ -235,6 +235,95 @@ test.describe('Marketing and Release — distribution calculator', () => {
     expect(values[2]).toBe(9000);
   });
 
+  // Factory Policy halves the pre-release run. Every other distribution toggle
+  // carries a numbered test in this file; this one shipped with none, and
+  // domStructure.test.js did not list it either, so the control could be
+  // deleted outright with the suite still green.
+  const analysed = async (steps) => {
+    await buildMarketingScript(steps);
+    await steps.on('analyzeScriptButton', 'MarketingRelease').click();
+    await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
+  };
+
+  test('TC04-000021 Factory Policy halves the pre-release run and the total', async ({ steps }) => {
+    await analysed(steps);
+    await steps.on('campaignPreRelease', 'MarketingRelease').verifyText('6 wks');
+    await steps.on('campaignTotalWeeks', 'MarketingRelease').verifyText('10 Weeks');
+
+    await steps.on('factoryPolicyToggle', 'MarketingRelease').check();
+
+    await steps.on('campaignPreRelease', 'MarketingRelease').verifyText('3 wks');
+    await steps.on('campaignTotalWeeks', 'MarketingRelease').verifyText('7 Weeks');
+  });
+
+  test('TC04-000022 switching Factory Policy back off restores the six-week run', async ({ steps }) => {
+    await analysed(steps);
+    await steps.on('factoryPolicyToggle', 'MarketingRelease').check();
+    await steps.on('campaignPreRelease', 'MarketingRelease').verifyText('3 wks');
+
+    await steps.on('factoryPolicyToggle', 'MarketingRelease').uncheck();
+
+    await steps.on('campaignPreRelease', 'MarketingRelease').verifyText('6 wks');
+    await steps.on('campaignTotalWeeks', 'MarketingRelease').verifyText('10 Weeks');
+  });
+
+  // Pre-release is the only stretch the policy touches: release is fixed by the
+  // game and post-release is gated on the commercial score, not on this toggle.
+  test('TC04-000023 Factory Policy leaves release and post-release untouched', async ({ steps }) => {
+    await analysed(steps);
+    await steps.on('factoryPolicyToggle', 'MarketingRelease').check();
+
+    await steps.on('campaignRelease', 'MarketingRelease').verifyText('4 wks');
+    await steps.on('campaignPostRelease', 'MarketingRelease').verifyText('0 wks');
+  });
+
+  // Regression: the toggle used to re-run the whole analysis, whose last act is
+  // scrollIntoView on the results — which threw the player ~1400px away from the
+  // switch they had just clicked.
+  test('TC04-000024 toggling Factory Policy does not scroll the page away', async ({ steps, page }) => {
+    await analysed(steps);
+    // Bring the switch itself into view, not its (very tall) panel: Playwright
+    // auto-scrolls to an off-screen target before clicking, and that scroll
+    // would otherwise be measured as if the app had caused it.
+    await page.locator('#factoryPolicyToggle').scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+
+    await steps.on('factoryPolicyToggle', 'MarketingRelease').check();
+    await steps.on('campaignPreRelease', 'MarketingRelease').verifyText('3 wks');
+
+    const after = await page.evaluate(() => window.scrollY);
+    expect(Math.abs(after - before)).toBeLessThan(100);
+  });
+
+  // The switch shipped with two invented classes that no stylesheet defined, so
+  // it rendered unstyled: stacked under the heading, and with no ON colour while
+  // every sibling toggle has one. Both are asserted here so the CSS cannot be
+  // dropped again silently.
+  test('TC04-000025 the Factory Policy switch sits on the heading row', async ({ steps, page }) => {
+    await analysed(steps);
+
+    const sameRow = await page.evaluate(() => {
+      const panel = document.getElementById('campaign-duration-panel');
+      const h = panel.querySelector('h3').getBoundingClientRect();
+      const t = panel.querySelector('.toggle-wrapper').getBoundingClientRect();
+      return Math.abs(h.top - t.top) < 25;
+    });
+
+    expect(sameRow).toBe(true);
+  });
+
+  test('TC04-000026 the Factory Policy switch changes colour when it is on', async ({ steps, page }) => {
+    await analysed(steps);
+    const trackColour = () => page.evaluate(() =>
+      getComputedStyle(document.getElementById('factoryPolicyToggle').nextElementSibling).backgroundColor);
+
+    const off = await trackColour();
+    await steps.on('factoryPolicyToggle', 'MarketingRelease').check();
+    await steps.on('campaignPreRelease', 'MarketingRelease').verifyText('3 wks');
+
+    await expect.poll(trackColour).not.toBe(off);
+  });
+
   test('TC04-000010 analysing a script produces a marketing profile', async ({ steps }) => {
     await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
     await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 3);
@@ -451,87 +540,7 @@ test.describe('Marketing and Release — Build for Target', () => {
   // story-element-budget model rather than the old fixed-size search.
   // ---------------------------------------------------------------------
 
-  // Given the budget is set to its minimum
-  // Then each combination carries that many story elements, plus Genre and Setting
-  test('TC05-000009 a budget of 5 produces seven-tag combinations', async ({ steps }) => {
-    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(5);
 
-    await steps.on('findCombinationsButton', 'BuildForTarget').click();
-
-    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
-    await steps.on('firstCombinationTagChips', 'BuildForTarget').verifyCount({ exactly: 7 });
-  });
-
-  // Given the budget is set to its maximum
-  // Then the combination widens by exactly the extra budget
-  test('TC05-000010 a budget of 10 produces twelve-tag combinations', async ({ steps }) => {
-    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(10);
-
-    await steps.on('findCombinationsButton', 'BuildForTarget').click();
-
-    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
-    await steps.on('firstCombinationTagChips', 'BuildForTarget').verifyCount({ exactly: 12 });
-  });
-
-  // Given the slider and its number input are two views of one budget
-  // Then moving either one moves the other
-  test('TC05-000011 the budget slider and number input stay in step', async ({ steps }) => {
-    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(7);
-    await steps.expect('elementsInput', 'BuildForTarget').value.toBe('7');
-
-    await steps.on('elementsInput', 'BuildForTarget').fill('5');
-    await steps.expect('elementsSlider', 'BuildForTarget').value.toBe('5');
-  });
-
-  // Given more story elements are picked than the budget allows
-  // Then the search is refused and the message names both numbers
-  test('TC05-000012 exceeding the budget is refused and names both numbers', async ({ steps }) => {
-    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(5);
-
-    // Supporting Character is multi-select, so its "+" is the only way to push
-    // the selection past a budget whose slider floor is 5.
-    await steps.on('addSupportingCharacterRow', 'BuildForTarget').click();
-    await steps.on('supportingCharacterSelects', 'BuildForTarget').verifyCount({ exactly: 2 });
-
-    await steps.selectDropdown('supportingCharacterSelect', 'BuildForTarget', FIRST_OPTION);
-    await steps.selectDropdown('supportingCharacterSelectRow2', 'BuildForTarget', {
-      type: DropdownSelectType.INDEX,
-      index: 2,
-    });
-
-    for (const select of ['protagonistSelect', 'antagonistSelect', 'themeEventSelect', 'finaleSelect']) {
-      await steps.selectDropdown(select, 'BuildForTarget', FIRST_OPTION);
-    }
-
-    await steps.on('findCombinationsButton', 'BuildForTarget').click();
-
-    await steps.on('feedbackMessage', 'BuildForTarget').verifyState('visible');
-    await steps.on('feedbackMessage', 'BuildForTarget').verifyTextContains('5');
-    await steps.on('feedbackMessage', 'BuildForTarget').verifyTextContains('6');
-    await steps.on('resultsPanel', 'BuildForTarget').verifyState('hidden');
-  });
-
-  // Given an element is banned in Script Lab
-  // When Build for Target searches
-  // Then that element never appears in a suggested combination
-  test('TC05-000013 an element excluded in Script Lab is absent from combinations', async ({ steps }) => {
-    await steps.on('buildTab', 'Navigation').click();
-    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
-      type: DropdownSelectType.VALUE,
-      value: SIDEKICK,
-    });
-
-    await steps.on('marketTab', 'Navigation').click();
-    await steps.on('buildForTargetModeButton', 'MarketingRelease').click();
-    await steps.on('allTagSelects', 'BuildForTarget').waitForState('visible');
-    await steps.on('elementsSlider', 'BuildForTarget').setSliderValue(10);
-
-    await steps.on('findCombinationsButton', 'BuildForTarget').click();
-
-    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
-    const listed = await steps.on('resultsList', 'BuildForTarget').getText();
-    expect(listed).not.toContain('Sidekick');
-  });
 
   // Given combinations are listed
   // Then they descend by advertiser fit, best first

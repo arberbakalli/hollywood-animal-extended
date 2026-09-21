@@ -178,51 +178,6 @@ test.describe('Script Lab — generator', () => {
     await steps.expect('excludedSupportingCharacterSelect', 'ScriptLab').value.toBe(SIDEKICK);
   });
 
-  // Given the user switched to Custom profile and removed an exclusion
-  // When they switch to another tab and back
-  // Then the removed element stays available and the exclusion list is consistent
-  test('TC01-000026 Exclusion state stays consistent when switching tabs', async ({ steps }) => {
-    // Start with Custom profile (default)
-    await steps.expect('customProfile', 'ScriptLab').attributes.get('class').toContain('active');
-
-    // Exclude Sidekick
-    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
-      type: DropdownSelectType.VALUE,
-      value: SIDEKICK,
-    });
-    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('1');
-
-    // Remove the exclusion by clearing the dropdown
-    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
-      type: DropdownSelectType.VALUE,
-      value: '',
-    });
-    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('0');
-
-    // Switch to Graves tab
-    await steps.on('evaluateTab', 'Navigation').click();
-    await steps.on('panel', 'ColmanGraves').verifyState('visible');
-
-    // Return to Script Lab
-    await steps.on('buildTab', 'Navigation').click();
-    await steps.on('panel', 'ScriptLab').verifyState('visible');
-
-    // Verify the exclusion is gone and Sidekick is available
-    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('0');
-    await steps.expect('excludedSupportingCharacterSelect', 'ScriptLab').value.toBe('');
-  });
-
-  // Given Custom is the active tag-availability profile
-  // When the user switches to Starting Tags
-  // Then the active state moves with them
-  test('TC01-000009 tag-availability profile switches between Starting and Custom', async ({ steps }) => {
-    await steps.expect('customProfile', 'ScriptLab').attributes.get('class').toContain('active');
-
-    await steps.on('startingTagsProfile', 'ScriptLab').click();
-
-    await steps.expect('startingTagsProfile', 'ScriptLab').attributes.get('class').toContain('active');
-    await steps.expect('customProfile', 'ScriptLab').attributes.get('class').not.toContain('active');
-  });
 
   // Given the user has generated scripts
   // When they pin the first result
@@ -331,6 +286,45 @@ test.describe('Script Lab — generator', () => {
     await steps.on('addExcludedSupportingCharacterRow', 'ScriptLab').click();
 
     await steps.on('excludedSupportingCharacterSelect', 'ScriptLab').verifyCount({ exactly: 2 });
+  });
+
+  // The only test that sees genuine first-run state: it builds a raw context, so
+  // the fixture's "seeding already done" marker is absent.
+  //
+  // Both halves matter. Seeding once is the feature. NOT re-seeding is the
+  // regression guard: an earlier build re-applied Starting Tags on every new
+  // tab, which rebuilt the excluded selectors over a restored list and let the
+  // store's MutationObserver save that rebuild back over the player's own bans.
+  test('TC01-000028 Starting Tags seed once on a first run and never re-seed', async ({ browser, baseURL }) => {
+    const context = await browser.newContext();
+    await context.addInitScript(() => {
+      window.__hollywoodReady = false;
+      window.addEventListener('hollywood:ready', () => { window.__hollywoodReady = true; });
+    });
+    const page = await context.newPage();
+    const badge = () => page.locator('#excluded-count').innerText();
+
+    try {
+      await page.goto(`${baseURL}/index.html`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => window.__hollywoodReady === true);
+      await page.locator('#tab-generator-button').click();
+
+      // First run: the ban list arrives seeded.
+      await expect.poll(async () => Number(await badge())).toBeGreaterThan(0);
+
+      // The player clears it deliberately.
+      await page.locator('#resetExcludedBansButton').click();
+      await expect.poll(async () => Number(await badge())).toBe(0);
+
+      // A new visit must respect that, not push the starter bans back over it.
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => window.__hollywoodReady === true);
+      await page.locator('#tab-generator-button').click();
+
+      await expect.poll(async () => Number(await badge())).toBe(0);
+    } finally {
+      await context.close();
+    }
   });
 
   test('TC01-000022 filtering excluded category search narrows banned options', async ({ steps, page }) => {

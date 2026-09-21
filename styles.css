@@ -2675,6 +2675,34 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background-color: #4cd964;
 }
 
+.distribution-toggle--factory > .toggle-checkbox:checked + .toggle-track {
+    background-color: var(--moderate);
+}
+
+.distribution-toggle-label--factory {
+    color: var(--moderate);
+}
+
+/* The campaign panel puts its switch on the heading row; without this the
+   wrapper is a plain block and the control drops onto its own line. */
+.panel-header-with-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+/* The heading wraps its own text rather than pushing the switch onto a second
+   row; this card is narrow and the switch belongs on the title line. */
+.panel-header-with-toggle > h3 {
+    margin: 0;
+    min-width: 0;
+}
+
+.campaign-duration-toggle {
+    flex: 0 0 auto;
+}
+
 /* Toggle Thumb */
 .toggle-thumb {
     position: relative;

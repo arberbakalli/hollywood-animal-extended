@@ -46,3 +46,42 @@ Feature: Exclusion Dropdown Refresh
     And switches to the Script Evaluation tab
     And opens the Colman Graves Submit Script Finale dropdown
     Then the same items are disabled in the Graves context
+
+  # A ban made by hand has to reach the builders the same instant the profile
+  # button's bans do. It did not: the change handler refreshed only the
+  # "excluded" context, so the ban list redrew itself and the builders kept
+  # offering the tag. Single-select categories had no other path to a redraw,
+  # which is why Setting, Protagonist, Antagonist and Finale felt broken while
+  # Genre and Supporting Character appeared to work.
+
+  # [automated] — TC09-000005
+  Scenario: TC09-000005 Banning a Setting by hand disables it in Script Lab at once
+    Given the Build tab is selected
+    And the Wild West setting is selectable in Script Lab
+    When the user bans Wild West in the Excluded Elements panel
+    Then Wild West is disabled in the Script Lab Setting dropdown
+    And no further interaction is needed to make that happen
+
+  # [automated] — TC09-000006
+  Scenario: TC09-000006 Lifting a Setting ban re-enables it in Script Lab at once
+    Given the Build tab is selected
+    And Wild West has been banned
+    When the user clears that ban
+    Then Wild West is selectable again in the Script Lab Setting dropdown
+
+  # [automated] — TC09-000007 .. TC09-000012
+  Scenario Outline: Banning a <category> disables it in Script Lab at once
+    Given the Build tab is selected
+    And a <category> option is selectable in Script Lab
+    When the user bans that option in the Excluded Elements panel
+    Then it is disabled in the Script Lab <category> dropdown
+
+    Examples:
+      | category            |
+      | Genre               |
+      | Protagonist         |
+      | Antagonist          |
+      | Supporting Character|
+      | Theme & Event       |
+      | Finale              |
+

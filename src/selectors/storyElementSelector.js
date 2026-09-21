@@ -183,6 +183,20 @@
         return selected;
     }
 
+    // Every context that draws from the ban list. A ban only matters once it
+    // reaches these: refreshing the 'excluded' context alone updates the ban
+    // list's own pickers and leaves the builders still offering the tag.
+    const EXCLUSION_CONSUMER_CONTEXTS = ['generator', 'graves', 'advertisers', 'targeted'];
+
+    // Called whenever a ban is added or lifted. Single-select categories --
+    // Setting, Protagonist, Antagonist, Finale -- had no other path to a redraw,
+    // so a banned Setting kept appearing in Script Lab until an unrelated
+    // interaction happened to refresh it.
+    function propagateExclusionChange(category) {
+        EXCLUSION_CONSUMER_CONTEXTS.forEach(consumer =>
+            refreshCategoryDropdowns(category, consumer));
+    }
+
     function refreshCategoryDropdowns(category, context) {
         const categoryContainerId = `inputs-${categoryToElementSlug(category)}-${context}`;
         const categoryContainer = document.getElementById(categoryContainerId);
@@ -201,7 +215,8 @@
             }
         });
 
-        // Update each dropdown: disable options that are selected elsewhere
+
+        // Update each dropdown: disable options that are selected elsewhere or excluded
         selects.forEach(select => {
             select.querySelectorAll('option:not(:first-child)').forEach(opt => {
                 const isSelectedInThisDropdown = (opt.value === select.value);
@@ -327,7 +342,10 @@
                 select.value = "";
             }
             refreshCategoryDropdowns(category, context);
-            if (context === 'excluded') updateExcludedCount();
+            if (context === 'excluded') {
+                updateExcludedCount();
+                propagateExclusionChange(category);
+            }
         });
         // Initial refresh to disable already-selected options
         setTimeout(() => refreshCategoryDropdowns(category, context), 0);
@@ -385,7 +403,10 @@
                 row.remove();
                 refreshCategoryDropdowns(category, context);
                 if (category === 'Genre' && context !== 'excluded') updateGenreControls(context);
-                if (context === 'excluded') updateExcludedCount();
+                if (context === 'excluded') {
+                    updateExcludedCount();
+                    propagateExclusionChange(category);
+                }
             });
             row.appendChild(removeBtn);
         }
@@ -564,7 +585,7 @@
 
         const excludedIds = getExcludedIdsForContext(context);
         if (excludedIds) {
-            MULTI_SELECT_CATEGORIES.forEach(category => refreshCategoryDropdowns(category, context));
+            GAME_DATA.categories.forEach(category => refreshCategoryDropdowns(category, context));
         }
 
         // BLOCK 1: Handling Genres (usually with percentages)
@@ -657,6 +678,7 @@
         clearExcludedSelectionsInCategory,
         getSelectedTagsInCategory,
         refreshCategoryDropdowns,
+        propagateExclusionChange,
         refreshScriptBuilderAvailability,
         refreshLockedElementAvailability,
         addDropdown,

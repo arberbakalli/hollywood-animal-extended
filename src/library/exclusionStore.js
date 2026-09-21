@@ -75,6 +75,32 @@
         }
     }
 
+    // Starting Tags seed the ban list once, on a player's genuine first run.
+    // The marker is deliberately NOT "is the stored list empty": a player who
+    // resets every ban has an empty list on purpose and must not have the 194
+    // starter bans pushed back over it on their next visit.
+    const SEEDED_KEY = 'hac.startingTagsSeeded.v1';
+
+    function hasSeededStartingTags() {
+        const store = storage();
+        if (!store) return true; // No storage means no way to remember; do not seed.
+        try {
+            return store.getItem(SEEDED_KEY) === 'true';
+        } catch (error) {
+            return true;
+        }
+    }
+
+    function markStartingTagsSeeded() {
+        const store = storage();
+        if (!store) return;
+        try {
+            store.setItem(SEEDED_KEY, 'true');
+        } catch (error) {
+            // Seeding simply repeats next time; better than failing the boot.
+        }
+    }
+
     function restoreStoredExclusions() {
         const saved = loadExclusions();
         if (saved.length === 0) return 0;
@@ -113,6 +139,9 @@
 
     global.HACExclusionStore = {
         STORAGE_KEY,
+        SEEDED_KEY,
+        hasSeededStartingTags,
+        markStartingTagsSeeded,
         serializeExclusions,
         parseStoredExclusions,
         saveExclusions,

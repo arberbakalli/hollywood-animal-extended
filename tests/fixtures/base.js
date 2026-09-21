@@ -25,6 +25,15 @@ export const test = configured.extend({
       });
     }
 
+    // Tests assert against a clean ban list. The app seeds Starting Tags on a
+    // player's genuine first run, and every Playwright context is a first run,
+    // so mark the seeding done before the app boots. Tests that want the
+    // first-run behaviour itself build their own context (see script-lab.spec.js
+    // TC01-000028) and therefore skip this.
+    await page.addInitScript(() => {
+      try { localStorage.setItem('hac.startingTagsSeeded.v1', 'true'); } catch (error) { /* private mode */ }
+    });
+
     await page.addInitScript(() => {
       window.__hollywoodReady = false;
       window.addEventListener('hollywood:ready', () => {
