@@ -61,7 +61,6 @@ describe('HTML structure', () => {
             'targeted-mode-advertisers-button',
             'targeted-mode-targeted-button',
             'generator-settings-panel',
-            'generator-profile-control',
             'generator-score-controls',
             'selectors-container-generator',
             'selectors-container-excluded',
