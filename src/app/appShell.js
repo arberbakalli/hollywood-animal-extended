@@ -165,10 +165,12 @@
                 container.classList.remove('is-batching');
                 updateExcludedCount();
 
-                // Refresh generator dropdowns to re-filter based on new exclusions
+                // Refresh all script builder dropdowns to re-filter based on new exclusions
                 if (typeof refreshCategoryDropdowns === 'function') {
-                    GAME_DATA.categories.forEach(category => {
-                        refreshCategoryDropdowns(category, 'generator');
+                    ['generator', 'graves', 'advertisers'].forEach(context => {
+                        GAME_DATA.categories.forEach(category => {
+                            refreshCategoryDropdowns(category, context);
+                        });
                     });
                 }
             };
