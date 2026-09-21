@@ -19,12 +19,24 @@
                     <h2>Calculator Extended</h2>
                 </div>
 
-                <!-- ELEMENT POOL CONTROL (GLOBAL) -->
-                <div id="global-element-pool-control" class="header-control-group">
-                    <label for="globalElementPoolInput" class="header-control-label">Element Pool:</label>
-                    <div class="header-control-input-group">
-                        <input type="number" id="globalElementPoolInput" class="header-control-number" step="1" min="5" max="10" value="10" title="Max story elements across all contexts">
-                        <input type="range" id="globalElementPoolSlider" class="header-control-slider" min="5" max="10" step="1" value="10" title="Max story elements across all contexts">
+                <!-- GLOBAL CONTROLS -->
+                <div id="global-controls-container" class="global-controls-group">
+                    <!-- TARGET MOVIE SCORE (GLOBAL) -->
+                    <div id="global-movie-score-control" class="header-control-group">
+                        <label for="globalMovieScoreInput" class="header-control-label">Target Movie</label>
+                        <div class="header-control-input-group">
+                            <input type="number" id="globalMovieScoreInput" class="header-control-number" step="1" min="5" max="10" value="6" title="Global - affects generator across Build, Evaluate, Market. Excludes Genre & Setting">
+                            <input type="range" id="globalMovieScoreSlider" class="header-control-slider art-slider" min="5" max="10" step="1" value="6" title="Global - affects generator across Build, Evaluate, Market. Excludes Genre & Setting">
+                        </div>
+                    </div>
+
+                    <!-- ELEMENT POOL CONTROL (GLOBAL) -->
+                    <div id="global-element-pool-control" class="header-control-group">
+                        <label for="globalElementPoolInput" class="header-control-label">Max Elements</label>
+                        <div class="header-control-input-group">
+                            <input type="number" id="globalElementPoolInput" class="header-control-number" step="1" min="5" max="10" value="10" title="Global - affects Best Additions across all contexts. Excludes Genre & Setting">
+                            <input type="range" id="globalElementPoolSlider" class="header-control-slider" min="5" max="10" step="1" value="10" title="Global - affects Best Additions across all contexts. Excludes Genre & Setting">
+                        </div>
                     </div>
                 </div>
 
@@ -92,20 +104,6 @@
                                 <input type="range" id="genCompSlider" class="styled-slider com-slider" min="1" max="5" step="0.1" value="4.0">
                             </div>
                             <p class="subtitle score-help-text">The generator will attempt to find a script matching or exceeding this compatibility score.</p>
-                        </div>
-
-                        <!-- TARGET MOVIE SCORE -->
-                        <div id="generator-movie-score-control" class="score-control-group">
-                            <div class="score-label-row">
-                                <label for="genScoreInput">Target Movie Score</label>
-                                <input type="number" id="genScoreInput" class="score-number-display" step="1" min="6" max="10" value="6">
-                            </div>
-                            <div class="range-wrapper">
-                                <input type="range" id="genScoreSlider" class="styled-slider art-slider" min="6" max="10" step="1" value="6">
-                            </div>
-                            <p id="genTagsRequiredDisplay" class="subtitle score-help-text generator-required-tags">
-                                Requires 8 Story Elements (excluding Genre).
-                            </p>
                         </div>
 
                     </div>

@@ -61,6 +61,7 @@
         setupGlobalCategorySearch();
         setupDomEventBindings();
         setupGlobalElementPoolControl();
+        setupGlobalMovieScoreControl();
 
         buildSearchIndex();
         setupSearchListeners();
@@ -83,30 +84,40 @@
     }
 
     function setupGlobalElementPoolControl() {
-        const slider = document.getElementById('globalElementPoolSlider');
-        const input = document.getElementById('globalElementPoolInput');
+        setupHeaderControlSlider('globalElementPool');
+    }
+
+    function setupGlobalMovieScoreControl() {
+        setupHeaderControlSlider('globalMovieScore');
+    }
+
+    function setupHeaderControlSlider(controlName) {
+        const slider = document.getElementById(controlName + 'Slider');
+        const input = document.getElementById(controlName + 'Input');
 
         if (!slider || !input) return;
 
         slider.addEventListener('input', (e) => {
             input.value = parseInt(e.target.value);
-            updateElementPoolSliderStyle(slider);
+            updateControlSliderStyle(slider);
         });
 
         input.addEventListener('input', (e) => {
             let val = parseInt(e.target.value);
-            if (val > 10) val = 10;
-            if (val < 5) val = 5;
+            const max = parseInt(slider.max);
+            const min = parseInt(slider.min);
+            if (val > max) val = max;
+            if (val < min) val = min;
             if (!isNaN(val)) {
                 slider.value = val;
-                updateElementPoolSliderStyle(slider);
+                updateControlSliderStyle(slider);
             }
         });
 
-        updateElementPoolSliderStyle(slider);
+        updateControlSliderStyle(slider);
     }
 
-    function updateElementPoolSliderStyle(slider) {
+    function updateControlSliderStyle(slider) {
         const percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
         slider.style.setProperty('--slider-fill-percent', percent + '%');
     }
