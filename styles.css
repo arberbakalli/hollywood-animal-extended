@@ -2157,6 +2157,24 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: #171717;
 }
 
+.best-match-swap-btn {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid rgba(169, 169, 169, 0.6);
+    border-radius: 4px;
+    background: rgba(169, 169, 169, 0.15);
+    color: #a9a9a9;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+.best-match-swap-btn:hover {
+    background: rgba(169, 169, 169, 0.3);
+    color: #d0d0d0;
+}
+
 /* Category color coding */
 /* Rows are coloured by band, not category, so green means "good addition" on
    every mode. Category stays legible on the tag chip below. */
