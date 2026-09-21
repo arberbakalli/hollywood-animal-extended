@@ -82,24 +82,6 @@
         // Render the help text once on load, otherwise the placeholder markup in
         // index.html stands until the user first touches the slider.
         updateScoreDisplay(parseInt(genScoreInput.value));
-
-        const elementPoolSlider = document.getElementById('elementPoolSlider');
-        const elementPoolInput = document.getElementById('elementPoolInput');
-
-        elementPoolSlider.addEventListener('input', (e) => {
-            elementPoolInput.value = parseInt(e.target.value);
-            updateSliderTrack(elementPoolSlider, '#8BEAFF');
-        });
-        elementPoolInput.addEventListener('input', (e) => {
-            let val = parseInt(e.target.value);
-            if (val > 10) val = 10;
-            if (val < 5) val = 5;
-            if (!isNaN(val)) {
-                elementPoolSlider.value = val;
-                updateSliderTrack(elementPoolSlider, '#8BEAFF');
-            }
-        });
-        updateSliderTrack(elementPoolSlider, '#8BEAFF');
     }
 
     let blockedLockIds = [];

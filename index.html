@@ -19,6 +19,15 @@
                     <h2>Calculator Extended</h2>
                 </div>
 
+                <!-- ELEMENT POOL CONTROL (GLOBAL) -->
+                <div id="global-element-pool-control" class="header-control-group">
+                    <label for="globalElementPoolInput" class="header-control-label">Element Pool:</label>
+                    <div class="header-control-input-group">
+                        <input type="number" id="globalElementPoolInput" class="header-control-number" step="1" min="5" max="10" value="10" title="Max story elements across all contexts">
+                        <input type="range" id="globalElementPoolSlider" class="header-control-slider" min="5" max="10" step="1" value="10" title="Max story elements across all contexts">
+                    </div>
+                </div>
+
                 <!-- LANGUAGE SELECTOR -->
                 <div id="language-controls" class="lang-wrapper">
                     <select id="languageSelector" class="lang-dropdown">
@@ -99,17 +108,6 @@
                             </p>
                         </div>
 
-                        <!-- ELEMENT POOL SIZE -->
-                        <div id="element-pool-control" class="score-control-group">
-                            <div class="score-label-row">
-                                <label for="elementPoolInput">Max Story Elements</label>
-                                <input type="number" id="elementPoolInput" class="score-number-display" step="1" min="5" max="10" value="10">
-                            </div>
-                            <div class="range-wrapper">
-                                <input type="range" id="elementPoolSlider" class="styled-slider" min="5" max="10" step="1" value="10">
-                            </div>
-                            <p class="subtitle score-help-text">Controls the maximum number of story elements available for Best Additions recommendations.</p>
-                        </div>
                     </div>
 
                     <div class="divider-line"></div>
@@ -536,17 +534,6 @@
                     </div>
 
                     <!-- Story Elements Range -->
-                    <div id="targeted-elements-control" class="score-control-group">
-                        <div class="score-label-row">
-                            <label for="targetedElementsInput">Max Story Elements</label>
-                            <input type="number" id="targetedElementsInput" class="score-number-display" step="1" min="5" max="10" value="10">
-                        </div>
-                        <div class="range-wrapper">
-                            <input type="range" id="targetedElementsSlider" class="styled-slider art-slider" min="5" max="10" step="1" value="10">
-                        </div>
-                        <p class="subtitle score-help-text">Genre and Settings always included. Adjust how many other story elements to allow.</p>
-                    </div>
-
                     <!-- Tag Builder -->
                     <div class="targeted-tag-builder">
                         <div class="targeted-field-label">Add Tags (Optional - Leave Empty for All)</div>

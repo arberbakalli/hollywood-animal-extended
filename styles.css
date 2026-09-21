@@ -95,6 +95,76 @@ h2 {
     border-color: var(--accent);
 }
 
+/* --- GLOBAL ELEMENT POOL CONTROL --- */
+.header-control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+}
+
+.header-control-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.header-control-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-control-number {
+    width: 35px;
+    background: var(--input-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.header-control-slider {
+    width: 100px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--slider-fill-percent, 50%), var(--border) var(--slider-fill-percent, 50%), var(--border) 100%);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.header-control-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header-control-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* --- TABS --- */
 .tab-nav {
     display: flex;

@@ -60,6 +60,7 @@
 
         setupGlobalCategorySearch();
         setupDomEventBindings();
+        setupGlobalElementPoolControl();
 
         buildSearchIndex();
         setupSearchListeners();
@@ -79,6 +80,35 @@
         renderPinnedScripts();
 
         window.dispatchEvent(new CustomEvent('hollywood:ready'));
+    }
+
+    function setupGlobalElementPoolControl() {
+        const slider = document.getElementById('globalElementPoolSlider');
+        const input = document.getElementById('globalElementPoolInput');
+
+        if (!slider || !input) return;
+
+        slider.addEventListener('input', (e) => {
+            input.value = parseInt(e.target.value);
+            updateElementPoolSliderStyle(slider);
+        });
+
+        input.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value);
+            if (val > 10) val = 10;
+            if (val < 5) val = 5;
+            if (!isNaN(val)) {
+                slider.value = val;
+                updateElementPoolSliderStyle(slider);
+            }
+        });
+
+        updateElementPoolSliderStyle(slider);
+    }
+
+    function updateElementPoolSliderStyle(slider) {
+        const percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+        slider.style.setProperty('--slider-fill-percent', percent + '%');
     }
 
     function switchTab(tabName) {
