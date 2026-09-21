@@ -273,7 +273,7 @@ test.describe('Script Lab — generator', () => {
     await steps.on('verdict', 'ColmanGraves').verifyText();
   });
 
-  test('TC01-000026 transferring a generated script opens Marketing analysis', async ({ steps }) => {
+  test('TC01-000027 transferring a generated script opens Marketing analysis', async ({ steps }) => {
     await steps.on('generateButton', 'ScriptLab').click();
     await steps.on('generatedMarketingButtons', 'ScriptLab').verifyCount({ greaterThan: 0 });
     await steps.on('generatedCardHeaders', 'ScriptLab').first().click();
