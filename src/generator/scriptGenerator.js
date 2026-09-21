@@ -96,20 +96,32 @@
 
     function setupMovieScoreSliderSync() {
         const genScoreSlider = document.getElementById('genScoreSlider');
+        const genScoreInput = document.getElementById('genScoreInput');
         const globalPoolSlider = document.getElementById('globalElementPoolSlider');
+        const globalPoolInput = document.getElementById('globalElementPoolInput');
 
         if (!genScoreSlider || !globalPoolSlider) return;
 
-        // When Target Movie Score changes, visually update pool slider proportionally
+        // When Target Movie Score changes, sync Max Element Pool
         genScoreSlider.addEventListener('input', () => {
+            globalPoolSlider.value = genScoreSlider.value;
+            globalPoolInput.value = genScoreSlider.value;
             updateSliderTrack(genScoreSlider, '#d4af37');
+            updateElementPoolSliderStyle(globalPoolSlider);
         });
 
-        // When Max Elements changes, update its track
+        // When Max Elements changes, sync Target Movie Score
         globalPoolSlider.addEventListener('input', () => {
-            const percent = ((globalPoolSlider.value - globalPoolSlider.min) / (globalPoolSlider.max - globalPoolSlider.min)) * 100;
-            globalPoolSlider.style.setProperty('--slider-fill-percent', percent + '%');
+            genScoreSlider.value = globalPoolSlider.value;
+            genScoreInput.value = globalPoolSlider.value;
+            updateElementPoolSliderStyle(globalPoolSlider);
+            updateSliderTrack(genScoreSlider, '#d4af37');
         });
+    }
+
+    function updateElementPoolSliderStyle(slider) {
+        const percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+        slider.style.setProperty('--slider-fill-percent', percent + '%');
     }
 
     function showBlockedLockAction(ids) {
