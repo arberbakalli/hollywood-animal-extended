@@ -4,20 +4,7 @@
     function setGeneratorProfile(profileName) {
         currentGenProfile = profileName;
 
-        // 1. Update Buttons Visual State
-        document.getElementById('btn-profile-custom').classList.remove('active');
-        document.getElementById('btn-profile-starting').classList.remove('active');
-        document.getElementById(`btn-profile-${profileName}`).classList.add('active');
-
-        // 2. Update Description Text
-        const descText = document.getElementById('profile-desc-text');
-        if (profileName === 'starting') {
-            descText.innerHTML = "Only <strong class=\"text-accent\">Starting Tags</strong> are available. Everything else is moved to Excluded.";
-        } else {
-            descText.innerHTML = "All tags are available. You can manually exclude tags below.";
-        }
-
-        // 3. Handle Exclusion Logic
+        // Handle Exclusion Logic
         if (profileName === 'starting') {
             populateExcludedForStartingProfile();
         } else {

@@ -8,6 +8,8 @@
     // Pagination: show 10 rows initially, then offer "Show more" to load next batch.
     const ROWS_PER_PAGE = 10;
     const ROWS_INCREMENT = 10;
+    // Maximum rows to display in Pairwise mode (all matches, capped for performance)
+    const MAX_ROWS = 100;
 
     let bestMatchMode = 'additions';
     let lastSelectedTags = [];
