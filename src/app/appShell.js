@@ -144,15 +144,33 @@
             button.addEventListener('click', () => setBestMatchMode(button.dataset.bestMatchMode));
         });
 
-        document.querySelectorAll('[data-generator-profile]').forEach(button => {
-            button.addEventListener('click', () => setGeneratorProfile(button.dataset.generatorProfile));
-        });
-
         document.querySelectorAll('[data-reset-context]').forEach(button => {
             button.addEventListener('click', () => resetSelectors(button.dataset.resetContext));
         });
 
+        function applyStartingTagsExclusions() {
+            const buildExcludedList = () => {
+                resetSelectors('excluded');
+                const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+                const allTags = Object.values(GAME_DATA.tags);
+                const container = document.getElementById('selectors-container-excluded');
+
+                if (!container) return;
+                container.classList.add('is-batching');
+                allTags.forEach(tag => {
+                    if (!whitelist.has(tag.id)) {
+                        addDropdown(tag.category, tag.id, 'excluded');
+                    }
+                });
+                container.classList.remove('is-batching');
+                updateExcludedCount();
+            };
+
+            setTimeout(buildExcludedList, 0);
+        }
+
         const clickBindings = [
+            ['applyStartingTagsButton', applyStartingTagsExclusions],
             ['generateScriptsButton', generateScripts],
             ['savePinnedScriptsButton', savePinnedScripts],
             ['loadPinnedScriptsButton', triggerLoadScripts],

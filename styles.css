@@ -695,6 +695,27 @@ select:focus { outline: none; border-color: var(--accent); }
 }
 .secondary-btn:hover { background-color: var(--accent); color: #000; }
 
+.excluded-header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.apply-profile-btn {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: #000;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.apply-profile-btn:hover {
+    opacity: 0.9;
+    border-color: var(--accent);
+}
+
 .reset-btn {
     background: transparent;
     border: 1px solid var(--text-muted);

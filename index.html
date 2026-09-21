@@ -72,24 +72,6 @@
                         <h3>Script Lab</h3>
                     </div>
 
-                    <!-- PROFILE SELECTION BUTTONS -->
-                    <div id="generator-profile-control" class="profile-control-container">
-                        <div class="profile-label-row">
-                            <div class="profile-field-label">Tag Availability</div>
-                        </div>
-                        <div class="profile-btn-group">
-                            <button id="btn-profile-starting" class="profile-btn" type="button" data-generator-profile="starting">
-                                Starting Tags
-                            </button>
-                            <button id="btn-profile-custom" class="profile-btn active" type="button" data-generator-profile="custom">
-                                Custom
-                            </button>
-                        </div>
-                        <p id="profile-desc-text" class="subtitle profile-description">
-                            Select which story elements are available for generation.
-                        </p>
-                    </div>
-
                     <div id="generator-score-controls" class="score-controls-wrapper">
                         <!-- TARGET COMPATIBILITY -->
                         <div id="generator-compatibility-control" class="score-control-group">
@@ -142,7 +124,10 @@
                             <span class="collapsible-title collapsible-title--excluded">Excluded Elements</span>
                             <span class="badge-danger" id="excluded-count">0</span>
                         </button>
-                        <button id="resetExcludedBansButton" class="reset-btn" type="button" data-reset-context="excluded">Reset Bans</button>
+                        <div class="excluded-header-buttons">
+                            <button id="applyStartingTagsButton" class="apply-profile-btn" type="button">Apply Starting Tags</button>
+                            <button id="resetExcludedBansButton" class="reset-btn" type="button" data-reset-context="excluded">Reset Bans</button>
+                        </div>
                     </div>
                     <div id="excluded-content" class="collapsible-content">
                         <p class="subtitle">Select tags to <strong>BAN</strong> (e.g., due to "The Code"). The generator will never pick these.</p>
