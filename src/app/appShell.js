@@ -66,33 +66,43 @@
         setupSearchListeners();
         setupScoreSync();
         setupGeneratorControls();
-        setupDistributionLogic();
+
+        // Try to setup distribution, but gracefully handle if elements aren't ready yet
+        try {
+            setupDistributionLogic();
+        } catch (error) {
+            console.warn('Distribution logic setup encountered an error:', error.message);
+        }
+
         setupCollapsibleSections();
         initializeTargetedAdsTab();
         initializeDistributionToggles();
         setGeneratorProfile('custom');
 
-        // Initialize sliders in sync on app load
-        const poolInput = document.getElementById('globalElementPoolInput');
-        const genScoreInput = document.getElementById('genScoreInput');
-        const genScoreSlider = document.getElementById('genScoreSlider');
-        if (poolInput && genScoreInput && genScoreSlider) {
-            const poolVal = parseInt(poolInput.value);
-            const scoreVal = parseInt(genScoreInput.value);
-            // If pool is at max (10) but score isn't, sync score to max
-            if (poolVal === 10 && scoreVal !== 10) {
-                genScoreSlider.value = 10;
-                genScoreInput.value = 10;
-                // Update slider track style
-                genScoreSlider.style.setProperty('--slider-fill-color', '#d4af37');
-                genScoreSlider.style.setProperty('--slider-fill-percent', '100%');
-                // Update help text
-                const requiredTagsDisplay = document.getElementById('genTagsRequiredDisplay');
-                if (requiredTagsDisplay) {
-                    requiredTagsDisplay.innerText = 'Requires ~10 Story Elements (excluding Genre & Setting).';
+        // Defer slider sync to ensure all DOM elements are fully ready
+        // Use requestAnimationFrame to wait for the next browser paint cycle
+        requestAnimationFrame(() => {
+            const poolInput = document.getElementById('globalElementPoolInput');
+            const genScoreInput = document.getElementById('genScoreInput');
+            const genScoreSlider = document.getElementById('genScoreSlider');
+            if (poolInput && genScoreInput && genScoreSlider) {
+                const poolVal = parseInt(poolInput.value);
+                const scoreVal = parseInt(genScoreInput.value);
+                // If pool is at max (10) but score isn't, sync score to max
+                if (poolVal === 10 && scoreVal !== 10) {
+                    genScoreSlider.value = 10;
+                    genScoreInput.value = 10;
+                    // Update slider track style
+                    genScoreSlider.style.setProperty('--slider-fill-color', '#d4af37');
+                    genScoreSlider.style.setProperty('--slider-fill-percent', '100%');
+                    // Update help text
+                    const requiredTagsDisplay = document.getElementById('genTagsRequiredDisplay');
+                    if (requiredTagsDisplay) {
+                        requiredTagsDisplay.innerText = 'Requires ~10 Story Elements (excluding Genre & Setting).';
+                    }
                 }
             }
-        }
+        });
 
         // After the profile, which rebuilds the excluded list and would wipe a
         // restore that ran before it.
