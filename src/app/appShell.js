@@ -85,11 +85,22 @@
     function setupGlobalElementPoolControl() {
         const slider = document.getElementById('globalElementPoolSlider');
         const input = document.getElementById('globalElementPoolInput');
+        const genScoreSlider = document.getElementById('genScoreSlider');
+        const genScoreInput = document.getElementById('genScoreInput');
 
         if (!slider || !input) return;
 
         slider.addEventListener('input', (e) => {
-            input.value = parseInt(e.target.value);
+            const poolVal = parseInt(e.target.value);
+            input.value = poolVal;
+            // Sync with Target Movie Score: poolSize = genScore - 1, so genScore = poolSize + 1
+            if (genScoreSlider && genScoreInput) {
+                const mappedScore = poolVal + 1;
+                if (mappedScore <= 10) {
+                    genScoreSlider.value = mappedScore;
+                    genScoreInput.value = mappedScore;
+                }
+            }
             updateElementPoolSliderStyle(slider);
         });
 
@@ -99,6 +110,14 @@
             if (val < 5) val = 5;
             if (!isNaN(val)) {
                 slider.value = val;
+                // Sync with Target Movie Score
+                if (genScoreSlider && genScoreInput) {
+                    const mappedScore = val + 1;
+                    if (mappedScore <= 10) {
+                        genScoreSlider.value = mappedScore;
+                        genScoreInput.value = mappedScore;
+                    }
+                }
                 updateElementPoolSliderStyle(slider);
             }
         });
