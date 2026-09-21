@@ -201,9 +201,39 @@
         let releaseDuration = 4;
         let postDuration = 0;
         let totalWeeks = 10;
+
+        // Factory Policy: 50% reduction to pre-release advertising
+        const factoryPolicyToggle = document.getElementById('factoryPolicyToggle');
+        const factoryEnabled = factoryPolicyToggle && factoryPolicyToggle.checked;
+        if (factoryEnabled) {
+            preDuration = Math.ceil(preDuration * 0.5); // 6 weeks → 3 weeks
+            totalWeeks = preDuration + releaseDuration + postDuration;
+        }
+
         if (inputCom >= 9.0) {
             postDuration = 4;
-            totalWeeks = 14;
+            totalWeeks = preDuration + releaseDuration + postDuration;
+        }
+
+        // Ensure factory policy toggle exists (create if missing from static HTML)
+        const panel = document.getElementById('campaign-duration-panel');
+        if (panel && !document.getElementById('factoryPolicyToggle')) {
+            const h3 = panel.querySelector('h3');
+            if (h3) {
+                const toggleWrapper = document.createElement('div');
+                toggleWrapper.className = 'toggle-wrapper campaign-duration-toggle';
+                toggleWrapper.innerHTML = `
+                    <span class="toggle-label-text" title="Factory Policy reduces pre-release advertising duration by 50%, cutting preparation time for efficient marketing rollout.">Factory Policy</span>
+                    <div class="toggle-container">
+                        <input type="checkbox" class="toggle-checkbox" id="factoryPolicyToggle" role="switch" aria-label="Factory Policy marketing efficiency bonus">
+                        <div class="toggle-track" aria-hidden="true">
+                            <div class="toggle-thumb" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                `;
+                h3.parentElement.insertBefore(toggleWrapper, h3.nextSibling);
+                setupFactoryPolicyListener();
+            }
         }
 
         document.getElementById('campaignStrategyDisplay').innerHTML = `
@@ -335,10 +365,32 @@
         return total / targetIds.length;
     }
 
+    // Wire up factory policy toggle to recalculate campaign duration
+    function setupFactoryPolicyListener() {
+        const toggle = document.getElementById('factoryPolicyToggle');
+        if (toggle) {
+            toggle.addEventListener('change', () => {
+                // Only recalculate if results are already displayed
+                const resultsSection = document.getElementById('results-advertisers');
+                if (resultsSection && !resultsSection.classList.contains('hidden')) {
+                    analyzeMovie();
+                }
+            });
+        }
+    }
+
+    // Initialize factory policy listener on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupFactoryPolicyListener);
+    } else {
+        setupFactoryPolicyListener();
+    }
+
     global.HACMarketingPlanner = {
         analyzeMovie,
         displayAdvertiserRecommendations,
         holidayBonusFor,
-        syncHolidayRowStates
+        syncHolidayRowStates,
+        setupFactoryPolicyListener
     };
 })(globalThis);
