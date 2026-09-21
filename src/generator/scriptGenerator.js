@@ -82,14 +82,34 @@
         // Render the help text once on load, otherwise the placeholder markup in
         // index.html stands until the user first touches the slider.
         updateScoreDisplay(parseInt(genScoreInput.value));
+
+        setupMovieScoreSliderSync();
     }
 
     let blockedLockIds = [];
     const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist"];
 
     function getMaxElementPoolSize() {
-        const input = document.getElementById('elementPoolInput');
+        const input = document.getElementById('globalElementPoolInput');
         return input ? parseInt(input.value) : 10;
+    }
+
+    function setupMovieScoreSliderSync() {
+        const genScoreSlider = document.getElementById('genScoreSlider');
+        const globalPoolSlider = document.getElementById('globalElementPoolSlider');
+
+        if (!genScoreSlider || !globalPoolSlider) return;
+
+        // When Target Movie Score changes, visually update pool slider proportionally
+        genScoreSlider.addEventListener('input', () => {
+            updateSliderTrack(genScoreSlider, '#d4af37');
+        });
+
+        // When Max Elements changes, update its track
+        globalPoolSlider.addEventListener('input', () => {
+            const percent = ((globalPoolSlider.value - globalPoolSlider.min) / (globalPoolSlider.max - globalPoolSlider.min)) * 100;
+            globalPoolSlider.style.setProperty('--slider-fill-percent', percent + '%');
+        });
     }
 
     function showBlockedLockAction(ids) {

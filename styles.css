@@ -48,8 +48,8 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
     gap: 15px;
+    flex-wrap: nowrap;
 }
 
 h1 {
@@ -122,11 +122,11 @@ h2 {
 }
 
 .header-control-number {
-    width: 35px;
+    width: 50px;
     background: var(--input-bg);
     color: var(--text-main);
     border: 1px solid var(--border);
-    padding: 4px 6px;
+    padding: 6px 8px;
     border-radius: 4px;
     font-size: 0.9rem;
     font-weight: 700;
@@ -137,7 +137,7 @@ h2 {
     width: 100px;
     height: 4px;
     border-radius: 2px;
-    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--slider-fill-percent, 50%), var(--border) var(--slider-fill-percent, 50%), var(--border) 100%);
+    background: linear-gradient(to right, #8BEAFF 0%, #8BEAFF var(--slider-fill-percent, 50%), var(--border) var(--slider-fill-percent, 50%), var(--border) 100%);
     outline: none;
     -webkit-appearance: none;
     appearance: none;
@@ -150,7 +150,7 @@ h2 {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: var(--accent);
+    background: #8BEAFF;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -159,7 +159,7 @@ h2 {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: var(--accent);
+    background: #8BEAFF;
     cursor: pointer;
     border: none;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
