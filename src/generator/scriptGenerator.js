@@ -102,26 +102,26 @@
 
         if (!genScoreSlider || !globalPoolSlider) return;
 
-        // When Target Movie Score (genScore) changes, map to Element Pool
-        // Formula: poolSize = genScore - 1 (range 6-10 maps to 5-9)
-        genScoreSlider.addEventListener('input', () => {
-            const scoreVal = parseInt(genScoreSlider.value);
-            const mappedPool = scoreVal - 1;
+        // Proportional mapping: genScore 6-10 maps to poolSize 5-10
+        // genScore 10 can use poolSize 9 (if done right) or 10 (better odds)
+        // Formula: poolSize = genScore - 1 for genScore 6-9; poolSize = 9 for genScore 10
+        const updatePoolFromScore = (scoreVal) => {
+            const mappedPool = scoreVal === 10 ? 9 : scoreVal - 1;
             globalPoolSlider.value = mappedPool;
             globalPoolInput.value = mappedPool;
-            // Update the fill percent of the pool slider
             const percent = ((mappedPool - 5) / (10 - 5)) * 100;
             globalPoolSlider.style.setProperty('--slider-fill-percent', percent + '%');
+        };
+
+        genScoreSlider.addEventListener('input', () => {
+            const scoreVal = parseInt(genScoreSlider.value);
+            updatePoolFromScore(scoreVal);
         });
 
         genScoreInput.addEventListener('input', () => {
             const scoreVal = parseInt(genScoreInput.value);
             if (scoreVal >= 6 && scoreVal <= 10) {
-                const mappedPool = scoreVal - 1;
-                globalPoolSlider.value = mappedPool;
-                globalPoolInput.value = mappedPool;
-                const percent = ((mappedPool - 5) / (10 - 5)) * 100;
-                globalPoolSlider.style.setProperty('--slider-fill-percent', percent + '%');
+                updatePoolFromScore(scoreVal);
             }
         });
     }

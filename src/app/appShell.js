@@ -93,13 +93,12 @@
         slider.addEventListener('input', (e) => {
             const poolVal = parseInt(e.target.value);
             input.value = poolVal;
-            // Sync with Target Movie Score: poolSize = genScore - 1, so genScore = poolSize + 1
+            // Proportional mapping: poolSize 5-10 maps to genScore 6-10
+            // genScore = poolSize + 1, except poolSize 9 or 10 both map to genScore 10
             if (genScoreSlider && genScoreInput) {
-                const mappedScore = poolVal + 1;
-                if (mappedScore <= 10) {
-                    genScoreSlider.value = mappedScore;
-                    genScoreInput.value = mappedScore;
-                }
+                const mappedScore = Math.min(poolVal + 1, 10);
+                genScoreSlider.value = mappedScore;
+                genScoreInput.value = mappedScore;
             }
             updateElementPoolSliderStyle(slider);
         });
@@ -110,13 +109,12 @@
             if (val < 5) val = 5;
             if (!isNaN(val)) {
                 slider.value = val;
-                // Sync with Target Movie Score
+                // Sync with Target Movie Score: poolSize 5-10 maps to genScore 6-10
+                // Both poolSize 9 and 10 map to genScore 10
                 if (genScoreSlider && genScoreInput) {
-                    const mappedScore = val + 1;
-                    if (mappedScore <= 10) {
-                        genScoreSlider.value = mappedScore;
-                        genScoreInput.value = mappedScore;
-                    }
+                    const mappedScore = Math.min(val + 1, 10);
+                    genScoreSlider.value = mappedScore;
+                    genScoreInput.value = mappedScore;
                 }
                 updateElementPoolSliderStyle(slider);
             }
