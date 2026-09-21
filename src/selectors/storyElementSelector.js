@@ -215,6 +215,26 @@
             }
         });
 
+        // When an exclusion is removed, un-excluded tags may not exist in the options
+        // (they were filtered out when the dropdown was created). Add them back if they're now usable.
+        const allCategoryTags = Object.values(GAME_DATA.tags)
+            .filter(t => t.category === category)
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        selects.forEach(select => {
+            const existingIds = new Set(Array.from(select.querySelectorAll('option:not(:first-child)')).map(opt => opt.value));
+
+            // Add options for any usable tags that are missing
+            allCategoryTags.forEach(tag => {
+                if (!existingIds.has(tag.id) && canUseTagInContext(tag.id, context)) {
+                    const opt = document.createElement('option');
+                    opt.value = tag.id;
+                    opt.innerText = tag.name;
+                    opt.dataset.searchText = tag.name.toLowerCase();
+                    select.appendChild(opt);
+                }
+            });
+        });
 
         // Update each dropdown: disable options that are selected elsewhere or excluded
         selects.forEach(select => {
