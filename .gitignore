@@ -23,3 +23,6 @@ yarn-error.log*
 
 # Local preview render from tools/ (regenerate, never commit)
 .preview-*.html
+
+# Personal learning folder (excluded from git)
+.arber/
