@@ -104,6 +104,16 @@ like real breakage and is not.
 Read the `Test Suites:` line, not only `Tests:`. A suite that fails to load
 reports zero failing tests while covering nothing.
 
+Run **one** Playwright process at a time. Two concurrent runs share
+`test-results/` and delete each other's trace artifacts, which surfaces as
+`browserContext.close: ENOENT ... recording.trace` on tests whose assertions
+all passed. That is a measurement failure, not a product failure: `rm -rf
+test-results` and re-run alone before believing it.
+
+When piping the run (`npm run test:e2e | tail`), the exit code reported is the
+pipe's last command, not Playwright's. Redirect to a file and check `$?`
+instead, or a failing suite reads as green.
+
 ## 4. Domain facts that have caused repeat regressions
 
 - The story element category is **`Setting`**, singular. Filtering on `Settings`
