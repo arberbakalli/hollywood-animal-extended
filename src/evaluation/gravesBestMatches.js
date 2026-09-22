@@ -320,8 +320,11 @@
     }
 
     function addButtonMarkup(candidate, index) {
-        const isSingleSelect = candidate.category !== 'Genre' && !MULTI_SELECT_CATEGORIES.includes(candidate.category);
-        const label = isSingleSelect ? 'Swap' : 'Add';
+        // Check if this category already has something selected in Graves
+        const categorySlug = categoryToElementSlug(candidate.category);
+        const existingSelect = document.querySelector(`#inputs-${categorySlug}-graves select.tag-selector`);
+        const hasExistingValue = existingSelect && existingSelect.value && existingSelect.value !== '';
+        const label = hasExistingValue ? 'Swap' : 'Add';
         return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-${label.toLowerCase()}-btn" type="button" data-action="add-graves-best-match" data-tag-id="${candidate.id}" data-category="${candidate.category}">${label}</button>`;
     }
 
