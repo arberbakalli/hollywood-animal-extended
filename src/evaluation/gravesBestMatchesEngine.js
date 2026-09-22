@@ -136,18 +136,16 @@
         return { rowsBySlot, allRows, currentAverage };
     }
 
-    function buildPairwise(selectedTags, candidates, minimum, maxPoolSize, options = {}) {
+    // Pairwise deliberately ignores the element budget: it is an analysis view,
+    // and hiding pairs at the budget removes the comparison exactly when the
+    // user is deciding what to trade. The panel disables the Add button instead.
+    function buildPairwise(selectedTags, candidates, minimum, options = {}) {
         const counts = categoryCardinality(selectedTags);
         const displayName = options.displayName || (tag => tag.name || tag.id);
         const getScore = options.getRawCompatibilityScore || global.getRawCompatibilityScore;
-        const poolCount = selectedTags.filter(tag =>
-            tag.category !== 'Genre' && tag.category !== 'Setting'
-        ).length;
-        const eligibleCandidates = candidates.filter(candidate => {
-            if (isCategoryFull(candidate.category, counts, options.multiSelectCategories)) return false;
-            if (poolCount >= maxPoolSize) return false;
-            return true;
-        });
+        const eligibleCandidates = candidates.filter(candidate =>
+            !isCategoryFull(candidate.category, counts, options.multiSelectCategories)
+        );
         const matches = [];
 
         selectedTags.forEach(selectedTag => {

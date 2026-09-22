@@ -161,7 +161,6 @@
             selectedTags,
             collectCandidates(selectedTags),
             minimumFit(),
-            maxElementPool(),
             engineOptions()
         );
     }
@@ -188,7 +187,7 @@
         return `<span class="best-match-warning">clashes with ${displayName(row.worstAgainst)} (${row.worstScore.toFixed(1)})</span>`;
     }
 
-    function addButtonMarkup(candidate, index) {
+    function addButtonMarkup(candidate, index, selectedTags = lastSelectedTags) {
         const categorySlug = categoryToElementSlug(candidate.category);
         const categoryRows = document.querySelectorAll(`#inputs-${categorySlug}-graves [data-role="tag-selector-row"]`);
         const selectedCount = Array.from(categoryRows).filter(row => {
@@ -210,7 +209,18 @@
         }
 
         const action = label === 'Swap' ? 'swap-graves-best-match' : 'add-graves-best-match';
-        return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-${label.toLowerCase()}-btn" type="button" data-action="${action}" data-tag-id="${candidate.id}" data-category="${candidate.category}">${label}</button>`;
+
+        // Only a genuine Add grows the pool. A Swap trades within a category,
+        // and Genre and Setting are context rather than budgeted elements.
+        const growsPool = label === 'Add'
+            && candidate.category !== 'Genre'
+            && candidate.category !== 'Setting';
+        const blocked = growsPool && atElementBudget(selectedTags);
+        const blockedAttrs = blocked
+            ? ` disabled aria-disabled="true" title="This script already uses all ${maxElementPool()} story elements it is allowed. Raise Max Element Pool, or swap an element instead."`
+            : '';
+
+        return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-${label.toLowerCase()}-btn" type="button" data-action="${action}" data-tag-id="${candidate.id}" data-category="${candidate.category}"${blockedAttrs}>${label}</button>`;
     }
 
     function tagClass(tag) {
@@ -372,9 +382,7 @@
         const matches = buildPairwise(selectedTags);
 
         if (matches.length === 0) {
-            list.innerHTML = emptyMarkup(atElementBudget(selectedTags)
-                ? elementBudgetMessage()
-                : 'No matches found for these filters. Try a lower fit or a different category.');
+            list.innerHTML = emptyMarkup('No matches found for these filters. Try a lower fit or a different category.');
             return;
         }
 
@@ -527,6 +535,8 @@
         updateGravesExclusionNotice,
         jumpToExclusionEditor,
         paginateRows,
+        addButtonMarkup,
+        atElementBudget,
         BAND_ORDER,
         ROWS_PER_PAGE,
         ROWS_INCREMENT

@@ -2530,6 +2530,20 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: #171717;
 }
 
+/* At the element budget the pair still reads, but it cannot be taken. The
+   title attribute carries the reason. */
+.best-match-add-btn[disabled] {
+    border-color: var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.best-match-add-btn[disabled]:hover {
+    background: transparent;
+    color: var(--text-muted);
+}
+
 .best-match-swap-btn {
     min-height: 32px;
     padding: 0 12px;

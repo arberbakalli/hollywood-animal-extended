@@ -157,64 +157,71 @@ describe('Graves Best Matches', () => {
      * above only assert that getMaxElementPoolSize is defined.
      */
     describe('pairwise honours its caller', () => {
-        const OPTIONS = `{
-            getRawCompatibilityScore: () => 5,
-            multiSelectCategories: ['Theme & Event']
-        }`;
-
-        const pairwise = (selected, candidates, maxPoolSize, options = OPTIONS) =>
-            h.evaluate(`HACGravesBestMatchesEngine.buildPairwise(
-                ${JSON.stringify(selected)},
-                ${JSON.stringify(candidates)},
-                0,
-                ${maxPoolSize},
-                ${options}
-            )`);
-
-        const theme = (id) => ({ id, name: id, category: 'Theme & Event' });
-
         test('the selected element is named by the resolver the caller supplies', () => {
-            const matches = pairwise(
+            const matches = h.evaluate(`HACGravesBestMatchesEngine.buildPairwise(
                 [{ id: 'FINALE_PROTAGONIST_FINDS_TREASURE', category: 'Finale' }],
                 [{ id: 'COMEDY', name: 'Comedy', category: 'Genre' }],
-                10,
-                `{
+                0,
+                {
                     getRawCompatibilityScore: () => 5,
                     multiSelectCategories: [],
                     displayName: tag => tag.id === 'FINALE_PROTAGONIST_FINDS_TREASURE'
                         ? 'Protagonist Finds Treasure'
                         : tag.id
-                }`
-            );
+                }
+            )`);
 
             expect(matches.length).toBe(1);
             // Falls back to the raw id the moment options lands in the wrong slot.
             expect(matches[0].selectedName).toBe('Protagonist Finds Treasure');
         });
+    });
 
-        test('no pair is offered once the script sits at its element budget', () => {
-            expect(pairwise([theme('A'), theme('B')], [theme('C')], 2).length).toBe(0);
+    /**
+     * Pairwise is an analysis view, so a full script still lists its pairs; it
+     * is the Add button that goes dead. The budget therefore has to be asserted
+     * on the button, not on the row count.
+     */
+    describe('the element budget gates the Add button, not the list', () => {
+        // The harness reports a pool of 10, so ten budgeted elements is "full".
+        const budgeted = (count) => Array.from({ length: count }, (_, i) => ({
+            id: `T${i}`, name: `T${i}`, category: 'Theme & Event'
+        }));
+
+        const button = (candidate, selectedTags) =>
+            h.call('HACGravesBestMatches.addButtonMarkup', candidate, 0, selectedTags);
+
+        const atBudget = (selectedTags) =>
+            h.call('HACGravesBestMatches.atElementBudget', selectedTags);
+
+        test('only budgeted elements count toward the pool', () => {
+            expect(atBudget(budgeted(10))).toBe(true);
+            expect(atBudget(budgeted(9))).toBe(false);
         });
 
-        test('the same pair is offered when the budget still has room', () => {
-            // Identical inputs, one seat of headroom: proves the gate above is
-            // the budget and not the category or fit filter.
-            expect(pairwise([theme('A'), theme('B')], [theme('C')], 3).length).toBe(2);
+        test('Genre and Setting do not consume the budget', () => {
+            const context = [
+                { id: 'ACTION', name: 'Action', category: 'Genre' },
+                { id: 'WILD_WEST', name: 'Wild West', category: 'Setting' }
+            ];
+
+            // Eleven selected elements, nine of them budgeted: still has room.
+            expect(atBudget([...budgeted(9), ...context])).toBe(false);
         });
 
-        test('Genre and Setting do not consume the element budget', () => {
-            const matches = pairwise(
-                [
-                    { id: 'ACTION', name: 'Action', category: 'Genre' },
-                    { id: 'WILD_WEST', name: 'Wild West', category: 'Setting' }
-                ],
-                [theme('C')],
-                1
-            );
+        test('Add goes dead once the script is at its budget', () => {
+            expect(button({ id: 'X', name: 'X', category: 'Theme & Event' }, budgeted(10)))
+                .toContain('disabled');
+        });
 
-            // Two selected elements against a budget of one, and both are still
-            // offered: neither category counts toward the pool.
-            expect(matches.length).toBe(2);
+        test('Add stays live while the budget has room', () => {
+            expect(button({ id: 'X', name: 'X', category: 'Theme & Event' }, budgeted(9)))
+                .not.toContain('disabled');
+        });
+
+        test('a Genre stays addable at the budget, because it is not budgeted', () => {
+            expect(button({ id: 'COMEDY', name: 'Comedy', category: 'Genre' }, budgeted(10)))
+                .not.toContain('disabled');
         });
     });
 });
