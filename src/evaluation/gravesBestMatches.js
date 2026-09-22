@@ -43,14 +43,6 @@
         return known ? known.name : tagLike.id;
     }
 
-    function formatDisplayName(text) {
-        if (!text) return text;
-        return text
-            .split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
-    }
-
     function minimumFit() {
         return parseFloat(document.getElementById('gravesBestScoreFilter')?.value || '4.0');
     }
@@ -123,44 +115,53 @@
         };
     }
 
-    function buildAdditions(selectedTags) {
-        const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
+    function maxElementPool() {
+        return typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
             ? HACScriptGenerator.getMaxElementPoolSize()
             : 10;
+    }
 
+    function atElementBudget(selectedTags) {
+        const budgeted = selectedTags.filter(tag =>
+            tag.category !== 'Genre' && tag.category !== 'Setting'
+        ).length;
+        return budgeted >= maxElementPool();
+    }
+
+    function elementBudgetMessage() {
+        return `This script already uses all ${maxElementPool()} story elements it is allowed. `
+            + 'Raise Max Element Pool in the header to make room, or use Swap Suggestions '
+            + 'to trade an element instead. Genre and Setting do not count toward the budget.';
+    }
+
+    function buildAdditions(selectedTags) {
         return Engine.buildAdditions(
             selectedTags,
             collectCandidates(selectedTags),
             minimumFit(),
-            maxPoolSize,
+            maxElementPool(),
             engineOptions()
         );
     }
 
+    // A swap only ever replaces a slot with a candidate of the same category, so
+    // it cannot change how many story elements the script carries. The element
+    // budget is deliberately not consulted here.
     function buildSwaps(selectedTags) {
-        const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
-            ? HACScriptGenerator.getMaxElementPoolSize()
-            : 10;
-
         return Engine.buildSwaps(
             selectedTags,
             collectCandidates(selectedTags),
             minimumFit(),
-            maxPoolSize,
             engineOptions()
         );
     }
 
     function buildPairwise(selectedTags) {
-        const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
-            ? HACScriptGenerator.getMaxElementPoolSize()
-            : 10;
-
         return Engine.buildPairwise(
             selectedTags,
             collectCandidates(selectedTags),
             minimumFit(),
-            maxPoolSize,
+            maxElementPool(),
             engineOptions()
         );
     }
@@ -293,19 +294,7 @@
     // row, so the generic advice sends the user round in circles. Name the
     // blocker that actually applies.
     function additionsEmptyReason(selectedTags) {
-        const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
-            ? HACScriptGenerator.getMaxElementPoolSize()
-            : 10;
-        const poolCount = selectedTags.filter(tag =>
-            tag.category !== 'Genre' && tag.category !== 'Setting'
-        ).length;
-
-        if (poolCount >= maxPoolSize) {
-            return `This script already uses all ${maxPoolSize} story elements it is allowed. `
-                + 'Raise Max Element Pool in the header to make room, or use Swap Suggestions '
-                + 'to trade an element instead. Genre and Setting do not count toward the budget.';
-        }
-
+        if (atElementBudget(selectedTags)) return elementBudgetMessage();
         return 'No additions available. Try a different script or adjust categories.';
     }
 
@@ -383,7 +372,9 @@
         const matches = buildPairwise(selectedTags);
 
         if (matches.length === 0) {
-            list.innerHTML = emptyMarkup('No matches found for these filters. Try a lower fit or a different category.');
+            list.innerHTML = emptyMarkup(atElementBudget(selectedTags)
+                ? elementBudgetMessage()
+                : 'No matches found for these filters. Try a lower fit or a different category.');
             return;
         }
 
@@ -392,13 +383,13 @@
         list.innerHTML = limited.map((match, index) => `
             <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${Engine.bandFor(match.score, match.score)} ${tagClass(match.candidate)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${Engine.bandFor(match.score, match.score)}">
                 <div class="best-match-pair">
-                    <span class="best-match-pair-label">${formatDisplayName(match.selectedCategory)}</span>
-                    <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${formatDisplayName(match.selectedName)}</span>
+                    <span class="best-match-pair-label ${categoryToElementSlug(match.selectedCategory)}">${match.selectedCategory}</span>
+                    <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
                     <span class="best-match-arrow">&rarr;</span>
-                    <span class="best-match-tag ${tagClass(match.candidate)}">${formatDisplayName(match.candidate.name)}</span>
+                    <span class="best-match-tag ${tagClass(match.candidate)}">${match.candidate.name}</span>
                 </div>
                 <div class="best-match-meta">
-                    <span class="best-match-category">${formatDisplayName(match.candidate.category)}</span>
+                    <span class="best-match-category">${match.candidate.category}</span>
                     <span class="best-match-score ${match.score >= 4.5 ? 'score-excellent' : 'score-strong'}">${match.score.toFixed(2)}</span>
                     ${addButtonMarkup(match.candidate, index)}
                 </div>

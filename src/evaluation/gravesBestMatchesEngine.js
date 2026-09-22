@@ -136,13 +136,18 @@
         return { rowsBySlot, allRows, currentAverage };
     }
 
-    function buildPairwise(selectedTags, candidates, minimum, options = {}) {
+    function buildPairwise(selectedTags, candidates, minimum, maxPoolSize, options = {}) {
         const counts = categoryCardinality(selectedTags);
         const displayName = options.displayName || (tag => tag.name || tag.id);
         const getScore = options.getRawCompatibilityScore || global.getRawCompatibilityScore;
-        const eligibleCandidates = candidates.filter(candidate =>
-            !isCategoryFull(candidate.category, counts, options.multiSelectCategories)
-        );
+        const poolCount = selectedTags.filter(tag =>
+            tag.category !== 'Genre' && tag.category !== 'Setting'
+        ).length;
+        const eligibleCandidates = candidates.filter(candidate => {
+            if (isCategoryFull(candidate.category, counts, options.multiSelectCategories)) return false;
+            if (poolCount >= maxPoolSize) return false;
+            return true;
+        });
         const matches = [];
 
         selectedTags.forEach(selectedTag => {

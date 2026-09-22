@@ -142,4 +142,79 @@ describe('Graves Best Matches', () => {
             expect(h.call('HACScriptGenerator.getMaxElementPoolSize')).toBeDefined();
         });
     });
+
+    /**
+     * These run against the engine directly, with every collaborator passed in,
+     * so they fail if the caller's arguments stop lining up with the signature.
+     *
+     * The regression they exist for: buildPairwise took (tags, candidates,
+     * minimum, options) while the caller passed (tags, candidates, minimum,
+     * maxPoolSize, options). `options` therefore received a number, the real
+     * options object was dropped, and displayName silently fell back to
+     * `tag.name || tag.id` — so every selected element rendered as its raw id
+     * (FINALE_PROTAGONIST_FINDS_TREASURE) and the element budget was never
+     * applied at all. The suite stayed green throughout, because the tests
+     * above only assert that getMaxElementPoolSize is defined.
+     */
+    describe('pairwise honours its caller', () => {
+        const OPTIONS = `{
+            getRawCompatibilityScore: () => 5,
+            multiSelectCategories: ['Theme & Event']
+        }`;
+
+        const pairwise = (selected, candidates, maxPoolSize, options = OPTIONS) =>
+            h.evaluate(`HACGravesBestMatchesEngine.buildPairwise(
+                ${JSON.stringify(selected)},
+                ${JSON.stringify(candidates)},
+                0,
+                ${maxPoolSize},
+                ${options}
+            )`);
+
+        const theme = (id) => ({ id, name: id, category: 'Theme & Event' });
+
+        test('the selected element is named by the resolver the caller supplies', () => {
+            const matches = pairwise(
+                [{ id: 'FINALE_PROTAGONIST_FINDS_TREASURE', category: 'Finale' }],
+                [{ id: 'COMEDY', name: 'Comedy', category: 'Genre' }],
+                10,
+                `{
+                    getRawCompatibilityScore: () => 5,
+                    multiSelectCategories: [],
+                    displayName: tag => tag.id === 'FINALE_PROTAGONIST_FINDS_TREASURE'
+                        ? 'Protagonist Finds Treasure'
+                        : tag.id
+                }`
+            );
+
+            expect(matches.length).toBe(1);
+            // Falls back to the raw id the moment options lands in the wrong slot.
+            expect(matches[0].selectedName).toBe('Protagonist Finds Treasure');
+        });
+
+        test('no pair is offered once the script sits at its element budget', () => {
+            expect(pairwise([theme('A'), theme('B')], [theme('C')], 2).length).toBe(0);
+        });
+
+        test('the same pair is offered when the budget still has room', () => {
+            // Identical inputs, one seat of headroom: proves the gate above is
+            // the budget and not the category or fit filter.
+            expect(pairwise([theme('A'), theme('B')], [theme('C')], 3).length).toBe(2);
+        });
+
+        test('Genre and Setting do not consume the element budget', () => {
+            const matches = pairwise(
+                [
+                    { id: 'ACTION', name: 'Action', category: 'Genre' },
+                    { id: 'WILD_WEST', name: 'Wild West', category: 'Setting' }
+                ],
+                [theme('C')],
+                1
+            );
+
+            // Two selected elements against a budget of one, and both are still
+            // offered: neither category counts toward the pool.
+            expect(matches.length).toBe(2);
+        });
+    });
 });

@@ -2133,12 +2133,20 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .best-match-pair-label {
     display: inline-block;
     font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    opacity: 0.6;
-    color: rgba(160, 160, 160, 1);
+    font-weight: 700;
+    color: var(--text-muted);
     flex-shrink: 0;
+    /* Pulls the element it labels in tighter than the row's general gap. */
+    margin-right: -0.35rem;
 }
+
+/* Mirrors Submit Script: the five story categories carry their colour, while
+   Genre and Setting stay neutral. */
+.best-match-pair-label.protagonist { color: var(--cat-protagonist); }
+.best-match-pair-label.antagonist { color: var(--cat-antagonist); }
+.best-match-pair-label.supporting-character { color: var(--cat-supporting); }
+.best-match-pair-label.theme-event { color: var(--cat-theme-event); }
+.best-match-pair-label.finale { color: var(--cat-finale); }
 
 .best-match-tag {
     display: inline-block;
@@ -2154,11 +2162,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     background: rgba(139, 92, 246, 0.2);
     border-left: 2px solid rgb(139, 92, 246);
     padding-left: calc(1rem - 2px);
-    font-size: 0.85rem;
-    max-width: 150px;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.3;
+    color: var(--text-muted, #a0a0a0);
 }
 
 .best-match-arrow {
@@ -2236,6 +2240,25 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .best-match-item.best-match-unsuccessful:hover {
     background: rgba(255, 95, 95, 0.12);
 }
+
+/* The row colour follows the suggested element's category rather than its
+   band. Same specificity as the band rules above, so order decides: these
+   must stay below them. Quality is still readable from the score colour. */
+.best-match-item.genre { background: color-mix(in srgb, var(--cat-genre) 12%, transparent); border-left-color: var(--cat-genre); }
+.best-match-item.setting { background: color-mix(in srgb, var(--cat-setting) 12%, transparent); border-left-color: var(--cat-setting); }
+.best-match-item.protagonist { background: color-mix(in srgb, var(--cat-protagonist) 12%, transparent); border-left-color: var(--cat-protagonist); }
+.best-match-item.antagonist { background: color-mix(in srgb, var(--cat-antagonist) 12%, transparent); border-left-color: var(--cat-antagonist); }
+.best-match-item.supporting-character { background: color-mix(in srgb, var(--cat-supporting) 12%, transparent); border-left-color: var(--cat-supporting); }
+.best-match-item.theme-event { background: color-mix(in srgb, var(--cat-theme-event) 12%, transparent); border-left-color: var(--cat-theme-event); }
+.best-match-item.finale { background: color-mix(in srgb, var(--cat-finale) 12%, transparent); border-left-color: var(--cat-finale); }
+
+.best-match-item.genre:hover { background: color-mix(in srgb, var(--cat-genre) 18%, transparent); }
+.best-match-item.setting:hover { background: color-mix(in srgb, var(--cat-setting) 18%, transparent); }
+.best-match-item.protagonist:hover { background: color-mix(in srgb, var(--cat-protagonist) 18%, transparent); }
+.best-match-item.antagonist:hover { background: color-mix(in srgb, var(--cat-antagonist) 18%, transparent); }
+.best-match-item.supporting-character:hover { background: color-mix(in srgb, var(--cat-supporting) 18%, transparent); }
+.best-match-item.theme-event:hover { background: color-mix(in srgb, var(--cat-theme-event) 18%, transparent); }
+.best-match-item.finale:hover { background: color-mix(in srgb, var(--cat-finale) 18%, transparent); }
 
 /* Graves pair analysis bands - same color language as best-match */
 .graves-pairs-band {
@@ -3001,6 +3024,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
   --cat-theme-event: var(--ha-category-theme-event);
   --cat-finale: var(--ha-category-finale);
   --cat-setting: #8fa3d1; /* neutral fallback, placeholder pending image */
+  /* Genre has per-genre colours but no generic one, so every `var(--cat-genre)`
+     was an invalid declaration that fell through to the inherited near-white.
+     Neutral matches how Submit Script labels Genre. */
+  --cat-genre: var(--text-muted);
 }
 
 /* Apply category colors to option text */
