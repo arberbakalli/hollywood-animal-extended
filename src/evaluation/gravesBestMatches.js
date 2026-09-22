@@ -20,10 +20,15 @@
 
     function hideGravesEvaluationResults() {
         const resultsContainer = document.getElementById('results-graves');
+        // Every panel Evaluate Script owns. Generate Best Matches reveals the
+        // shared results container, so anything missing from this list shows up
+        // holding either a placeholder or the previous run's numbers.
         const evaluationPanels = [
             'graves-summary-row',
             'graves-reading-panel',
-            'graves-detail-row'
+            'graves-detail-row',
+            'graves-pairs-panel',
+            'graves-breakdown-panel'
         ];
 
         evaluationPanels.forEach(panelId => {

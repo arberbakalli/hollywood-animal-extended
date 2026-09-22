@@ -66,7 +66,10 @@
         evaluation.pairsByBand = findGravesPairsByBand(tags);
 
         document.getElementById('results-graves').classList.remove('hidden');
-        ['graves-summary-row', 'graves-reading-panel', 'graves-breakdown-panel', 'graves-detail-row'].forEach(panelId => {
+        // Must stay in step with hideGravesEvaluationResults: a panel hidden
+        // there and not revealed here disappears for good once Generate Best
+        // Matches has run.
+        ['graves-summary-row', 'graves-reading-panel', 'graves-breakdown-panel', 'graves-detail-row', 'graves-pairs-panel'].forEach(panelId => {
             const panel = document.getElementById(panelId);
             if (panel) panel.classList.remove('hidden');
         });
