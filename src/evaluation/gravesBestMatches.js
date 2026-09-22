@@ -425,22 +425,26 @@
     }
 
     function renderAdditions(list, selectedTags) {
-        const rows = buildAdditions(selectedTags);
+        let rows = buildAdditions(selectedTags);
+
+        // Auto-lower minimum fit if no additions found
         if (rows.length === 0) {
-            list.innerHTML = `
-                <div class="empty-state">
-                    <p>No additions clear the minimum fit. Try a lower fit or a different category.</p>
-                    <button id="adjust-fit-button" class="analyze-btn" type="button">Adjust Minimum Fit</button>
-                </div>
-            `;
-            document.getElementById('adjust-fit-button')?.addEventListener('click', () => {
-                const filterField = document.getElementById('graves-best-score-field');
-                if (filterField) {
-                    filterField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    const select = filterField.querySelector('select');
-                    select?.focus();
+            const fitSelect = document.getElementById('gravesBestScoreFilter');
+            const fitValues = ['0', '3.0', '3.5', '4.0', '4.5', '5.0'];
+            const currentIndex = fitValues.indexOf(fitSelect?.value || '4.0');
+
+            if (currentIndex > 0) {
+                // Try lower fit thresholds
+                for (let i = currentIndex - 1; i >= 0; i--) {
+                    fitSelect.value = fitValues[i];
+                    rows = buildAdditions(selectedTags);
+                    if (rows.length > 0) break;
                 }
-            });
+            }
+        }
+
+        if (rows.length === 0) {
+            list.innerHTML = emptyMarkup('No additions available. Try a different script or adjust categories.');
             return;
         }
         const markup = groupedMarkup(rows, visibleRowCount);
