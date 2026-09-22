@@ -19,13 +19,18 @@
             return;
         }
 
-        if (selectedTags.length < 5) {
-            showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements for a real script evaluation. You selected ${selectedTags.length}.`, 'accent');
+        // Genre and Setting don't count toward the 5-10 budget
+        const budgetedElements = selectedTags.filter(tag =>
+            tag.category !== 'Genre' && tag.category !== 'Setting'
+        );
+
+        if (budgetedElements.length < 5) {
+            showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements for a real script evaluation. You selected ${budgetedElements.length} (Genre and Setting don't count).`, 'accent');
             return;
         }
 
-        if (selectedTags.length > 10) {
-            showFeedbackMessage('gravesFeedbackMessage', `Colman evaluates up to 10 story elements at once. You selected ${selectedTags.length}.`, 'accent');
+        if (budgetedElements.length > 10) {
+            showFeedbackMessage('gravesFeedbackMessage', `Colman evaluates up to 10 story elements at once. You selected ${budgetedElements.length} (Genre and Setting don't count).`, 'accent');
             return;
         }
 
