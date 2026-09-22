@@ -33,176 +33,31 @@
     }
 
     function getGravesVerdict(rawAverage) {
-        if (rawAverage >= 4.0) {
-            return {
-                label: 'Success',
-                tone: 'success',
-                text: 'Graves sees a strong, marketable script. The selected elements reinforce each other cleanly.'
-            };
-        }
-
-        if (rawAverage >= 3.5) {
-            return {
-                label: 'Common',
-                tone: 'accent',
-                text: 'Graves sees a viable script. It should work, but it is not a rare high-synergy combination.'
-            };
-        }
-
-        if (rawAverage < 3.0) {
-            return {
-                label: 'Failed',
-                tone: 'danger',
-                text: 'Graves sees a weak fit. The premise may still be interesting, but the game data says these elements fight each other.'
-            };
-        }
-
-        return {
-            label: 'Risky',
-            tone: 'neutral',
-            text: 'Graves sees an uneven script. A few pairings may carry it, but the whole package is fragile.'
-        };
+        return HACGravesAnalysis.getGravesVerdict(rawAverage);
     }
 
     function calculateGravesAudience(tags) {
-        const affinity = Object.fromEntries(Object.keys(GAME_DATA.demographics).map(id => [id, 0]));
-
-        tags.forEach(item => {
-            const tagData = GAME_DATA.tags[item.id];
-            if (!tagData || !tagData.weights) return;
-
-            Object.keys(affinity).forEach(demoId => {
-                affinity[demoId] += (tagData.weights[demoId] || 0) * item.percent;
-            });
-        });
-
-        const maxAffinity = Math.max(1, ...Object.values(affinity));
-        return Object.entries(affinity)
-            .map(([id, score]) => ({
-                id,
-                name: GAME_DATA.demographics[id].name,
-                score,
-                strength: Math.round((score / maxAffinity) * 100)
-            }))
-            .filter(item => item.score > 0)
-            .sort((a, b) => b.score - a.score);
+        return HACGravesAnalysis.calculateGravesAudience(tags);
     }
 
-    const GRAVES_DANGER_LINE = 2.0;
-    const GRAVES_SEVERE_BELOW = 1.0;
-    const GRAVES_SERIOUS_BELOW = 1.5;
-
-    // A script with one marginal clash and a structurally broken one both used to
-    // render as an undifferentiated list. Grading the pairs is what lets the panel
-    // say how much trouble the player is actually in.
     function gravesConflictSeverity(rawScore) {
-        if (rawScore >= GRAVES_DANGER_LINE) return 'none';
-        if (rawScore < GRAVES_SEVERE_BELOW) return 'severe';
-        if (rawScore < GRAVES_SERIOUS_BELOW) return 'serious';
-        return 'mild';
+        return HACGravesAnalysis.gravesConflictSeverity(rawScore);
     }
 
     function summarizeGravesConflicts(conflicts) {
-        const empty = {
-            total: 0, severe: 0, serious: 0, mild: 0,
-            worst: null, tone: 'none', headline: ''
-        };
-        if (!conflicts || conflicts.length === 0) return empty;
-
-        const counts = conflicts.reduce((acc, conflict) => {
-            const band = gravesConflictSeverity(conflict.rawScore);
-            if (acc[band] !== undefined) acc[band] += 1;
-            return acc;
-        }, { severe: 0, serious: 0, mild: 0 });
-
-        const worst = conflicts.reduce((lowest, conflict) =>
-            conflict.rawScore < lowest.rawScore ? conflict : lowest);
-        const tone = gravesConflictSeverity(worst.rawScore);
-
-        const noun = conflicts.length === 1 ? 'pair' : 'pairs';
-        const headline = `${conflicts.length} ${noun} below the danger line — worst is ${tone}`;
-
-        return { total: conflicts.length, ...counts, worst, tone, headline };
+        return HACGravesAnalysis.summarizeGravesConflicts(conflicts);
     }
 
     function findGravesConflicts(tags) {
-        const conflicts = [];
-
-        const describe = tag => {
-            const known = GAME_DATA.tags[tag.id];
-            return {
-                name: known ? known.name : tag.id,
-                category: known ? known.category : ''
-            };
-        };
-
-        for (let i = 0; i < tags.length; i++) {
-            for (let j = i + 1; j < tags.length; j++) {
-                const rawScore = getRawCompatibilityScore(tags[i], tags[j]);
-                if (rawScore < GRAVES_DANGER_LINE) {
-                    const first = describe(tags[i]);
-                    const second = describe(tags[j]);
-                    conflicts.push({
-                        firstName: first.name,
-                        secondName: second.name,
-                        firstCategory: first.category,
-                        secondCategory: second.category,
-                        severity: gravesConflictSeverity(rawScore),
-                        rawScore
-                    });
-                }
-            }
-        }
-
-        return conflicts.sort((a, b) => a.rawScore - b.rawScore);
+        return HACGravesAnalysis.findGravesConflicts(tags);
     }
 
     function findGravesPairsByBand(tags) {
-        const STRONG_FIT_THRESHOLD = 4.0;
-        const pairs = [];
-
-        const describe = tag => {
-            const known = GAME_DATA.tags[tag.id];
-            return {
-                name: known ? known.name : tag.id,
-                category: known ? known.category : ''
-            };
-        };
-
-        for (let i = 0; i < tags.length; i++) {
-            for (let j = i + 1; j < tags.length; j++) {
-                const rawScore = getRawCompatibilityScore(tags[i], tags[j]);
-                const first = describe(tags[i]);
-                const second = describe(tags[j]);
-
-                let band = 'common';
-                if (rawScore < 2.0) band = 'unsuccessful';
-                else if (rawScore >= STRONG_FIT_THRESHOLD) band = 'successful';
-
-                pairs.push({
-                    firstName: first.name,
-                    secondName: second.name,
-                    firstCategory: first.category,
-                    secondCategory: second.category,
-                    rawScore,
-                    band
-                });
-            }
-        }
-
-        // Group by band
-        const grouped = {
-            successful: pairs.filter(p => p.band === 'successful').sort((a, b) => b.rawScore - a.rawScore),
-            common: pairs.filter(p => p.band === 'common').sort((a, b) => b.rawScore - a.rawScore),
-            unsuccessful: pairs.filter(p => p.band === 'unsuccessful').sort((a, b) => a.rawScore - b.rawScore)
-        };
-
-        return grouped;
+        return HACGravesAnalysis.findGravesPairsByBand(tags);
     }
 
     function formatFinalRating(value) {
-        if (value >= 10) return "10.0";
-        return formatMovieScore(value);
+        return HACGravesAnalysis.formatFinalRating(value);
     }
 
     function renderColmanGravesResults(evaluation) {
@@ -322,15 +177,39 @@
                 `;
             }).join('');
 
-            pairsContainer.innerHTML = bandMarkup || '<div class="empty-state">No pairs to display.</div>';
+            pairsContainer.innerHTML = bandMarkup || '<div class="empty-state">No element pairings found. All combinations are working well together.</div>';
 
-            // Add click handlers for band collapsing
+            // Restore band collapse state from localStorage
+            const savedBandState = localStorage.getItem('graves-band-state');
+            const collapsedBands = savedBandState ? JSON.parse(savedBandState) : {};
+
+            pairsContainer.querySelectorAll('.graves-pairs-band').forEach(band => {
+                const bandName = band.querySelector('[data-band]')?.dataset.band;
+                if (bandName && collapsedBands[bandName]) {
+                    band.classList.add('collapsed');
+                    const title = band.querySelector('.graves-pairs-band-title');
+                    if (title) title.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Add click handlers for band collapsing with state persistence
             pairsContainer.querySelectorAll('.graves-pairs-band-title').forEach(title => {
                 title.addEventListener('click', function() {
                     const band = this.closest('.graves-pairs-band');
+                    const bandName = this.dataset.band;
                     band.classList.toggle('collapsed');
                     const isCollapsed = band.classList.contains('collapsed');
                     this.setAttribute('aria-expanded', !isCollapsed);
+
+                    // Save band state to localStorage
+                    const savedState = localStorage.getItem('graves-band-state');
+                    const bandState = savedState ? JSON.parse(savedState) : {};
+                    if (isCollapsed) {
+                        bandState[bandName] = true;
+                    } else {
+                        delete bandState[bandName];
+                    }
+                    localStorage.setItem('graves-band-state', JSON.stringify(bandState));
                 });
             });
         }

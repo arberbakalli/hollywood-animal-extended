@@ -177,6 +177,7 @@ describe('HTML structure', () => {
             'src/library/scriptLibrary.js',
             'src/library/exclusionStore.js',
             'src/evaluation/scriptEvaluation.js',
+            'src/evaluation/gravesAnalysis.js',
             'src/evaluation/gravesAudience.js',
             'src/evaluation/gravesBestMatchesEngine.js',
             'src/evaluation/gravesBestMatches.js',

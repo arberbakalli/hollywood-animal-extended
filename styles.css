@@ -2276,15 +2276,22 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .graves-pairs-band-unsuccessful .graves-pairs-band-title { color: var(--danger); }
 
 .graves-pair-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.75rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    padding: 1rem;
     background: rgba(51, 51, 51, 0.5);
     border-radius: 4px;
     border-left: 3px solid transparent;
-    font-size: 0.875rem;
     line-height: 1.5;
+    align-items: start;
+    transition: all 0.15s ease-in-out;
+    cursor: default;
+}
+
+.graves-pair-row:hover {
+    background: rgba(51, 51, 51, 0.7);
+    transform: translateX(2px);
 }
 
 .graves-pairs-band-successful .graves-pair-row {
