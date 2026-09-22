@@ -48,7 +48,6 @@ function buildGravesBestMatchesDom(selectorsExpression) {
         };
         const scoreFilter = { value: '4.0' };
         const categoryFilter = { value: '' };
-        const starterOnlyFilter = { checked: false };
         const emptyContainer = { querySelectorAll() { return []; } };
         const gravesContainer = {
             querySelectorAll(selector) {
@@ -81,7 +80,6 @@ function buildGravesBestMatchesDom(selectorsExpression) {
                 if (id === 'gravesBestMatchesList') return bestMatchesList;
                 if (id === 'gravesBestScoreFilter') return scoreFilter;
                 if (id === 'gravesBestCategoryFilter') return categoryFilter;
-                if (id === 'gravesStarterOnlyFilter') return starterOnlyFilter;
                 if (id.startsWith('inputs-')) return null;
                 return generic;
             },
