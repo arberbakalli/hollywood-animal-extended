@@ -194,9 +194,10 @@
 
     /**
      * Add or Swap follows one rule: a category that is already full can only be
-     * traded into. That rule lives in the engine's isCategoryFull (Genre caps at
-     * 2, multi-select categories are uncapped, everything else holds one), and
-     * this defers to it rather than keeping a second copy in the panel.
+     * traded into. That rule lives in the engine's isCategoryFull (Genre,
+     * Supporting Character and Theme & Event are uncapped; Setting, Protagonist,
+     * Antagonist and Finale hold one), and this defers to it rather than keeping
+     * a second copy in the panel.
      */
     function buttonLabelFor(category, selectedCount) {
         return Engine.isCategoryFull(category, { [category]: selectedCount }, MULTI_SELECT_CATEGORIES)
@@ -425,7 +426,7 @@
                 </div>
                 <div class="best-match-meta">
                     <span class="best-match-category">${match.candidate.category}</span>
-                    <span class="best-match-score ${match.score >= 4.5 ? 'score-excellent' : 'score-strong'}">${match.score.toFixed(2)}</span>
+                    <span class="best-match-score score-${Engine.bandFor(match.score, match.score)}">${match.score.toFixed(2)}</span>
                     ${addButtonMarkup(match.candidate, index)}
                 </div>
             </div>

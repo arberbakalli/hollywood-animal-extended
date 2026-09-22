@@ -2185,8 +2185,12 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     font-size: 1.1rem;
 }
 
-.best-match-score.score-excellent { color: #10b981; }
-.best-match-score.score-strong { color: #f59e0b; }
+/* Banded off bandFor, so the score agrees with the row it sits in. These used
+   to split at 4.5, which matches no band boundary, and there was no red at all
+   — a pair scoring 1.00 rendered the same amber as one scoring 4.4. */
+.best-match-score.score-successful { color: #10b981; }
+.best-match-score.score-common { color: #f59e0b; }
+.best-match-score.score-unsuccessful { color: var(--danger); }
 
 /* Category-colored text in best-match rows */
 .best-match-item.setting .best-match-category { color: var(--cat-setting); }

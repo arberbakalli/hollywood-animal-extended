@@ -1,6 +1,36 @@
 (function(global) {
     "use strict";
 
+    const BAND_STATE_KEY = 'graves-band-state';
+
+    /**
+     * localStorage can hold whatever a previous version, another tab or a stray
+     * write left behind, and parsing it unguarded threw on anything malformed.
+     *
+     * The failure was quiet rather than loud. evaluateColmanGravesScript is
+     * async, so the rejection was swallowed by the promise and nothing appeared
+     * in the UI; the panels are unhidden earlier in the render, so they looked
+     * populated while everything after this point silently never ran — the band
+     * collapse handlers, and the Conflicts list, which then sat showing its
+     * static placeholder as though the script had no conflicts at all.
+     */
+    function readBandState() {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(BAND_STATE_KEY));
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (error) {
+            return {};
+        }
+    }
+
+    function writeBandState(state) {
+        try {
+            localStorage.setItem(BAND_STATE_KEY, JSON.stringify(state));
+        } catch (error) {
+            // Private browsing and quota limits are not worth losing a render over.
+        }
+    }
+
     async function evaluateColmanGravesScript() {
         await ensureCompatibilityLoaded();
         clearFeedbackMessage('gravesFeedbackMessage');
@@ -183,8 +213,7 @@
             pairsContainer.innerHTML = bandMarkup || '<div class="empty-state">No element pairings found. All combinations are working well together.</div>';
 
             // Restore band collapse state from localStorage
-            const savedBandState = localStorage.getItem('graves-band-state');
-            const collapsedBands = savedBandState ? JSON.parse(savedBandState) : {};
+            const collapsedBands = readBandState();
 
             pairsContainer.querySelectorAll('.graves-pairs-band').forEach(band => {
                 const bandName = band.querySelector('[data-band]')?.dataset.band;
@@ -205,14 +234,13 @@
                     this.setAttribute('aria-expanded', !isCollapsed);
 
                     // Save band state to localStorage
-                    const savedState = localStorage.getItem('graves-band-state');
-                    const bandState = savedState ? JSON.parse(savedState) : {};
+                    const bandState = readBandState();
                     if (isCollapsed) {
                         bandState[bandName] = true;
                     } else {
                         delete bandState[bandName];
                     }
-                    localStorage.setItem('graves-band-state', JSON.stringify(bandState));
+                    writeBandState(bandState);
                 });
             });
         }
