@@ -77,10 +77,9 @@ Feature: Marketing and Release
       | Striking Image   |
       | Artistic Ability |
 
-  # [verified] Behemoth has two separate effects: a +25% boost to all weeks 1-8
-  # whenever it is active, plus slower decay only above commercial score 9.
-  # TC04-000013 covers this scenario but still encodes the superseded
-  # week-1-only rule, so it is RED pending owner review.
+  # [automated] TC04-000013 and TC-BEH-006. Behemoth has two separate effects: a
+  # +25% boost to all weeks 1-8 whenever it is active, plus slower decay only
+  # above commercial score 9.
   Scenario: Behemoth applies 25% boost to all weeks
     When the user enables the Behemoth studio policy
     Then all weeks 1-8 demand increases by 25 percent
@@ -205,10 +204,9 @@ Feature: Marketing and Release
     And the user enables the Behemoth studio policy
     Then week 2 demand increases by 25 percent
 
-  # [verified] The slower decay rule has a separate gate: commercial score > 9.
-  # Below that threshold, Behemoth applies only the boost, not the decay modifier.
-  # Pinned by tests/distribution-behemoth.test.js; TC-BEH-006 still encodes the
-  # superseded week-1-only rule and is RED pending owner review.
+  # [automated] TC-BEH-006 drives this through the grid, reading the decay off
+  # the week3/week2 ratio because the boost lifts both weeks together. Also
+  # pinned by tests/distribution-behemoth.test.js.
   Scenario: Behemoth slower decay requires commercial score above 9
     When the user sets the commercial score to 9.0
     And the user enables the Behemoth studio policy

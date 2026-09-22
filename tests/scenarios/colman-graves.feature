@@ -213,11 +213,10 @@ Feature: Script Evaluation — Colman Graves
     Then a Show more control states how many suggestions remain
     And the control disappears once every suggestion is listed
 
-  # [verified] Swap Suggestions evaluates all selected elements, not just the
-  # weakest, and shows viable swap candidates for each element slot that can
-  # be improved. TC03-000027 still encodes the superseded weakest-only rule and
-  # is RED pending owner review; do not treat this as automated until it is
-  # rewritten or replaced.
+  # [automated] TC03-000027. Swap Suggestions evaluates all selected elements,
+  # not just the weakest. The invariant is per slot: a slot may only be replaced
+  # by a candidate of its own category, since you cannot swap a Setting for a
+  # Finale.
   Scenario: Swap Suggestions shows swap candidates for all selected elements
     Given the user has evaluated a script with multiple Supporting Characters
     When the user generates Swap Suggestions
@@ -300,6 +299,29 @@ Feature: Script Evaluation — Colman Graves
     And the expand/collapse indicator shows the collapsed state
     When the user clicks it again
     Then the successful pair rows expand again
+
+  # [automated] Genre and Setting are exempt from the 5-10 story element budget,
+  # so a complete script sits at the budget when Max Element Pool is at its
+  # default of 5 and Best Additions has nothing it is allowed to offer. The
+  # empty state has to name that, because no fit threshold and no category will
+  # ever produce a row while the budget is full. TC03-000005/8/12/28 raise the
+  # pool first for this reason.
+  Scenario: Best Additions explains when the element budget is full
+    Given the user has evaluated a complete script
+    And the Max Element Pool is at its default
+    When the user generates Best Additions
+    Then no suggestions are listed
+    And the message says the script already uses all the story elements it is allowed
+    And the message points to Max Element Pool and to Swap Suggestions
+    And the message states that Genre and Setting do not count toward the budget
+
+  # [automated] The auto-widening retry must not leave the control reading a
+  # threshold the user never chose, or the next search silently runs under the
+  # wrong filter.
+  Scenario: A failed search restores the minimum fit the user chose
+    Given the user has set the minimum fit to "4.0+"
+    When the user generates Best Additions and nothing is found at any threshold
+    Then the minimum fit control still reads "4.0+"
 
   # [verified] Starting Tags filter was removed; all available tags (except
   # excluded ones) are shown in suggestions. Single source of truth is Script Lab.

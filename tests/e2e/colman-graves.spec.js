@@ -27,6 +27,15 @@ const buildValidScript = async (steps) => {
   }
 };
 
+// Max Element Pool defaults to 5 and a complete script carries exactly 5 story
+// elements — Genre and Setting are exempt — so a finished script sits at its
+// budget and Best Additions is correctly empty. Raising the pool is what gives
+// it room to suggest, so any test that wants additions from a complete script
+// has to ask for that room first.
+const makeRoomForAdditions = async (steps) => {
+  await steps.setSliderValue('elementPoolSlider', 'Navigation', 10);
+};
+
 // Build a script with multiple Supporting Characters for swap testing
 const buildMultiSupportingScript = async (steps) => {
   await steps.selectDropdown('genreSelect', 'ColmanGraves', {
@@ -187,6 +196,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
   });
 
   test('TC03-000005 best matches open and the analysis modes switch', async ({ steps, page }) => {
+    await makeRoomForAdditions(steps);
     await buildValidScript(steps);
     await steps.on('evaluateButton', 'ColmanGraves').click();
     await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
@@ -231,10 +241,58 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('feedbackMessage', 'ColmanGraves').verifyState('hidden');
   });
 
-  // Bug discovered: Swap Suggestions identifies the weakest element but then
-  // suggests additions instead of replacements. This test verifies the bug:
-  // suggestions must be candidates that can actually swap for the weak slot.
-  test('TC03-000027 Swap Suggestions gives candidates that can replace the weakest element', async ({ steps, page }) => {
+  // Genre and Setting are exempt from the story element budget, so a complete
+  // script sits at the budget with the pool at its default of 5 and Best
+  // Additions has nothing it may offer. No fit threshold and no category can
+  // change that, so the empty state has to name the budget rather than send the
+  // user round the filters.
+  test('TC03-000029 Best Additions explains when the element budget is full', async ({ steps, page }) => {
+    await buildValidScript(steps);
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+
+    // Deliberately NOT calling makeRoomForAdditions: the default pool is the
+    // condition under test.
+    await steps.expect('elementPoolInput', 'Navigation').value.toBe('5');
+
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+    await steps.on('bestMatchesPanel', 'ColmanGraves').verifyState('visible');
+
+    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ exactly: 0 });
+
+    const message = await page.locator('#gravesBestMatchesList .empty-state').textContent();
+    expect(message).toContain('already uses all 5 story elements');
+    expect(message).toContain('Max Element Pool');
+    expect(message).toContain('Swap Suggestions');
+    expect(message).toContain('Genre and Setting do not count');
+  });
+
+  // The auto-widening retry walks the fit filter down looking for rows. When it
+  // finds none it must put the control back, or the next search runs under a
+  // threshold the user never picked.
+  test('TC03-000030 a failed search restores the minimum fit the user chose', async ({ steps, page }) => {
+    await buildValidScript(steps);
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: '4.0',
+    });
+
+    // At the default pool this finds nothing at any threshold, so the retry
+    // exhausts every value on its way down.
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ exactly: 0 });
+
+    await steps.expect('minimumFitFilter', 'ColmanGraves').value.toBe('4.0');
+  });
+
+  // Swap Suggestions covers every selected element, not just the weakest, so the
+  // list spans categories. The invariant is per slot rather than global: a slot
+  // may only be replaced by a candidate of its own category — you cannot swap a
+  // Setting for a Finale — and each slot names its category in its own heading.
+  test('TC03-000027 every Swap Suggestion matches the category of the slot it replaces', async ({ steps, page }) => {
     await buildMultiSupportingScript(steps);
     await steps.on('evaluateButton', 'ColmanGraves').click();
     await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
@@ -250,20 +308,34 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('swapSuggestionsTab', 'ColmanGraves').click();
     await steps.expect('swapSuggestionsTab', 'ColmanGraves').attributes.get('class').toContain('active');
 
-    // Verify suggestions exist and check their categories
     await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
-    // The test will fail if suggestions are not Supporting Characters (categories differ)
-    const categories = await page.locator('#gravesBestMatchesList [data-category]').evaluateAll(
-      (els) => els.map((el) => el.getAttribute('data-category'))
+
+    const slots = await page.locator('#gravesBestMatchesList .best-match-slot-group').evaluateAll(
+      (groups) => groups.map((group) => ({
+        // The heading reads "<name> (<Category>). Replacing it with..."
+        heading: group.querySelector('.best-match-slot-note')?.textContent ?? '',
+        rowCategories: [...group.querySelectorAll('[data-role="graves-best-match"]')]
+          .map((row) => row.getAttribute('data-category')),
+      }))
     );
-    expect(categories.length).toBeGreaterThan(0);
-    // For Swap Suggestions, all should be Supporting Character (same as weakest slot)
-    expect(categories.every((c) => c === 'Supporting Character')).toBe(true);
+
+    expect(slots.length).toBeGreaterThan(0);
+
+    for (const slot of slots) {
+      const slotCategory = slot.heading.match(/\(([^)]+)\)/)?.[1];
+      expect(slotCategory, `slot heading did not name a category: ${slot.heading}`).toBeTruthy();
+      expect(slot.rowCategories.length).toBeGreaterThan(0);
+      expect(
+        slot.rowCategories.every((category) => category === slotCategory),
+        `slot "${slotCategory}" offered candidates from ${[...new Set(slot.rowCategories)].join(', ')}`
+      ).toBe(true);
+    }
   });
 
   // Bug discovered: Best Additions suggests categories at their cardinality limit.
   // This test verifies the bug: suggestions must only be for categories that can accept more.
   test('TC03-000028 Best Additions respects per-category selection limits', async ({ steps, page }) => {
+    await makeRoomForAdditions(steps);
     await buildCardinalityLimitScript(steps);
 
     // Verify the script was built correctly with 2 genres
@@ -301,6 +373,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
   });
 
   test('TC03-000008 adding a suggested Theme & Event joins the Graves script', async ({ steps }) => {
+    await makeRoomForAdditions(steps);
     await buildValidScript(steps);
     await steps.on('evaluateButton', 'ColmanGraves').click();
     await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
@@ -347,6 +420,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
   });
 
   test('TC03-000012 best-match category filter restricts suggestions', async ({ steps, page }) => {
+    await makeRoomForAdditions(steps);
     await buildValidScript(steps);
     await steps.selectDropdown('matchCategoryFilter', 'ColmanGraves', {
       type: DropdownSelectType.VALUE,
