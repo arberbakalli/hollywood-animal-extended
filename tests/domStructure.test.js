@@ -1,4 +1,5 @@
-import { describe, expect, test } from '@jest/globals';
+import { beforeAll, describe, expect, test } from '@jest/globals';
+import { loadLegacyScript } from './helpers/legacyHarness.js';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -217,5 +218,31 @@ describe('generated DOM hooks', () => {
         const source = await readGeneratedDomSources();
         expect(source).toContain('function categoryToElementSlug(category)');
         expect(source).not.toContain("category.replace(/\\s/g, '-')");
+    });
+});
+
+/**
+ * The neighbouring source-text guard checks how categoryToElementSlug is
+ * spelled, which cannot catch a change in what it returns. Every hardcoded
+ * selector in the Playwright specs and in styles.css depends on these exact
+ * strings, so they are pinned here against the real function.
+ */
+describe('category ids are derived, not hand-written', () => {
+    let h;
+
+    beforeAll(async () => {
+        h = await loadLegacyScript();
+    });
+
+    test.each([
+        ['Genre', 'genre'],
+        ['Setting', 'setting'],
+        ['Protagonist', 'protagonist'],
+        ['Antagonist', 'antagonist'],
+        ['Supporting Character', 'supporting-character'],
+        ['Theme & Event', 'theme-event'],
+        ['Finale', 'finale']
+    ])('%s maps to the id fragment %s', (category, slug) => {
+        expect(h.call('categoryToElementSlug', category)).toBe(slug);
     });
 });
