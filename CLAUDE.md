@@ -114,36 +114,19 @@ When piping the run (`npm run test:e2e | tail`), the exit code reported is the
 pipe's last command, not Playwright's. Redirect to a file and check `$?`
 instead, or a failing suite reads as green.
 
-## 4. Domain facts that have caused repeat regressions
+## 4. Domain rules live in one file
 
-- The story element category is **`Setting`**, singular. Filtering on `Settings`
-  matches nothing and silently miscounts every script.
-- Genre and Setting do not count toward the 5–10 story element budget.
-- Behemoth carries two effects on two independent gates. The **+25% applies to
-  every week 1–8**, including week 2, whenever the policy is on — it rides on the
-  budget the toggle stands for. The **slower decay** is separate and applies to
-  weeks 3+ only above commercial score 9.
-  - Changed 2026-09-22. This previously read "+25% to week 1 only" and "week 2
-    must never move". The owner corrected it against the game, where the Behemoth
-    icon shows on every week, and the code, Jest specs, Playwright specs and
-    `tests/scenarios` were all realigned. **Do not restore the week-1-only rule**
-    — an older comment or test elsewhere still describing it is stale, not a spec.
-- Max Element Pool defaults to **5**, and a complete script carries exactly 5
-  story elements, so a finished script sits at its budget and Best Additions is
-  correctly empty. That is intended: raise the pool, or swap instead. A test that
-  wants additions from a complete script must raise the pool first.
-- Swap Suggestions covers **every selected element**, not just the weakest. A
-  slot may only be replaced by a candidate of its own category.
-- The element budget does **not** apply to Swap Suggestions. A swap replaces a
-  slot with a candidate of the same category, so the element count cannot
-  change. It applies to Best Additions, where the engine returns no rows at the
-  budget, and to Pairwise, where the rows still list and the **Add button** is
-  disabled instead — Pairwise is an analysis view, and hiding it at the budget
-  removes the comparison exactly when the user is choosing what to trade.
-  - Added 2026-09-22 after the opposite was asserted and acted on. Handing
-    `buildSwaps` a budget is the bug, not the fix.
-- Within Pairwise, Add is disabled only when it would actually grow the pool. A
-  Swap label and a Genre or Setting candidate stay live at the budget.
+**`docs/GAME_RULES.md` is the source of truth for how the game and the app
+behave** — script shape, Genre being uncapped, the element budget and which
+features spend it, scoring thresholds, distribution and the studio policies,
+exclusions. Read it before answering any "should it be X or Y?" question, and
+add rules there rather than here, so there is one place to correct.
+
+If a rule is not in that file, it is not settled. Ask the owner instead of
+inferring one from the code: the code has been wrong about several of them.
+
+### Implementation traps that are not rules
+
 - The three engine builders do **not** share an argument order:
   `buildAdditions(tags, candidates, minimum, maxPoolSize, options)` but
   `buildSwaps(tags, candidates, minimum, options)` and
@@ -154,46 +137,16 @@ instead, or a failing suite reads as green.
   (`FINALE_PROTAGONIST_FINDS_TREASURE`), because `options.displayName` is gone
   and the engine falls back to `tag.name || tag.id`. That is a lookup failure
   upstream, never a string that needs reformatting — reformatting it corrupts
-  the names that were already correct ("Damsel in Distress" → "Damsel in
+  the names that were already correct ("Damsel in Distress" -> "Damsel in
   distress").
-- How many of a category a script may hold is **one rule**, `isCategoryFull` in
-  `gravesBestMatchesEngine` (multi-select categories — Genre, Supporting
-  Character, Theme & Event — are uncapped; everything else holds one). The
-  Add/Swap button label derives from it. Do not re-implement that arithmetic in
-  a panel.
-- **Story elements are everything except Genre and Setting.** A script is
-  `N` story elements (5–10, the Max Element Pool) **plus** one Setting **plus**
-  one to eleven Genres. Genre and Setting never spend the budget, so a
-  combination's width is the budget plus its context, not a fixed number.
-  Protagonist, Antagonist and Finale are mandatory and *do* spend it.
-  - Build for Target enforced this as a fixed `budget + 2` width, which assumed
-    exactly one Genre. A three-genre script therefore delivered three fewer
-    story elements than the pool promised. Size on the story-element count, not
-    on total tags.
-- **Genre is not capped at 2.** A script can carry all eleven genres, split by
-  percentage, with one taking whatever remains up to 100%. Two is a common mix,
-  not a limit. The minimum is one: every script needs a Genre.
-  - Uncapped does not mean generated. Build for Target seeds the one Genre a
-    script requires and spends the remaining budget on story elements; further
-    genres come from what the player locked.
-  - Corrected 2026-09-22 by the owner against the game. The engine had
-    special-cased Genre to 2, which silently withheld every Genre suggestion
-    once a script had two. **Do not reintroduce a Genre cap** — a comment or
-    test elsewhere still describing one is stale, not a spec.
-- `MULTI_SELECT_CATEGORIES` is `[Genre, Supporting Character, Theme & Event]`.
-  Iterating it to refresh dropdowns silently skips **Setting, Protagonist,
-  Antagonist and Finale**, so a lifted ban on any of those leaves the old list
-  on screen until an unrelated click redraws that one category. Exclusion
-  refreshes must cover every category, derived from the data.
-- Pair Analysis's **Unsuccessful** band and the **Conflicts** panel are the same
-  pairs, both `rawScore < 2.0`. They are not "bad" and "terrible" tiers;
-  Conflicts sub-grades the same set (severe below 1.0, serious below 1.5, mild
-  below 2.0).
 - `hideGravesEvaluationResults` and the list that reveals panels after an
   evaluation must name the **same five panels**. Generate Best Matches unhides
   the shared results container, so a panel missing from the hide list shows a
   placeholder or the previous run's numbers, and a panel missing from the reveal
   list disappears for good once Best Matches has run.
+- Reproducing an exclusion-refresh bug requires the **Starting Tags profile
+  active**. From a clean ban list the scenario passes with the defect present,
+  which is how it survived several rounds of fixing.
 
 ## 5. Verifying a fix
 

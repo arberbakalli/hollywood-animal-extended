@@ -5,8 +5,11 @@ Model-agnostic contract for every coding agent working in this repository.
 ## Read Order
 
 1. `AGENTS.md`
-2. `docs/DECISIONS.md` — why the architecture looks the way it does
-3. `docs/KNOWN_ISSUES.md` — confirmed unresolved risks
+2. `docs/GAME_RULES.md` — **how the game and the app must behave.** The source of
+   truth for domain questions. If a rule is not there it is not settled: ask the
+   owner rather than inferring one from the code
+3. `docs/DECISIONS.md` — why the architecture looks the way it does
+4. `docs/KNOWN_ISSUES.md` — confirmed unresolved risks
 
 Source code, tests, and observed browser behaviour override stale prose.
 
