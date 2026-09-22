@@ -453,6 +453,28 @@ test.describe('Marketing and Release — Build for Target', () => {
     await steps.on('resultsList', 'BuildForTarget').verifyText();
   });
 
+  // Build for Target used to read a #targetedElementsSlider of its own. That
+  // element is no longer in the markup, so the lookup fell through to a NaN
+  // branch and returned 10 no matter what the header said — the global control
+  // silently did nothing here, which is the "Build for Target ignores max pool"
+  // report. Asserting equality alone would not catch it, because both sides
+  // read 10 by default; the pool has to be moved off its default first.
+  test('TC05-000015 Build for Target spends the global Max Element Pool', async ({ steps, page }) => {
+    const budgetFor = async (pool) => {
+      await steps.on('elementPoolInput', 'Navigation').fill(String(pool));
+      return page.evaluate(() => ({
+        pool: window.HACScriptGenerator.getMaxElementPoolSize(),
+        budget: window.HACTargetedAds.getTargetedElementBudget(),
+      }));
+    };
+
+    await expect.poll(async () => (await budgetFor(7)).budget).toBe(7);
+
+    const atSix = await budgetFor(6);
+    expect(atSix.budget).toBe(6);
+    expect(atSix.budget).toBe(atSix.pool);
+  });
+
   // Given an audience is chosen
   // When the user searches for combinations
   // Then results are produced

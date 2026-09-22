@@ -31,37 +31,9 @@
         // Initialize tag selectors for Targeted Ads
         initializeSelectors('targeted');
 
-        setupTargetedElementBudget();
-
         // Attach event listeners
         document.getElementById('findCombinationsButton')?.addEventListener('click', findTargetedCombinations);
         document.getElementById('resetTargetedButton')?.addEventListener('click', resetTargetedTab);
-    }
-
-    function setupTargetedElementBudget() {
-        const slider = document.getElementById('targetedElementsSlider');
-        const input = document.getElementById('targetedElementsInput');
-        if (!slider || !input) return;
-
-        const clamp = value => Math.min(10, Math.max(5, value));
-
-        const sync = (value, { updateSlider, updateInput }) => {
-            if (updateSlider) slider.value = String(value);
-            if (updateInput) input.value = String(value);
-            updateSliderTrack(slider, '#d4af37');
-        };
-
-        slider.addEventListener('input', e => {
-            sync(clamp(parseInt(e.target.value, 10)), { updateInput: true });
-        });
-
-        input.addEventListener('input', e => {
-            const value = parseInt(e.target.value, 10);
-            if (Number.isNaN(value)) return;
-            sync(clamp(value), { updateSlider: true });
-        });
-
-        sync(clamp(parseInt(slider.value, 10)), { updateInput: true });
     }
 
     function resetTargetedTab() {
@@ -85,7 +57,7 @@
         const storyElementTags = scoringElementsOf(selectedTags);
 
         if (storyElementTags.length > maxElements) {
-            showFeedbackMessage('targetedFeedbackMessage', `Max Story Elements is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise the slider or remove a tag (Genre and Setting do not count).`, 'accent');
+            showFeedbackMessage('targetedFeedbackMessage', `Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`, 'accent');
             return;
         }
 
@@ -115,15 +87,22 @@
     }
 
     // Genre and Setting are structural picks every script carries, so they never
-    // spend the story-element budget the slider controls.
+    // spend the Max Element Pool budget.
     function scoringElementsOf(tags) {
         return tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting');
     }
 
+    /**
+     * Build for Target reads the global Max Element Pool, like every other
+     * generator. It used to read a #targetedElementsSlider of its own, which no
+     * longer exists in the markup: the lookup fell through to the NaN branch and
+     * returned 10 whatever the header was set to, so the control silently did
+     * nothing here.
+     */
     function getTargetedElementBudget() {
-        const slider = document.getElementById('targetedElementsSlider');
-        const value = parseInt(slider?.value, 10);
-        return Number.isNaN(value) ? 10 : value;
+        return typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
+            ? HACScriptGenerator.getMaxElementPoolSize()
+            : 10;
     }
 
     async function searchForTargetCombinations(targetAgencies, constraintTags = [], constraintAudiences = [], maxResults = 20, storyElementBudget = 10) {
@@ -350,7 +329,6 @@
         searchForTargetCombinations,
         scoringElementsOf,
         getTargetedElementBudget,
-        setupTargetedElementBudget,
         resolveTargetedTagInputs,
         withCompatibilityWeights,
         scoreTagForTargetAgencies,
