@@ -120,26 +120,64 @@ describe('Graves Best Matches', () => {
         });
     });
 
+    /**
+     * Rewritten 2026-09-22 with the owner's approval. The three cases here
+     * asserted only that getMaxElementPoolSize was defined, so they passed
+     * while the budget was reaching none of these builders and while the
+     * arguments to two of them were misaligned. Each case now drives the
+     * builder it names, with a pool that actually bites.
+     *
+     * The three builders deliberately treat the budget differently, and that
+     * difference is the thing worth pinning:
+     *   - additions grow the pool, so the engine withholds rows at the budget
+     *   - a swap trades within a category, so the count cannot change and the
+     *     budget is none of its business
+     *   - pairwise is an analysis view: rows stay, the Add button goes dead
+     */
     describe('max element pool constraint', () => {
-        test('buildAdditions respects max pool size from script generator', () => {
-            // Max pool is a global constraint that limits how many non-Genre/Setting
-            // elements can be suggested. Additions should not suggest adding beyond
-            // the pool limit.
-            expect(h.call('HACScriptGenerator.getMaxElementPoolSize')).toBeDefined();
-            // The function buildAdditions should receive maxPoolSize as a parameter
-            // to the engine (verified through integration test at evaluation time)
+        const theme = (id) => ({ id, name: id, category: 'Theme & Event' });
+        const OPTS = `{
+            calculateMatrixScore: () => ({ rawAverage: 3 }),
+            getRawCompatibilityScore: () => 5,
+            multiSelectCategories: ['Theme & Event']
+        }`;
+
+        test('buildAdditions offers nothing once the pool is spent', () => {
+            const rows = (maxPoolSize) => h.evaluate(`HACGravesBestMatchesEngine.buildAdditions(
+                ${JSON.stringify([theme('A'), theme('B')])},
+                ${JSON.stringify([theme('C')])},
+                0,
+                ${maxPoolSize},
+                ${OPTS}
+            )`).length;
+
+            expect(rows(2)).toBe(0);
+            // One seat of headroom, same inputs: proves the budget is the gate.
+            expect(rows(3)).toBe(1);
         });
 
-        test('buildSwaps respects max pool size from script generator', () => {
-            // Swap suggestions should also respect pool limits; a swap should never
-            // suggest replacing when at max capacity
-            expect(h.call('HACScriptGenerator.getMaxElementPoolSize')).toBeDefined();
+        test('buildSwaps does not take a pool, because a swap cannot change the count', () => {
+            // A swap replaces a slot with a candidate of its own category, so the
+            // element count is identical before and after. Handing this builder a
+            // budget is what displaced its options argument and left every
+            // selected element rendering as a raw id.
+            expect(h.evaluate('HACGravesBestMatchesEngine.buildSwaps.length')).toBe(3);
+            expect(h.evaluate('HACGravesBestMatchesEngine.buildAdditions.length')).toBe(4);
         });
 
-        test('buildPairwise respects max pool size from script generator', () => {
-            // Pairwise analysis should not suggest pairs that would exceed the
-            // global element pool limit
-            expect(h.call('HACScriptGenerator.getMaxElementPoolSize')).toBeDefined();
+        test('buildPairwise still lists its pairs at the budget', () => {
+            // Ten budgeted elements against a pool of ten. Additions would be
+            // empty here; pairwise keeps the comparison and disables Add instead.
+            const selected = Array.from({ length: 10 }, (_, i) => theme(`T${i}`));
+            const matches = h.evaluate(`HACGravesBestMatchesEngine.buildPairwise(
+                ${JSON.stringify(selected)},
+                ${JSON.stringify([theme('C')])},
+                0,
+                ${OPTS}
+            )`);
+
+            expect(matches.length).toBe(10);
+            expect(h.call('HACGravesBestMatches.atElementBudget', selected)).toBe(true);
         });
     });
 
