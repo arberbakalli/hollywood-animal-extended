@@ -16,6 +16,7 @@ show-recordings/
 .achilles/show/
 .achilles/self-repair/
 .achilles/mutation-out/
+.achilles/run-summary.json
 .DS_Store
 
 npm-debug.log*
