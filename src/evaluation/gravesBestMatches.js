@@ -191,11 +191,15 @@
             ? HACScriptGenerator.getMaxElementPoolSize()
             : 10;
         const counts = categoryCardinality(selectedTags);
+        // Pool size counts only the 5 story elements, not Genre or Setting
+        const poolCount = selectedTags.filter(tag =>
+            tag.category !== 'Genre' && tag.category !== 'Setting'
+        ).length;
         const candidates = collectCandidates(selectedTags).filter(candidate => {
             // Check both category-specific limits and total pool size
             if (isCategoryFull(candidate.category, counts)) return false;
             // If adding this element would exceed the pool size, filter it out
-            if (selectedTags.length >= maxPoolSize) return false;
+            if (poolCount >= maxPoolSize) return false;
             return true;
         });
 
