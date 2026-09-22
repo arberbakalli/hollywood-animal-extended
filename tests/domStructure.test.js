@@ -246,3 +246,36 @@ describe('category ids are derived, not hand-written', () => {
         expect(h.call('categoryToElementSlug', category)).toBe(slug);
     });
 });
+
+/**
+ * script.js is a bridge: every bare global delegates to a HAC* namespace. A
+ * wrapper whose target has since been removed still parses and still loads,
+ * and only fails when something calls it — so nothing catches it until a user
+ * does. One shipped exactly that way when an unused export was deleted, and
+ * both suites stayed green because nothing called the bare name.
+ */
+describe('script.js bridges only targets that exist', () => {
+    const NAMESPACE_CALL = /(HAC[A-Za-z]+)\.([A-Za-z0-9_$]+)/g;
+    const EXPORT_BLOCK = /global\.(HAC[A-Za-z]+)\s*=\s*\{([\s\S]*?)\n\s*\};/;
+
+    test('every HAC namespace call in script.js resolves to a real export', async () => {
+        const bridge = await readProjectFile('script.js');
+        const exportsByNamespace = {};
+
+        for (const file of await listSourceModules()) {
+            const block = (await readProjectFile(file)).match(EXPORT_BLOCK);
+            if (!block) continue;
+            exportsByNamespace[block[1]] = block[2]
+                .split(',')
+                .map(entry => entry.split(':')[0].trim())
+                .filter(Boolean);
+        }
+
+        const dangling = [...bridge.matchAll(NAMESPACE_CALL)]
+            .filter(([, namespace]) => exportsByNamespace[namespace])
+            .filter(([, namespace, name]) => !exportsByNamespace[namespace].includes(name))
+            .map(([, namespace, name]) => `${namespace}.${name}`);
+
+        expect([...new Set(dangling)]).toEqual([]);
+    });
+});

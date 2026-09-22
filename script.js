@@ -95,10 +95,7 @@ function getSelectedTagsInCategory(category, context) {
 function refreshCategoryDropdowns(category, context) {
     return HACStoryElementSelector.refreshCategoryDropdowns(category, context);
 }
-
-function removeBlockedLockedPicks() {
-    return HACScriptGenerator.removeBlockedLockedPicks();
-}
+
 
 function refreshLockedElementAvailability() {
     return HACStoryElementSelector.refreshLockedElementAvailability();
