@@ -2244,25 +2244,29 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .graves-pairs-band-toggle {
-    display: inline-block;
-    width: 1.2rem;
-    height: 1.2rem;
-    font-size: 0.75rem;
-    line-height: 1.2rem;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    font-size: 0.85rem;
     background: currentColor;
     color: var(--card-bg);
-    border-radius: 2px;
+    border-radius: 3px;
     font-weight: bold;
     flex-shrink: 0;
+    transition: transform 0.15s ease-in-out;
 }
 
 .graves-pairs-band.collapsed .graves-pairs-band-toggle::before {
     content: '▶';
+    display: inline-block;
 }
 
 .graves-pairs-band:not(.collapsed) .graves-pairs-band-toggle::before {
     content: '▼';
+    display: inline-block;
+    transform: rotate(0deg);
 }
 
 .graves-pairs-band-successful .graves-pairs-band-title { color: #10b981; }
@@ -2310,7 +2314,9 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .graves-pair-separator {
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 300;
+    opacity: 0.7;
 }
 
 .graves-pair-categories {
