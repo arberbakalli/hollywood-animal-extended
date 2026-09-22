@@ -190,7 +190,8 @@
             label = selectedCount > 0 ? 'Swap' : 'Add';
         }
 
-        return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-${label.toLowerCase()}-btn" type="button" data-action="add-graves-best-match" data-tag-id="${candidate.id}" data-category="${candidate.category}">${label}</button>`;
+        const action = label === 'Swap' ? 'swap-graves-best-match' : 'add-graves-best-match';
+        return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-${label.toLowerCase()}-btn" type="button" data-action="${action}" data-tag-id="${candidate.id}" data-category="${candidate.category}">${label}</button>`;
     }
 
     function tagClass(tag) {
@@ -396,6 +397,7 @@
     }
 
     function bindAddButtons(list) {
+        // Handle Add action
         list.querySelectorAll('[data-action="add-graves-best-match"]').forEach(button => {
             button.addEventListener('click', () => {
                 const tag = GAME_DATA.tags[button.dataset.tagId];
@@ -405,6 +407,39 @@
                     showFeedbackMessage('gravesFeedbackMessage', `${tag.name} added to the Graves script.`, 'success');
                     lastSelectedTags = collectTagInputs('graves');
                     renderBestMatches();
+                }
+            });
+        });
+
+        // Handle Swap action
+        list.querySelectorAll('[data-action="swap-graves-best-match"]').forEach(button => {
+            button.addEventListener('click', () => {
+                const tag = GAME_DATA.tags[button.dataset.tagId];
+                const category = button.dataset.category;
+                if (!tag || !category) return;
+
+                // Find and remove existing tag in this category
+                const categorySlug = categoryToElementSlug(category);
+                const categoryRows = document.querySelectorAll(`#inputs-${categorySlug}-graves [data-role="tag-selector-row"]`);
+                let swapped = false;
+
+                categoryRows.forEach(row => {
+                    const select = row.querySelector('select.tag-selector');
+                    if (select && select.value && select.value !== '') {
+                        select.value = '';
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        swapped = true;
+                    }
+                });
+
+                // Add the new tag
+                if (swapped) {
+                    const added = addTagToSelectorContext(tag, 'graves');
+                    if (added) {
+                        showFeedbackMessage('gravesFeedbackMessage', `${tag.name} swapped in the Graves script.`, 'success');
+                        lastSelectedTags = collectTagInputs('graves');
+                        renderBestMatches();
+                    }
                 }
             });
         });
