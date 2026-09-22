@@ -2001,7 +2001,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .category-search-input {
     width: 100%;
     padding: 6px 10px;
-    background: var(--bg-input, #1a1a2e);
+    background: var(--input-bg);
     border: 1px solid var(--border);
     border-radius: 3px;
     color: var(--text-main);
@@ -2284,11 +2284,11 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     gap: 0.5rem;
     align-items: center;
     font-weight: 500;
-    color: var(--text-bright);
+    color: var(--text-main);
 }
 
 .graves-pair-name {
-    color: var(--text-bright);
+    color: var(--text-main);
 }
 
 .graves-pair-separator {
