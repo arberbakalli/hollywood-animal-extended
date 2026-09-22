@@ -1,7 +1,7 @@
 {
   "meta": {
-    "timestamp": "2026-09-22T10:04:57Z",
-    "git_sha": "5ddffc5b725d94178aa277b20de6afe83baf5ed5",
+    "timestamp": "2026-09-22T12:27:34Z",
+    "git_sha": "a17244e6050a80722d7f3db846647de3de7bb84e",
     "achilles_version": "0.1.8",
     "schema": "run-summary/v2"
   },
@@ -15,6 +15,7 @@
       "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/distribution-max-score.spec.js",
       "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/empty-state-navigation.spec.js",
       "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/exclusion-dropdown-refresh.spec.js",
+      "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/exclusion-persistence.spec.js",
       "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/exclusion-select-story.spec.js",
       "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/genre-mix.spec.js",
       "/c/Users/testUser/IdeaProjects/hollywood-animal-extended/tests/e2e/marketing-release.spec.js",

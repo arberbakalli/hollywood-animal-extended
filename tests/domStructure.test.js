@@ -157,6 +157,7 @@ describe('HTML structure', () => {
             'src/library/exclusionStore.js',
             'src/evaluation/scriptEvaluation.js',
             'src/evaluation/gravesAudience.js',
+            'src/evaluation/generateHighestSynergy.js',
             'src/evaluation/gravesBestMatches.js',
             'src/marketing/advertiserMatcher.js',
             'src/marketing/distributionPlanner.js',

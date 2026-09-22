@@ -483,7 +483,11 @@
         const result = buildSwaps(selectedTags);
 
         if (!result) {
-            list.innerHTML = emptyMarkup('Select at least 2 elements to see swap suggestions.');
+            const budgeted = selectedTags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting');
+            const msg = budgeted.length === 0
+                ? 'Select at least 2 story elements to swap (Genre and Setting are context, not swappable).'
+                : `Select at least 2 story elements to swap. You have ${budgeted.length} eligible.`;
+            list.innerHTML = emptyMarkup(msg);
             return;
         }
 

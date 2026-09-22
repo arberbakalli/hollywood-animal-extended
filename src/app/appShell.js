@@ -244,6 +244,20 @@
             button.addEventListener('click', () => resetSelectors(button.dataset.resetContext));
         });
 
+        document.getElementById('transferToMarketingButton')?.addEventListener('click', () => {
+            const gravesSelection = collectTagInputs('graves');
+            resetSelectors('targeted');
+            gravesSelection.forEach(tag => {
+                addTagToSelectorContext(tag, 'targeted');
+            });
+            switchTab('targeted');
+            document.getElementById('targetedModeTargetedButton')?.click();
+        });
+
+        document.getElementById('generateSynergyButton')?.addEventListener('click', () => {
+            generateHighestSynergy('overall');
+        });
+
         function applyStartingTagsExclusions() {
             const buildExcludedList = () => {
                 resetSelectors('excluded');
