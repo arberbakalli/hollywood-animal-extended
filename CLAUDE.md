@@ -124,3 +124,60 @@ reports zero failing tests while covering nothing.
   wants additions from a complete script must raise the pool first.
 - Swap Suggestions covers **every selected element**, not just the weakest. A
   slot may only be replaced by a candidate of its own category.
+- The element budget does **not** apply to Swap Suggestions. A swap replaces a
+  slot with a candidate of the same category, so the element count cannot
+  change. It applies to Best Additions, where the engine returns no rows at the
+  budget, and to Pairwise, where the rows still list and the **Add button** is
+  disabled instead — Pairwise is an analysis view, and hiding it at the budget
+  removes the comparison exactly when the user is choosing what to trade.
+  - Added 2026-09-22 after the opposite was asserted and acted on. Handing
+    `buildSwaps` a budget is the bug, not the fix.
+- Within Pairwise, Add is disabled only when it would actually grow the pool. A
+  Swap label and a Genre or Setting candidate stay live at the budget.
+- The three engine builders do **not** share an argument order:
+  `buildAdditions(tags, candidates, minimum, maxPoolSize, options)` but
+  `buildSwaps(tags, candidates, minimum, options)` and
+  `buildPairwise(tags, candidates, minimum, options)`. An argument added in the
+  wrong slot replaces `options` with a number and drops `engineOptions()`
+  silently. **Read the signature before adding an argument.** The visible
+  symptom is every selected element rendering as its raw id
+  (`FINALE_PROTAGONIST_FINDS_TREASURE`), because `options.displayName` is gone
+  and the engine falls back to `tag.name || tag.id`. That is a lookup failure
+  upstream, never a string that needs reformatting — reformatting it corrupts
+  the names that were already correct ("Damsel in Distress" → "Damsel in
+  distress").
+- How many of a category a script may hold is **one rule**, `isCategoryFull` in
+  `gravesBestMatchesEngine` (Genre caps at 2, multi-select categories are
+  uncapped, everything else holds one). The Add/Swap button label derives from
+  it. Do not re-implement that arithmetic in a panel.
+- `MULTI_SELECT_CATEGORIES` is `[Genre, Supporting Character, Theme & Event]`.
+  Iterating it to refresh dropdowns silently skips **Setting, Protagonist,
+  Antagonist and Finale**, so a lifted ban on any of those leaves the old list
+  on screen until an unrelated click redraws that one category. Exclusion
+  refreshes must cover every category, derived from the data.
+- Pair Analysis's **Unsuccessful** band and the **Conflicts** panel are the same
+  pairs, both `rawScore < 2.0`. They are not "bad" and "terrible" tiers;
+  Conflicts sub-grades the same set (severe below 1.0, serious below 1.5, mild
+  below 2.0).
+- `hideGravesEvaluationResults` and the list that reveals panels after an
+  evaluation must name the **same five panels**. Generate Best Matches unhides
+  the shared results container, so a panel missing from the hide list shows a
+  placeholder or the previous run's numbers, and a panel missing from the reveal
+  list disappears for good once Best Matches has run.
+
+## 5. Verifying a fix
+
+A green suite is not evidence that a bug is fixed. This suite was fully green
+for the entire life of the argument-order bug above, and three tests named for
+the element budget passed with that bug present.
+
+- **Prove a new test has teeth.** Reintroduce the defect and confirm the test
+  goes red. If it still passes, it is vacuous — rewrite or drop it. Do not keep
+  it as reassurance.
+- **Re-render before reading the DOM.** After editing JS or CSS, reload with a
+  cache-buster *and* re-trigger the render. A reload alone leaves the previous
+  results markup in place, and inspecting it reports the old build.
+- **Read the evidence before citing it.** State the expected value and compare
+  against it explicitly, rather than glancing at output and calling it a pass.
+- Report what was not reproduced. An unreproduced bug that is described as
+  fixed costs more than one that is described as open.
