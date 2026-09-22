@@ -118,10 +118,12 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('allTagSelects', 'ColmanGraves').verifyCount({ exactly: 7 });
   });
 
-  test('TC03-000007 best-match filters expose category, fit and starter controls', async ({ steps, page }) => {
+  // The starting-tags-only checkbox was removed from this panel: exclusions are
+  // owned by Script Lab alone, so Graves no longer offers a second place to
+  // narrow the candidate pool. Category and fit remain.
+  test('TC03-000007 best-match filters expose category and fit controls', async ({ steps, page }) => {
     await steps.on('matchCategoryFilter', 'ColmanGraves').verifyState('visible');
     await steps.on('minimumFitFilter', 'ColmanGraves').verifyState('visible');
-    await steps.on('startingTagsOnlyCheckbox', 'ColmanGraves').verifyState('visible');
     await steps.on('exclusionNotice', 'ColmanGraves').verifyState('hidden');
 
     const categoryOptions = await page.locator('#gravesBestCategoryFilter option').allTextContents();
@@ -378,25 +380,9 @@ test.describe('Script Evaluation — Colman Graves', () => {
     expect(scores.every(score => score >= 4.5)).toBe(true);
   });
 
-  test('TC03-000014 starting-tags-only filter restricts suggestions to the starter deck', async ({ steps, page }) => {
-    await steps.selectDropdown('genreSelect', 'ColmanGraves', FIRST_OPTION);
-    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
-      type: DropdownSelectType.VALUE,
-      value: '0',
-    });
-    await steps.on('startingTagsOnlyCheckbox', 'ColmanGraves').check();
-
-    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
-
-    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
-    const [suggestedIds, starterIds] = await page.evaluate(() => [
-      Array.from(document.querySelectorAll('#gravesBestMatchesList [data-role="graves-best-match"]'))
-        .map(row => row.dataset.tagId),
-      Array.from(HACAvailabilityFilter.getStarterAvailableIds()),
-    ]);
-    const starterSet = new Set(starterIds);
-    expect(suggestedIds.every(id => starterSet.has(id))).toBe(true);
-  });
+  // TC03-000014 removed: it drove the starting-tags-only checkbox, which no
+  // longer exists. Script Lab's exclusion list is the single place that narrows
+  // the candidate pool, so Graves has no starter-deck filter left to assert.
 
   test('TC03-000006 resetting clears the submission and hides the verdict', async ({ steps }) => {
     await buildValidScript(steps);

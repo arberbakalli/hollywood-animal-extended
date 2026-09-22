@@ -167,7 +167,9 @@ test.describe('Marketing and Release — distribution calculator', () => {
       .toBeGreaterThan(before);
   });
 
-  test('TC04-000013 the Behemoth policy changes week one and commercial-gated decay', async ({ steps }) => {
+  // The +25% rides on the budget the toggle stands for, so it lifts every week
+  // at any score. Only the slower decay waits for commercial to pass 9.
+  test('TC04-000013 the Behemoth policy boosts every week and gates decay on commercial score', async ({ steps }) => {
     await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8.5);
     const week1Before = await attr(steps, 'weekOneCard', 'data-demand');
     const week3Before = Number((await steps.getAll('weekCards', 'MarketingRelease', {
@@ -180,7 +182,7 @@ test.describe('Marketing and Release — distribution calculator', () => {
       .toBe(Math.ceil(week1Before * 1.25));
     expect(Number((await steps.getAll('weekCards', 'MarketingRelease', {
       extractAttribute: 'data-demand',
-    }))[2])).toBe(week3Before);
+    }))[2])).toBe(Math.ceil(week3Before * 1.25));
 
     await steps.on('behemothToggle', 'MarketingRelease').uncheck();
     await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 10);
@@ -220,6 +222,9 @@ test.describe('Marketing and Release — distribution calculator', () => {
     expect(thresholdValues[2]).toBe(normalValues[2]);
   });
 
+  // Both gates open at 10/10, so the fall slows to 0.9 and Behemoth's +25% rides
+  // on top of every week. Seeded demand is 20000/10000, week 3 falls to 9000,
+  // and the boost lifts all three: 25000 / 12500 / 11250.
   test('TC04-000015 Behemoth and Boutique stack their slower decay when both gates qualify', async ({ steps }) => {
     await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 10);
     await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 10);
@@ -231,8 +236,8 @@ test.describe('Marketing and Release — distribution calculator', () => {
     })).map(Number);
 
     expect(values[0]).toBe(25000);
-    expect(values[1]).toBe(10000);
-    expect(values[2]).toBe(9000);
+    expect(values[1]).toBe(12500);
+    expect(values[2]).toBe(11250);
   });
 
   // Factory Policy halves the pre-release run. Every other distribution toggle

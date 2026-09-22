@@ -114,7 +114,6 @@
         { "elementName": "finaleAddButton", "selector": { "css": "#add-finale-graves-button" } },
         { "elementName": "matchCategoryFilter", "selector": { "css": "#gravesBestCategoryFilter" } },
         { "elementName": "minimumFitFilter", "selector": { "css": "#gravesBestScoreFilter" } },
-        { "elementName": "startingTagsOnlyCheckbox", "selector": { "css": "#gravesStarterOnlyFilter" } },
         { "elementName": "exclusionNotice", "selector": { "css": "#graves-exclusion-notice" } },
         { "elementName": "exclusionSummary", "selector": { "css": "#gravesExclusionSummary" } },
         { "elementName": "editInScriptLabButton", "selector": { "css": "#gravesExclusionJumpButton" } },

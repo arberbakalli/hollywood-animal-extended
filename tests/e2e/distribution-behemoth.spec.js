@@ -75,8 +75,10 @@ test.describe('Distribution Calculator — Behemoth Policy Feature', () => {
     });
 
     // Below the decay threshold the two halves of the Behemoth policy part ways:
-    // the week 1 boost still applies, the slower decay does not.
-    test('TC-BEH-006: below score 9, Behemoth boosts week 1 but not the decay', async ({ page }) => {
+    // the +25% boost still applies to every week, the slower decay does not.
+    // The boost lifts weeks 2 and 3 together, so the week-on-week ratio is what
+    // exposes the decay rate — it stays at the base 0.8 until the score passes 9.
+    test('TC-BEH-006: below score 9, Behemoth boosts every week but not the decay', async ({ page }) => {
       await page.click('button:has-text("Marketing & Release")');
 
       // Set commercial score to 8.5 (below the decay threshold of 9)
@@ -84,19 +86,25 @@ test.describe('Distribution Calculator — Behemoth Policy Feature', () => {
 
       // Get values without Behemoth
       const week1Before = await page.getAttribute('#dist-week-1-value', 'data-demand');
+      const week2Before = await page.getAttribute('#dist-week-2-value', 'data-demand');
       const week3Before = await page.getAttribute('#dist-week-3-value', 'data-demand');
 
       // Enable Behemoth
       await page.check('#behemothToggle');
 
       const week1After = await page.getAttribute('#dist-week-1-value', 'data-demand');
+      const week2After = await page.getAttribute('#dist-week-2-value', 'data-demand');
       const week3After = await page.getAttribute('#dist-week-3-value', 'data-demand');
 
-      // Week 1 takes the +25% at any score.
+      // Every week takes the +25% at any score.
       expect(parseInt(week1After)).toBe(Math.ceil(parseInt(week1Before) * 1.25));
+      expect(parseInt(week2After)).toBe(Math.ceil(parseInt(week2Before) * 1.25));
+      expect(parseInt(week3After)).toBe(Math.ceil(parseInt(week3Before) * 1.25));
 
-      // Weeks 3+ keep the base 0.8 decay until the score passes 9.
-      expect(week3After).toBe(week3Before);
+      // Weeks 3+ keep the base 0.8 decay until the score passes 9, so the boost
+      // must not have changed the shape of the curve.
+      expect(parseInt(week3Before) / parseInt(week2Before)).toBeCloseTo(0.8, 5);
+      expect(parseInt(week3After) / parseInt(week2After)).toBeCloseTo(0.8, 5);
     });
 
     test('TC-BEH-007: Behemoth stacks with Striking Image and Artistic Ability', async ({ page }) => {
