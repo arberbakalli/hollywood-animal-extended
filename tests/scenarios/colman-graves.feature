@@ -127,9 +127,12 @@ Feature: Script Evaluation — Colman Graves
     And suggestions are listed
     And no message says Genre, Setting or Protagonist is required
 
-  # [unverified] Source-of-truth expectation for Script Lab exclusions. Starting
-  # Tags may hide unavailable settings, but removing a setting from the exclusion
-  # list should make it selectable in Graves without a reload.
+  # [automated] tests/e2e/exclusion-dropdown-refresh.spec.js TC09-000018.
+  # Confirmed in the app 2026-09-22, and it was failing: with the Starting Tags
+  # profile active, Reset Bans emptied the list while Graves kept all 24 banned
+  # Settings hidden. The profile is the precondition that makes it visible —
+  # from a clean ban list the scenario passes even with the defect present,
+  # which is how it survived several rounds of fixing.
   Scenario: Removing a Setting from Script Lab exclusions restores it in Graves
     Given the Script Lab Starting Tags profile is active
     And a Setting is hidden from Colman Graves because it is excluded
@@ -225,11 +228,10 @@ Feature: Script Evaluation — Colman Graves
     And candidates are grouped by fit band (successful, common, unsuccessful)
     And candidates are ranked from highest to lowest fit
 
-  # [unverified] DISCOVERED BUG: Best Additions suggests categories that are
-  # already at their cardinality limit. A script with two Genres (limit 2) and
-  # one Setting, Protagonist, Antagonist, Supporting Character and Theme & Event
-  # should not be offered more Genres in additions. The mode should only suggest
-  # categories that can accept more members.
+  # [automated] DISCOVERED BUG: Best Additions suggests categories that are
+  # already at their cardinality limit. Genre is uncapped because it is a
+  # percentage split, while Setting, Protagonist, Antagonist and Finale hold one
+  # slot each. The mode should only block categories that are actually full.
   Scenario: Best Additions respects per-category selection limits
     Given the user has evaluated a script at the cardinality limit
     When the user generates Best Additions

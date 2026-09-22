@@ -203,4 +203,35 @@ test.describe('Exclusion Dropdown Refresh', () => {
     const selected = await page.locator('#inputs-setting-generator select.tag-selector').first().inputValue();
     expect(selected).toBe(excludedValue);
   });
+
+  // The reproduction for a bug that came back repeatedly. Reset Bans clears the
+  // whole list at once and so runs none of the per-row change handlers that
+  // normally carry a lifted ban outward. The refresh it does reach used to
+  // iterate MULTI_SELECT_CATEGORIES, which is [Genre, Supporting Character,
+  // Theme & Event] — so Setting, Protagonist, Antagonist and Finale kept the
+  // old list until an unrelated click happened to redraw one of them.
+  //
+  // applyStartingTags is the precondition that makes it visible: the profile is
+  // what puts single-select bans in place to go stale. An earlier attempt at
+  // this test skipped it, started from a clean ban list, and therefore passed
+  // with the defect present — worse than no test at all.
+  test('TC09-000018 Reset Bans clears the old list from Colman Graves', async ({ steps, page }) => {
+    await applyStartingTags(steps);
+
+    await steps.on('evaluateTab', 'Navigation').click();
+    expect(
+      await disabledOptionCount(page, '#inputs-setting-graves'),
+      'the profile should have banned some Settings to begin with'
+    ).toBeGreaterThan(0);
+
+    await steps.on('buildTab', 'Navigation').click();
+    await steps.on('resetBansButton', 'ScriptLab').click();
+
+    // Straight to Evaluate: any interaction here would redraw the category and
+    // hide the defect, which is exactly how it kept escaping notice.
+    await steps.on('evaluateTab', 'Navigation').click();
+    await expect
+      .poll(() => disabledOptionCount(page, '#inputs-setting-graves'))
+      .toBe(0);
+  });
 });

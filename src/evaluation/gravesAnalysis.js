@@ -31,9 +31,12 @@
             };
         }
 
+        // Risky is worse than Common, so it cannot read calmer than it. The
+        // neutral tone it carried put near-white on a script Graves is warning
+        // about, while the better Common verdict got the amber.
         return {
             label: 'Risky',
-            tone: 'neutral',
+            tone: 'danger',
             text: 'Graves sees an uneven script. A few pairings may carry it, but the whole package is fragile.'
         };
     }
