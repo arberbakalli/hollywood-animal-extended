@@ -130,19 +130,29 @@
     }
 
     function buildSwaps(selectedTags) {
+        const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
+            ? HACScriptGenerator.getMaxElementPoolSize()
+            : 10;
+
         return Engine.buildSwaps(
             selectedTags,
             collectCandidates(selectedTags),
             minimumFit(),
+            maxPoolSize,
             engineOptions()
         );
     }
 
     function buildPairwise(selectedTags) {
+        const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
+            ? HACScriptGenerator.getMaxElementPoolSize()
+            : 10;
+
         return Engine.buildPairwise(
             selectedTags,
             collectCandidates(selectedTags),
             minimumFit(),
+            maxPoolSize,
             engineOptions()
         );
     }
@@ -200,7 +210,7 @@
         return `${categoryClass} ${genreClass}`.trim();
     }
 
-    function rowMarkup(row, index) {
+    function rowMarkup(row, index, forceSwap = false) {
         return `
             <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${row.band} ${tagClass(row.candidate)}" data-role="graves-best-match" data-tag-id="${row.candidate.id}" data-category="${row.candidate.category}" data-score="${row.fitAverage.toFixed(2)}" data-band="${row.band}">
                 <div class="best-match-pair">
@@ -210,7 +220,7 @@
                 <div class="best-match-meta">
                     <span class="best-match-category">${row.candidate.category}</span>
                     ${deltaMarkup(row.currentAverage, row.resultingAverage)}
-                    ${addButtonMarkup(row.candidate, index)}
+                    ${forceSwap ? `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-swap-btn" type="button" data-action="swap-graves-best-match" data-tag-id="${row.candidate.id}" data-category="${row.candidate.category}">Swap</button>` : addButtonMarkup(row.candidate, index)}
                 </div>
             </div>`;
     }
@@ -235,7 +245,7 @@
         return visible;
     }
 
-    function groupedMarkup(rows, rowLimit = visibleRowCount) {
+    function groupedMarkup(rows, rowLimit = visibleRowCount, forceSwap = false) {
         totalRowCount = rows.length;
         const visible = paginateRows(rows, rowLimit);
 
@@ -244,7 +254,7 @@
             const banded = visible.filter(row => row.band === band);
             if (banded.length === 0) return '';
 
-            const body = banded.map(row => rowMarkup(row, index++)).join('');
+            const body = banded.map(row => rowMarkup(row, index++, forceSwap)).join('');
             return `<div class="best-match-band best-match-band-${band}">
                 <h4 class="best-match-band-title">${BAND_LABELS[band]}</h4>
                 ${body}
@@ -345,7 +355,7 @@
         // Display swaps organized by element
         const slotMarkup = Object.entries(result.rowsBySlot).map(([slotIndex, { slot, rows }]) => {
             const slotName = displayName(slot.tag);
-            const slotMarkup = groupedMarkup(rows, visibleRowCount);
+            const slotMarkup = groupedMarkup(rows, visibleRowCount, true);
             return `
                 <div class="best-match-slot-group">
                     <div class="best-match-slot-note">

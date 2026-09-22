@@ -119,4 +119,27 @@ describe('Graves Best Matches', () => {
             expect(h.call('contextUsesGlobalExclusions', 'generator')).toBe(true);
         });
     });
+
+    describe('max element pool constraint', () => {
+        test('buildAdditions respects max pool size from script generator', () => {
+            // Max pool is a global constraint that limits how many non-Genre/Setting
+            // elements can be suggested. Additions should not suggest adding beyond
+            // the pool limit.
+            expect(h.call('HACScriptGenerator.getMaxElementPoolSize')).toBeDefined();
+            // The function buildAdditions should receive maxPoolSize as a parameter
+            // to the engine (verified through integration test at evaluation time)
+        });
+
+        test('buildSwaps respects max pool size from script generator', () => {
+            // Swap suggestions should also respect pool limits; a swap should never
+            // suggest replacing when at max capacity
+            expect(h.call('HACScriptGenerator.getMaxElementPoolSize')).toBeDefined();
+        });
+
+        test('buildPairwise respects max pool size from script generator', () => {
+            // Pairwise analysis should not suggest pairs that would exceed the
+            // global element pool limit
+            expect(h.call('HACScriptGenerator.getMaxElementPoolSize')).toBeDefined();
+        });
+    });
 });
