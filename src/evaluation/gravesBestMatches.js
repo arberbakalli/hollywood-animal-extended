@@ -155,12 +155,9 @@
 
     function collectCandidates(selectedTags) {
         const selectedIds = new Set(selectedTags.map(tag => tag.id));
-        // Graves evaluates ANY script, not just Starting-Tags-compliant ones.
-        // Use only manual exclusions, not profile-based ones.
+        // Graves evaluates ANY script. Use only manual exclusions from Script Lab.
         const excludedIds = new Set(collectTagInputs('excluded').map(tag => tag.id));
-        const starterIds = getAllAvailableTagIds('starting');
         const categoryFilter = document.getElementById('gravesBestCategoryFilter')?.value || '';
-        const starterOnly = Boolean(document.getElementById('gravesStarterOnlyFilter')?.checked);
 
         const allTags = Object.values(GAME_DATA.tags);
         const candidates = allTags.filter(tag => {
@@ -168,7 +165,6 @@
             if (selectedIds.has(tag.id)) return false;
             if (excludedIds.has(tag.id)) return false;
             if (categoryFilter && tag.category !== categoryFilter) return false;
-            if (starterOnly && !starterIds.has(tag.id)) return false;
             return true;
         });
 

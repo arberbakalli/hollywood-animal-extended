@@ -242,10 +242,6 @@
                                 <option value="5.0">5.0 only</option>
                             </select>
                         </div>
-                        <label id="graves-starter-filter-field" class="graves-toggle-field">
-                            <input type="checkbox" id="gravesStarterOnlyFilter">
-                            <span>Starting tags only</span>
-                        </label>
                     </div>
 
                     <div id="graves-exclusion-notice" class="graves-exclusion-notice hidden" role="status">
@@ -435,7 +431,7 @@
                                     </div>
                                 </div>
                                 <div class="toggle-wrapper">
-                                    <span class="toggle-label-text distribution-toggle-label--behemoth" title="Behemoth adds 25% to week 1 when the production budget is at least $1,000,000. Its slower decay is a separate perk, gated on commercial rating above 9.">Behemoth <small>(budget over $1M)</small></span>
+                                    <span class="toggle-label-text distribution-toggle-label--behemoth" title="Budget >$1M: +25% boost all weeks. Commercial ≥9: slower decay (separate gates).">Behemoth <small>(budget >$1M)</small></span>
                                     <div class="toggle-container distribution-toggle distribution-toggle--behemoth">
                                         <input type="checkbox" class="toggle-checkbox" id="behemothToggle" role="switch" aria-label="Behemoth studio policy distribution bonus">
                                         <div class="toggle-track" aria-hidden="true">
@@ -444,7 +440,7 @@
                                     </div>
                                 </div>
                                 <div class="toggle-wrapper">
-                                    <span class="toggle-label-text distribution-toggle-label--boutique" title="Boutique slows attendance decay. Requires artistic rating above 9.">Boutique</span>
+                                    <span class="toggle-label-text distribution-toggle-label--boutique" title="Artistic ≥9: slower decay on weeks 3+.">Boutique</span>
                                     <div class="toggle-container distribution-toggle distribution-toggle--boutique">
                                         <input type="checkbox" class="toggle-checkbox" id="boutiqueToggle" role="switch" aria-label="Boutique studio policy distribution bonus">
                                         <div class="toggle-track" aria-hidden="true">
@@ -452,6 +448,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div id="studio-policy-status" class="studio-policy-status"></div>
                             </div>
                         </div>
 
@@ -463,6 +460,9 @@
                             <div class="dist-info-group">
                                 <span class="subtitle dist-info-text">
                                     Based on Target Commercial Score: <strong id="dist-com-score-display" class="text-accent">5.0</strong>
+                                </span>
+                                <span id="dist-artistic-score-text" class="subtitle dist-info-text hidden">
+                                    Boutique — Artistic Score: <strong id="dist-art-score-display" class="text-accent">5.0</strong>
                                 </span>
                             </div>
                         </div>

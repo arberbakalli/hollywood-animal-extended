@@ -1807,6 +1807,29 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     margin-bottom: 20px;
 }
 
+.studio-policy-status {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background-color: rgba(212, 175, 55, 0.1);
+    border-left: 3px solid var(--accent);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    min-height: 20px;
+}
+
+.studio-policy-status.hidden {
+    display: none;
+}
+
+.dist-artistic-score-text {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.dist-artistic-score-text.hidden {
+    display: none;
+}
+
 @media(min-width: 600px) {
     .dist-info-group {
         margin-top: 0;
@@ -2179,6 +2202,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     margin-bottom: 1.5rem;
 }
 
+.graves-pairs-band.collapsed .graves-pair-row {
+    display: none;
+}
+
 .graves-pairs-band-title {
     margin: 0;
     color: var(--text-muted);
@@ -2186,6 +2213,39 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.graves-pairs-band-title:hover {
+    background-color: rgba(51, 51, 51, 0.5);
+}
+
+.graves-pairs-band-toggle {
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    font-size: 0.75rem;
+    line-height: 1.2rem;
+    text-align: center;
+    background: currentColor;
+    color: var(--card-bg);
+    border-radius: 2px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.graves-pairs-band.collapsed .graves-pairs-band-toggle::before {
+    content: '▶';
+}
+
+.graves-pairs-band:not(.collapsed) .graves-pairs-band-toggle::before {
+    content: '▼';
 }
 
 .graves-pairs-band-successful .graves-pairs-band-title { color: #10b981; }

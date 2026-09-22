@@ -46,6 +46,61 @@
 
         if(scoreDisplay) scoreDisplay.innerText = score.toFixed(1);
         updateDistributionGrid(score, owned);
+        updateStudioPolicyStatus();
+    }
+
+    function updateStudioPolicyStatus() {
+        const comInput = document.getElementById('comScoreInput');
+        const artInput = document.getElementById('artScoreInput');
+        const behemothToggle = document.getElementById('behemothToggle');
+        const boutiqueToggle = document.getElementById('boutiqueToggle');
+        const statusEl = document.getElementById('studio-policy-status');
+        const artScoreText = document.getElementById('dist-artistic-score-text');
+        const artScoreDisplay = document.getElementById('dist-art-score-display');
+
+        if (!statusEl) return;
+
+        const comScore = parseFloat(comInput?.value) || 0;
+        const artScore = parseFloat(artInput?.value) || 0;
+        const behemothActive = behemothToggle?.checked;
+        const boutiqueActive = boutiqueToggle?.checked;
+
+        let statusHtml = '';
+
+        if (behemothActive) {
+            const boostActive = true;
+            const decayActive = comScore > 9;
+            if (decayActive) {
+                statusHtml += 'Behemoth: +25% Boost + Slower Decay Active';
+            } else {
+                statusHtml += 'Behemoth: +25% Boost Active (Slower decay at commercial 9+)';
+            }
+        }
+
+        if (boutiqueActive) {
+            const decayActive = artScore > 9;
+            if (statusHtml) statusHtml += ' | ';
+            if (decayActive) {
+                statusHtml += 'Boutique: Slower Decay Active';
+            } else {
+                statusHtml += 'Boutique: Slower Decay at artistic 9+';
+            }
+            if (artScoreText && artScoreDisplay) {
+                artScoreDisplay.innerText = artScore.toFixed(1);
+                artScoreText.classList.remove('hidden');
+            }
+        } else {
+            if (artScoreText) {
+                artScoreText.classList.add('hidden');
+            }
+        }
+
+        if (statusHtml) {
+            statusEl.innerHTML = statusHtml;
+            statusEl.classList.remove('hidden');
+        } else {
+            statusEl.classList.add('hidden');
+        }
     }
 
     // The publish window. The game commits a film for four weeks with an optional

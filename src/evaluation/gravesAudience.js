@@ -309,13 +309,24 @@
 
                 return `
                     <div class="graves-pairs-band graves-pairs-band-${band}">
-                        <h4 class="graves-pairs-band-title">${BAND_LABELS[band]}</h4>
+                        <h4 class="graves-pairs-band-title" data-band="${band}">
+                            <span class="graves-pairs-band-toggle"></span>
+                            ${BAND_LABELS[band]} <small>(${pairs.length})</small>
+                        </h4>
                         ${pairRows}
                     </div>
                 `;
             }).join('');
 
             pairsContainer.innerHTML = bandMarkup || '<div class="empty-state">No pairs to display.</div>';
+
+            // Add click handlers for band collapsing
+            pairsContainer.querySelectorAll('.graves-pairs-band-title').forEach(title => {
+                title.addEventListener('click', function() {
+                    const band = this.closest('.graves-pairs-band');
+                    band.classList.toggle('collapsed');
+                });
+            });
         }
 
         const conflictContainer = document.getElementById('gravesConflictDisplay');
