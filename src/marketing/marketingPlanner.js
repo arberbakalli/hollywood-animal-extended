@@ -111,7 +111,7 @@
                 audienceContainer.appendChild(chip);
             });
         } else {
-            audienceContainer.innerHTML = '<div class="empty-state">No audience fits the criteria.</div>';
+            audienceContainer.innerHTML = '<div class="empty-state">No audience fits these filters. Loosen them, or pick a different advertiser.</div>';
         }
 
         const validTargetIds = targetAudiences.map(t => t.id);

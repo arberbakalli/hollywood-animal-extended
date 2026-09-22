@@ -155,7 +155,7 @@
         audienceContainer.innerHTML = '';
         const audiences = evaluation.audience.slice(0, 6);
         if (audiences.length === 0) {
-            audienceContainer.innerHTML = '<div class="empty-state">No clear audience pattern found.</div>';
+            audienceContainer.innerHTML = '<div class="empty-state">No clear audience pattern. Add more story elements to give Graves a signal.</div>';
         } else {
             audiences.forEach(audience => {
                 const chip = document.createElement('div');
