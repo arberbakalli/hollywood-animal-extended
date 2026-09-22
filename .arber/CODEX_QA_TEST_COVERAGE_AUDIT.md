@@ -17,7 +17,7 @@ Date: 2026-09-18
 
 ## Verification Result
 
-- Unit/Jest: `262 passed`, `21 passed` suites on 2026-09-22.
+- Unit/Jest: `263 passed`, `21 passed` suites on 2026-09-22.
 - E2E/Playwright: `149 declared` tests across 14 specs.
 
 ## Coverage Added Or Confirmed
@@ -86,7 +86,10 @@ Date: 2026-09-18
   filter, and optional tag constraints.
 - Reset clears checked filters and hides results.
 - One pick per category is accepted.
-- Story-element budget slider and input stay in sync.
+- ~~Story-element budget slider and input stay in sync~~ - stale. That slider
+  (`#targetedElementsSlider`) is not in the markup; the lookup fell through to a
+  NaN branch returning 10, so the control did nothing here. Build for Target now
+  reads the global Max Element Pool, pinned by TC05-000015.
 - Over-budget validation names both selected count and budget.
 - Script Lab exclusions are used as shared source of truth.
 - Ranking is checked for descending advertiser fit.
@@ -117,19 +120,38 @@ Date: 2026-09-18
 
 - Script Library download/upload round trip: invalid load and empty save are
   covered, but a full valid save-download-load workflow is still unverified.
-- `unlockBlockedLocksButton`: the control exists, but the exact conflict path
-  that should reveal/use it has not been confirmed.
-- Graves exclusion warning and "Edit in Script Lab" journey: markup exists, but
-  the intended warning behavior still needs a watched product flow.
-- Graves selected excluded Setting behavior: scenario remains unverified because
-  Settings are structural and the desired source-of-truth rule needs a decision.
+- ~~`unlockBlockedLocksButton`~~ — **closed 2026-09-22, no product decision
+  needed.** The conflict path does not exist: the branch fires only when a
+  locked element is excluded, and such a lock is cleared with a message before
+  generation runs. The control and its handlers were deleted; the guard that
+  refuses generation stays.
+- ~~Graves exclusion warning journey~~ - **closed 2026-09-22.** It cannot
+  happen: banning an element removes it from the Graves script immediately and
+  names it ("Removed from this script because they are now excluded: Wild
+  West."), so a script never holds a banned element to be warned about. The
+  generic notice covers the other half, and was watched: 24 Settings hidden,
+  "Script Lab is hiding suggestions: 193 excluded elements."
+- ~~Graves selected excluded Setting behavior~~ - **closed 2026-09-22.** The
+  rule is settled and recorded in docs/GAME_RULES.md section 5: one exclusion
+  list feeds every context, a ban removes the element everywhere at once, and a
+  lifted ban restores it with no reload. Pinned by TC09-000018.
 - Marketing audience interest legend: verified in prose, but not yet automated.
 - Holiday bonus later-week behavior: currently marked unverified because the
   exact game-file rule is not proven.
-- Build for Target no-match empty state: rendering exists, but no reachable
-  input path has been confirmed.
-- Build for Target with both audience and advertiser selected: product semantics
-  are still undecided, so the scenario must stay unautomated.
+- ~~Build for Target no-match empty state~~ - **closed 2026-09-22.** The path
+  exists: the generator discards any combination that does not spend the budget
+  in full, so a pool too thin to fill it returns nothing. Measured - three story
+  elements against a budget of ten yields zero combinations where the full pool
+  yields twenty. Reached by excluding most story elements, or raising Max
+  Element Pool past the remaining supply.
+- Build for Target with both audience and advertiser selected: semantics are
+  settled - `findTargetedCombinations` reads `if (advertisers) ... else if
+  (audiences)`, so an advertiser overrides the audience rather than narrowing
+  with it. The scenario records that and is `[verified]`. Still a real coverage
+  gap: the test that claimed to cover it asserted a `resolveAgencies` copy
+  declared inside the test file, and was rightly removed. Covering it needs the
+  agency resolution lifted out of `findTargetedCombinations`, or a Playwright
+  test.
 
 ## QA Recommendation
 

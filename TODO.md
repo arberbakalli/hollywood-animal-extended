@@ -6,6 +6,11 @@ Everything below is either an unacted finding or a decision waiting on a human.
 Suite state at the time of writing: **62 Playwright, 80 Jest, green.**
 Last commit: `02c197b`.
 
+**Reviewed 2026-09-22.** Suite is now **149 Playwright, 263 Jest across 21
+suites, green**. Items resolved since are struck through or annotated in place;
+the rest still stand. Domain rules have moved to `docs/GAME_RULES.md`, which is
+the source of truth for behaviour questions.
+
 ---
 
 ## 1. ~~Move the test static server off Python~~ — DONE
@@ -120,9 +125,14 @@ assumption produces a suite that documents fiction.
 
 Notable gaps, highest value first:
 
-- **Script Lab — conflicting locks** `[unverified]`. `#generatorFeedbackMessage`
-  and `#unlockBlockedLocksButton` exist in the markup, but nobody has reproduced
-  the conditions that surface them. Find the repro before writing the test.
+- ~~**Script Lab — conflicting locks** `[unverified]`~~ — **RESOLVED 2026-09-22.**
+  The repro was looked for and does not exist. The trigger was never "locks that
+  conflict with each other": that branch fires only when a locked element is
+  excluded, and such a lock is cleared, with a message naming it, before
+  generation is ever reached. `showBlockedLockAction`, `removeBlockedLockedPicks`
+  and `#unlockBlockedLocksButton` had no reachable path and were deleted; the
+  guard that refuses generation stays. The scenario now describes what the app
+  actually does.
 - **Script Library save/load round trip** `[unverified]`. Save downloads JSON,
   Load reads it back. Never exercised end to end; needs Playwright download
   handling.
@@ -130,8 +140,12 @@ Notable gaps, highest value first:
   `gravesAudience.js`; the under-five guard is automated and this one is not.
 - **Graves best-match filters** `[verified]` — category filter, minimum fit,
   starting-tags-only. Currently only the "widen to any" path is covered.
-- **Graves exclusion notice** `[verified]`. Ban an element in Script Lab, use it
-  in a Graves script, expect the notice and the jump-back control.
+- **Graves exclusion notice** `[verified]`. Confirmed in the app 2026-09-22 —
+  with the Starting Tags profile on, 24 Settings are correctly unselectable and
+  the notice reads "Script Lab is hiding suggestions: 193 excluded elements."
+  Still not automated. Note the second half of the old wording is impossible:
+  a Graves script cannot *hold* a banned element, because banning one removes it
+  from the script immediately.
 - **Compatibility: switching to Graves preserves the selection** `[unverified]`.
   Expected, never observed.
 
@@ -141,9 +155,11 @@ Notable gaps, highest value first:
 
 - `.claude/skills/` is untracked and was deliberately left alone. Decide whether
   it belongs in the repo or in `.gitignore`.
-- Uncommitted at time of writing (another session's work, not touched):
-  `package.json`, `package-lock.json`, `playwright.config.js`, `.gitignore`,
-  `.arber/LESSONS_LEARNED.md`, `tests/scenarios/colman-graves.feature`.
+- ~~Uncommitted at time of writing (another session's work, not touched)~~ —
+  stale; that list described a working tree from 2026-09-07 and all of it has
+  long since landed. The tree is clean as of 2026-09-22.
+- `.achilles/run-summary.json` is now ignored. It is regenerated per run, its
+  diff is only `timestamp` and `git_sha`, and it records no results.
 - One raw CSS selector remains in a spec, in the `script-lab.spec.js` negative
   control's `addStyleTag`. It is a mutation target rather than a locator, and it
   is commented as such — but it must stay in step with the `resultsSection`

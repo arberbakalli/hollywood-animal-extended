@@ -55,8 +55,8 @@ That runs `tools/static-server.mjs` (no dependencies) at http://127.0.0.1:4173.
 
 ```bash
 npm install
-npm test          # Jest — 298 tests, 21 suites, over a VM harness
-npm run test:e2e  # Playwright — 147 tests in a real browser
+npm test          # Jest — 263 tests, 21 suites, over a VM harness
+npm run test:e2e  # Playwright — 149 tests in a real browser
 ```
 
 `npm test` is the entry point, not `npx jest` — the suite is native ESM and needs a Node flag that no

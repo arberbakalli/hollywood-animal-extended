@@ -39,13 +39,23 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 ## Architecture
 
-- `script.js` is now a ~490-line bridge layer rather than the ~2,000-line monolith this file used to
+- `script.js` is now a ~478-line bridge layer rather than the ~2,000-line monolith this file used to
   describe: behaviour lives in 28 files under `src/`, each an IIFE exposing a `HAC*` namespace, which
   `script.js` re-exports as bare globals. Everything is still a **classic script**, so nothing can
   `import` and the constraints in `AGENTS.md` still hold. The module flip itself has not happened.
 - The bare-global wrappers in `script.js` look like duplicate implementations and are not. They
   delegate to the `src/` namespace, and removing one breaks every caller of the bare name.
-- A duplication audit of `script.js` against `src/` has not been done since the split.
+- **The duplication audit was done on 2026-09-22 and came back clean.** All 118 bare globals are
+  one-line delegations to a `HAC*` namespace, with no reimplementation anywhere.
+  - It did find one dangling wrapper: `removeBlockedLockedPicks` survived in `script.js` after its
+    export was deleted, so that bare global called `undefined`. Both suites stayed green because
+    nothing calls it — a wrapper whose target is gone still parses and still loads, and only fails
+    when a user reaches it. `tests/domStructure.test.js` now asserts every `HAC*` call in
+    `script.js` resolves to a real export, so this cannot recur silently.
+- The flip is larger than the file count suggests: `tests/helpers/legacyHarness.js` runs the classic
+  scripts in `node:vm` and reaches bare globals by name, which is exactly what modules remove. It is
+  27 conversions **plus** a harness rewrite **plus** 157 `h.call`/`h.evaluate` sites across 18 Jest
+  suites, and no partial state is green — until all of it lands, Jest has no harness at all.
 - The abandoned `generateHighestSynergy` prototype is intentionally parked at
   `docs/parked/generateHighestSynergy.js`. It should stay outside `src/` until it becomes a real
   loaded module again.
