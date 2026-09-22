@@ -2,5 +2,19 @@
 # WARNING: Do not store sensitive information in this file, as its contents will be included in the Qodana report. #
 ####################################################################################################################
 version: "1.0"
+linter: qodana-js
+withinDocker: "false"
+bootstrap: npm ci
 profile:
-  name: qodana.starter
+  name: qodana.recommended
+exclude:
+  - name: All
+    paths:
+      - node_modules
+      - graphify-out
+      - playwright-report
+      - test-results
+      - show-recordings
+      - output
+      - .achilles
+      - .idea

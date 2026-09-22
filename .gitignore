@@ -8,6 +8,8 @@ dist/
 test-results/
 playwright-report/
 graphify-out/
+.qodana/
+.intellij-inspections/
 output/
 show-recordings/
 .achilles/history/
