@@ -256,10 +256,23 @@ Feature: Script Lab
     Then the locked pick is removed
     And a message names the element that was removed
 
-  # [unverified] Save downloads JSON and Load reads it back; the round trip has
-  # not been exercised.
-  Scenario: Saving and reloading the Script Library
-    Given the user has pinned at least one script
-    When the user saves the Script Library to a file
-    And the user loads that file back
-    Then the pinned scripts are restored
+  # [automated] tests/e2e/script-lab.spec.js TC01-000029. Watched in the app
+  # 2026-09-22 before automating: pin 1, reload, library empties to 0, load the
+  # saved file, back to 1 with "Loaded 1 scripts."
+  #
+  # The reload is the scenario, not staging for it. `pinnedScripts` is an
+  # in-memory array with no persistence, unlike the exclusion list, so a refresh
+  # does not re-render the library — it loses it, and the saved file is the only
+  # way a pinned script survives. The previous wording said "loads that file
+  # back" with nothing lost in between, which cannot pass: handleFileLoad merges
+  # and dedupes on uniqueId, so loading into a library that still holds those
+  # scripts reports "No new unique scripts found" and changes no count. A test
+  # written from that wording would have asserted nothing.
+  Scenario: The saved file is the only way a pinned script survives a reload
+    Given the user has pinned a script
+    And the user has saved the Script Library to a file
+    When the user reloads the calculator
+    Then the Script Library is empty
+    When the user loads that file back
+    Then the pinned script is restored
+    And a message says how many scripts were loaded

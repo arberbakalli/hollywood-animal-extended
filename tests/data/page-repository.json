@@ -75,6 +75,7 @@
         { "elementName": "pinnedCards", "selector": { "css": "#pinnedResultsList .gen-card" } },
         { "elementName": "savePinnedButton", "selector": { "css": "#savePinnedScriptsButton" } },
         { "elementName": "loadPinnedButton", "selector": { "css": "#loadPinnedScriptsButton" } },
+        { "elementName": "loadScriptsInput", "selector": { "css": "#loadScriptsInput" } },
         { "elementName": "pinnedFeedbackMessage", "selector": { "css": "#pinnedScriptsFeedbackMessage" } }
       ]
     },

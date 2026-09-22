@@ -367,4 +367,37 @@ test.describe('Script Lab — generator', () => {
 
     await steps.on('resultsSection', 'ScriptLab').verifyState('hidden');
   });
+
+  // The round trip, and the reason it matters: `pinnedScripts` is an in-memory
+  // array with no persistence, unlike the exclusion list. A reload does not
+  // merely re-render the library, it empties it — so the saved file is the only
+  // way a pinned script survives at all.
+  //
+  // Reloading in the middle is what makes this a real assertion. Loading the
+  // file back into a library that still holds those scripts proves nothing:
+  // handleFileLoad merges and dedupes on uniqueId, so it would report "No new
+  // unique scripts found" and leave the count unchanged, which a naive
+  // save-then-load test would happily read as a pass.
+  test('TC01-000029 a saved library file restores pinned scripts after a reload', async ({ steps, page }) => {
+    await steps.on('generateButton', 'ScriptLab').click();
+    await steps.on('generatedCards', 'ScriptLab').verifyCount({ greaterThan: 0 });
+
+    await steps.on('generatedPinButtons', 'ScriptLab').first().click();
+    await steps.on('pinnedCards', 'ScriptLab').verifyCount({ exactly: 1 });
+
+    const downloadPromise = page.waitForEvent('download');
+    await steps.on('savePinnedButton', 'ScriptLab').click();
+    const savedFile = await (await downloadPromise).path();
+
+    await page.reload();
+    await steps.on('buildTab', 'Navigation').click();
+    await steps.on('pinnedCards', 'ScriptLab').verifyCount({ exactly: 0 });
+
+    const chooserPromise = page.waitForEvent('filechooser');
+    await steps.on('loadPinnedButton', 'ScriptLab').click();
+    await (await chooserPromise).setFiles(savedFile);
+
+    await steps.on('pinnedCards', 'ScriptLab').verifyCount({ exactly: 1 });
+    await steps.on('pinnedFeedbackMessage', 'ScriptLab').verifyTextContains('Loaded 1 scripts');
+  });
 });
