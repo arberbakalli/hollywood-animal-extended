@@ -58,7 +58,6 @@
         { "elementName": "addExcludedSupportingCharacterRow", "selector": { "css": "#add-supporting-character-excluded-button" } },
 
         { "elementName": "feedbackMessage", "selector": { "css": "#generatorFeedbackMessage" } },
-        { "elementName": "unlockBlockedLocksButton", "selector": { "css": "#unlockBlockedLocksButton" } },
         { "elementName": "generateButton", "selector": { "css": "#generateScriptsButton" } },
 
         { "elementName": "resultsSection", "selector": { "css": "#results-generator" } },

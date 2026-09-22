@@ -128,8 +128,14 @@ Feature: Build for Target
     When the user searches for top combinations
     Then an empty state explains that nothing matched
 
-  # [automated] tests/build-for-target.test.js, "an advertiser selection wins
-  # over an audience selection".
+  # [verified] 2026-09-22, by reading findTargetedCombinations and confirming in
+  # the app. NOT automated: this was briefly marked automated against
+  # "an advertiser selection wins over an audience selection" in
+  # tests/build-for-target.test.js, but that test asserted a resolveAgencies
+  # copy declared inside the test file rather than the product, and was removed
+  # for exactly that reason. Covering this for real needs the agency resolution
+  # lifted out of findTargetedCombinations, or a Playwright test — it is a
+  # genuine gap, not a covered behaviour.
   #
   # Corrected 2026-09-22. This asked for results reflecting BOTH constraints,
   # which the app has never done: findTargetedCombinations reads

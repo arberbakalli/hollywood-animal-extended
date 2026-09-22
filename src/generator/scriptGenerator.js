@@ -86,7 +86,6 @@
         setupMovieScoreSliderSync();
     }
 
-    let blockedLockIds = [];
     const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist"];
 
     function getMaxElementPoolSize() {
@@ -132,39 +131,9 @@
         slider.style.setProperty('--slider-fill-percent', percent + '%');
     }
 
-    function showBlockedLockAction(ids) {
-        blockedLockIds = ids;
-        document.getElementById('unlockBlockedLocksButton')?.classList.remove('hidden');
-    }
-
-    function hideBlockedLockAction() {
-        blockedLockIds = [];
-        document.getElementById('unlockBlockedLocksButton')?.classList.add('hidden');
-    }
-
-    /**
-     * Clears exactly the locked picks the generator refused, so the user does not
-     * have to hunt them down or reset every lock they still wanted.
-     */
-    function removeBlockedLockedPicks() {
-        const blocked = new Set(blockedLockIds);
-        if (blocked.size === 0) return;
-
-        document.querySelectorAll('#selectors-container-generator select.tag-selector').forEach(select => {
-            if (blocked.has(select.value)) {
-                select.value = '';
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-
-        hideBlockedLockAction();
-        clearFeedbackMessage('generatorFeedbackMessage');
-    }
-
     async function generateScripts() {
         await ensureCompatibilityLoaded();
         clearFeedbackMessage('generatorFeedbackMessage');
-        hideBlockedLockAction();
 
         const targetComp = parseFloat(document.getElementById('genCompInput').value);
         const targetScoreInput = parseInt(document.getElementById('genScoreInput').value);
@@ -214,11 +183,9 @@
                 'generatorFeedbackMessage',
                 `Locked elements are unavailable or excluded: ${unavailableNames}.`
             );
-            showBlockedLockAction(unavailableFixed.map(t => t.id));
             return;
         }
 
-        hideBlockedLockAction();
 
         const generatedBatch = [];
 
@@ -403,7 +370,6 @@
         buildScriptStats,
         buildScriptFromTags,
         createScriptCardHTML,
-        removeBlockedLockedPicks,
         getMaxElementPoolSize
     };
 })(globalThis);

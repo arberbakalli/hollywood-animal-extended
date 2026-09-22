@@ -74,11 +74,20 @@ test.describe('Marketing and Release — distribution calculator', () => {
 
     await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
 
-    await steps.on('distributionCommercialScore', 'MarketingRelease').verifyTextContains('8');
-    // Echoing the label is not the same as recalculating the grid.
+    // Echoing the label is not the same as recalculating the grid. Asserted
+    // before Behemoth is touched, so the change can only come from the slider.
     await expect
       .poll(async () => screenings(steps, 'weekOneValue'))
       .not.toBe(before);
+
+    // The commercial score line follows the Behemoth toggle, so it has to be on
+    // for this to assert anything. verifyTextContains reads text whether or not
+    // the element is visible, so without the toggle and the visible check this
+    // passed against a hidden line and would not have noticed it failing to
+    // appear at all.
+    await steps.on('behemothToggle', 'MarketingRelease').check();
+    await steps.on('distributionCommercialScore', 'MarketingRelease').verifyState('visible');
+    await steps.on('distributionCommercialScore', 'MarketingRelease').verifyTextContains('8');
   });
 
   test('TC04-000006 setting the movie scores updates their paired inputs', async ({ steps }) => {
@@ -97,10 +106,15 @@ test.describe('Marketing and Release — distribution calculator', () => {
 
     await steps.expect('commercialScoreSlider', 'MarketingRelease').value.toBe('7.5');
     await steps.expect('artisticScoreSlider', 'MarketingRelease').value.toBe('2.5');
-    await steps.on('distributionCommercialScore', 'MarketingRelease').verifyTextContains('7.5');
     await expect
       .poll(async () => screenings(steps, 'weekOneValue'))
       .not.toBe(weekOneBefore);
+
+    // Same reason as TC04-000005: the line only exists on screen while Behemoth
+    // is on, and the text assertion is blind to visibility on its own.
+    await steps.on('behemothToggle', 'MarketingRelease').check();
+    await steps.on('distributionCommercialScore', 'MarketingRelease').verifyState('visible');
+    await steps.on('distributionCommercialScore', 'MarketingRelease').verifyTextContains('7.5');
   });
 
   const attr = async (steps, element, name) =>
@@ -446,11 +460,17 @@ test.describe('Marketing and Release — Build for Target', () => {
   // Given neither an audience nor an advertiser is chosen
   // When the user searches for combinations
   // Then every agency is in scope and combinations are still produced
-  test('TC05-000002 searching with no audience or advertiser ranks against every agency', async ({ steps }) => {
+  test('TC05-000002 searching with no audience or advertiser ranks against every agency', async ({ steps, page }) => {
     await steps.on('findCombinationsButton', 'BuildForTarget').click();
 
     await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
-    await steps.on('resultsList', 'BuildForTarget').verifyText();
+    await steps.on('combinationCards', 'BuildForTarget').verifyCount({ greaterThan: 0 });
+
+    const agencyNames = await page.evaluate(() => GAME_DATA.adAgents.map(agency => agency.name));
+    const resultText = await page.locator('#targetedResultsList').innerText();
+    const visibleAgencies = agencyNames.filter(name => resultText.includes(name));
+
+    expect(new Set(visibleAgencies).size).toBeGreaterThan(1);
   });
 
   // Build for Target used to read a #targetedElementsSlider of its own. That

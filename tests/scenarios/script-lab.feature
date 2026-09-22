@@ -58,6 +58,23 @@ Feature: Script Lab
     Then the excluded counter reads 1
     And "Sidekick" remains selected in Excluded Elements
 
+  # [automated] TC09-000015. The Starting Tags profile stores a large exclusion
+  # list. Reload must restore every stored row, or the next DOM mutation writes a
+  # shortened list back to storage and loses bans.
+  Scenario: Every stored exclusion is restored after reload
+    Given the user has applied the Starting Tags profile
+    When the user reloads the calculator
+    Then every stored exclusion is rendered again
+    And no saved ban is lost from storage
+
+  # [automated] TC09-000017. The Excluded Elements list has no category
+  # cardinality cap. Single-select script categories may still have many banned
+  # items and all of them must survive a reload.
+  Scenario: Single-select category bans survive reload
+    Given the Starting Tags profile has banned several Settings, Protagonists, Antagonists and Finales
+    When the user reloads the calculator
+    Then every ban in those categories is still present
+
   # [automated] TC01-000026: exclusion state is restored from localStorage when
   # returning to the Build tab, ensuring the badge count and dropdown selections
   # stay in sync across tab switches.
@@ -227,10 +244,12 @@ Feature: Script Lab
   # either — the branch behind unlockBlockedLocksButton fires only when a locked
   # element is excluded.
   #
-  # Consequence worth a decision: showBlockedLockAction, removeBlockedLockedPicks
-  # and unlockBlockedLocksButton have no reachable path. They are kept for now
-  # rather than deleted, because an exclusion arriving while this context is not
-  # refreshed would still need them.
+  # showBlockedLockAction, hideBlockedLockAction, removeBlockedLockedPicks and
+  # the unlockBlockedLocksButton markup were deleted on the owner's call, having
+  # no reachable path. The guard itself stays: generation still refuses, and
+  # still names the offending element, if a locked pick is somehow excluded when
+  # it runs. Only the button offering to clear them is gone, because the lock is
+  # already cleared by the time anyone could press it.
   Scenario: Locking an element that becomes excluded drops it with a message
     Given the user has locked an element in Script Lab
     When that element becomes excluded

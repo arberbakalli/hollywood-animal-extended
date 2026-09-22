@@ -340,7 +340,6 @@
             ['loadPinnedScriptsButton', triggerLoadScripts],
             ['evaluateGravesButton', evaluateColmanGravesScript],
             ['generateBestMatchesButton', generateBestMatches],
-            ['unlockBlockedLocksButton', removeBlockedLockedPicks],
             ['gravesExclusionJumpButton', jumpToExclusionEditor],
             ['transferGravesTagsButton', () => transferTagsToAdvertisers('graves')],
             ['analyzeMovieButton', analyzeMovie],
