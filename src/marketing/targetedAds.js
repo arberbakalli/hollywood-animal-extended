@@ -111,10 +111,7 @@
         const excludedIds = getGeneratorExcludedIds();
         const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id && !excludedIds.has(t.id));
         const lockedTags = resolveTargetedTagInputs(constraintTags);
-        // Genre and Setting sit outside the story-element budget, so a script of
-        // N story elements is N + 2 tags wide.
-        const comboSize = storyElementBudget + 2;
-        const combinations = generateTargetedCombinations(allTags, lockedTags, targetAgencies, comboSize, maxResults * 4);
+        const combinations = generateTargetedCombinations(allTags, lockedTags, targetAgencies, storyElementBudget, maxResults * 4);
         const scoredCombinations = [];
 
         for (const combo of combinations) {
@@ -172,28 +169,21 @@
         return total / targetAgencies.length;
     }
 
-    // The game caps most categories at one pick. Only Genre, Supporting Character
-    // and Theme & Event repeat (MULTI_SELECT_CATEGORIES in src/app/state.js), and
-    // the combination width is budget + 2 because exactly one Genre and one
-    // Setting sit outside the story-element budget — so Genre is capped at 1 here
-    // even though the selector UI allows a pair.
-    const TARGETED_CATEGORY_LIMITS = {
-        'Genre': 1,
-        'Setting': 1,
-        'Protagonist': 1,
-        'Antagonist': 1,
-        'Finale': 1
-    };
+    // How many of a category a script may hold is the engine's isCategoryFull:
+    // Genre, Supporting Character and Theme & Event repeat, everything else
+    // holds one. Build for Target used to keep its own table that capped Genre
+    // at 1, so it could never honour a two-genre mix, let alone a wider split.
+    function categoryIsFull(category, counts) {
+        return HACGravesBestMatchesEngine.isCategoryFull(category, counts, MULTI_SELECT_CATEGORIES);
+    }
 
-    // Every script the game accepts carries one of each of these. Seeding them
-    // first is what makes a suggested combination something the player can
-    // actually build, rather than a pile of high-scoring themes.
+    // Every script the game accepts carries at least one of each of these.
+    // Seeding them first is what makes a suggested combination something the
+    // player can actually build, rather than a pile of high-scoring themes.
     const TARGETED_MANDATORY_CATEGORIES = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale'];
 
-    function categoryLimitFor(category) {
-        return Object.prototype.hasOwnProperty.call(TARGETED_CATEGORY_LIMITS, category)
-            ? TARGETED_CATEGORY_LIMITS[category]
-            : Infinity;
+    function isStoryElement(tag) {
+        return tag.category !== 'Genre' && tag.category !== 'Setting';
     }
 
     function countByCategory(tags) {
@@ -203,41 +193,58 @@
         }, {});
     }
 
-    // Walks the advertiser-ranked list from `offset`, taking the best tag that
-    // still fits its category cap. Mandatory categories are seeded first so a
-    // combination is never missing a Setting or a Finale.
-    function fillWithinCategoryLimits(ranked, offset, slots, seedCounts) {
+    /**
+     * Walks the advertiser-ranked list from `offset` and fills `storyElementSlots`
+     * story elements around the mandatory picks.
+     *
+     * The budget counts story elements only. Genre and Setting sit outside it, so
+     * the combination is as wide as it needs to be rather than a fixed
+     * budget + 2: a script with three genres still carries the full budget of
+     * story elements instead of trading four of them away for the extra genres.
+     *
+     * Genre is uncapped, so two guards matter here. A mandatory category is
+     * seeded only when the locked picks have not already supplied it, and the
+     * free fill takes story elements alone — otherwise an uncapped Genre would
+     * let the generator invent genres the player never asked for.
+     */
+    function fillWithinCategoryLimits(ranked, offset, storyElementSlots, seedCounts) {
         const counts = Object.assign({}, seedCounts);
         const taken = new Set();
         const picked = [];
+        let storyElements = 0;
 
-        const canTake = tag => !taken.has(tag.id) && (counts[tag.category] || 0) < categoryLimitFor(tag.category);
+        const canTake = tag => !taken.has(tag.id)
+            && !categoryIsFull(tag.category, counts)
+            && (!isStoryElement(tag) || storyElements < storyElementSlots);
 
         const take = tag => {
             taken.add(tag.id);
             counts[tag.category] = (counts[tag.category] || 0) + 1;
+            if (isStoryElement(tag)) storyElements += 1;
             picked.push(tag);
         };
 
         TARGETED_MANDATORY_CATEGORIES.forEach(category => {
-            if (picked.length >= slots) return;
+            if ((counts[category] || 0) > 0) return;
             const pool = ranked.filter(tag => tag.category === category && canTake(tag));
             if (pool.length > 0) take(pool[offset % pool.length]);
         });
 
-        for (let step = 0; step < ranked.length && picked.length < slots; step++) {
+        for (let step = 0; step < ranked.length && storyElements < storyElementSlots; step++) {
             const tag = ranked[(offset + step) % ranked.length];
-            if (canTake(tag)) take(tag);
+            if (isStoryElement(tag) && canTake(tag)) take(tag);
         }
 
         return picked;
     }
 
-    function generateTargetedCombinations(allTags, lockedTags, targetAgencies, size = 6, limit = 80) {
+    function generateTargetedCombinations(allTags, lockedTags, targetAgencies, storyElementBudget = 5, limit = 80) {
         const lockedIds = new Set(lockedTags.map(tag => tag.id));
-        const slotsToFill = Math.max(0, size - lockedTags.length);
+        // The budget is spent on story elements. Locked genres and settings do
+        // not consume it, so they widen the combination rather than shrink it.
+        const slotsToFill = Math.max(0, storyElementBudget - lockedTags.filter(isStoryElement).length);
 
-        if (slotsToFill === 0) return [lockedTags.slice(0, size)];
+        if (slotsToFill === 0) return [lockedTags.slice()];
 
         const ranked = allTags
             .filter(tag => !lockedIds.has(tag.id))
@@ -257,7 +264,7 @@
 
         for (let offset = 0; offset < ranked.length && combos.length < limit; offset++) {
             const fillTags = fillWithinCategoryLimits(ranked, offset, slotsToFill, lockedCounts);
-            if (fillTags.length !== slotsToFill) continue;
+            if (fillTags.filter(isStoryElement).length !== slotsToFill) continue;
 
             const signature = fillTags.map(tag => tag.id).sort().join('|');
             if (seen.has(signature)) continue;

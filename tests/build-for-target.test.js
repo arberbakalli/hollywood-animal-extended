@@ -146,7 +146,9 @@ describe('Build for Target — category cardinality', () => {
     let combos;
 
     const SINGLE_SELECT = ['Setting', 'Protagonist', 'Antagonist', 'Finale'];
-    const GENRE_CAP = 2;
+    const STORY_ELEMENT_BUDGET = 10;
+
+    const isStoryElement = tag => tag.category !== 'Genre' && tag.category !== 'Setting';
 
     const countByCategory = combo =>
         combo.reduce((acc, tag) => {
@@ -161,7 +163,10 @@ describe('Build for Target — category cardinality', () => {
         const allTags = Object.values(h.GAME_DATA.tags).filter(t => t && t.id);
         const agencies = h.GAME_DATA.adAgents;
 
-        combos = h.call('generateTargetedCombinations', allTags, [], agencies, 12, 20);
+        // The fourth argument is the story-element budget, not a total width.
+        // Genre and Setting sit outside it, so a budget of ten yields twelve
+        // tags when the generator seeds one of each.
+        combos = h.call('generateTargetedCombinations', allTags, [], agencies, STORY_ELEMENT_BUDGET, 20);
     });
 
     test('the generator returns combinations to inspect', () => {
@@ -177,16 +182,50 @@ describe('Build for Target — category cardinality', () => {
         expect(offenders).toHaveLength(0);
     });
 
-    test('no combination exceeds the two-genre pair window', () => {
-        const offenders = combos
-            .map(countByCategory)
-            .filter(counts => (counts.Genre || 0) > GENRE_CAP);
+    // Corrected 2026-09-22 with the owner's approval, against the game: Genre
+    // has a minimum of one and no maximum — a script can carry all eleven,
+    // split by percentage. This previously asserted a two-genre window, which
+    // came from the generator's own limits table rather than from the game.
+    //
+    // Uncapped does not mean the generator invents genres. It seeds the one
+    // every script needs and spends the rest of the budget on story elements;
+    // extra genres come from what the player locked.
+    test('every combination carries exactly one Genre when none is locked', () => {
+        const genreCounts = combos.map(combo => countByCategory(combo).Genre || 0);
 
-        expect(offenders).toHaveLength(0);
+        expect(genreCounts.every(count => count === 1)).toBe(true);
     });
 
-    test('every combination is still the requested width', () => {
-        combos.forEach(combo => expect(combo).toHaveLength(12));
+    // The budget buys story elements. Genre and Setting sit outside it, so the
+    // width is the budget plus whatever context the script carries rather than
+    // a fixed number. Asserting the story-element count is what actually holds:
+    // it is the promise the Max Element Pool control makes.
+    test('every combination spends its whole story-element budget', () => {
+        combos.forEach(combo =>
+            expect(combo.filter(isStoryElement)).toHaveLength(STORY_ELEMENT_BUDGET));
+    });
+
+    test('a combination is its budget plus one Genre and one Setting', () => {
+        combos.forEach(combo => expect(combo).toHaveLength(STORY_ELEMENT_BUDGET + 2));
+    });
+
+    // The case the uncap exists for. Locking three genres used to be impossible
+    // here (the generator capped Genre at 1) and, with a fixed budget + 2 width,
+    // each extra genre would have eaten a story-element slot -- a ten-element
+    // budget quietly delivering eight.
+    test('locked genres widen the combination rather than spend the budget', () => {
+        const allTags = Object.values(h.GAME_DATA.tags).filter(t => t && t.id);
+        const genres = allTags.filter(t => t.category === 'Genre').slice(0, 3);
+
+        const withGenres = h.call(
+            'generateTargetedCombinations', allTags, genres, h.GAME_DATA.adAgents, STORY_ELEMENT_BUDGET, 5
+        );
+
+        expect(withGenres.length).toBeGreaterThan(0);
+        withGenres.forEach(combo => {
+            expect(countByCategory(combo).Genre).toBe(3);
+            expect(combo.filter(isStoryElement)).toHaveLength(STORY_ELEMENT_BUDGET);
+        });
     });
 
     test('combinations contain no duplicate tags', () => {

@@ -161,9 +161,21 @@ instead, or a failing suite reads as green.
   Character, Theme & Event — are uncapped; everything else holds one). The
   Add/Swap button label derives from it. Do not re-implement that arithmetic in
   a panel.
+- **Story elements are everything except Genre and Setting.** A script is
+  `N` story elements (5–10, the Max Element Pool) **plus** one Setting **plus**
+  one to eleven Genres. Genre and Setting never spend the budget, so a
+  combination's width is the budget plus its context, not a fixed number.
+  Protagonist, Antagonist and Finale are mandatory and *do* spend it.
+  - Build for Target enforced this as a fixed `budget + 2` width, which assumed
+    exactly one Genre. A three-genre script therefore delivered three fewer
+    story elements than the pool promised. Size on the story-element count, not
+    on total tags.
 - **Genre is not capped at 2.** A script can carry all eleven genres, split by
   percentage, with one taking whatever remains up to 100%. Two is a common mix,
-  not a limit.
+  not a limit. The minimum is one: every script needs a Genre.
+  - Uncapped does not mean generated. Build for Target seeds the one Genre a
+    script requires and spends the remaining budget on story elements; further
+    genres come from what the player locked.
   - Corrected 2026-09-22 by the owner against the game. The engine had
     special-cased Genre to 2, which silently withheld every Genre suggestion
     once a script had two. **Do not reintroduce a Genre cap** — a comment or
