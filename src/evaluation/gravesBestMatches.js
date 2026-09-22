@@ -324,17 +324,26 @@
     }
 
     function addButtonMarkup(candidate, index) {
-        // Multi-select categories always add; single-select either add (if empty) or swap
-        const isMultiSelect = MULTI_SELECT_CATEGORIES.includes(candidate.category);
-        if (isMultiSelect) {
-            return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-add-btn" type="button" data-action="add-graves-best-match" data-tag-id="${candidate.id}" data-category="${candidate.category}">Add</button>`;
+        const categorySlug = categoryToElementSlug(candidate.category);
+        const categoryRows = document.querySelectorAll(`#inputs-${categorySlug}-graves [data-role="tag-selector-row"]`);
+        const selectedCount = Array.from(categoryRows).filter(row => {
+            const select = row.querySelector('select.tag-selector');
+            return select && select.value && select.value !== '';
+        }).length;
+
+        let label = 'Add';
+
+        if (candidate.category === 'Genre') {
+            // Genre max is 2
+            label = selectedCount >= 2 ? 'Swap' : 'Add';
+        } else if (MULTI_SELECT_CATEGORIES.includes(candidate.category)) {
+            // Multi-select: always add
+            label = 'Add';
+        } else {
+            // Single-select: swap if something selected, add if empty
+            label = selectedCount > 0 ? 'Swap' : 'Add';
         }
 
-        // Single-select: check if something is already selected
-        const categorySlug = categoryToElementSlug(candidate.category);
-        const existingSelect = document.querySelector(`#inputs-${categorySlug}-graves select.tag-selector`);
-        const hasExistingValue = existingSelect && existingSelect.value && existingSelect.value !== '';
-        const label = hasExistingValue ? 'Swap' : 'Add';
         return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-${label.toLowerCase()}-btn" type="button" data-action="add-graves-best-match" data-tag-id="${candidate.id}" data-category="${candidate.category}">${label}</button>`;
     }
 
