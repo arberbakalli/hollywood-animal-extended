@@ -116,17 +116,28 @@ Feature: Build for Target
     When the user types 5 into the budget number field
     Then the budget slider reads 5
 
-  # [unverified] displayTargetedResults renders an empty state when the search
-  # returns nothing, but no reachable input has been found that produces zero
-  # combinations. Do not automate until a real path to it is confirmed.
+  # [verified] 2026-09-22. The reachable path the previous note was missing: the
+  # generator returns nothing when the surviving pool cannot fill the budget,
+  # because each candidate combination is discarded unless it spends the budget
+  # in full. Measured directly — three story elements against a budget of ten
+  # yields zero combinations, where the full pool yields twenty. A user reaches
+  # it by excluding most story elements in Script Lab, since that list feeds
+  # Build for Target, or by raising Max Element Pool past the remaining supply.
   Scenario: An empty state is shown when nothing matches
-    Given constraints that no combination can satisfy
+    Given the surviving element pool cannot fill the Max Element Pool budget
     When the user searches for top combinations
     Then an empty state explains that nothing matched
 
-  # [unverified] Whether a selected audience and a selected advertiser combine
-  # or conflict has not been observed.
-  Scenario: Selecting both an audience and an advertiser
+  # [automated] tests/build-for-target.test.js, "an advertiser selection wins
+  # over an audience selection".
+  #
+  # Corrected 2026-09-22. This asked for results reflecting BOTH constraints,
+  # which the app has never done: findTargetedCombinations reads
+  # `if (selectedAdvertisers.length) ... else if (selectedAudiences.length)`,
+  # so an advertiser overrides the audience rather than narrowing with it. The
+  # scenario described an intention, and a passing test already described the
+  # opposite; recording the behaviour that ships.
+  Scenario: An advertiser selection overrides a selected audience
     When the user selects both a target audience and an advertiser
     And the user searches for top combinations
-    Then the results reflect both constraints
+    Then only the advertiser constrains the results
