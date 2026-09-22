@@ -13,7 +13,8 @@
     "test:e2e:show": "achilles-show",
     "test:repair": "achilles-self-repair",
     "test:mutate": "node tools/run-achilles-mutate.mjs",
-    "test:mutate:calibrate": "node tools/run-achilles-mutate.mjs --calibrate"
+    "test:mutate:calibrate": "node tools/run-achilles-mutate.mjs --calibrate",
+    "git:unlock": "node tools/git-unlock.mjs"
   },
   "devDependencies": {
     "@civitas-cerebrum/element-interactions": "^0.3.9",
