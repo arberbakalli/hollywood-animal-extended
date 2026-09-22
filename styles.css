@@ -2162,6 +2162,15 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 .best-match-score.score-excellent { color: #10b981; }
 .best-match-score.score-strong { color: #f59e0b; }
 
+/* Category-colored text in best-match rows */
+.best-match-item.setting .best-match-category { color: var(--cat-setting); }
+.best-match-item.genre .best-match-category { color: var(--cat-genre); }
+.best-match-item.protagonist .best-match-category { color: var(--cat-protagonist); }
+.best-match-item.antagonist .best-match-category { color: var(--cat-antagonist); }
+.best-match-item.supporting-character .best-match-category { color: var(--cat-supporting); }
+.best-match-item.theme-event .best-match-category { color: var(--cat-theme-event); }
+.best-match-item.finale .best-match-category { color: var(--cat-finale); }
+
 /* Band grouping mirrors the in-game dossier: successful, common, unsuccessful. */
 .best-match-band {
     display: flex;
