@@ -43,6 +43,14 @@
         return known ? known.name : tagLike.id;
     }
 
+    function formatDisplayName(text) {
+        if (!text) return text;
+        return text
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    }
+
     function minimumFit() {
         return parseFloat(document.getElementById('gravesBestScoreFilter')?.value || '4.0');
     }
@@ -384,13 +392,13 @@
         list.innerHTML = limited.map((match, index) => `
             <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${Engine.bandFor(match.score, match.score)} ${tagClass(match.candidate)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${Engine.bandFor(match.score, match.score)}">
                 <div class="best-match-pair">
-                    <span class="best-match-pair-label">${match.selectedCategory}</span>
-                    <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
+                    <span class="best-match-pair-label">${formatDisplayName(match.selectedCategory)}</span>
+                    <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${formatDisplayName(match.selectedName)}</span>
                     <span class="best-match-arrow">&rarr;</span>
-                    <span class="best-match-tag ${tagClass(match.candidate)}">${match.candidate.name}</span>
+                    <span class="best-match-tag ${tagClass(match.candidate)}">${formatDisplayName(match.candidate.name)}</span>
                 </div>
                 <div class="best-match-meta">
-                    <span class="best-match-category">${match.candidate.category}</span>
+                    <span class="best-match-category">${formatDisplayName(match.candidate.category)}</span>
                     <span class="best-match-score ${match.score >= 4.5 ? 'score-excellent' : 'score-strong'}">${match.score.toFixed(2)}</span>
                     ${addButtonMarkup(match.candidate, index)}
                 </div>
