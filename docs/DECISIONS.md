@@ -39,7 +39,7 @@ implicitly.
 Extract only when `script.js` can import the result, and delete the original in the same commit.
 
 **Superseded — `src/` is back, by a different route.** `0415f32 Finish classic module architecture
-split` moved behaviour into 22 files under `src/`, and `script.js` is now a ~490-line bridge rather
+split` moved behaviour into 26 files under `src/`, and `script.js` is now a ~490-line bridge rather
 than the monolith.
 
 The condition above was never met: there was no module flip, and `script.js` still cannot `import`.

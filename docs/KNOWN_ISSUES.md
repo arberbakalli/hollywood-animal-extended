@@ -40,12 +40,15 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 ## Architecture
 
 - `script.js` is now a ~490-line bridge layer rather than the ~2,000-line monolith this file used to
-  describe: behaviour lives in 22 files under `src/`, each an IIFE exposing a `HAC*` namespace, which
+  describe: behaviour lives in 26 files under `src/`, each an IIFE exposing a `HAC*` namespace, which
   `script.js` re-exports as bare globals. Everything is still a **classic script**, so nothing can
   `import` and the constraints in `AGENTS.md` still hold. The module flip itself has not happened.
 - The bare-global wrappers in `script.js` look like duplicate implementations and are not. They
   delegate to the `src/` namespace, and removing one breaks every caller of the bare name.
 - A duplication audit of `script.js` against `src/` has not been done since the split.
+- The abandoned `generateHighestSynergy` prototype is intentionally parked at
+  `docs/parked/generateHighestSynergy.js`. It should stay outside `src/` until it becomes a real
+  loaded module again.
 
 ## Tooling
 
@@ -53,8 +56,8 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   than being imported, so istanbul cannot instrument them. Coverage becomes available only after the
   module flip.
 - Bare `npx jest` fails all suites. See `AGENTS.md` for the reason and the workaround.
-- Qodana is configured for JetBrains inspections in `qodana.yaml`, but the `qodana-js` linter needs
-  a `QODANA_TOKEN` even for local native scans. There is still no formatter or npm `lint` script.
+- There is still no committed formatter or npm `lint` script. A temporary Qodana setup was removed
+  because the `qodana-js` linter needs a `QODANA_TOKEN` even for local native scans.
 - `@civitas-cerebrum/achilles` is wired in as `file:../achilles`. A clone without that sibling
   checkout installs *green* — npm symlinks a `file:` path without checking it exists — so the
   absence surfaces at runtime rather than at install. The Playwright reporter is optional and

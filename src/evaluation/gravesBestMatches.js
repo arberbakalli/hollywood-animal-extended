@@ -1,16 +1,11 @@
 (function(global) {
     "use strict";
 
-    // Same bar findGravesConflicts uses, so "conflict" means one thing app-wide.
-    const CONFLICT_PAIR_THRESHOLD = 2.0;
-    // Same bar getGravesVerdict calls Success.
-    const STRONG_FIT_THRESHOLD = 4.0;
     // Pagination: show 10 rows initially, then offer "Show more" to load next batch.
     const ROWS_PER_PAGE = 10;
     const ROWS_INCREMENT = 10;
-    // Maximum rows to display in Pairwise mode (all matches, capped for performance)
-    const MAX_ROWS = 100;
 
+    const Engine = global.HACGravesBestMatchesEngine;
     let bestMatchMode = 'additions';
     let lastSelectedTags = [];
     let visibleRowCount = ROWS_PER_PAGE;
@@ -42,51 +37,6 @@
     /* ---------------------------------------------------------------------
        Scoring
        --------------------------------------------------------------------- */
-
-    function pairCount(size) {
-        return (size * (size - 1)) / 2;
-    }
-
-    /**
-     * Scores a candidate against every member of the current set.
-     *
-     * Only the pairs the candidate introduces are read. The set's own pairs are
-     * identical for every candidate, so ranking on this average produces the same
-     * order as rescoring the whole matrix, at O(n) instead of O(n^2).
-     */
-    function scoreAgainstSet(candidate, set) {
-        let sum = 0;
-        let worstScore = Infinity;
-        let worstAgainst = null;
-
-        set.forEach(member => {
-            const score = getRawCompatibilityScore(candidate, member);
-            sum += score;
-            if (score < worstScore) {
-                worstScore = score;
-                worstAgainst = member;
-            }
-        });
-
-        return {
-            fitAverage: set.length ? sum / set.length : 0,
-            newPairSum: sum,
-            worstScore: set.length ? worstScore : 0,
-            worstAgainst
-        };
-    }
-
-    /** Resulting script average after folding newPairSum into a known base. */
-    function averageWith(baseAverage, baseSize, newPairSum) {
-        const basePairs = pairCount(baseSize);
-        return (baseAverage * basePairs + newPairSum) / (basePairs + baseSize);
-    }
-
-    function bandFor(fitAverage, worstScore) {
-        if (worstScore < CONFLICT_PAIR_THRESHOLD) return 'unsuccessful';
-        if (fitAverage >= STRONG_FIT_THRESHOLD) return 'successful';
-        return 'common';
-    }
 
     function displayName(tagLike) {
         const known = GAME_DATA.tags[tagLike.id];
@@ -138,21 +88,6 @@
             ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    function categoryCardinality(selectedTags) {
-        const counts = {};
-        selectedTags.forEach(tag => {
-            counts[tag.category] = (counts[tag.category] || 0) + 1;
-        });
-        return counts;
-    }
-
-    function isCategoryFull(category, counts) {
-        // Genre can have up to 2; single-select categories max 1; others unlimited.
-        const maxForCategory = category === 'Genre' ? 2 :
-            MULTI_SELECT_CATEGORIES.includes(category) ? Infinity : 1;
-        return (counts[category] || 0) >= maxForCategory;
-    }
-
     function collectCandidates(selectedTags) {
         const selectedIds = new Set(selectedTags.map(tag => tag.id));
         // Graves evaluates ANY script. Use only manual exclusions from Script Lab.
@@ -171,135 +106,45 @@
         return candidates;
     }
 
-    function rankCandidates(candidates, set, minimum) {
-        return candidates
-            .map(candidate => ({ candidate, ...scoreAgainstSet(candidate, set) }))
-            .filter(row => row.fitAverage >= minimum)
-            .sort((a, b) =>
-                b.fitAverage - a.fitAverage ||
-                a.candidate.name.localeCompare(b.candidate.name)
-            );
+    function engineOptions() {
+        return {
+            calculateMatrixScore,
+            displayName,
+            getRawCompatibilityScore,
+            multiSelectCategories: MULTI_SELECT_CATEGORIES
+        };
     }
 
     function buildAdditions(selectedTags) {
-        const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
         const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
             ? HACScriptGenerator.getMaxElementPoolSize()
             : 10;
-        const counts = categoryCardinality(selectedTags);
-        // Pool size counts only the 5 story elements, not Genre or Setting
-        const poolCount = selectedTags.filter(tag =>
-            tag.category !== 'Genre' && tag.category !== 'Setting'
-        ).length;
-        const candidates = collectCandidates(selectedTags).filter(candidate => {
-            // Check both category-specific limits and total pool size
-            if (isCategoryFull(candidate.category, counts)) return false;
-            // If adding this element would exceed the pool size, filter it out
-            if (poolCount >= maxPoolSize) return false;
-            return true;
-        });
 
-        return rankCandidates(candidates, selectedTags, minimumFit())
-            .map(row => Object.assign({}, row, {
-                currentAverage,
-                resultingAverage: averageWith(currentAverage, selectedTags.length, row.newPairSum),
-                band: bandFor(row.fitAverage, row.worstScore)
-            }));
-    }
-
-    /** The element whose removal lifts the script average the most. */
-    function weakestSlot(selectedTags) {
-        let weakest = null;
-
-        selectedTags.forEach((tag, index) => {
-            const rest = selectedTags.filter((_, position) => position !== index);
-            if (rest.length === 0) return;
-
-            const averageWithout = calculateMatrixScore(rest).rawAverage;
-            if (!weakest || averageWithout > weakest.averageWithout) {
-                weakest = { tag, rest, averageWithout };
-            }
-        });
-
-        return weakest;
+        return Engine.buildAdditions(
+            selectedTags,
+            collectCandidates(selectedTags),
+            minimumFit(),
+            maxPoolSize,
+            engineOptions()
+        );
     }
 
     function buildSwaps(selectedTags) {
-        if (selectedTags.length < 2) return null;
-
-        const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
-        const allRows = [];
-        const slots = [];
-
-        // For each selected element, find viable swaps
-        selectedTags.forEach((tag, index) => {
-            const rest = selectedTags.filter((_, position) => position !== index);
-            if (rest.length === 0) return;
-
-            const averageWithout = calculateMatrixScore(rest).rawAverage;
-            const slot = { tag, rest, averageWithout, index };
-            slots.push(slot);
-
-            const candidates = collectCandidates(selectedTags).filter(candidate =>
-                candidate.category === tag.category
-            );
-
-            const rowsForSlot = rankCandidates(candidates, rest, minimumFit())
-                .map(row => Object.assign({}, row, {
-                    slotIndex: index,
-                    slotTag: tag,
-                    currentAverage,
-                    resultingAverage: averageWith(averageWithout, rest.length, row.newPairSum),
-                    band: bandFor(row.fitAverage, row.worstScore)
-                }))
-                .filter(row => row.resultingAverage > currentAverage);
-
-            allRows.push(...rowsForSlot);
-        });
-
-        if (allRows.length === 0) return null;
-
-        // Group rows by slot index for organized display
-        const rowsBySlot = {};
-        allRows.forEach(row => {
-            if (!rowsBySlot[row.slotIndex]) {
-                rowsBySlot[row.slotIndex] = {
-                    slot: slots[row.slotIndex],
-                    rows: []
-                };
-            }
-            rowsBySlot[row.slotIndex].rows.push(row);
-        });
-
-        return { rowsBySlot, allRows, currentAverage };
+        return Engine.buildSwaps(
+            selectedTags,
+            collectCandidates(selectedTags),
+            minimumFit(),
+            engineOptions()
+        );
     }
 
     function buildPairwise(selectedTags) {
-        const counts = categoryCardinality(selectedTags);
-        const allCandidates = collectCandidates(selectedTags);
-        const candidates = allCandidates.filter(candidate =>
-            !isCategoryFull(candidate.category, counts)
+        return Engine.buildPairwise(
+            selectedTags,
+            collectCandidates(selectedTags),
+            minimumFit(),
+            engineOptions()
         );
-        const minimum = minimumFit();
-        const matches = [];
-
-        selectedTags.forEach(selectedTag => {
-            candidates.forEach(candidate => {
-                const score = getRawCompatibilityScore(selectedTag, candidate);
-                if (score < minimum) return;
-
-                matches.push({
-                    selectedName: displayName(selectedTag),
-                    selectedCategory: selectedTag.category,
-                    candidate,
-                    score
-                });
-            });
-        });
-
-        return matches
-            .sort((a, b) => b.score - a.score || a.candidate.name.localeCompare(b.candidate.name))
-            .slice(0, MAX_ROWS);
     }
 
     /* ---------------------------------------------------------------------
@@ -320,7 +165,7 @@
     }
 
     function warningMarkup(row) {
-        if (row.worstScore >= CONFLICT_PAIR_THRESHOLD) return '';
+        if (row.worstScore >= Engine.CONFLICT_PAIR_THRESHOLD) return '';
         return `<span class="best-match-warning">clashes with ${displayName(row.worstAgainst)} (${row.worstScore.toFixed(1)})</span>`;
     }
 
@@ -526,7 +371,7 @@
         totalRowCount = matches.length;
         const limited = matches.slice(0, visibleRowCount);
         list.innerHTML = limited.map((match, index) => `
-            <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${bandFor(match.score, match.score)} ${tagClass(match.candidate)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${bandFor(match.score, match.score)}">
+            <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${Engine.bandFor(match.score, match.score)} ${tagClass(match.candidate)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${Engine.bandFor(match.score, match.score)}">
                 <div class="best-match-pair">
                     <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
                     <span class="best-match-arrow">&rarr;</span>

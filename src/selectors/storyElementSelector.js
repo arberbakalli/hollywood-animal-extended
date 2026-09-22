@@ -1,38 +1,24 @@
 (function(global) {
     "use strict";
 
-    // A genre mix is set in 5% increments, each genre holding at least 5%, and the
-    // whole mix always totalling 100%.
-    const GENRE_PERCENT_STEP = 5;
-    const GENRE_PERCENT_MIN = 5;
-
-    const SCRIPT_BUILDER_CONTEXTS = new Set([
-        'generator',
-        'graves',
-        'advertisers',
-        'targeted'
-    ]);
-
     function contextUsesGlobalExclusions(context) {
-        return SCRIPT_BUILDER_CONTEXTS.has(context);
+        return HACSelectorExclusions.contextUsesGlobalExclusions(context);
     }
 
     function getExcludedIdsForContext(context) {
-        if (!contextUsesGlobalExclusions(context)) return null;
-        return getGeneratorExcludedIds();
+        return HACSelectorExclusions.getExcludedIdsForContext(context);
     }
 
     function isTagExcludedForContext(tagId, context) {
-        return Boolean(getExcludedIdsForContext(context)?.has(tagId));
+        return HACSelectorExclusions.isTagExcludedForContext(tagId, context);
     }
 
     function canUseTagInContext(tagId, context) {
-        return !isTagExcludedForContext(tagId, context);
+        return HACSelectorExclusions.canUseTagInContext(tagId, context);
     }
 
     function excludedTagFeedbackMessage(tagId) {
-        const tagName = GAME_DATA.tags[tagId] ? GAME_DATA.tags[tagId].name : tagId;
-        return `${tagName} is excluded in Script Lab. Remove it from Excluded Elements first.`;
+        return HACSelectorExclusions.excludedTagFeedbackMessage(tagId);
     }
 
     function showExcludedTagFeedback(tagId, context) {
@@ -40,24 +26,11 @@
     }
 
     function filterTagsForContext(tags, context) {
-        return tags.filter(tag => tag && tag.id && canUseTagInContext(tag.id, context));
+        return HACSelectorExclusions.filterTagsForContext(tags, context);
     }
 
     function clearExcludedSelectionsInCategory(category, context, excludedIds = getExcludedIdsForContext(context)) {
-        if (!excludedIds || excludedIds.size === 0) return [];
-
-        const categoryContainerId = `inputs-${categoryToElementSlug(category)}-${context}`;
-        const categoryContainer = document.getElementById(categoryContainerId);
-        if (!categoryContainer) return [];
-
-        const clearedIds = [];
-        categoryContainer.querySelectorAll('.tag-selector').forEach(select => {
-            if (select.value && excludedIds.has(select.value)) {
-                clearedIds.push(select.value);
-                select.value = "";
-            }
-        });
-        return clearedIds;
+        return HACSelectorExclusions.clearExcludedSelectionsInCategory(category, context, excludedIds);
     }
 
     function restoreSelection(context, savedInputs) {
@@ -189,17 +162,12 @@
         return selected;
     }
 
-    // Every context that draws from the ban list. A ban only matters once it
-    // reaches these: refreshing the 'excluded' context alone updates the ban
-    // list's own pickers and leaves the builders still offering the tag.
-    const EXCLUSION_CONSUMER_CONTEXTS = ['generator', 'graves', 'advertisers', 'targeted'];
-
     // Called whenever a ban is added or lifted. Single-select categories --
     // Setting, Protagonist, Antagonist, Finale -- had no other path to a redraw,
     // so a banned Setting kept appearing in Script Lab until an unrelated
     // interaction happened to refresh it.
     function propagateExclusionChange(category) {
-        EXCLUSION_CONSUMER_CONTEXTS.forEach(consumer =>
+        HACSelectorExclusions.exclusionConsumerContexts().forEach(consumer =>
             refreshCategoryDropdowns(category, consumer));
     }
 
@@ -265,7 +233,7 @@
 
     /** Re-applies exclusion availability to every script-building dropdown. */
     function refreshScriptBuilderAvailability() {
-        SCRIPT_BUILDER_CONTEXTS.forEach(context => {
+        HACSelectorExclusions.scriptBuilderContexts().forEach(context => {
             const cleared = MULTI_SELECT_CATEGORIES
                 .flatMap(category => refreshCategoryDropdowns(category, context) || []);
 
@@ -385,17 +353,17 @@
             numInput.type = 'number';
             numInput.className = 'percent-input';
             numInput.id = `${row.id}-percent-input`;
-            numInput.min = GENRE_PERCENT_MIN;
+            numInput.min = HACGenreMix.GENRE_PERCENT_MIN;
             numInput.max = 100;
-            numInput.step = GENRE_PERCENT_STEP;
+            numInput.step = HACGenreMix.GENRE_PERCENT_STEP;
             numInput.value = 100;
             const slider = document.createElement('input');
             slider.type = 'range';
             slider.className = 'styled-slider percent-slider';
             slider.id = `${row.id}-percent-slider`;
-            slider.min = GENRE_PERCENT_MIN;
+            slider.min = HACGenreMix.GENRE_PERCENT_MIN;
             slider.max = 100;
-            slider.step = GENRE_PERCENT_STEP;
+            slider.step = HACGenreMix.GENRE_PERCENT_STEP;
             slider.value = 100;
             const label = document.createElement('span');
             label.id = `${row.id}-percent-unit`;
@@ -404,10 +372,10 @@
             // 'change' rather than 'input' on the number field, so rebalancing
             // does not fire on every keystroke while a two-digit value is typed.
             numInput.addEventListener('change', (e) => {
-                applyGenrePercent(context, row, parseFloat(e.target.value));
+                HACGenreMix.applyGenrePercent(context, row, parseFloat(e.target.value));
             });
             slider.addEventListener('input', (e) => {
-                applyGenrePercent(context, row, parseFloat(e.target.value));
+                HACGenreMix.applyGenrePercent(context, row, parseFloat(e.target.value));
             });
             updatePercentSliderTrack(slider);
             percentWrapper.appendChild(slider);
@@ -443,96 +411,8 @@
         }
     }
 
-    function snapGenrePercent(value) {
-        return Math.round(value / GENRE_PERCENT_STEP) * GENRE_PERCENT_STEP;
-    }
-
-    // Split `total` across `weights` in whole steps, never below the minimum, summing
-    // to exactly `total`. Largest-remainder, so the result stays as close to the
-    // requested proportions as the step size allows.
-    function splitGenrePercent(total, weights) {
-        const count = weights.length;
-        if (count === 0) return [];
-        const weightSum = weights.reduce((sum, weight) => sum + weight, 0);
-        const raw = weights.map(weight =>
-            weightSum > 0 ? (weight / weightSum) * total : total / count);
-        const shares = raw.map(value =>
-            Math.max(GENRE_PERCENT_MIN, Math.floor(value / GENRE_PERCENT_STEP) * GENRE_PERCENT_STEP));
-        const remainders = raw.map((value, index) => value - shares[index]);
-        let assigned = shares.reduce((sum, share) => sum + share, 0);
-
-        while (assigned < total) {
-            let best = 0;
-            for (let i = 1; i < count; i++) if (remainders[i] > remainders[best]) best = i;
-            shares[best] += GENRE_PERCENT_STEP;
-            remainders[best] -= GENRE_PERCENT_STEP;
-            assigned += GENRE_PERCENT_STEP;
-        }
-        while (assigned > total) {
-            let best = -1;
-            for (let i = 0; i < count; i++) {
-                if (shares[i] - GENRE_PERCENT_STEP < GENRE_PERCENT_MIN) continue;
-                if (best === -1 || shares[i] > shares[best]) best = i;
-            }
-            if (best === -1) break;
-            shares[best] -= GENRE_PERCENT_STEP;
-            assigned -= GENRE_PERCENT_STEP;
-        }
-        return shares;
-    }
-
-    function genreRows(context) {
-        const container = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
-        return container ? Array.from(container.querySelectorAll('.genre-row')) : [];
-    }
-
-    function readGenrePercent(row) {
-        const value = parseFloat(row.querySelector('.percent-input')?.value);
-        return Number.isFinite(value) ? value : GENRE_PERCENT_MIN;
-    }
-
-    function writeGenrePercent(row, value) {
-        const input = row.querySelector('.percent-input');
-        const slider = row.querySelector('.percent-slider');
-        if (!input || !slider) return;
-        input.value = value;
-        slider.value = value;
-        updatePercentSliderTrack(slider);
-    }
-
-    // Moving one genre redistributes the remainder across the others in proportion
-    // to what they already hold, so the mix always totals 100%.
-    function applyGenrePercent(context, changedRow, requestedValue) {
-        const others = genreRows(context).filter(row => row !== changedRow);
-        if (others.length === 0) {
-            writeGenrePercent(changedRow, 100);
-            return;
-        }
-        const ceiling = 100 - GENRE_PERCENT_MIN * others.length;
-        const value = Math.min(ceiling,
-            Math.max(GENRE_PERCENT_MIN, snapGenrePercent(requestedValue)));
-        writeGenrePercent(changedRow, value);
-        splitGenrePercent(100 - value, others.map(readGenrePercent))
-            .forEach((share, index) => writeGenrePercent(others[index], share));
-    }
-
     function updateGenreControls(context) {
-        const rows = genreRows(context);
-        if (rows.length === 0) return;
-
-        if (rows.length === 1) {
-            rows[0].querySelector('.genre-percent-wrapper')?.classList.add('hidden');
-            writeGenrePercent(rows[0], 100);
-            return;
-        }
-
-        // Adding or removing a genre re-splits evenly; dragging is what preserves a
-        // deliberate mix.
-        const shares = splitGenrePercent(100, rows.map(() => 1));
-        rows.forEach((row, index) => {
-            row.querySelector('.genre-percent-wrapper')?.classList.remove('hidden');
-            writeGenrePercent(row, shares[index]);
-        });
+        HACGenreMix.updateGenreControls(context);
     }
 
     function selectTagFromSearch(tagObj, context) {

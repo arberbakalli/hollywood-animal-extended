@@ -62,13 +62,6 @@ npm run test:e2e  # Playwright — 147 tests in a real browser
 `npm test` is the entry point, not `npx jest` — the suite is native ESM and needs a Node flag that no
 config file can supply. See [AGENTS.md](AGENTS.md).
 
-Qodana is configured for JetBrains inspections through `qodana.yaml`. Running it locally requires a
-`QODANA_TOKEN` from Qodana Cloud:
-
-```bash
-qodana scan --config qodana.yaml --results-dir .qodana/results --report-dir .qodana/report
-```
-
 Before changing anything, read [AGENTS.md](AGENTS.md) for the architectural constraints and
 [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) for what is already known to be broken.
 

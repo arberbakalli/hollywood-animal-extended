@@ -295,22 +295,26 @@
                 const pairs = pairsByBand[band] || [];
                 if (pairs.length === 0) return '';
 
-                const pairRows = pairs.map((pair, index) => `
-                    <div id="graves-pair-${band}-${index + 1}" class="graves-pair-row">
+                const pairRows = pairs.map((pair, index) => {
+                    const categorySlug = categoryToElementSlug(pair.secondCategory);
+                    return `
+                    <div id="graves-pair-${band}-${index + 1}" class="graves-pair-row ${categorySlug}">
                         <span class="graves-pair-names">
                             <span class="graves-pair-name">${pair.firstName}</span>
                             <span class="graves-pair-separator">&times;</span>
                             <span class="graves-pair-name">${pair.secondName}</span>
                         </span>
-                        <span class="graves-pair-categories">${pair.firstCategory} &times; ${pair.secondCategory}</span>
-                        <span class="graves-pair-score">${pair.rawScore.toFixed(2)}</span>
+                        <div class="graves-pair-footer">
+                            <span class="graves-pair-categories">${pair.firstCategory} &times; ${pair.secondCategory}</span>
+                            <span class="graves-pair-score">${pair.rawScore.toFixed(2)}</span>
+                        </div>
                     </div>
-                `).join('');
+                `}).join('');
 
                 return `
                     <div class="graves-pairs-band graves-pairs-band-${band}">
-                        <h4 class="graves-pairs-band-title" data-band="${band}">
-                            <span class="graves-pairs-band-toggle"></span>
+                        <h4 class="graves-pairs-band-title" data-band="${band}" role="button" aria-expanded="true" aria-label="Toggle ${BAND_LABELS[band]} pairs (${pairs.length})">
+                            <span class="graves-pairs-band-toggle" aria-hidden="true"></span>
                             ${BAND_LABELS[band]} <small>(${pairs.length})</small>
                         </h4>
                         ${pairRows}
@@ -325,6 +329,8 @@
                 title.addEventListener('click', function() {
                     const band = this.closest('.graves-pairs-band');
                     band.classList.toggle('collapsed');
+                    const isCollapsed = band.classList.contains('collapsed');
+                    this.setAttribute('aria-expanded', !isCollapsed);
                 });
             });
         }
