@@ -283,23 +283,6 @@
         const minimum = minimumFit();
         const matches = [];
 
-        if (selectedTags.length > 0 && candidates.length === 0) {
-            console.warn('🎬 Graves buildPairwise: No candidates after category filter', {
-                selectedCount: selectedTags.length,
-                availableCandidates: allCandidates.length,
-                fullCategories: Object.entries(counts)
-                    .filter(([cat, cnt]) => {
-                        const max = cat === 'Genre' ? 2 : (MULTI_SELECT_CATEGORIES.includes(cat) ? Infinity : 1);
-                        return cnt >= max;
-                    })
-                    .map(([cat, cnt]) => cat),
-                candidatesByCategory: allCandidates.reduce((acc, c) => {
-                    acc[c.category] = (acc[c.category] || 0) + 1;
-                    return acc;
-                }, {})
-            });
-        }
-
         selectedTags.forEach(selectedTag => {
             candidates.forEach(candidate => {
                 const score = getRawCompatibilityScore(selectedTag, candidate);
@@ -570,8 +553,6 @@
         resultsContainer.classList.remove('hidden');
         panel.classList.remove('hidden');
         syncModeButtons();
-
-        console.warn('🎬 renderBestMatches: lastSelectedTags =', lastSelectedTags.map(t => `${t.name}(${t.category})`));
 
         if (lastSelectedTags.length === 0) {
             list.innerHTML = emptyMarkup('Select at least one element to find strong matches.');
