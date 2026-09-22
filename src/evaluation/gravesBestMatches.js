@@ -231,29 +231,51 @@
     function buildSwaps(selectedTags) {
         if (selectedTags.length < 2) return null;
 
-        const slot = weakestSlot(selectedTags);
-        if (!slot) return null;
+        const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
+        const allRows = [];
+        const slots = [];
 
-        console.warn('🎬 Graves buildSwaps: Weakest slot identified', {
-            weakestTag: slot.tag.name,
-            weakestCategory: slot.tag.category,
-            scoreWithout: slot.averageWithout.toFixed(2)
+        // For each selected element, find viable swaps
+        selectedTags.forEach((tag, index) => {
+            const rest = selectedTags.filter((_, position) => position !== index);
+            if (rest.length === 0) return;
+
+            const averageWithout = calculateMatrixScore(rest).rawAverage;
+            const slot = { tag, rest, averageWithout, index };
+            slots.push(slot);
+
+            const candidates = collectCandidates(selectedTags).filter(candidate =>
+                candidate.category === tag.category
+            );
+
+            const rowsForSlot = rankCandidates(candidates, rest, minimumFit())
+                .map(row => Object.assign({}, row, {
+                    slotIndex: index,
+                    slotTag: tag,
+                    currentAverage,
+                    resultingAverage: averageWith(averageWithout, rest.length, row.newPairSum),
+                    band: bandFor(row.fitAverage, row.worstScore)
+                }))
+                .filter(row => row.resultingAverage > currentAverage);
+
+            allRows.push(...rowsForSlot);
         });
 
-        const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
+        if (allRows.length === 0) return null;
 
-        const candidates = collectCandidates(selectedTags).filter(candidate =>
-            candidate.category === slot.tag.category
-        );
-        const rows = rankCandidates(candidates, slot.rest, minimumFit())
-            .map(row => Object.assign({}, row, {
-                currentAverage,
-                resultingAverage: averageWith(slot.averageWithout, slot.rest.length, row.newPairSum),
-                band: bandFor(row.fitAverage, row.worstScore)
-            }))
-            .filter(row => row.resultingAverage > currentAverage);
+        // Group rows by slot index for organized display
+        const rowsBySlot = {};
+        allRows.forEach(row => {
+            if (!rowsBySlot[row.slotIndex]) {
+                rowsBySlot[row.slotIndex] = {
+                    slot: slots[row.slotIndex],
+                    rows: []
+                };
+            }
+            rowsBySlot[row.slotIndex].rows.push(row);
+        });
 
-        return { slot, rows, currentAverage };
+        return { rowsBySlot, allRows, currentAverage };
     }
 
     function buildPairwise(selectedTags) {
@@ -460,18 +482,27 @@
             return;
         }
 
-        if (result.rows.length === 0) {
+        if (result.allRows.length === 0) {
             list.innerHTML = emptyMarkup('No replacement scores better than what you already have.');
             return;
         }
 
-        const slotName = displayName(result.slot.tag);
-        const markup = groupedMarkup(result.rows, visibleRowCount);
-        list.innerHTML = `
-            <div class="best-match-slot-note">
-                Weakest element: <strong>${slotName}</strong>. Replacing it with any of these raises the script average.
-            </div>
-            ${markup}` + showMoreButton();
+        // Display swaps organized by element
+        const slotMarkup = Object.entries(result.rowsBySlot).map(([slotIndex, { slot, rows }]) => {
+            const slotName = displayName(slot.tag);
+            const slotMarkup = groupedMarkup(rows, visibleRowCount);
+            return `
+                <div class="best-match-slot-group">
+                    <div class="best-match-slot-note">
+                        <strong>${slotName}</strong> (${slot.tag.category}). Replacing it with any of these raises the script average.
+                    </div>
+                    ${slotMarkup}
+                </div>
+            `;
+        }).join('');
+
+        totalRowCount = result.allRows.length;
+        list.innerHTML = slotMarkup + showMoreButton();
         bindShowMoreButton(list);
     }
 

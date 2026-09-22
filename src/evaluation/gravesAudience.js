@@ -157,14 +157,58 @@
         return conflicts.sort((a, b) => a.rawScore - b.rawScore);
     }
 
+    function findGravesPairsByBand(tags) {
+        const STRONG_FIT_THRESHOLD = 4.0;
+        const pairs = [];
+
+        const describe = tag => {
+            const known = GAME_DATA.tags[tag.id];
+            return {
+                name: known ? known.name : tag.id,
+                category: known ? known.category : ''
+            };
+        };
+
+        for (let i = 0; i < tags.length; i++) {
+            for (let j = i + 1; j < tags.length; j++) {
+                const rawScore = getRawCompatibilityScore(tags[i], tags[j]);
+                const first = describe(tags[i]);
+                const second = describe(tags[j]);
+
+                let band = 'common';
+                if (rawScore < 2.0) band = 'unsuccessful';
+                else if (rawScore >= STRONG_FIT_THRESHOLD) band = 'successful';
+
+                pairs.push({
+                    firstName: first.name,
+                    secondName: second.name,
+                    firstCategory: first.category,
+                    secondCategory: second.category,
+                    rawScore,
+                    band
+                });
+            }
+        }
+
+        // Group by band
+        const grouped = {
+            successful: pairs.filter(p => p.band === 'successful').sort((a, b) => b.rawScore - a.rawScore),
+            common: pairs.filter(p => p.band === 'common').sort((a, b) => b.rawScore - a.rawScore),
+            unsuccessful: pairs.filter(p => p.band === 'unsuccessful').sort((a, b) => a.rawScore - b.rawScore)
+        };
+
+        return grouped;
+    }
+
     function formatFinalRating(value) {
         if (value >= 10) return "10.0";
         return formatMovieScore(value);
     }
 
     function renderColmanGravesResults(evaluation) {
-        const { matrix, bonuses, movieScores } = evaluation;
+        const { matrix, bonuses, movieScores, tags } = evaluation;
         const verdict = getGravesVerdict(matrix.rawAverage);
+        evaluation.pairsByBand = findGravesPairsByBand(tags);
 
         document.getElementById('results-graves').classList.remove('hidden');
         ['graves-summary-row', 'graves-reading-panel', 'graves-breakdown-panel', 'graves-detail-row'].forEach(panelId => {
@@ -236,6 +280,44 @@
             });
         }
 
+        // Render pairs grouped by band (successful, common, unsuccessful)
+        const pairsContainer = document.getElementById('gravesPairsDisplay');
+        if (pairsContainer) {
+            const pairsByBand = evaluation.pairsByBand || {};
+            const BAND_LABELS = {
+                successful: 'Successful combinations',
+                common: 'Common combinations',
+                unsuccessful: 'Unsuccessful combinations'
+            };
+            const BAND_ORDER = ['successful', 'common', 'unsuccessful'];
+
+            const bandMarkup = BAND_ORDER.map(band => {
+                const pairs = pairsByBand[band] || [];
+                if (pairs.length === 0) return '';
+
+                const pairRows = pairs.map((pair, index) => `
+                    <div id="graves-pair-${band}-${index + 1}" class="graves-pair-row">
+                        <span class="graves-pair-names">
+                            <span class="graves-pair-name">${pair.firstName}</span>
+                            <span class="graves-pair-separator">&times;</span>
+                            <span class="graves-pair-name">${pair.secondName}</span>
+                        </span>
+                        <span class="graves-pair-categories">${pair.firstCategory} &times; ${pair.secondCategory}</span>
+                        <span class="graves-pair-score">${pair.rawScore.toFixed(2)}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="graves-pairs-band graves-pairs-band-${band}">
+                        <h4 class="graves-pairs-band-title">${BAND_LABELS[band]}</h4>
+                        ${pairRows}
+                    </div>
+                `;
+            }).join('');
+
+            pairsContainer.innerHTML = bandMarkup || '<div class="empty-state">No pairs to display.</div>';
+        }
+
         const conflictContainer = document.getElementById('gravesConflictDisplay');
         const conflicts = evaluation.conflicts;
         const conflictPanel = document.getElementById('graves-conflicts-panel');
@@ -286,6 +368,7 @@
         getGravesVerdict,
         calculateGravesAudience,
         findGravesConflicts,
+        findGravesPairsByBand,
         gravesConflictSeverity,
         summarizeGravesConflicts,
         renderColmanGravesResults
