@@ -53,7 +53,8 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   than being imported, so istanbul cannot instrument them. Coverage becomes available only after the
   module flip.
 - Bare `npx jest` fails all suites. See `AGENTS.md` for the reason and the workaround.
-- There is no linter or formatter configured.
+- Qodana is configured for JetBrains inspections in `qodana.yaml`, but the `qodana-js` linter needs
+  a `QODANA_TOKEN` even for local native scans. There is still no formatter or npm `lint` script.
 - `@civitas-cerebrum/achilles` is wired in as `file:../achilles`. A clone without that sibling
   checkout installs *green* — npm symlinks a `file:` path without checking it exists — so the
   absence surfaces at runtime rather than at install. The Playwright reporter is optional and
@@ -63,7 +64,7 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 ## Graves Evaluation & Best Matches (2026-09-22 work in progress)
 
 - **Pair Analysis band categorization**: The `findGravesPairsByBand()` function groups all element pairs by compatibility band (successful ≥4.0, common 2.0-4.0, unsuccessful <2.0). The HTML structure renders these three bands in Pair Analysis panel plus a separate Conflicts panel (diagnostic subset of unsuccessful). Data structure verified but rendering needs CSS styling for green/yellow/red band backgrounds.
-- **Swap Suggestions refactor**: `buildSwaps()` now iterates ALL 7 selected elements (not just weakest), finding viable swaps for each. Data structure is `rowsBySlot` organized by element index. Rendering logic updated in `renderSwaps()` to display multiple slots. Code complete and tested (274/274 tests passing) but UI rendering needs verification.
+- **Swap Suggestions refactor**: `buildSwaps()` now iterates ALL 7 selected elements (not just weakest), finding viable swaps for each. Data structure is `rowsBySlot` organized by element index. Rendering logic updated in `renderSwaps()` to display multiple slots. Jest and the Colman Graves E2E path cover the current behaviour; remaining work is visual polish, not correctness.
 - **Starting Tags profile**: When applied, populates manual exclusion list with ~139 items (all non-whitelisted). Graves evaluation uses manual exclusions only, not profile-based filtering, allowing any script evaluation regardless of Starting Tags membership.
 
 ## Testing Gaps

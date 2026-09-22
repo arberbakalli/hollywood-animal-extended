@@ -247,16 +247,12 @@
         document.getElementById('transferToMarketingButton')?.addEventListener('click', () => {
             const gravesSelection = collectTagInputs('graves');
             resetSelectors('targeted');
-            const container = document.getElementById('selectors-container-targeted');
-            if (container) container.classList.add('is-batching');
-
             gravesSelection.forEach(tag => {
                 addTagToSelectorContext(tag, 'targeted');
             });
-
-            if (container) container.classList.remove('is-batching');
             switchTab('targeted');
-            document.getElementById('targeted-mode-targeted-button')?.click();
+            const targetedBtn = document.getElementById('targeted-mode-targeted-button');
+            if (targetedBtn) targetedBtn.click();
         });
 
         function applyStartingTagsExclusions() {

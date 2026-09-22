@@ -24,6 +24,24 @@ async function readGeneratedDomSources() {
     return (await Promise.all(files.map(readProjectFile))).join('\n');
 }
 
+async function listSourceModules() {
+    const files = [];
+
+    async function collect(dir) {
+        for (const entry of await readdir(join(ROOT, dir), { withFileTypes: true })) {
+            const relativePath = `${dir}/${entry.name}`;
+            if (entry.isDirectory()) {
+                await collect(relativePath);
+            } else if (entry.isFile() && entry.name.endsWith('.js')) {
+                files.push(relativePath);
+            }
+        }
+    }
+
+    await collect('src');
+    return files.sort();
+}
+
 function getIds(markup) {
     return [...markup.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
 }
@@ -171,6 +189,14 @@ describe('HTML structure', () => {
         await Promise.all(expectedSources.map(source => readProjectFile(source)));
     });
 
+    test('does not leave orphaned source modules outside the HTML load order', async () => {
+        const html = await readProjectFile('index.html');
+        const loadedSourceModules = getScriptSources(html)
+            .filter(source => source.startsWith('src/'))
+            .sort();
+
+        await expect(listSourceModules()).resolves.toEqual(loadedSourceModules);
+    });
 });
 
 describe('generated DOM hooks', () => {
