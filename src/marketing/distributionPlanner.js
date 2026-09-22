@@ -75,22 +75,29 @@
         const statusEl = document.getElementById('studio-policy-status');
         const artScoreText = document.getElementById('dist-artistic-score-text');
         const artScoreDisplay = document.getElementById('dist-art-score-display');
+        const comScoreText = document.getElementById('dist-com-score-text');
 
         if (!statusEl) return;
 
         const commercialScore = parseFloat(document.getElementById('comScoreInput')?.value) || 0;
         const artisticScore = getArtisticScore();
         const boutique = isBoutiqueActive();
+        const behemoth = isBehemothActive();
 
         const status = describeStudioPolicies({
-            behemoth: isBehemothActive(),
+            behemoth,
             boutique,
             commercialScore,
             artisticScore
         });
 
         if (artScoreDisplay) artScoreDisplay.innerText = artisticScore.toFixed(1);
+        // Each score line follows the policy it belongs to: artistic to Boutique,
+        // commercial to Behemoth. Commercial score still drives demand while
+        // Behemoth is off; this line is about the policy's own gate, not the
+        // baseline, and the grid shows the baseline either way.
         artScoreText?.classList.toggle('hidden', !boutique);
+        comScoreText?.classList.toggle('hidden', !behemoth);
 
         statusEl.innerHTML = status;
         statusEl.classList.toggle('hidden', !status);
