@@ -191,12 +191,15 @@ describe('Graves Best Matches', () => {
         const label = (category, count) =>
             h.call('HACGravesBestMatches.buttonLabelFor', category, count);
 
-        test('Genre holds two', () => {
-            expect(full('Genre', 1)).toBe(false);
-            expect(full('Genre', 2)).toBe(true);
-            // The second Genre is still an Add; only the third has to trade.
-            expect(label('Genre', 1)).toBe('Add');
-            expect(label('Genre', 2)).toBe('Swap');
+        // Corrected 2026-09-22 by the repository owner, against the game: a
+        // script can carry all eleven genres split by percentage. Two is a
+        // common mix, not a cap. The engine special-cased Genre to 2, which
+        // withheld every Genre suggestion from a script that already had two.
+        test('Genre is uncapped', () => {
+            expect(full('Genre', 2)).toBe(false);
+            expect(full('Genre', 11)).toBe(false);
+            expect(label('Genre', 2)).toBe('Add');
+            expect(label('Genre', 11)).toBe('Add');
         });
 
         test('a single-select category holds one', () => {

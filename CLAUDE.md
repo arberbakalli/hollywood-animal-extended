@@ -147,9 +147,17 @@ reports zero failing tests while covering nothing.
   the names that were already correct ("Damsel in Distress" → "Damsel in
   distress").
 - How many of a category a script may hold is **one rule**, `isCategoryFull` in
-  `gravesBestMatchesEngine` (Genre caps at 2, multi-select categories are
-  uncapped, everything else holds one). The Add/Swap button label derives from
-  it. Do not re-implement that arithmetic in a panel.
+  `gravesBestMatchesEngine` (multi-select categories — Genre, Supporting
+  Character, Theme & Event — are uncapped; everything else holds one). The
+  Add/Swap button label derives from it. Do not re-implement that arithmetic in
+  a panel.
+- **Genre is not capped at 2.** A script can carry all eleven genres, split by
+  percentage, with one taking whatever remains up to 100%. Two is a common mix,
+  not a limit.
+  - Corrected 2026-09-22 by the owner against the game. The engine had
+    special-cased Genre to 2, which silently withheld every Genre suggestion
+    once a script had two. **Do not reintroduce a Genre cap** — a comment or
+    test elsewhere still describing one is stale, not a spec.
 - `MULTI_SELECT_CATEGORIES` is `[Genre, Supporting Character, Theme & Event]`.
   Iterating it to refresh dropdowns silently skips **Setting, Protagonist,
   Antagonist and Finale**, so a lifted ban on any of those leaves the old list

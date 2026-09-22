@@ -2130,6 +2130,13 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     flex: 1;
 }
 
+.best-match-slot-widened {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
 .best-match-pair-label {
     display: inline-block;
     font-size: 0.75rem;

@@ -313,30 +313,46 @@
         return 'No additions available. Try a different script or adjust categories.';
     }
 
-    function renderAdditions(list, selectedTags) {
-        let rows = buildAdditions(selectedTags);
+    const FIT_VALUES = ['0', '3.0', '3.5', '4.0', '4.5', '5.0'];
 
-        // Auto-lower minimum fit if no additions found
-        if (rows.length === 0) {
-            const fitSelect = document.getElementById('gravesBestScoreFilter');
-            const fitValues = ['0', '3.0', '3.5', '4.0', '4.5', '5.0'];
-            const originalFit = fitSelect?.value || '4.0';
-            const currentIndex = fitValues.indexOf(originalFit);
+    /**
+     * Runs a search and, if the user's Minimum Fit yields nothing, walks the
+     * threshold down until it does. Reporting an empty result that the filter
+     * itself caused reads as "there is nothing", which is a different and much
+     * more discouraging claim.
+     *
+     * Swap Suggestions needs this at least as much as Best Additions: a swap
+     * candidate is scored against the remaining elements, so a weak script --
+     * exactly the one worth repairing -- is the hardest place to clear the bar.
+     *
+     * When widening finds nothing either, the control goes back to where the
+     * user left it, so the next search does not silently run under a threshold
+     * nobody picked.
+     */
+    function widenFitUntilFound(build, isEmpty) {
+        let result = build();
+        if (!isEmpty(result)) return result;
 
-            if (currentIndex > 0) {
-                // Try lower fit thresholds
-                for (let i = currentIndex - 1; i >= 0; i--) {
-                    fitSelect.value = fitValues[i];
-                    rows = buildAdditions(selectedTags);
-                    if (rows.length > 0) break;
-                }
+        const fitSelect = document.getElementById('gravesBestScoreFilter');
+        const originalFit = fitSelect?.value || '4.0';
+        const startIndex = FIT_VALUES.indexOf(originalFit);
+        if (!fitSelect || startIndex <= 0) return result;
 
-                // Widening found nothing, so put the control back. Leaving it
-                // parked on a threshold the user never picked makes the next
-                // search silently run under the wrong filter.
-                if (rows.length === 0 && fitSelect) fitSelect.value = originalFit;
-            }
+        for (let i = startIndex - 1; i >= 0; i--) {
+            fitSelect.value = FIT_VALUES[i];
+            result = build();
+            if (!isEmpty(result)) return result;
         }
+
+        fitSelect.value = originalFit;
+        return result;
+    }
+
+    function renderAdditions(list, selectedTags) {
+        const rows = widenFitUntilFound(
+            () => buildAdditions(selectedTags),
+            found => found.length === 0
+        );
 
         if (rows.length === 0) {
             list.innerHTML = emptyMarkup(additionsEmptyReason(selectedTags));
@@ -348,13 +364,16 @@
     }
 
     function renderSwaps(list, selectedTags) {
+        // No widening here: the engine widens per slot, because one slot having
+        // rows would otherwise suppress widening for every other slot.
         const result = buildSwaps(selectedTags);
 
         if (!result) {
-            const budgeted = selectedTags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting');
-            const msg = budgeted.length < 2
-                ? 'Select at least 2 story elements to swap (Genre and Setting are context, not swappable).'
-                : 'No better swaps available for your current elements.';
+            // Matches buildSwaps' own guard, which counts every selected tag:
+            // Genre and Setting occupy slots and are swappable like any other.
+            const msg = selectedTags.length < 2
+                ? 'Select at least 2 elements so Graves has a pair to compare.'
+                : 'No replacement raises the script average, at any fit threshold.';
             list.innerHTML = emptyMarkup(msg);
             return;
         }
@@ -372,6 +391,9 @@
                 <div class="best-match-slot-group">
                     <div class="best-match-slot-note">
                         <strong>${slotName}</strong> (${slot.tag.category}). Replacing it with any of these raises the script average.
+                        ${rows.length && rows.every(row => row.belowRequestedFit)
+                            ? `<em class="best-match-slot-widened">Nothing here clears your ${minimumFit().toFixed(1)} minimum fit, so these are the best improvements below it.</em>`
+                            : ''}
                     </div>
                     ${slotMarkup}
                 </div>
