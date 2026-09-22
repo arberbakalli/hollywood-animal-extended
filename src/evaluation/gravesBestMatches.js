@@ -324,7 +324,13 @@
     }
 
     function addButtonMarkup(candidate, index) {
-        // Check if this category already has something selected in Graves
+        // Multi-select categories always add; single-select either add (if empty) or swap
+        const isMultiSelect = MULTI_SELECT_CATEGORIES.includes(candidate.category);
+        if (isMultiSelect) {
+            return `<button id="graves-best-match-add-${index + 1}" class="best-match-add-btn best-match-add-btn" type="button" data-action="add-graves-best-match" data-tag-id="${candidate.id}" data-category="${candidate.category}">Add</button>`;
+        }
+
+        // Single-select: check if something is already selected
         const categorySlug = categoryToElementSlug(candidate.category);
         const existingSelect = document.querySelector(`#inputs-${categorySlug}-graves select.tag-selector`);
         const hasExistingValue = existingSelect && existingSelect.value && existingSelect.value !== '';
