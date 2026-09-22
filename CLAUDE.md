@@ -109,5 +109,18 @@ reports zero failing tests while covering nothing.
 - The story element category is **`Setting`**, singular. Filtering on `Settings`
   matches nothing and silently miscounts every script.
 - Genre and Setting do not count toward the 5–10 story element budget.
-- Behemoth applies +25% to week 1 and a slower decay to weeks 3+ (score > 9
-  only). **Week 2 is seeded from the commercial score and must never move.**
+- Behemoth carries two effects on two independent gates. The **+25% applies to
+  every week 1–8**, including week 2, whenever the policy is on — it rides on the
+  budget the toggle stands for. The **slower decay** is separate and applies to
+  weeks 3+ only above commercial score 9.
+  - Changed 2026-09-22. This previously read "+25% to week 1 only" and "week 2
+    must never move". The owner corrected it against the game, where the Behemoth
+    icon shows on every week, and the code, Jest specs, Playwright specs and
+    `tests/scenarios` were all realigned. **Do not restore the week-1-only rule**
+    — an older comment or test elsewhere still describing it is stale, not a spec.
+- Max Element Pool defaults to **5**, and a complete script carries exactly 5
+  story elements, so a finished script sits at its budget and Best Additions is
+  correctly empty. That is intended: raise the pool, or swap instead. A test that
+  wants additions from a complete script must raise the pool first.
+- Swap Suggestions covers **every selected element**, not just the weakest. A
+  slot may only be replaced by a candidate of its own category.
