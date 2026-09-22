@@ -2130,6 +2130,15 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     flex: 1;
 }
 
+.best-match-pair-label {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    opacity: 0.75;
+    flex-shrink: 0;
+}
+
 .best-match-tag {
     display: inline-block;
     padding: 0.5rem 1rem;
@@ -2261,8 +2270,8 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     width: 1.4rem;
     height: 1.4rem;
     font-size: 0.85rem;
-    background: currentColor;
-    color: var(--card-bg);
+    background: transparent;
+    color: currentColor;
     border-radius: 3px;
     font-weight: bold;
     flex-shrink: 0;

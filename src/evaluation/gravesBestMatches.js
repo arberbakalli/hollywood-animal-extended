@@ -340,9 +340,9 @@
 
         if (!result) {
             const budgeted = selectedTags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting');
-            const msg = budgeted.length === 0
+            const msg = budgeted.length < 2
                 ? 'Select at least 2 story elements to swap (Genre and Setting are context, not swappable).'
-                : `Select at least 2 story elements to swap. You have ${budgeted.length} eligible.`;
+                : 'No better swaps available for your current elements.';
             list.innerHTML = emptyMarkup(msg);
             return;
         }
@@ -384,6 +384,7 @@
         list.innerHTML = limited.map((match, index) => `
             <div id="graves-best-match-${index + 1}" class="best-match-item best-match-${Engine.bandFor(match.score, match.score)} ${tagClass(match.candidate)}" data-role="graves-best-match" data-tag-id="${match.candidate.id}" data-category="${match.candidate.category}" data-score="${match.score.toFixed(2)}" data-band="${Engine.bandFor(match.score, match.score)}">
                 <div class="best-match-pair">
+                    <span class="best-match-pair-label">${match.selectedCategory}</span>
                     <span class="best-match-tag primary ${categoryToElementSlug(match.selectedCategory)}">${match.selectedName}</span>
                     <span class="best-match-arrow">&rarr;</span>
                     <span class="best-match-tag ${tagClass(match.candidate)}">${match.candidate.name}</span>
