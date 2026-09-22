@@ -17,8 +17,8 @@ Date: 2026-09-18
 
 ## Verification Result
 
-- Unit/Jest: `244 passed`, `19 passed` suites.
-- E2E/Playwright: `117 passed`.
+- Unit/Jest: `262 passed`, `21 passed` suites on 2026-09-22.
+- E2E/Playwright: `149 declared` tests across 14 specs.
 
 ## Coverage Added Or Confirmed
 
