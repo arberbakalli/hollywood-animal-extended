@@ -192,6 +192,18 @@
         return `<span class="best-match-warning">clashes with ${displayName(row.worstAgainst)} (${row.worstScore.toFixed(1)})</span>`;
     }
 
+    /**
+     * Add or Swap follows one rule: a category that is already full can only be
+     * traded into. That rule lives in the engine's isCategoryFull (Genre caps at
+     * 2, multi-select categories are uncapped, everything else holds one), and
+     * this defers to it rather than keeping a second copy in the panel.
+     */
+    function buttonLabelFor(category, selectedCount) {
+        return Engine.isCategoryFull(category, { [category]: selectedCount }, MULTI_SELECT_CATEGORIES)
+            ? 'Swap'
+            : 'Add';
+    }
+
     function addButtonMarkup(candidate, index, selectedTags = lastSelectedTags) {
         const categorySlug = categoryToElementSlug(candidate.category);
         const categoryRows = document.querySelectorAll(`#inputs-${categorySlug}-graves [data-role="tag-selector-row"]`);
@@ -200,19 +212,7 @@
             return select && select.value && select.value !== '';
         }).length;
 
-        let label = 'Add';
-
-        if (candidate.category === 'Genre') {
-            // Genre max is 2
-            label = selectedCount >= 2 ? 'Swap' : 'Add';
-        } else if (MULTI_SELECT_CATEGORIES.includes(candidate.category)) {
-            // Multi-select: always add
-            label = 'Add';
-        } else {
-            // Single-select: swap if something selected, add if empty
-            label = selectedCount > 0 ? 'Swap' : 'Add';
-        }
-
+        const label = buttonLabelFor(candidate.category, selectedCount);
         const action = label === 'Swap' ? 'swap-graves-best-match' : 'add-graves-best-match';
 
         // Only a genuine Add grows the pool. A Swap trades within a category,
@@ -541,6 +541,7 @@
         jumpToExclusionEditor,
         paginateRows,
         addButtonMarkup,
+        buttonLabelFor,
         atElementBudget,
         BAND_ORDER,
         ROWS_PER_PAGE,

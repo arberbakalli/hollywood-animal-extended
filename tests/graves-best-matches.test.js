@@ -178,6 +178,41 @@ describe('Graves Best Matches', () => {
     });
 
     /**
+     * How many of a category a script may hold is one rule, owned by the
+     * engine's isCategoryFull. The panel used to keep a second hand-written
+     * copy to choose between Add and Swap, so the two could drift without
+     * anything failing. buttonLabelFor now delegates, and these pin both the
+     * rule and the delegation.
+     */
+    describe('category capacity decides Add versus Swap', () => {
+        const full = (category, count) =>
+            h.call('HACGravesBestMatchesEngine.isCategoryFull', category, { [category]: count });
+
+        const label = (category, count) =>
+            h.call('HACGravesBestMatches.buttonLabelFor', category, count);
+
+        test('Genre holds two', () => {
+            expect(full('Genre', 1)).toBe(false);
+            expect(full('Genre', 2)).toBe(true);
+            // The second Genre is still an Add; only the third has to trade.
+            expect(label('Genre', 1)).toBe('Add');
+            expect(label('Genre', 2)).toBe('Swap');
+        });
+
+        test('a single-select category holds one', () => {
+            expect(full('Protagonist', 0)).toBe(false);
+            expect(full('Protagonist', 1)).toBe(true);
+            expect(label('Protagonist', 0)).toBe('Add');
+            expect(label('Protagonist', 1)).toBe('Swap');
+        });
+
+        test('a multi-select category never fills', () => {
+            expect(full('Theme & Event', 50)).toBe(false);
+            expect(label('Theme & Event', 50)).toBe('Add');
+        });
+    });
+
+    /**
      * Pairwise is an analysis view, so a full script still lists its pairs; it
      * is the Add button that goes dead. The budget therefore has to be asserted
      * on the button, not on the row count.
