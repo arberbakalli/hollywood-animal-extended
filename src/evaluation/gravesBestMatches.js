@@ -427,7 +427,20 @@
     function renderAdditions(list, selectedTags) {
         const rows = buildAdditions(selectedTags);
         if (rows.length === 0) {
-            list.innerHTML = emptyMarkup('No additions clear the minimum fit. Try a lower fit or a different category.');
+            list.innerHTML = `
+                <div class="empty-state">
+                    <p>No additions clear the minimum fit. Try a lower fit or a different category.</p>
+                    <button id="adjust-fit-button" class="analyze-btn" type="button">Adjust Minimum Fit</button>
+                </div>
+            `;
+            document.getElementById('adjust-fit-button')?.addEventListener('click', () => {
+                const filterField = document.getElementById('graves-best-score-field');
+                if (filterField) {
+                    filterField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const select = filterField.querySelector('select');
+                    select?.focus();
+                }
+            });
             return;
         }
         const markup = groupedMarkup(rows, visibleRowCount);
