@@ -1,6 +1,27 @@
 (function(global) {
     "use strict";
 
+    /**
+     * findTargetedCombinations reads `if (advertisers) ... else if (audiences)`,
+     * so an advertiser overrides the audience rather than narrowing with it.
+     * Measured: selecting both returns results identical to the advertiser
+     * alone. The checkboxes stayed live and gave no sign of it, so a user could
+     * pick an audience, pick an advertiser, and silently lose the first choice.
+     * This surfaces the existing behaviour rather than changing it.
+     */
+    function syncAudienceAvailability() {
+        const advertiserChosen = !!document.querySelector('.targeted-advertiser-checkbox:checked');
+
+        document.querySelectorAll('.targeted-audience-checkbox').forEach(checkbox => {
+            checkbox.disabled = advertiserChosen;
+            checkbox.closest('.targeted-checkbox-item')?.classList
+                .toggle('is-overridden', advertiserChosen);
+        });
+
+        document.getElementById('targeted-audience-override-note')
+            ?.classList.toggle('hidden', !advertiserChosen);
+    }
+
     async function initializeTargetedAdsTab() {
         // Initialize audience checkboxes
         const audienceContainer = document.getElementById('targeted-audience-checkboxes');
@@ -31,6 +52,10 @@
         // Initialize tag selectors for Targeted Ads
         initializeSelectors('targeted');
 
+        document.querySelectorAll('.targeted-advertiser-checkbox')
+            .forEach(checkbox => checkbox.addEventListener('change', syncAudienceAvailability));
+        syncAudienceAvailability();
+
         // Attach event listeners
         document.getElementById('findCombinationsButton')?.addEventListener('click', findTargetedCombinations);
         document.getElementById('resetTargetedButton')?.addEventListener('click', resetTargetedTab);
@@ -43,6 +68,8 @@
         document.getElementById('targeted-results-panel').classList.add('hidden');
         document.getElementById('targetedResultsList').innerHTML = '';
         clearFeedbackMessage('targetedFeedbackMessage');
+        // Reset clears the advertisers, so the audiences become live again.
+        syncAudienceAvailability();
     }
 
     async function findTargetedCombinations() {
@@ -332,6 +359,7 @@
     global.HACTargetedAds = {
         initializeTargetedAdsTab,
         resetTargetedTab,
+        syncAudienceAvailability,
         findTargetedCombinations,
         searchForTargetCombinations,
         scoringElementsOf,

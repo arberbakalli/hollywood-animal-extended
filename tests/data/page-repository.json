@@ -213,6 +213,7 @@
         { "elementName": "audienceCheckboxes", "selector": { "css": "#targeted-audience-checkboxes .targeted-audience-checkbox" } },
         { "elementName": "advertiserList", "selector": { "css": "#targeted-advertiser-checkboxes" } },
         { "elementName": "advertiserCheckboxes", "selector": { "css": "#targeted-advertiser-checkboxes .targeted-advertiser-checkbox" } },
+        { "elementName": "audienceOverrideNote", "selector": { "css": "#targeted-audience-override-note" } },
         { "elementName": "checkedAudienceCheckboxes", "selector": { "css": "#targeted-audience-checkboxes .targeted-audience-checkbox:checked" } },
         { "elementName": "checkedAdvertiserCheckboxes", "selector": { "css": "#targeted-advertiser-checkboxes .targeted-advertiser-checkbox:checked" } },
 

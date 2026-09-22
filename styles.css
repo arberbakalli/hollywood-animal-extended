@@ -1656,6 +1656,18 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     transition: border-color 0.16s ease, background-color 0.16s ease;
 }
 
+/* An advertiser selection overrides the audience one, so the audiences say so
+   rather than sitting there looking live and being quietly discarded. */
+.targeted-checkbox-item.is-overridden {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.targeted-override-note {
+    margin-bottom: 8px;
+    color: var(--accent);
+}
+
 .targeted-tag-builder {
     margin-bottom: 20px;
 }
