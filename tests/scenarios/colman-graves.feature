@@ -260,14 +260,17 @@ Feature: Script Evaluation — Colman Graves
     And the script's Genre is selected there
     And marketing analysis results are shown
 
-  # [unverified] Markup includes this notice and it is hidden by default, but the
-  # banned-element warning journey has not been reproduced yet.
-  Scenario: Warning when the script uses elements banned in Script Lab
-    Given the user has banned an element in Script Lab
-    And that element is part of the Graves script
-    When the user evaluates the script
-    Then an exclusion notice names the banned element
-    And the user can jump back to Script Lab to change it
+  # [verified] 2026-09-22. Rewritten: the journey it described cannot happen.
+  # A script can never hold a banned element long enough to be warned about it,
+  # because banning one removes it from every script that uses it on the spot
+  # and says so by name. The generic notice above covers the other half —
+  # elements the ban list is hiding from suggestions — so nothing names a
+  # banned element inside the script, and nothing needs to.
+  Scenario: Banning an element removes it from the Graves script and says so
+    Given an element is part of the Graves script
+    When the user bans that element in Script Lab
+    Then the element is removed from the Graves script
+    And a message names the element that was removed
 
   # [verified] The verdict label and tone are banded off the average fit,
   # with "Success" at 4.0 and above.

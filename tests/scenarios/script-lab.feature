@@ -219,13 +219,23 @@ Feature: Script Lab
     Then the counter text is black
     And the counter remains legible against the badge background
 
-  # [unverified] A feedback element and an unlock-blocked-locks button exist in
-  # the markup, but the conditions that surface them have not been reproduced.
-  Scenario: Conflicting locks surface a feedback message
-    Given the user has locked tags that cannot appear together
-    When the user generates scripts
-    Then a feedback message explains the conflict
-    And a control is offered to remove the blocked locked picks
+  # [verified] 2026-09-22. Rewritten: the journey it described could not be
+  # reproduced, and the reason is that the app resolves the situation before
+  # generation is ever reached. A lock that becomes excluded is dropped from the
+  # selection on the spot, named in a message, so generation never sees a
+  # blocked lock. The trigger was never "locks that conflict with each other"
+  # either — the branch behind unlockBlockedLocksButton fires only when a locked
+  # element is excluded.
+  #
+  # Consequence worth a decision: showBlockedLockAction, removeBlockedLockedPicks
+  # and unlockBlockedLocksButton have no reachable path. They are kept for now
+  # rather than deleted, because an exclusion arriving while this context is not
+  # refreshed would still need them.
+  Scenario: Locking an element that becomes excluded drops it with a message
+    Given the user has locked an element in Script Lab
+    When that element becomes excluded
+    Then the locked pick is removed
+    And a message names the element that was removed
 
   # [unverified] Save downloads JSON and Load reads it back; the round trip has
   # not been exercised.
