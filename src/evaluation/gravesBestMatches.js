@@ -155,12 +155,15 @@
 
     function collectCandidates(selectedTags) {
         const selectedIds = new Set(selectedTags.map(tag => tag.id));
-        const excludedIds = getGeneratorExcludedIds();
+        // Graves evaluates ANY script, not just Starting-Tags-compliant ones.
+        // Use only manual exclusions, not profile-based ones.
+        const excludedIds = new Set(collectTagInputs('excluded').map(tag => tag.id));
         const starterIds = getAllAvailableTagIds('starting');
         const categoryFilter = document.getElementById('gravesBestCategoryFilter')?.value || '';
         const starterOnly = Boolean(document.getElementById('gravesStarterOnlyFilter')?.checked);
 
-        return Object.values(GAME_DATA.tags).filter(tag => {
+        const allTags = Object.values(GAME_DATA.tags);
+        const candidates = allTags.filter(tag => {
             if (!tag || !tag.id) return false;
             if (selectedIds.has(tag.id)) return false;
             if (excludedIds.has(tag.id)) return false;
@@ -168,6 +171,8 @@
             if (starterOnly && !starterIds.has(tag.id)) return false;
             return true;
         });
+
+        return candidates;
     }
 
     function rankCandidates(candidates, set, minimum) {
@@ -225,6 +230,12 @@
         const slot = weakestSlot(selectedTags);
         if (!slot) return null;
 
+        console.warn('🎬 Graves buildSwaps: Weakest slot identified', {
+            weakestTag: slot.tag.name,
+            weakestCategory: slot.tag.category,
+            scoreWithout: slot.averageWithout.toFixed(2)
+        });
+
         const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
 
         const candidates = collectCandidates(selectedTags).filter(candidate =>
@@ -243,11 +254,29 @@
 
     function buildPairwise(selectedTags) {
         const counts = categoryCardinality(selectedTags);
-        const candidates = collectCandidates(selectedTags).filter(candidate =>
+        const allCandidates = collectCandidates(selectedTags);
+        const candidates = allCandidates.filter(candidate =>
             !isCategoryFull(candidate.category, counts)
         );
         const minimum = minimumFit();
         const matches = [];
+
+        if (selectedTags.length > 0 && candidates.length === 0) {
+            console.warn('🎬 Graves buildPairwise: No candidates after category filter', {
+                selectedCount: selectedTags.length,
+                availableCandidates: allCandidates.length,
+                fullCategories: Object.entries(counts)
+                    .filter(([cat, cnt]) => {
+                        const max = cat === 'Genre' ? 2 : (MULTI_SELECT_CATEGORIES.includes(cat) ? Infinity : 1);
+                        return cnt >= max;
+                    })
+                    .map(([cat, cnt]) => cat),
+                candidatesByCategory: allCandidates.reduce((acc, c) => {
+                    acc[c.category] = (acc[c.category] || 0) + 1;
+                    return acc;
+                }, {})
+            });
+        }
 
         selectedTags.forEach(selectedTag => {
             candidates.forEach(candidate => {
@@ -475,6 +504,8 @@
         resultsContainer.classList.remove('hidden');
         panel.classList.remove('hidden');
         syncModeButtons();
+
+        console.warn('🎬 renderBestMatches: lastSelectedTags =', lastSelectedTags.map(t => `${t.name}(${t.category})`));
 
         if (lastSelectedTags.length === 0) {
             list.innerHTML = emptyMarkup('Select at least one element to find strong matches.');

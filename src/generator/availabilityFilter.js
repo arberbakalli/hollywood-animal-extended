@@ -72,11 +72,11 @@
     }
 
     function getGeneratorExcludedIds(manualExcludedTags = null) {
-        const excludedIds = manualExcludedTags
+        // The exclusion store is the single source of truth. When Starting Tags are applied,
+        // all non-starter items are added to manual exclusions. No profile-based filtering needed.
+        return manualExcludedTags
             ? new Set(manualExcludedTags.map(tag => tag.id))
             : getManuallyExcludedIds('excluded');
-        getProfileExcludedIds().forEach(id => excludedIds.add(id));
-        return excludedIds;
     }
 
     function getGeneratorExcludedTags(manualExcludedTags = null) {
