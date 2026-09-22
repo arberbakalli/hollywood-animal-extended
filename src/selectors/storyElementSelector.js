@@ -231,10 +231,21 @@
         return clearedIds;
     }
 
+    /**
+     * Every category the selectors can render, taken from the data rather than
+     * a second hand-kept list. This used to iterate MULTI_SELECT_CATEGORIES,
+     * which silently skipped Setting, Protagonist, Antagonist and Finale: a ban
+     * lifted on a Setting left the old list in place until some unrelated click
+     * happened to redraw that one category.
+     */
+    function allSelectorCategories() {
+        return [...new Set(Object.values(GAME_DATA.tags || {}).map(tag => tag.category))];
+    }
+
     /** Re-applies exclusion availability to every script-building dropdown. */
     function refreshScriptBuilderAvailability() {
         HACSelectorExclusions.scriptBuilderContexts().forEach(context => {
-            const cleared = MULTI_SELECT_CATEGORIES
+            const cleared = allSelectorCategories()
                 .flatMap(category => refreshCategoryDropdowns(category, context) || []);
 
             // Excluding a tag drops it from any script already using it. Saying so
@@ -544,6 +555,11 @@
 
         initializeSelectors(context);
         clearFeedbackMessage(`${context}FeedbackMessage`);
+
+        // Resetting the bans only rebuilds the excluded list's own dropdowns.
+        // Without this the script builders keep hiding tags that are no longer
+        // banned, until an unrelated interaction redraws one category.
+        if (context === 'excluded') refreshScriptBuilderAvailability();
 
         // If resetting Advertisers, move the calculator back to its initial position
         if (context === 'advertisers') {
