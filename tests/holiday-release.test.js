@@ -94,3 +94,67 @@ describe('Holiday release', () => {
         });
     });
 });
+
+/**
+ * The bonus percentages are now game-file sourced, not inferred.
+ *
+ * extractedFilesFromGameSourceOfTruth/Holidays.json is the game's own
+ * Configs/Holidays.json. Its audienceBonuses are keyed `AUDIENCE|type`, where
+ * type is 0 base, 1 artistic, 2 commercial, and all three carry the same value
+ * per demographic — so type 0 is the number. A demographic absent from a
+ * holiday scores zero.
+ *
+ * This pins data.js against that file. It does NOT settle how long the bonus
+ * lasts: Holidays.json has no week dimension at all, so "week 1 only" remains
+ * an assumption and stays marked unverified in tests/scenarios.
+ */
+describe('holiday bonuses match the extracted game config', () => {
+    const GAME_FILE = 'extractedFilesFromGameSourceOfTruth/Holidays.json';
+    const AUDIENCES = ['TM', 'TF', 'YM', 'YF', 'AM', 'AF'];
+
+    // data.js names them for the UI; the game file keys them by id.
+    const GAME_KEY_BY_NAME = {
+        "Valentine's Day": 'VALENTINE',
+        'Independence Day': 'INDEPENDENCE_DAY',
+        'Thanksgiving': 'THANKSGIVING',
+        'Halloween': 'HALLOWEEN',
+        'Christmas': 'CHRISTMAS',
+        'Memorial Day': 'MEMORIAL_DAY'
+    };
+
+    let gameHolidays;
+    let appHolidays;
+
+    beforeAll(async () => {
+        const { readFile } = await import('node:fs/promises');
+        gameHolidays = JSON.parse(await readFile(GAME_FILE, 'utf8'));
+        appHolidays = (await loadLegacyScript()).GAME_DATA.holidays;
+    });
+
+    const gameBonuses = (key) => {
+        const bonuses = gameHolidays[key].audienceBonuses;
+        return Object.fromEntries(AUDIENCES.map(audience => {
+            const raw = bonuses[`${audience}|0`];
+            return [audience, raw === undefined ? 0 : Math.round(parseFloat(raw) * 100)];
+        }));
+    };
+
+    test('every holiday in data.js exists in the game config', () => {
+        const missing = appHolidays
+            .map(holiday => holiday.name)
+            .filter(name => !gameHolidays[GAME_KEY_BY_NAME[name]]);
+
+        expect(missing).toEqual([]);
+    });
+
+    test.each(Object.keys(GAME_KEY_BY_NAME))('%s carries the game config bonuses', (name) => {
+        const app = appHolidays.find(holiday => holiday.name === name);
+        expect(app).toBeDefined();
+
+        const shipped = Object.fromEntries(
+            AUDIENCES.map(audience => [audience, app.bonuses[audience] || 0])
+        );
+
+        expect(shipped).toEqual(gameBonuses(GAME_KEY_BY_NAME[name]));
+    });
+});
