@@ -52,7 +52,7 @@ test.describe('Exclusion persistence', () => {
     await openHollywood(steps);
   });
 
-  test('TC09-000005 every stored exclusion is restored after a reload', async ({ steps, page }) => {
+  test('TC09-000015 every stored exclusion is restored after a reload', async ({ steps, page }) => {
     await applyStartingTags(steps, page);
 
     const beforeStored = await storedCount(page);
@@ -68,7 +68,7 @@ test.describe('Exclusion persistence', () => {
     expect(await renderedCount(page)).toBe(beforeStored);
   });
 
-  test('TC09-000006 a reload does not shrink the stored list', async ({ steps, page }) => {
+  test('TC09-000016 a reload does not shrink the stored list', async ({ steps, page }) => {
     await applyStartingTags(steps, page);
     const beforeStored = await storedCount(page);
 
@@ -84,7 +84,7 @@ test.describe('Exclusion persistence', () => {
     await expect.poll(() => storedCount(page)).toBe(beforeStored);
   });
 
-  test('TC09-000007 bans in single-select categories survive a reload', async ({ steps, page }) => {
+  test('TC09-000017 bans in single-select categories survive a reload', async ({ steps, page }) => {
     await applyStartingTags(steps, page);
 
     const countsByCategory = () =>

@@ -425,6 +425,26 @@
         renderBestMatches();
     }
 
+    // At the element budget no fit threshold and no category will ever yield a
+    // row, so the generic advice sends the user round in circles. Name the
+    // blocker that actually applies.
+    function additionsEmptyReason(selectedTags) {
+        const maxPoolSize = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
+            ? HACScriptGenerator.getMaxElementPoolSize()
+            : 10;
+        const poolCount = selectedTags.filter(tag =>
+            tag.category !== 'Genre' && tag.category !== 'Setting'
+        ).length;
+
+        if (poolCount >= maxPoolSize) {
+            return `This script already uses all ${maxPoolSize} story elements it is allowed. `
+                + 'Raise Max Element Pool in the header to make room, or use Swap Suggestions '
+                + 'to trade an element instead. Genre and Setting do not count toward the budget.';
+        }
+
+        return 'No additions available. Try a different script or adjust categories.';
+    }
+
     function renderAdditions(list, selectedTags) {
         let rows = buildAdditions(selectedTags);
 
@@ -432,7 +452,8 @@
         if (rows.length === 0) {
             const fitSelect = document.getElementById('gravesBestScoreFilter');
             const fitValues = ['0', '3.0', '3.5', '4.0', '4.5', '5.0'];
-            const currentIndex = fitValues.indexOf(fitSelect?.value || '4.0');
+            const originalFit = fitSelect?.value || '4.0';
+            const currentIndex = fitValues.indexOf(originalFit);
 
             if (currentIndex > 0) {
                 // Try lower fit thresholds
@@ -441,11 +462,16 @@
                     rows = buildAdditions(selectedTags);
                     if (rows.length > 0) break;
                 }
+
+                // Widening found nothing, so put the control back. Leaving it
+                // parked on a threshold the user never picked makes the next
+                // search silently run under the wrong filter.
+                if (rows.length === 0 && fitSelect) fitSelect.value = originalFit;
             }
         }
 
         if (rows.length === 0) {
-            list.innerHTML = emptyMarkup('No additions available. Try a different script or adjust categories.');
+            list.innerHTML = emptyMarkup(additionsEmptyReason(selectedTags));
             return;
         }
         const markup = groupedMarkup(rows, visibleRowCount);
