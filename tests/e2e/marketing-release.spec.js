@@ -358,6 +358,38 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await steps.on('campaignDuration', 'MarketingRelease').verifyTextContains('Total Duration');
   });
 
+  test('TC04-000027 target audience legend distinguishes interest levels', async ({ steps, page }) => {
+    await buildMarketingScript(steps);
+    await steps.on('analyzeScriptButton', 'MarketingRelease').click();
+
+    await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
+    const legend = page.locator('#target-audience-panel .audience-legend');
+    await expect(legend).toBeVisible();
+    await expect(legend).toContainText('High Interest');
+    await expect(legend).toContainText('Moderate Interest');
+    await expect(page.locator('#targetAudienceDisplay .audience-pill').first()).toBeVisible();
+  });
+
+  test('TC04-000028 studio policy status names active gates', async ({ steps, page }) => {
+    const status = page.locator('#studio-policy-status');
+
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
+    await steps.on('behemothToggle', 'MarketingRelease').check();
+    await expect(status).toBeVisible();
+    await expect(status).toContainText('Behemoth: +25% Boost Active (Slower decay at commercial 9+)');
+
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 10);
+    await expect(status).toContainText('Behemoth: +25% Boost + Slower Decay Active');
+
+    await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 8);
+    await steps.on('boutiqueToggle', 'MarketingRelease').check();
+    await expect(status).toContainText('Boutique: Slower Decay at artistic 9+');
+
+    await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 10);
+    await expect(status).toContainText('Boutique: Slower Decay Active');
+    await expect(status).toContainText('Behemoth: +25% Boost + Slower Decay Active');
+  });
+
   // The holiday rows only render once a script has been analysed. These drive the
   // real control; the suite previously asserted only that the holiday panel was
   // non-empty, so an unwired row went unnoticed. Verified by mutation: removing
@@ -382,19 +414,19 @@ test.describe('Marketing and Release — distribution calculator', () => {
     const bonusPercent = Number(boostLabel.match(/([\d.]+)\s*%/)[1]);
     expect(bonusPercent).toBeGreaterThan(0);
 
-    const weekTwoDemand = async () => Number((await steps.getAll('weekCards', 'MarketingRelease', {
+    const weeklyDemands = async () => (await steps.getAll('weekCards', 'MarketingRelease', {
       extractAttribute: 'data-demand',
-    }))[1]);
+    })).map(Number);
 
     const week1Before = await attr(steps, 'weekOneCard', 'data-demand');
-    const week2Before = await weekTwoDemand();
+    const baseWeeks = await weeklyDemands();
 
     await steps.on('holidayTopPick', 'MarketingRelease').click();
 
     await expect.poll(async () => attr(steps, 'weekOneCard', 'data-demand'))
       .toBe(Math.ceil(week1Before * (1 + bonusPercent / 100)));
-    // Holiday bonus affects week 1 only; week 2 is unchanged.
-    expect(await weekTwoDemand()).toBe(week2Before);
+    // Holiday bonus affects opening week only; every later week is unchanged.
+    expect((await weeklyDemands()).slice(1)).toEqual(baseWeeks.slice(1));
   });
 
   test('TC04-000020 selecting the active holiday again restores the base curve', async ({ steps }) => {
@@ -557,6 +589,38 @@ test.describe('Marketing and Release — Build for Target', () => {
     await steps.on('resultsList', 'BuildForTarget').verifyTextContains(advertiserName);
   });
 
+  test('TC05-000016 an advertiser selection overrides a selected audience', async ({ steps, page }) => {
+    const fixture = await page.evaluate(() => {
+      const agencies = GAME_DATA.adAgents;
+      const demographicIds = Object.keys(GAME_DATA.demographics);
+      for (const agency of agencies) {
+        const incompatibleAudience = demographicIds.find(id => !agency.targets.includes(id));
+        if (incompatibleAudience) {
+          return {
+            advertiserId: agency.id,
+            advertiserName: agency.name,
+            audienceId: incompatibleAudience
+          };
+        }
+      }
+      return null;
+    });
+    expect(fixture).not.toBeNull();
+
+    await page.locator(`.targeted-audience-checkbox[value="${fixture.audienceId}"]`).check();
+    await page.locator(`.targeted-advertiser-checkbox[value="${fixture.advertiserId}"]`).check();
+    await steps.on('findCombinationsButton', 'BuildForTarget').click();
+
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+    await steps.on('resultsList', 'BuildForTarget').verifyTextContains(fixture.advertiserName);
+
+    const resultText = await page.locator('#targetedResultsList').innerText();
+    const otherAgencyNames = await page.evaluate(advertiserId =>
+      GAME_DATA.adAgents.filter(agency => agency.id !== advertiserId).map(agency => agency.name),
+    fixture.advertiserId);
+    expect(otherAgencyNames.some(name => resultText.includes(name))).toBe(false);
+  });
+
   test('TC05-000007 switching back to Analyze Script shows the marketing panel', async ({ steps }) => {
     await steps.on('analyzeScriptModeButton', 'BuildForTarget').click();
 
@@ -578,6 +642,57 @@ test.describe('Marketing and Release — Build for Target', () => {
     await steps.on('resultsPanel', 'BuildForTarget').verifyState('hidden');
     // The checkbox stays visible either way; what reset must do is uncheck it.
     await steps.on('checkedAudienceCheckboxes', 'BuildForTarget').verifyCount({ exactly: 0 });
+  });
+
+  test('TC05-000017 an empty state is shown when exclusions leave too few story elements', async ({ steps, page }) => {
+    const exclusions = await page.evaluate(() => {
+      const keep = new Set([
+        'PROTAGONIST_COP',
+        'ANTAGONIST_BANDIT',
+        'FINALE_ANTAGONIST_GETS_KILLED'
+      ]);
+      return Object.values(GAME_DATA.tags)
+        .filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting' && !keep.has(tag.id))
+        .map(tag => ({ id: tag.id, category: tag.category }));
+    });
+
+    await page.evaluate(items =>
+      localStorage.setItem('hac.excludedTags.v1', JSON.stringify(items)),
+    exclusions);
+    await page.reload();
+    await page.waitForFunction(() => window.__hollywoodReady === true);
+
+    await steps.on('marketTab', 'Navigation').click();
+    await steps.on('buildForTargetModeButton', 'MarketingRelease').click();
+    await steps.on('allTagSelects', 'BuildForTarget').waitForState('visible');
+    await steps.on('findCombinationsButton', 'BuildForTarget').click();
+
+    await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+    await expect(page.locator('#targetedResultsList .empty-state')).toContainText('No combinations found');
+  });
+
+  // TC05-000016 covers the override itself. This covers whether the user can
+  // see it coming: the label says "Or Select Advertiser", but both lists stayed
+  // live, so an audience could be picked and then silently discarded. Measured
+  // against a real 158-ban profile - selecting both returned results identical
+  // to the advertiser alone, with nothing on screen saying so.
+  test('TC05-000018 the audience list says it is ignored while an advertiser is selected', async ({ steps, page }) => {
+    const audience = page.locator('.targeted-audience-checkbox').first();
+    const advertiser = page.locator('.targeted-advertiser-checkbox').first();
+
+    await steps.on('audienceOverrideNote', 'BuildForTarget').verifyState('hidden');
+    await expect(audience).toBeEnabled();
+
+    await advertiser.check();
+
+    await steps.on('audienceOverrideNote', 'BuildForTarget').verifyState('visible');
+    await expect(audience).toBeDisabled();
+
+    // Reset clears the advertiser, so the audiences have to come back.
+    await steps.on('resetButton', 'BuildForTarget').click();
+
+    await steps.on('audienceOverrideNote', 'BuildForTarget').verifyState('hidden');
+    await expect(audience).toBeEnabled();
   });
 
   // ---------------------------------------------------------------------
