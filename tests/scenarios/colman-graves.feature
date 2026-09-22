@@ -213,9 +213,11 @@ Feature: Script Evaluation — Colman Graves
     Then a Show more control states how many suggestions remain
     And the control disappears once every suggestion is listed
 
-  # [automated] Swap Suggestions evaluates all selected elements, not just the
+  # [verified] Swap Suggestions evaluates all selected elements, not just the
   # weakest, and shows viable swap candidates for each element slot that can
-  # be improved.
+  # be improved. TC03-000027 still encodes the superseded weakest-only rule and
+  # is RED pending owner review; do not treat this as automated until it is
+  # rewritten or replaced.
   Scenario: Swap Suggestions shows swap candidates for all selected elements
     Given the user has evaluated a script with multiple Supporting Characters
     When the user generates Swap Suggestions
@@ -273,8 +275,9 @@ Feature: Script Evaluation — Colman Graves
     When the user evaluates the script
     Then the verdict reads "Success"
 
-  # [automated] Pair Analysis panel shows all element pair scores grouped by
+  # [verified] Pair Analysis panel shows all element pair scores grouped by
   # success band: successful (≥4.0), common (2.0-4.0), unsuccessful (<2.0).
+  # Band thresholds are pinned by tests/graves.test.js; no e2e spec yet.
   Scenario: Pair Analysis shows element combinations grouped by success band
     Given the user has evaluated a script
     Then the Pair Analysis panel is visible
@@ -282,6 +285,29 @@ Feature: Script Evaluation — Colman Graves
     And common pairs are listed with an amber band
     And unsuccessful pairs are listed with a red band
     And pairs within each band are ranked from highest to lowest score
+
+  # [verified] Band titles show pair counts and are clickable to collapse/expand,
+  # reducing visual bloat in Swap Suggestions while keeping all data accessible.
+  Scenario: Pair Analysis bands are collapsible with pair counts
+    Given the user has evaluated a script
+    When the user views the Pair Analysis panel
+    Then each band title shows the number of pairs in that band
+    And successful band is expanded
+    And common band is expanded
+    And unsuccessful band is expanded
+    When the user clicks the successful band title
+    Then the successful pair rows collapse
+    And the expand/collapse indicator shows the collapsed state
+    When the user clicks it again
+    Then the successful pair rows expand again
+
+  # [verified] Starting Tags filter was removed; all available tags (except
+  # excluded ones) are shown in suggestions. Single source of truth is Script Lab.
+  Scenario: All available tags are shown in Best Matches suggestions
+    Given the user has evaluated a script
+    When the user generates best matches
+    Then no "Starting tags only" checkbox is visible
+    And all non-excluded tags from their categories are eligible for suggestion
 
   # [automated] Search fields must not disappear while the user is typing or
   # after a search has no matches.

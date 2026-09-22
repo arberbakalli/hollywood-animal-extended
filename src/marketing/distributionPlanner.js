@@ -49,58 +49,51 @@
         updateStudioPolicyStatus();
     }
 
+    // Each policy owns two independent gates, so the status line has to say which
+    // half is live: Behemoth's boost rides on the budget the toggle stands for,
+    // its slower decay on commercial > 9. Boutique only ever carries slower decay,
+    // gated on artistic > 9. Pure so the wording can be pinned without a DOM.
+    function describeStudioPolicies({ behemoth, boutique, commercialScore, artisticScore } = {}) {
+        const parts = [];
+
+        if (behemoth) {
+            parts.push(commercialScore > BEHEMOTH_DECAY_MIN_SCORE
+                ? 'Behemoth: +25% Boost + Slower Decay Active'
+                : 'Behemoth: +25% Boost Active (Slower decay at commercial 9+)');
+        }
+
+        if (boutique) {
+            parts.push(artisticScore > BOUTIQUE_DECAY_MIN_SCORE
+                ? 'Boutique: Slower Decay Active'
+                : 'Boutique: Slower Decay at artistic 9+');
+        }
+
+        return parts.join(' | ');
+    }
+
     function updateStudioPolicyStatus() {
-        const comInput = document.getElementById('comScoreInput');
-        const artInput = document.getElementById('artScoreInput');
-        const behemothToggle = document.getElementById('behemothToggle');
-        const boutiqueToggle = document.getElementById('boutiqueToggle');
         const statusEl = document.getElementById('studio-policy-status');
         const artScoreText = document.getElementById('dist-artistic-score-text');
         const artScoreDisplay = document.getElementById('dist-art-score-display');
 
         if (!statusEl) return;
 
-        const comScore = parseFloat(comInput?.value) || 0;
-        const artScore = parseFloat(artInput?.value) || 0;
-        const behemothActive = behemothToggle?.checked;
-        const boutiqueActive = boutiqueToggle?.checked;
+        const commercialScore = parseFloat(document.getElementById('comScoreInput')?.value) || 0;
+        const artisticScore = getArtisticScore();
+        const boutique = isBoutiqueActive();
 
-        let statusHtml = '';
+        const status = describeStudioPolicies({
+            behemoth: isBehemothActive(),
+            boutique,
+            commercialScore,
+            artisticScore
+        });
 
-        if (behemothActive) {
-            const boostActive = true;
-            const decayActive = comScore > 9;
-            if (decayActive) {
-                statusHtml += 'Behemoth: +25% Boost + Slower Decay Active';
-            } else {
-                statusHtml += 'Behemoth: +25% Boost Active (Slower decay at commercial 9+)';
-            }
-        }
+        if (artScoreDisplay) artScoreDisplay.innerText = artisticScore.toFixed(1);
+        artScoreText?.classList.toggle('hidden', !boutique);
 
-        if (boutiqueActive) {
-            const decayActive = artScore > 9;
-            if (statusHtml) statusHtml += ' | ';
-            if (decayActive) {
-                statusHtml += 'Boutique: Slower Decay Active';
-            } else {
-                statusHtml += 'Boutique: Slower Decay at artistic 9+';
-            }
-            if (artScoreText && artScoreDisplay) {
-                artScoreDisplay.innerText = artScore.toFixed(1);
-                artScoreText.classList.remove('hidden');
-            }
-        } else {
-            if (artScoreText) {
-                artScoreText.classList.add('hidden');
-            }
-        }
-
-        if (statusHtml) {
-            statusEl.innerHTML = statusHtml;
-            statusEl.classList.remove('hidden');
-        } else {
-            statusEl.classList.add('hidden');
-        }
+        statusEl.innerHTML = status;
+        statusEl.classList.toggle('hidden', !status);
     }
 
     // The publish window. The game commits a film for four weeks with an optional
@@ -296,6 +289,8 @@
         getHolidayRelease,
         getHolidayBonusPercent,
         distributionConfig,
+        describeStudioPolicies,
+        updateStudioPolicyStatus,
         initializeDistributionToggles,
         getDistributionMultiplier,
         isBehemothActive,
