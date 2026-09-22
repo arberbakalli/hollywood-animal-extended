@@ -2067,6 +2067,23 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     color: var(--accent);
 }
 
+.analyze-btn.transfer-btn {
+    width: auto;
+    padding: 10px 16px;
+    background-color: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: none;
+    border: 1px solid var(--border);
+}
+
+.analyze-btn.transfer-btn:hover {
+    background-color: transparent;
+    color: var(--text-main);
+    border-color: var(--text-main);
+}
+
 .best-matches-list {
     display: flex;
     flex-direction: column;

@@ -254,10 +254,6 @@
             document.getElementById('targetedModeTargetedButton')?.click();
         });
 
-        document.getElementById('generateSynergyButton')?.addEventListener('click', () => {
-            generateHighestSynergy('overall');
-        });
-
         function applyStartingTagsExclusions() {
             const buildExcludedList = () => {
                 resetSelectors('excluded');
