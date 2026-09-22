@@ -82,9 +82,9 @@
         const holidayBonusPercent = options.holidayBonusPercent || 0;
 
         const decay = resolveDecayRate(commercialScore, artisticScore, behemoth, boutique);
-        // Both week-one effects multiply the same slot: Behemoth's flat 25% and
-        // the holiday's audience-dependent turnout bonus.
-        const weekOneBoost = (behemoth ? BEHEMOTH_WEEK_ONE_BOOST : 1) * (1 + holidayBonusPercent / 100);
+        // Behemoth applies 25% boost to all weeks. Holiday bonus applies to week 1 only.
+        const behemothMultiplier = behemoth ? BEHEMOTH_WEEK_ONE_BOOST : 1;
+        const holidayBoost = 1 + holidayBonusPercent / 100;
 
         const demand = [
             commercialScore * config.weekOneMultiplier * config.base,
@@ -96,8 +96,9 @@
 
         return demand.map((value, index) => {
             const inOpeningWindow = index < config.openingWindow;
-            let boosted = inOpeningWindow ? value * openingMultiplier : value;
-            if (index === 0) boosted *= weekOneBoost;
+            let boosted = value * behemothMultiplier;
+            boosted = inOpeningWindow ? boosted * openingMultiplier : boosted;
+            if (index === 0) boosted *= holidayBoost;
             return inOpeningWindow ? Math.ceil(boosted) : Math.floor(boosted);
         });
     }

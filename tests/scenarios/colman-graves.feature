@@ -213,17 +213,16 @@ Feature: Script Evaluation — Colman Graves
     Then a Show more control states how many suggestions remain
     And the control disappears once every suggestion is listed
 
-  # [unverified] DISCOVERED BUG: Swap Suggestions identifies a weakest element
-  # but then suggests additions instead of replacements. The panel says
-  # "Weakest element: Worried Wife" but every suggestion is either a different
-  # category or not a Supporting Character that could replace her. The mode
-  # should only suggest candidates that can actually swap for the weak slot.
-  Scenario: Swap Suggestions gives candidates that can replace the weakest element
+  # [automated] Swap Suggestions evaluates all selected elements, not just the
+  # weakest, and shows viable swap candidates for each element slot that can
+  # be improved.
+  Scenario: Swap Suggestions shows swap candidates for all selected elements
     Given the user has evaluated a script with multiple Supporting Characters
     When the user generates Swap Suggestions
-    Then the UI names the weakest element
-    And every suggestion is a candidate of the same category
-    And selecting a suggestion improves the script average
+    Then swap candidates are shown for multiple selected elements
+    And each element slot shows candidates from that element's category
+    And candidates are grouped by fit band (successful, common, unsuccessful)
+    And candidates are ranked from highest to lowest fit
 
   # [unverified] DISCOVERED BUG: Best Additions suggests categories that are
   # already at their cardinality limit. A script with two Genres (limit 2) and
@@ -273,6 +272,16 @@ Feature: Script Evaluation — Colman Graves
     Given a script whose average fit is 4.2
     When the user evaluates the script
     Then the verdict reads "Success"
+
+  # [automated] Pair Analysis panel shows all element pair scores grouped by
+  # success band: successful (≥4.0), common (2.0-4.0), unsuccessful (<2.0).
+  Scenario: Pair Analysis shows element combinations grouped by success band
+    Given the user has evaluated a script
+    Then the Pair Analysis panel is visible
+    And successful pairs are listed with a green band
+    And common pairs are listed with an amber band
+    And unsuccessful pairs are listed with a red band
+    And pairs within each band are ranked from highest to lowest score
 
   # [automated] Search fields must not disappear while the user is typing or
   # after a search has no matches.

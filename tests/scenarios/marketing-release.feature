@@ -77,20 +77,20 @@ Feature: Marketing and Release
       | Striking Image   |
       | Artistic Ability |
 
-  # [automated] Behemoth has two separate effects: a week-one boost whenever it
-  # is active, plus slower decay only above commercial score 9.
-  Scenario: Behemoth applies its own distribution policy
+  # [automated] Behemoth has two separate effects: a +25% boost to all weeks 1-8
+  # whenever it is active, plus slower decay only above commercial score 9.
+  Scenario: Behemoth applies 25% boost to all weeks
     When the user enables the Behemoth studio policy
-    Then week 1 demand increases
+    Then all weeks 1-8 demand increases by 25 percent
     When the user raises the commercial score above 9
     Then week 3 keeps more attendance than the normal grid
 
-  # [automated] The control should explain that the week-one boost represents
+  # [automated] The control should explain that the Behemoth boost represents
   # the Behemoth budget policy rather than a score-only rule.
   Scenario: Behemoth control explains its budget requirement
     Then the Behemoth policy toggle is visible
     And its label mentions the budget over $1M requirement
-    And its tooltip explains the 25 percent week 1 boost
+    And its tooltip explains the 25 percent boost to all weeks
 
   # [automated] Boutique is the artistic counterpart: it never changes week 1,
   # and its slower decay is gated by artistic score above 9.
@@ -101,11 +101,11 @@ Feature: Marketing and Release
     And week 3 keeps more attendance than the normal grid
 
   # [automated] Both studio policies can apply to the same film; they stack on
-  # the decay rate while leaving week 2 seeded directly from commercial score.
-  Scenario: Behemoth and Boutique decay policies stack
+  # the decay rate while all weeks receive their respective boosts.
+  Scenario: Behemoth and Boutique policies stack
     When the user sets both movie scores to 10
     And the user enables the Behemoth and Boutique studio policies
-    Then week 2 remains seeded from the commercial score
+    Then all weeks 1-8 receive the Behemoth 25% boost
     And week 3 uses the stacked studio decay rate
 
   # [automated] Analyze control and results markup exist.
@@ -186,3 +186,26 @@ Feature: Marketing and Release
   Scenario: The holiday bonus affects only the opening week
     Given the user has selected a holiday release window
     Then weeks 3 through 8 match their unboosted figures
+
+  # [automated] Behemoth boost applies regardless of commercial score. The slower
+  # decay rule is independent and only applies when score > 9.
+  Scenario: Behemoth boost applies at all score levels
+    When the user sets the commercial score to 5.0
+    And the user enables the Behemoth studio policy
+    Then all weeks 1-8 show 25% higher demand than without Behemoth
+
+  # [automated] Week 2 receives the full Behemoth boost since it is based on the
+  # commercial score and not derived from decay.
+  Scenario: Behemoth boost applies to week 2
+    When the user sets the commercial score to 8.0
+    And the user enables the Behemoth studio policy
+    Then week 2 demand increases by 25 percent
+
+  # [automated] The slower decay rule has a separate gate: commercial score > 9.
+  # Below that threshold, Behemoth applies only the boost, not the decay modifier.
+  Scenario: Behemoth slower decay requires commercial score above 9
+    When the user sets the commercial score to 9.0
+    And the user enables the Behemoth studio policy
+    Then week 3 shows the boost but uses the normal decay rate
+    When the user raises the commercial score to 9.1
+    Then week 3 shows the boost and uses the slower decay rate
