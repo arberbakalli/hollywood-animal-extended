@@ -4,11 +4,12 @@
 
 Comprehensive test strategy for Hollywood Animal calculator: Jest for logic/edge cases, Playwright for workflows. All tests are regression gates—no code merges without green suite.
 
-Current verified baseline as of 2026-09-18:
+Current verified baseline as of 2026-09-22:
 
-- Jest/unit: 244 tests, 19 suites.
-- Playwright/E2E: 117 tests.
+- Jest/unit and integration-style VM tests: 262 tests, 21 suites.
+- Playwright/E2E: 149 declared tests across 14 specs.
 - Scenario files: `tests/scenarios/*.feature` remain the BDD behavior map.
+- Push quality gate: `docs/TEST_QUALITY_GATE.md`.
 
 ## Phase 1: Distribution & Genre Mix ✓ Complete
 
@@ -147,7 +148,7 @@ Current verified baseline as of 2026-09-18:
 
 | Area | Jest | Playwright | Total |
 |------|------|------------|-------|
-| Current green baseline | 244 | 117 | 361 |
+| Current green baseline | 262 | 149 declared | 411 |
 
 The phase notes above are historical planning notes. Use the current green
 baseline and `.arber/CODEX_QA_TEST_COVERAGE_AUDIT.md` for present coverage.

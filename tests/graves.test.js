@@ -1,5 +1,6 @@
-import { describe, test, expect, beforeAll } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterEach } from '@jest/globals';
 import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { scriptByNames, tagByName } from './helpers/gameTestBuilders.js';
 
 /**
  * Graves Evaluation feature tests.
@@ -14,7 +15,9 @@ beforeAll(async () => {
     await h.ensureCompatibilityLoaded();
 });
 
-const tag = (id, category) => ({ id, category });
+afterEach(() => {
+    h.resetBrowserState();
+});
 
 function buildGravesBestMatchesDom(selectorsExpression) {
     return `(() => {
@@ -98,96 +101,57 @@ function buildGravesBestMatchesDom(selectorsExpression) {
 }
 
 describe('Graves Evaluation', () => {
-    test('validates mandatory Genre + Setting', () => {
-        const selectedTags = [tag('ACTION', 'Genre')];
-        const genre = selectedTags.find(t => t.category === 'Genre');
-        const setting = selectedTags.find(t => t.category === 'Setting');
+    test('Evaluate Script rejects missing required script categories', async () => {
+        const result = await h.evaluate(`(async () => {
+            const feedback = ${buildGravesBestMatchesDom(`[
+                { value: 'ACTION', dataset: { category: 'Genre' } }
+            ]`)};
 
-        expect(genre).toBeDefined();
-        expect(setting).toBeUndefined();
+            await evaluateColmanGravesScript();
+            return feedback.textContent;
+        })()`);
+
+        expect(result).toContain('A script needs at least one Setting, Protagonist.');
     });
 
-    test('enforces 5-10 element selection range', () => {
-        const tooFew = Array(4).fill(null).map(() => tag('TEST', 'Genre'));
-        const valid = Array(7).fill(null).map(() => tag('TEST', 'Genre'));
-        const tooMany = Array(11).fill(null).map(() => tag('TEST', 'Genre'));
+    test('Evaluate Script rejects fewer than 5 selected tags after required categories are present', async () => {
+        const result = await h.evaluate(`(async () => {
+            const feedback = ${buildGravesBestMatchesDom(`[
+                { value: 'ACTION', dataset: { category: 'Genre' } },
+                { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
+                { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } }
+            ]`)};
 
-        expect(tooFew.length).toBeLessThan(5);
-        expect(valid.length >= 5 && valid.length <= 10).toBe(true);
-        expect(tooMany.length).toBeGreaterThan(10);
+            await evaluateColmanGravesScript();
+            return feedback.textContent;
+        })()`);
+
+        expect(result).toContain('at least 5 story elements');
+        expect(result).toContain('You selected 3');
     });
 
-    test('enforces max 1 Antagonist, 1 Protagonist, 1 Finale', () => {
-        const validSingle = [
-            tag('ACTION', 'Genre'),
-            tag('MODERN_DAY', 'Setting'),
-            tag('ANTAGONIST_ALIEN', 'Antagonist'),
-            tag('PROTAGONIST_COP', 'Protagonist'),
-            tag('FINALE_HAPPY', 'Finale'),
+    test('Graves pair bands classify real compatibility pairs by production thresholds', () => {
+        const tags = [
+            tagByName(h.GAME_DATA, 'Action'),
+            tagByName(h.GAME_DATA, 'Modern American City'),
+            tagByName(h.GAME_DATA, 'Cop'),
+            tagByName(h.GAME_DATA, 'Bandit')
         ];
 
-        const antagonists = validSingle.filter(t => t.category === 'Antagonist');
-        const protagonists = validSingle.filter(t => t.category === 'Protagonist');
-        const finales = validSingle.filter(t => t.category === 'Finale');
-
-        expect(antagonists.length).toBeLessThanOrEqual(1);
-        expect(protagonists.length).toBeLessThanOrEqual(1);
-        expect(finales.length).toBeLessThanOrEqual(1);
-    });
-
-    test('allows multiple Supporting Character and Theme & Event', () => {
-        const selections = [
-            tag('ACTION', 'Genre'),
-            tag('MODERN_DAY', 'Setting'),
-            tag('SUPPORT_MENTOR', 'Supporting Character'),
-            tag('SUPPORT_SIDEKICK', 'Supporting Character'),
-            tag('THEME_LOVE', 'Theme & Event'),
-            tag('THEME_GREED', 'Theme & Event'),
+        const pairsByBand = h.call('HACGravesAnalysis.findGravesPairsByBand', tags);
+        const allPairs = [
+            ...pairsByBand.successful,
+            ...pairsByBand.common,
+            ...pairsByBand.unsuccessful
         ];
 
-        const supporting = selections.filter(t => t.category === 'Supporting Character');
-        const themes = selections.filter(t => t.category === 'Theme & Event');
-
-        expect(supporting.length).toBeGreaterThan(1);
-        expect(themes.length).toBeGreaterThan(1);
-    });
-
-    test('generates 2-tag combinations from selections', () => {
-        const selected = [
-            tag('ACTION', 'Genre'),
-            tag('MODERN_DAY', 'Setting'),
-            tag('SUPPORT_MENTOR', 'Supporting Character'),
-        ];
-
-        const combinations = [];
-        for (let i = 0; i < selected.length; i++) {
-            for (let j = i + 1; j < selected.length; j++) {
-                combinations.push([selected[i].id, selected[j].id]);
-            }
-        }
-
-        // Should have C(3,2) = 3 combinations
-        expect(combinations.length).toBe(3);
-        expect(combinations).toContainEqual(['ACTION', 'MODERN_DAY']);
-        expect(combinations).toContainEqual(['ACTION', 'SUPPORT_MENTOR']);
-        expect(combinations).toContainEqual(['MODERN_DAY', 'SUPPORT_MENTOR']);
-    });
-
-    test('groups combinations by compatibility score', () => {
-        const combinations = [
-            { score: 4.5, pair: 'A-B' },
-            { score: 3.7, pair: 'C-D' },
-            { score: 2.1, pair: 'E-F' },
-            { score: 4.2, pair: 'G-H' },
-        ];
-
-        const successful = combinations.filter(c => c.score >= 4.0);
-        const common = combinations.filter(c => c.score >= 3.5 && c.score < 4.0);
-        const unsuccessful = combinations.filter(c => c.score < 3.5);
-
-        expect(successful.length).toBe(2);
-        expect(common.length).toBe(1);
-        expect(unsuccessful.length).toBe(1);
+        expect(allPairs).toHaveLength(6);
+        pairsByBand.successful.forEach(pair => expect(pair.rawScore).toBeGreaterThanOrEqual(4));
+        pairsByBand.common.forEach(pair => {
+            expect(pair.rawScore).toBeGreaterThanOrEqual(2);
+            expect(pair.rawScore).toBeLessThan(4);
+        });
+        pairsByBand.unsuccessful.forEach(pair => expect(pair.rawScore).toBeLessThan(2));
     });
 
     test('loads real game data for compatibility lookup', () => {
@@ -211,19 +175,36 @@ describe('Graves Evaluation', () => {
         expect(typeof scores).toBe('object');
     });
 
-    test('handles missing compatibility scores gracefully', () => {
-        const gd = h.GAME_DATA;
-        const fakeId1 = 'FAKE_TAG_1';
-        const fakeId2 = 'FAKE_TAG_2';
-
-        let score = 3.0; // Default
-        if (gd.compatibility[fakeId1]?.[fakeId2]) {
-            score = parseFloat(gd.compatibility[fakeId1][fakeId2]);
-        } else if (gd.compatibility[fakeId2]?.[fakeId1]) {
-            score = parseFloat(gd.compatibility[fakeId2][fakeId1]);
-        }
+    test('missing compatibility scores default through the production lookup', () => {
+        const score = h.call(
+            'HACCompatibilityEngine.getRawCompatibilityScore',
+            { id: 'FAKE_TAG_1' },
+            { id: 'FAKE_TAG_2' },
+            h.GAME_DATA
+        );
 
         expect(score).toBe(3.0);
+    });
+
+    test('real Graves script evaluation produces non-zero movie score breakdown', () => {
+        const tags = scriptByNames(h.GAME_DATA, [
+            'Action',
+            'Modern American City',
+            'Cop',
+            'Bandit',
+            'Shootout',
+            'Antagonist Gets Killed'
+        ]);
+
+        const evaluation = h.call('calculateScriptEvaluation', tags);
+
+        expect(evaluation.matrix.rawAverage).toBeCloseTo(4.2);
+        expect(evaluation.matrix.totalScore).toBeGreaterThan(0);
+        expect(evaluation.bonuses.com).toBeGreaterThan(0);
+        expect(evaluation.movieScores.scoringCount).toBe(4);
+        expect(evaluation.movieScores.tagCap).toBe(6);
+        expect(evaluation.movieScores.commercial).toBeGreaterThan(0);
+        expect(evaluation.movieScores.artistic).toBeGreaterThan(0);
     });
 
     test('Generate Best Matches works from one seed element', async () => {
@@ -308,18 +289,4 @@ describe('Graves Evaluation', () => {
         expect(result).toContain('You selected 11');
     });
 
-    test('category colors are defined', () => {
-        const categoryColors = {
-            'Genre': '#92400e',
-            'Theme & Event': '#991b1b',
-            'Supporting Character': '#3b82f6',
-            'Protagonist': '#1e40af',
-            'Antagonist': '#166534',
-        };
-
-        Object.entries(categoryColors).forEach(([category, color]) => {
-            expect(category).toMatch(/^[A-Z]/);
-            expect(color).toMatch(/^#[0-9a-f]{6}$/i);
-        });
-    });
 });

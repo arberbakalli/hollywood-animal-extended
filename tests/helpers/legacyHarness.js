@@ -40,6 +40,14 @@ const SCORING_MODULES = [
     'src/evaluation/movieScoreEstimator.js',
 ];
 
+function createDocumentStub() {
+    return {
+        getElementById: () => null,
+        querySelector: () => null,
+        querySelectorAll: () => [],
+    };
+}
+
 /**
  * Loads data.js and script.js into a VM context so their functions can be
  * characterised by tests.
@@ -60,11 +68,7 @@ export async function loadLegacyScript() {
     const sandbox = {
         console,
         window: { addEventListener() {}, dispatchEvent() {} },
-        document: {
-            getElementById: () => null,
-            querySelector: () => null,
-            querySelectorAll: () => [],
-        },
+        document: createDocumentStub(),
         CustomEvent: class CustomEvent {},
         setTimeout,
         clearTimeout,
@@ -103,6 +107,12 @@ export async function loadLegacyScript() {
         /** Ensure deferred data is loaded. */
         ensureCompatibilityLoaded: () => runInContext('ensureCompatibilityLoaded()', ctx),
         ensureGenrePairsLoaded: () => runInContext('ensureGenrePairsLoaded()', ctx),
+        /** Restore browser-like globals after tests that replace document or app state. */
+        resetBrowserState: () => {
+            sandbox.document = createDocumentStub();
+            sandbox.window = { addEventListener() {}, dispatchEvent() {} };
+            runInContext(`if (typeof currentGenProfile !== 'undefined') currentGenProfile = 'custom';`, ctx);
+        },
         get GAME_DATA() {
             return runInContext('GAME_DATA', ctx);
         },

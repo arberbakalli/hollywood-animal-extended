@@ -1,100 +1,101 @@
+import { describe, test, expect, beforeAll } from '@jest/globals';
+import { loadLegacyScript } from './helpers/legacyHarness.js';
+
 describe('Genre mix percentage validation', () => {
-  // Genre mix must:
-  // - Accept 5% increments (5, 10, 15, ..., 95, 100)
-  // - Sum to exactly 100% when multiple genres selected
-  // - Allow single genre at any value 5-100%
-  // - Reject invalid combinations
+  let h;
 
-  function isValidIncrement(percent) {
-    return percent > 0 && percent % 5 === 0;
-  }
-
-  function isValidSingleGenre(percent) {
-    return percent >= 5 && percent <= 100 && isValidIncrement(percent);
-  }
-
-  function isValidMix(genres) {
-    // All must be valid increments
-    if (!genres.every(isValidIncrement)) return false;
-    // All must be >= 5
-    if (genres.some(p => p < 5)) return false;
-    // Sum must be exactly 100
-    return genres.reduce((a, b) => a + b, 0) === 100;
-  }
-
-  test('single genre: 5% is valid minimum', () => {
-    expect(isValidSingleGenre(5)).toBe(true);
+  beforeAll(async () => {
+    h = await loadLegacyScript();
   });
 
-  test('single genre: 100% is valid maximum', () => {
-    expect(isValidSingleGenre(100)).toBe(true);
+  test.each([
+    { weights: [1], expected: [100] },
+    { weights: [1, 1], expected: [50, 50] },
+    { weights: [1, 1, 1, 1], expected: [25, 25, 25, 25] },
+    { weights: [1, 1, 1, 1, 1], expected: [20, 20, 20, 20, 20] },
+    { weights: [3, 3, 4], expected: [30, 30, 40] },
+    { weights: [95, 5], expected: [95, 5] },
+  ])('splits genre weights into valid 5% shares: $weights', ({ weights, expected }) => {
+    expect(h.call('HACGenreMix.splitGenrePercent', 100, weights)).toEqual(expected);
   });
 
-  test('single genre: all 5% increments 5-100 are valid', () => {
-    for (let p = 5; p <= 100; p += 5) {
-      expect(isValidSingleGenre(p)).toBe(true);
-    }
+  test.each([
+    [50, [1, 1], 50],
+    [95, [1], 95],
+    [15, [1, 1, 1], 15],
+  ])('split shares always sum to the requested total', (total, weights, expectedTotal) => {
+    const split = h.call('HACGenreMix.splitGenrePercent', total, weights);
+
+    expect(split.reduce((sum, share) => sum + share, 0)).toBe(expectedTotal);
+    split.forEach(share => {
+      expect(share).toBeGreaterThanOrEqual(5);
+      expect(share % 5).toBe(0);
+    });
   });
 
-  test('single genre: 0% is invalid', () => {
-    expect(isValidSingleGenre(0)).toBe(false);
+  test('applying a genre percent snaps the changed row and redistributes the rest', () => {
+    const result = h.evaluate(`(() => {
+      const rows = [
+        makeRow(62),
+        makeRow(20),
+        makeRow(20)
+      ];
+
+      function makeRow(value) {
+        const input = { value: String(value) };
+        const slider = { value: String(value), style: { setProperty() {} } };
+        return {
+          input,
+          slider,
+          querySelector(selector) {
+            if (selector === '.percent-input') return input;
+            if (selector === '.percent-slider') return slider;
+            return null;
+          }
+        };
+      }
+
+      document = {
+        getElementById(id) {
+          if (id === 'inputs-genre-graves') {
+            return { querySelectorAll: selector => selector === '.genre-row' ? rows : [] };
+          }
+          return null;
+        }
+      };
+
+      HACGenreMix.applyGenrePercent('graves', rows[0], 62);
+      return rows.map(row => Number(row.input.value));
+    })()`);
+
+    expect(result).toEqual([60, 20, 20]);
   });
 
-  test('single genre: 3% (non-5-increment) is invalid', () => {
-    expect(isValidSingleGenre(3)).toBe(false);
-  });
+  test('a single genre is forced back to 100%', () => {
+    const result = h.evaluate(`(() => {
+      const input = { value: '35' };
+      const slider = { value: '35', style: { setProperty() {} } };
+      const row = {
+        querySelector(selector) {
+          if (selector === '.percent-input') return input;
+          if (selector === '.percent-slider') return slider;
+          return null;
+        }
+      };
 
-  test('single genre: 102% exceeds max', () => {
-    expect(isValidSingleGenre(102)).toBe(false);
-  });
+      document = {
+        getElementById(id) {
+          if (id === 'inputs-genre-graves') {
+            return { querySelectorAll: selector => selector === '.genre-row' ? [row] : [] };
+          }
+          return null;
+        }
+      };
 
-  test('mix: 50% + 50% is valid', () => {
-    expect(isValidMix([50, 50])).toBe(true);
-  });
+      HACGenreMix.applyGenrePercent('graves', row, 35);
+      return Number(input.value);
+    })()`);
 
-  test('mix: 25% + 25% + 25% + 25% is valid', () => {
-    expect(isValidMix([25, 25, 25, 25])).toBe(true);
-  });
-
-  test('mix: 60% + 40% is valid', () => {
-    expect(isValidMix([60, 40])).toBe(true);
-  });
-
-  test('mix: 5% + 95% is valid boundary', () => {
-    expect(isValidMix([5, 95])).toBe(true);
-  });
-
-  test('mix: 50% + 50% + 5% (sums to 105) is invalid', () => {
-    expect(isValidMix([50, 50, 5])).toBe(false);
-  });
-
-  test('mix: 50% + 49% (non-increment) is invalid', () => {
-    expect(isValidMix([50, 49])).toBe(false);
-  });
-
-  test('mix: 50% + 50% - 5% (only 95%) is invalid', () => {
-    expect(isValidMix([50, 45])).toBe(false);
-  });
-
-  test('mix: contains 0% is invalid', () => {
-    expect(isValidMix([50, 50, 0])).toBe(false);
-  });
-
-  test('mix: 3% + 97% (non-increment) is invalid', () => {
-    expect(isValidMix([3, 97])).toBe(false);
-  });
-
-  test('three genres: 30% + 30% + 40% is valid', () => {
-    expect(isValidMix([30, 30, 40])).toBe(true);
-  });
-
-  test('three genres: 20% + 20% + 20% (sums to 60) is invalid', () => {
-    expect(isValidMix([20, 20, 20])).toBe(false);
-  });
-
-  test('all genres equal: 2 × 50%, 4 × 25%, 5 × 20% are all valid', () => {
-    expect(isValidMix([50, 50])).toBe(true);
-    expect(isValidMix([25, 25, 25, 25])).toBe(true);
-    expect(isValidMix([20, 20, 20, 20, 20])).toBe(true);
+    expect(result).toBe(100);
   });
 });

@@ -1,5 +1,6 @@
-import { describe, test, expect, beforeAll } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterEach } from '@jest/globals';
 import { loadLegacyScript, loadScoringModules, round } from './helpers/legacyHarness.js';
+import { tag } from './helpers/gameTestBuilders.js';
 
 /**
  * Golden-master characterisation of the scoring core in script.js.
@@ -31,7 +32,9 @@ beforeAll(async () => {
     for (const ids of Object.values(cat)) ids.sort();
 });
 
-const tag = (id, category, percent = 1) => ({ id, category, percent });
+afterEach(() => {
+    h.resetBrowserState();
+});
 
 /** Normalise a matrix result so snapshots are stable across platforms. */
 const normalise = (r) => ({

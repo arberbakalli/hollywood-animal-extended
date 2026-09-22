@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test } from '@jest/globals';
+import { afterEach, beforeAll, describe, expect, test } from '@jest/globals';
 import { loadLegacyScript } from './helpers/legacyHarness.js';
 
 describe('Generator lock and exclusion logic', () => {
@@ -7,6 +7,10 @@ describe('Generator lock and exclusion logic', () => {
     beforeAll(async () => {
         h = await loadLegacyScript();
         await h.ensureGenrePairsLoaded();
+    });
+
+    afterEach(() => {
+        h.resetBrowserState();
     });
 
     test('Script Lab, Graves, Marketing, and Build for Target all use the shared exclusion source', () => {

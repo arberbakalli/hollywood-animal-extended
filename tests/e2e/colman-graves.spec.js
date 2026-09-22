@@ -76,7 +76,7 @@ const buildMultiSupportingScript = async (steps) => {
   });
 };
 
-// Build a script at the cardinality limit (can't add more of certain categories)
+// Build a script with full single-select categories.
 const buildCardinalityLimitScript = async (steps) => {
   // Single-select categories: 1 each
   await steps.selectDropdown('settingSelect', 'ColmanGraves', {
@@ -95,7 +95,7 @@ const buildCardinalityLimitScript = async (steps) => {
     type: DropdownSelectType.VALUE,
     value: 'FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM',
   });
-  // Two Genres (the max)
+  // Two Genres are allowed, but Genre itself is not capped at two.
   await steps.selectDropdown('genreSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
     value: 'THRILLER',
@@ -221,10 +221,12 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.expect('swapSuggestionsTab', 'ColmanGraves').attributes.get('class').toContain('active');
     await steps.expect('bestAdditionsTab', 'ColmanGraves').attributes.get('class').not.toContain('active');
     await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+    expect(await page.locator('#gravesBestMatchesList .best-match-slot-group').count()).toBeGreaterThan(0);
 
     await steps.on('pairwiseTab', 'ColmanGraves').click();
     await steps.expect('pairwiseTab', 'ColmanGraves').attributes.get('class').toContain('active');
     await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
+    expect(await page.locator('#gravesBestMatchesList .best-match-pair-label').count()).toBeGreaterThan(0);
   });
 
   test('TC03-000011 best matches can start from one seed element', async ({ steps }) => {
@@ -356,18 +358,18 @@ test.describe('Script Evaluation — Colman Graves', () => {
     // (module state from other tests might have changed it)
     await page.evaluate(() => window.HACGravesBestMatches?.setBestMatchMode?.('additions'));
     await page.evaluate(() => window.HACGravesBestMatches?.renderBestMatches?.());
-    await page.waitForTimeout(500); // Wait for re-render after mode change
     await steps.on('bestAdditionsTab', 'ColmanGraves').click();
-    await page.waitForTimeout(500); // Wait for any animation/render
     await steps.expect('bestAdditionsTab', 'ColmanGraves').attributes.get('class').toContain('active');
+    await expect(page.locator('#gravesBestMatchesList [data-role="graves-best-match"]').first()).toBeVisible();
 
-    // Verify no Genre or single-select categories are suggested
+    // Verify no single-select categories are suggested. Genre is intentionally
+    // allowed to keep growing as a percentage split.
     await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ greaterThan: 0 });
 
     const categories = await page.locator('#gravesBestMatchesList [data-category]').evaluateAll(
       (els) => els.map((el) => el.getAttribute('data-category'))
     );
-    const forbiddenCategories = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale'];
+    const forbiddenCategories = ['Setting', 'Protagonist', 'Antagonist', 'Finale'];
     const forbiddenFound = categories.filter(c => forbiddenCategories.includes(c));
     expect(forbiddenFound).toHaveLength(0);
   });
