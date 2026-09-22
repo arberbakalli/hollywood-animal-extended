@@ -9,7 +9,7 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 - **Distribution formula is game-file sourced, not inferred.** Week 1 = commercial score × 2 × 1,000;
   Week 2 = commercial score × 1 × 1,000; weeks 3-8 = previous week × 0.8 (20% decay). Extracted
-  from the game files and documented in `.arber/ENGINEERING_SPECS.md`. Capacity (owned theatres) is
+  from the game files and documented in `GAME_RULES.md`. Capacity (owned theatres) is
   subtracted after demand is calculated, splitting it into owned/rented/spare, never changing the
   demand itself.
 - **Studio policies are game-file sourced.** Both decay policies are quoted verbatim in the game's
@@ -40,7 +40,7 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 ## Architecture
 
 - `script.js` is now a ~490-line bridge layer rather than the ~2,000-line monolith this file used to
-  describe: behaviour lives in 26 files under `src/`, each an IIFE exposing a `HAC*` namespace, which
+  describe: behaviour lives in 28 files under `src/`, each an IIFE exposing a `HAC*` namespace, which
   `script.js` re-exports as bare globals. Everything is still a **classic script**, so nothing can
   `import` and the constraints in `AGENTS.md` still hold. The module flip itself has not happened.
 - The bare-global wrappers in `script.js` look like duplicate implementations and are not. They
