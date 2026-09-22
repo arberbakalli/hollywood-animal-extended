@@ -78,7 +78,13 @@
                     break;
                 }
             }
-            if(!placed && MULTI_SELECT_CATEGORIES.includes(category)) {
+            // The ban list carries no cardinality limit — a player may ban every
+            // Setting in the game — so the excluded context always gets a fresh
+            // row. Applying the script builder's single-select rule here silently
+            // dropped every ban past the first in Setting, Protagonist,
+            // Antagonist and Finale, and the observer then saved that short list
+            // back over the stored one.
+            if(!placed && (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category))) {
                 addDropdown(category, input.id, context);
                 placed = true;
             }
