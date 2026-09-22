@@ -379,7 +379,7 @@ test.describe('Marketing and Release — distribution calculator', () => {
 
     await expect.poll(async () => attr(steps, 'weekOneCard', 'data-demand'))
       .toBe(Math.ceil(week1Before * (1 + bonusPercent / 100)));
-    // Week 2 is seeded from the commercial score and must never move.
+    // Holiday bonus affects week 1 only; week 2 is unchanged.
     expect(await weekTwoDemand()).toBe(week2Before);
   });
 
