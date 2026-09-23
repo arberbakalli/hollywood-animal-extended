@@ -456,9 +456,61 @@ test.describe('Script Evaluation — Colman Graves', () => {
     expect(scores.every(score => score >= 4.5)).toBe(true);
   });
 
+  test('TC03-000031 Show more states remaining suggestions and preserves existing rows', async ({ steps, page }) => {
+    await steps.selectDropdown('genreSelect', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: 'ACTION',
+    });
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: '0',
+    });
+
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+
+    const rows = page.locator('#gravesBestMatchesList [data-role="graves-best-match"]');
+    await expect(rows).toHaveCount(10);
+    const firstPage = await rows.evaluateAll(items => items.map(item => item.textContent));
+
+    const showMore = page.locator('#graves-show-more-btn');
+    await expect(showMore).toBeVisible();
+    await expect(showMore).toContainText(/Show more suggestions \(\d+ more available\)/);
+    const remainingBefore = Number((await showMore.textContent()).match(/\((\d+) more available\)/)[1]);
+    expect(remainingBefore).toBeGreaterThan(0);
+
+    await showMore.click();
+
+    await expect.poll(() => rows.count()).toBeGreaterThan(10);
+    const afterClick = await rows.evaluateAll(items => items.map(item => item.textContent));
+    expect(afterClick.slice(0, firstPage.length)).toEqual(firstPage);
+  });
+
   // TC03-000014 removed: it drove the starting-tags-only checkbox, which no
   // longer exists. Script Lab's exclusion list is the single place that narrows
   // the candidate pool, so Graves has no starter-deck filter left to assert.
+
+  test('TC03-000032 Pair Analysis groups pairs by band and collapses counts', async ({ steps, page }) => {
+    await buildValidScript(steps);
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+    await expect(page.locator('#gravesPairsDisplay')).toBeVisible();
+
+    const bandTitles = page.locator('#gravesPairsDisplay .graves-pairs-band-title');
+    await expect(bandTitles.first()).toBeVisible();
+    const titles = await bandTitles.allTextContents();
+    expect(titles.some(title => /Successful combinations \(\d+\)/.test(title))).toBe(true);
+    expect(titles.some(title => /Common combinations \(\d+\)/.test(title))).toBe(true);
+
+    const firstBand = page.locator('#gravesPairsDisplay .graves-pairs-band').first();
+    const firstTitle = firstBand.locator('.graves-pairs-band-title');
+    await expect(firstTitle).toHaveAttribute('aria-expanded', 'true');
+
+    await firstTitle.click();
+
+    await expect(firstBand).toHaveClass(/collapsed/);
+    await expect(firstTitle).toHaveAttribute('aria-expanded', 'false');
+  });
 
   test('TC03-000006 resetting clears the submission and hides the verdict', async ({ steps }) => {
     await buildValidScript(steps);
