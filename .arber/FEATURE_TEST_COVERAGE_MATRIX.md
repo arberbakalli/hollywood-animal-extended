@@ -70,9 +70,9 @@ These are the only BDD behaviors that are not fully automated yet.
 These are not necessarily BDD gaps, but they would harden feature behavior.
 
 1. **Traceability guard**
-   - Add a Jest test that reports all `[verified]` and `[unverified]` scenarios with file/line output.
-   - Do not fail on them yet; use it as a visible QA dashboard.
-   - Later, once owner approves, fail only when a new `[verified]` or `[unverified]` scenario appears without being added to this matrix.
+   - Implemented in `tests/featureScenarioMarkers.test.js`.
+   - The test pins the current `[verified]` and `[unverified]` backlog by scenario name.
+   - If a new weak marker appears, or one is resolved without updating this matrix, the test fails and forces an explicit QA decision.
 
 2. **BDD-to-test ID honesty**
    - For scenarios that name a `TCxx` id, assert that the id exists in an E2E spec.
@@ -100,4 +100,4 @@ These are not necessarily BDD gaps, but they would harden feature behavior.
 1. Decide the Graves excluded-Setting message.
 2. Automate the two lock/exclude message flows.
 3. Confirm the two Behemoth `[verified]` markers really match existing tests, then mark them `[automated]` or add the missing assertion.
-4. Add the non-failing traceability dashboard test.
+4. Add BDD-to-test-ID honesty checks for scenarios that cite a `TCxx` id.
