@@ -294,3 +294,60 @@ framework assertion failures as proof that the assertion would have failed.
 or around a page-object assertion, review it as suspicious. Prefer an explicit
 observable state check, or move the guard to a unit test where failure handling
 is not tied to browser artifacts.
+
+---
+
+## 16. A lesson without an executing guard is a wish
+
+**What broke.** On 2026-09-23 Colman Graves refused a legal nine-element script
+with "Colman evaluates up to 10 story elements at once. You selected 11." Both
+Graves guards counted raw tags, so Genre and Setting — context that spends no
+budget — were charged against the 5-10 story-element bounds.
+
+**Why this entry is different.** Two lessons in this very file already described
+that defect, written *before* it shipped:
+
+- **Lesson 8** — "'Source of truth' means every consumer, not the one in front
+  of you. A fix that touches only one of those is incomplete even if that one
+  screen passes." The rule had **five** implementations; two were corrected in
+  September and three were never looked for.
+- **Lesson 12** — "Tag validation must count by category, not by total count. A
+  flat count hides the real constraint." This is the defect, named exactly.
+
+Both lessons were correct. Both were ignored, because neither had anything that
+could fail. Every entry here ends with "Cheap check for next time" and almost
+none of those checks was ever turned into a test that runs.
+
+**The rule.** A lesson is not learned when it is written down. It is learned
+when something red-flags the next violation. When you add a lesson, add the
+guard in the same change — or mark the lesson as unguarded so its status is
+honest.
+
+**Cheap check for next time.** Run prompt **P5** in `docs/AUDIT_PROMPTS.md`:
+for every lesson, name the executing test that implements its check, or NONE.
+
+---
+
+## 17. The assumptions that keep costing us
+
+Written after the 2026-09-23 story-element regression. Each of these felt
+reasonable and each has now been paid for at least twice.
+
+| Assumption | What is actually true |
+|---|---|
+| "The rule is documented, so it is enforced." | Prose does not execute. `GAME_RULES.md` was right while five implementations drifted. Only a function plus a guard test enforces anything. |
+| "`[automated]` means a test asserts it." | Measured 2026-09-23: **91 of 128** `[automated]` scenarios cite no test at all. A hand-maintained marker is a claim, not a measurement. |
+| "The suite is green, so the behaviour is right." | The suite was green for the entire life of this bug *and was the reason it survived* — two tests asserted the wrong answer. |
+| "The agent fixed it, so the class is closed." | An LLM fixes the instance it is pointed at and reports success. It will not volunteer the other four copies unless asked to enumerate them. |
+| "A test named X tests X." | Vacuous tests pass without exercising anything. Three "max element pool" tests passed with the defect present. Prove teeth by reintroducing the defect. |
+| "More tests means more coverage." | Test counts moved 272 → 277 → 283 in one session because a second agent was committing into the same working tree. Counts measure activity, not coverage. |
+| "The doc says where the rule is enforced." | That pointer is hand-written and goes stale silently. `GAME_RULES.md` named two modules; neither was the one with the bug, so the audit walked past it. |
+| "If it were broken, someone would have noticed." | This shipped to a real user who could not generate a script, and was reported by a third party before any test, marker, or doc flagged it. |
+
+**The rule.** Trust a claim in proportion to what would fail if it were false.
+A document fails nothing. A marker fails nothing. A green suite fails nothing
+unless a test in it can go red for the right reason.
+
+**Cheap check for next time.** The standing clause at the end of
+`docs/AUDIT_PROMPTS.md` — append it to every bug report so the enumeration
+happens before the fix is called done.
