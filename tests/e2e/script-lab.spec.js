@@ -86,6 +86,23 @@ test.describe('Script Lab — generator', () => {
     await steps.on('resultsSection', 'ScriptLab').verifyState('hidden');
   });
 
+  test('TC01-000030 excluding a locked element drops the lock and names it', async ({ steps }) => {
+    await steps.selectDropdown('lockedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: SIDEKICK,
+    });
+    await steps.expect('lockedSupportingCharacterSelect', 'ScriptLab').value.toBe(SIDEKICK);
+
+    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: SIDEKICK,
+    });
+
+    await steps.expect('lockedSupportingCharacterSelect', 'ScriptLab').value.toBe('');
+    await steps.on('feedbackMessage', 'ScriptLab')
+      .verifyTextContains('Removed from this script because they are now excluded: Sidekick.');
+  });
+
   // Given the user is on Script Lab
   // When they move the compatibility slider to its maximum
   // Then the paired number input reflects the same value
@@ -172,6 +189,20 @@ test.describe('Script Lab — generator', () => {
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     await steps.verifyWindowProperty('__hollywoodReady', { truthy: true });
+    await steps.on('buildTab', 'Navigation').click();
+
+    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('1');
+    await steps.expect('excludedSupportingCharacterSelect', 'ScriptLab').value.toBe(SIDEKICK);
+  });
+
+  test('TC01-000026 exclusion state stays consistent across tab switches', async ({ steps }) => {
+    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: SIDEKICK,
+    });
+    await steps.on('excludedCountBadge', 'ScriptLab').verifyText('1');
+
+    await steps.on('evaluateTab', 'Navigation').click();
     await steps.on('buildTab', 'Navigation').click();
 
     await steps.on('excludedCountBadge', 'ScriptLab').verifyText('1');

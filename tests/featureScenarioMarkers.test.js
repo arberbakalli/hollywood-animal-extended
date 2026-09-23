@@ -4,10 +4,12 @@ import { join } from 'node:path';
 
 const ROOT = process.cwd();
 const SCENARIO_DIR = join(ROOT, 'tests', 'scenarios');
+const E2E_DIR = join(ROOT, 'tests', 'e2e');
 
 const STATUS_MARKER_PATTERN = /^\s*# \[(automated|verified|unverified)\]/;
 const SCENARIO_PATTERN = /^\s*Scenario(?: Outline)?:/;
 const SECTION_PATTERN = /^\s*(Feature|Background):/;
+const FULL_TEST_ID_PATTERN = /\bTC(?:\d{2}|-[A-Z]+)-\d{3,6}\b/g;
 
 describe('BDD scenario markers', () => {
     test('keeps exactly one status marker immediately above each scenario', async () => {
@@ -65,13 +67,34 @@ describe('BDD scenario markers', () => {
         }
 
         expect(backlog).toEqual([
-            'unverified colman-graves.feature Scenario: Graves explains when excluded Settings are unavailable',
-            'verified colman-graves.feature Scenario: Banning an element removes it from the Graves script and says so',
             'verified colman-graves.feature Scenario: The verdict follows a successful average fit',
             'verified colman-graves.feature Scenario: All available tags are shown in Best Matches suggestions',
-            'verified marketing-release.feature Scenario: Behemoth boost applies at all score levels',
-            'verified marketing-release.feature Scenario: Behemoth boost applies to week 2',
-            'verified script-lab.feature Scenario: Locking an element that becomes excluded drops it with a message',
         ]);
+    });
+
+    test('keeps cited E2E test ids honest', async () => {
+        const featureFiles = (await readdir(SCENARIO_DIR))
+            .filter(file => file.endsWith('.feature'))
+            .sort();
+        const e2eFiles = (await readdir(E2E_DIR))
+            .filter(file => file.endsWith('.spec.js'))
+            .sort();
+        const e2eSource = (await Promise.all(e2eFiles
+            .map(file => readFile(join(E2E_DIR, file), 'utf8'))))
+            .join('\n');
+        const missing = [];
+
+        for (const file of featureFiles) {
+            const lines = (await readFile(join(SCENARIO_DIR, file), 'utf8')).split(/\r?\n/);
+            for (let index = 0; index < lines.length; index += 1) {
+                for (const match of lines[index].matchAll(FULL_TEST_ID_PATTERN)) {
+                    if (!e2eSource.includes(match[0])) {
+                        missing.push(`${file}:${index + 1} ${match[0]}`);
+                    }
+                }
+            }
+        }
+
+        expect(missing).toEqual([]);
     });
 });

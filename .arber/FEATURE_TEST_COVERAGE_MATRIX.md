@@ -18,36 +18,20 @@ Source: `tests/scenarios/*.feature` markers.
 | Feature area | Automated | Verified only | Unverified | Heat | Notes |
 | --- | ---: | ---: | ---: | --- | --- |
 | App Shell | 5 | 0 | 0 | Green | Tabs, language, boot failure, retry, rapid tab switching covered. |
-| Script Lab | 28 | 1 | 0 | Yellow | Strong UI and exclusion coverage; one lock/exclude conflict message is only observed. |
-| Colman Graves | 31 | 3 | 1 | Yellow/Red | Core scoring, best matches, pair analysis covered; one UX decision still parked. |
-| Marketing and Release | 27 | 2 | 0 | Yellow | Distribution heavily covered; two Behemoth scenarios are still marked verified-only. |
+| Script Lab | 29 | 0 | 0 | Green | Strong UI, Script Library and exclusion coverage. |
+| Colman Graves | 33 | 2 | 0 | Yellow | Core scoring, best matches, pair analysis and exclusion messaging covered. |
+| Marketing and Release | 29 | 0 | 0 | Green | Distribution, studio policies, holiday boosts and marketing profile paths covered. |
 | Build for Target | 15 | 0 | 0 | Green | Audience/advertiser, exclusions, empty state, ranking and budget covered. |
 | Exclusion Dropdown Refresh | 7 | 0 | 0 | Green | Global exclusion propagation covered across contexts. |
 | Slider Syncing | 7 | 0 | 0 | Green | Pool-score mapping and max score edge covered. |
 
-Totals: **120 scenario markers** = **113 automated**, **6 verified-only**, **1 unverified**.
+Totals: **120 scenario markers** = **118 automated**, **2 verified-only**, **0 unverified**.
 
 ## Red-Flag Backlog
 
 These are the only BDD behaviors that are not fully automated yet.
 
-### P0 - Product Decision Needed
-
-- `tests/scenarios/colman-graves.feature:143`
-  - Scenario: Graves explains when excluded Settings are unavailable
-  - Gap: behavior is still `[unverified]`.
-  - Decision needed: show a small explanatory message, or rely on users learning that exclusions are global.
-  - Suggested test once decided: Playwright flow where Script Lab excludes a Setting, Graves Setting picker hides it, and any explanatory notice either appears or is explicitly not expected.
-
 ### P1 - Automate Observed Behavior
-
-- `tests/scenarios/colman-graves.feature:263`
-  - Scenario: Banning an element removes it from the Graves script and says so
-  - Suggested E2E: select an element in Graves, ban it from Script Lab, return to Graves, assert the selected row is gone and the feedback names the removed element.
-
-- `tests/scenarios/script-lab.feature:239`
-  - Scenario: Locking an element that becomes excluded drops it with a message
-  - Suggested E2E: lock a tag, exclude that same tag, assert lock is removed and feedback names the dropped lock.
 
 - `tests/scenarios/colman-graves.feature:275`
   - Scenario: The verdict follows a successful average fit
@@ -56,14 +40,6 @@ These are the only BDD behaviors that are not fully automated yet.
 - `tests/scenarios/colman-graves.feature:331`
   - Scenario: All available tags are shown in Best Matches suggestions
   - Suggested E2E: seed one element, generate Best Matches, assert non-starting-deck element can appear when not excluded.
-
-- `tests/scenarios/marketing-release.feature:201`
-  - Scenario: Behemoth boost applies at all score levels
-  - Suggested marker cleanup: this is probably already covered by `TC04-000013`, `TC-BEH-006`, and `tests/distribution-behemoth.test.js`; verify and mark `[automated]` only if those tests assert score below 9 and all-week boost.
-
-- `tests/scenarios/marketing-release.feature:209`
-  - Scenario: Behemoth boost applies to week 2
-  - Suggested marker cleanup: likely covered by `TC04-000013` and `tests/distribution-behemoth.test.js`; verify exact week 2 assertion before marking `[automated]`.
 
 ## Missing Feature-Level Tests Worth Adding
 
@@ -75,9 +51,9 @@ These are not necessarily BDD gaps, but they would harden feature behavior.
    - If a new weak marker appears, or one is resolved without updating this matrix, the test fails and forces an explicit QA decision.
 
 2. **BDD-to-test ID honesty**
-   - For scenarios that name a `TCxx` id, assert that the id exists in an E2E spec.
-   - This catches fake `[automated] TC...` markers.
-   - Do not require every `[automated]` scenario to name a TC id yet, because many are covered by unit tests or broad E2E flows.
+   - Implemented in `tests/featureScenarioMarkers.test.js`.
+   - Any full `TCxx` id cited by a BDD feature file must exist in an E2E spec.
+   - This catches fake `[automated] TC...` markers without forcing every automated unit-backed scenario to cite an E2E id.
 
 3. **Unit coverage map**
    - Tag high-risk pure logic tests by feature:
@@ -93,11 +69,9 @@ These are not necessarily BDD gaps, but they would harden feature behavior.
      - Script Lab exclusions -> Graves
      - Script Lab exclusions -> Build for Target
      - Graves transfer -> Marketing
-     - Script Library saved script -> reload/load -> still usable
+     - Script Library saved script -> reload/load -> still usable is already pinned by `TC01-000029`.
 
 ## Next Best Move
 
-1. Decide the Graves excluded-Setting message.
-2. Automate the two lock/exclude message flows.
-3. Confirm the two Behemoth `[verified]` markers really match existing tests, then mark them `[automated]` or add the missing assertion.
-4. Add BDD-to-test-ID honesty checks for scenarios that cite a `TCxx` id.
+1. Automate the Graves verdict-band and all-available-tags verified scenarios.
+2. Build the unit coverage map for high-risk pure logic.

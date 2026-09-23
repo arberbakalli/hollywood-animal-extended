@@ -127,6 +127,41 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('allTagSelects', 'ColmanGraves').verifyCount({ exactly: 7 });
   });
 
+  test('TC03-000033 Graves explains that Script Lab exclusions hide unavailable Settings', async ({ steps, page }) => {
+    await steps.on('buildTab', 'Navigation').click();
+    await steps.selectDropdown('excludedSettingSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: 'WILD_WEST',
+    });
+
+    await steps.on('evaluateTab', 'Navigation').click();
+
+    await steps.on('exclusionNotice', 'ColmanGraves').verifyState('visible');
+    await steps.on('exclusionSummary', 'ColmanGraves')
+      .verifyTextContains('Script Lab is hiding suggestions');
+    await expect(page.locator('#inputs-setting-graves select.tag-selector option[value="WILD_WEST"]'))
+      .toBeDisabled();
+  });
+
+  test('TC03-000034 banning an element removes it from the Graves script and says so', async ({ steps }) => {
+    await steps.selectDropdown('supportingCharacterSelect', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value: 'SUPPORTINGCHARACTER_SIDEKICK',
+    });
+    await steps.expect('supportingCharacterSelect', 'ColmanGraves').value.toBe('SUPPORTINGCHARACTER_SIDEKICK');
+
+    await steps.on('buildTab', 'Navigation').click();
+    await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE,
+      value: 'SUPPORTINGCHARACTER_SIDEKICK',
+    });
+    await steps.on('evaluateTab', 'Navigation').click();
+
+    await steps.expect('supportingCharacterSelect', 'ColmanGraves').value.toBe('');
+    await steps.on('feedbackMessage', 'ColmanGraves')
+      .verifyTextContains('Removed from this script because they are now excluded: Sidekick.');
+  });
+
   // The starting-tags-only checkbox was removed from this panel: exclusions are
   // owned by Script Lab alone, so Graves no longer offers a second place to
   // narrow the candidate pool. Category and fit remain.

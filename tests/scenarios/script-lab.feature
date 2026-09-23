@@ -236,7 +236,7 @@ Feature: Script Lab
     Then the counter text is black
     And the counter remains legible against the badge background
 
-  # [verified] 2026-09-22. Rewritten: the journey it described could not be
+  # [automated] TC01-000030. Rewritten: the journey it described could not be
   # reproduced, and the reason is that the app resolves the situation before
   # generation is ever reached. A lock that becomes excluded is dropped from the
   # selection on the spot, named in a message, so generation never sees a

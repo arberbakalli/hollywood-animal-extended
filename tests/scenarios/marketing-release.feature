@@ -198,17 +198,17 @@ Feature: Marketing and Release
     Given the user has selected a holiday release window
     Then weeks 2 through 8 match their unboosted figures
 
-  # [verified] Behemoth boost applies regardless of commercial score. The slower
-  # decay rule is independent and only applies when score > 9. Pinned by
-  # tests/distribution-behemoth.test.js; no e2e spec asserts it yet.
+  # [automated] TC-BEH-006 plus tests/distribution-behemoth.test.js. Behemoth
+  # boost applies regardless of commercial score. The slower decay rule is
+  # independent and only applies when score > 9.
   Scenario: Behemoth boost applies at all score levels
     When the user sets the commercial score to 5.0
     And the user enables the Behemoth studio policy
     Then all weeks 1-8 show 25% higher demand than without Behemoth
 
-  # [verified] Week 2 receives the full Behemoth boost since it is based on the
-  # commercial score and not derived from decay. Pinned by
-  # tests/distribution-behemoth.test.js; no e2e spec asserts it yet.
+  # [automated] TC-BEH-006 plus tests/distribution-behemoth.test.js. Week 2
+  # receives the full Behemoth boost since it is based on the commercial score
+  # and not derived from decay.
   Scenario: Behemoth boost applies to week 2
     When the user sets the commercial score to 8.0
     And the user enables the Behemoth studio policy

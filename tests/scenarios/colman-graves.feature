@@ -140,9 +140,9 @@ Feature: Script Evaluation — Colman Graves
     And the user returns to Colman Graves
     Then that Setting is available in the Graves Setting picker
 
-  # [unverified] Guard against confusing source-of-truth behavior. If a setting
-  # is unavailable because the shared exclusion list bans it, Graves should make
-  # that reason visible rather than looking broken.
+  # [automated] TC03-000033. Guard against confusing source-of-truth behavior:
+  # if a setting is unavailable because the shared exclusion list bans it,
+  # Graves must make that reason visible rather than looking broken.
   Scenario: Graves explains when excluded Settings are unavailable
     Given the Script Lab exclusion list hides one or more Settings
     When the user opens the Colman Graves Setting picker
@@ -260,7 +260,7 @@ Feature: Script Evaluation — Colman Graves
     And the script's Genre is selected there
     And marketing analysis results are shown
 
-  # [verified] 2026-09-22. Rewritten: the journey it described cannot happen.
+  # [automated] TC03-000034. Rewritten: the journey it described cannot happen.
   # A script can never hold a banned element long enough to be warned about it,
   # because banning one removes it from every script that uses it on the spot
   # and says so by name. The generic notice above covers the other half —
