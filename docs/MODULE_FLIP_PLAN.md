@@ -1,5 +1,30 @@
 # Module Flip — Migration Plan
 
+> **Superseded 2026-09-23. Do not run this plan for coverage's sake.**
+>
+> The premise below is wrong. Coverage was never blocked by classic scripts:
+> it is blocked by `tests/helpers/legacyHarness.js` reading files with
+> `readFile` and evaluating them in `node:vm`, which never passes them through
+> Jest's transformer, so istanbul sees nothing.
+>
+> Measured on 2026-09-23:
+> - `npx jest --coverage --collectCoverageFrom='src/**/*.js'` reports **0%**
+>   across every file, while 270 tests pass through them.
+> - A throwaway test that simply `import`s `src/app/domIds.js` — the file
+>   unchanged, still a classic IIFE with no `export` — reports **75% statements,
+>   66% functions** on it.
+> - All **28/28** `src/` modules import cleanly with nothing but a fake DOM on
+>   `globalThis`. None needed converting.
+>
+> So the work that unblocks coverage is a change to one file, the harness, not a
+> 28-file atomic refactor plus 157 call sites. The flip may still be worth doing
+> later for its own sake — real `import` graphs instead of load-order coupling —
+> but it should be justified on that, not on coverage.
+>
+> The plan below is kept as the record of what the flip itself would involve.
+
+---
+
 Converting `src/` from classic scripts to ES modules. Written 2026-09-22 with
 the blast radius measured rather than estimated, because the file count badly
 understates the work.

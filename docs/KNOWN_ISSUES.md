@@ -41,8 +41,13 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 - `script.js` is now a ~478-line bridge layer rather than the ~2,000-line monolith this file used to
   describe: behaviour lives in 28 files under `src/`, each an IIFE exposing a `HAC*` namespace, which
-  `script.js` re-exports as bare globals. Everything is still a **classic script**, so nothing can
-  `import` and the constraints in `AGENTS.md` still hold. The module flip itself has not happened.
+  `script.js` re-exports as bare globals. Everything is still a **classic script** — they contain no
+  `import`/`export` and the load-order constraints in `AGENTS.md` still hold. The module flip itself
+  has not happened.
+  - They can nonetheless be *imported* by a test: a classic IIFE is valid ESM-importable JavaScript,
+    and all 28 import cleanly given a fake DOM. "Classic script" constrains how the browser loads
+    them, not whether Node can import them — a distinction this file previously blurred, which is
+    what made coverage look blocked on the flip.
 - The bare-global wrappers in `script.js` look like duplicate implementations and are not. They
   delegate to the `src/` namespace, and removing one breaks every caller of the bare name.
 - **The duplication audit was done on 2026-09-22 and came back clean.** All 118 bare globals are
@@ -62,9 +67,15 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 ## Tooling
 
-- Test coverage cannot be measured. `script.js` and `data.js` run through a `node:vm` harness rather
-  than being imported, so istanbul cannot instrument them. Coverage becomes available only after the
-  module flip.
+- Test coverage reads 0% across every file, while 270 tests pass through them. The cause is the
+  harness, not the classic scripts: `tests/helpers/legacyHarness.js` reads each file with `readFile`
+  and evaluates it in `node:vm`, so nothing passes through Jest's transformer and istanbul sees
+  nothing to instrument.
+  - **Corrected 2026-09-23.** This previously said coverage becomes available only after the module
+    flip. That is wrong, and it made a one-file fix look like a 28-file atomic refactor. Measured: a
+    test that merely `import`s `src/app/domIds.js`, unchanged and still a classic IIFE with no
+    `export`, reports 75% statements on it; and all 28 `src/` modules import cleanly with nothing but
+    a fake DOM on `globalThis`. The work is to make the harness import rather than evaluate.
 - Bare `npx jest` fails all suites. See `AGENTS.md` for the reason and the workaround.
 - There is still no committed formatter or npm `lint` script. A temporary Qodana setup was removed
   because the `qodana-js` linter needs a `QODANA_TOKEN` even for local native scans.
