@@ -7,6 +7,7 @@ Reference and institutional knowledge for `hollywood-animal-extended`.
 - `LESSONS_LEARNED.md` - 15 regression prevention rules from real failures. Read this when debugging.
 - `GRAVES_EVALUATION_ANALYSIS.md` - reverse-engineered Colman Graves scoring; game mechanics reference.
 - `CODEX_QA_TEST_COVERAGE_AUDIT.md` - current Jest/Playwright coverage map and gaps.
+- `FEATURE_TEST_COVERAGE_MATRIX.md` - BDD feature heat map and red-flag traceability gaps.
 - `ACHILLES_POWER_NOTES.md` - QA framework (Achilles) reference and mutation testing guide.
 
 ## Removed As Redundant
