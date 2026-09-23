@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll } from '@jest/globals';
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * Best Advertisers recommendation engine.
@@ -12,7 +12,7 @@ import { loadLegacyScript } from './helpers/legacyHarness.js';
 let h;
 
 beforeAll(async () => {
-    h = await loadLegacyScript();
+    h = await loadInstrumentedApp();
 });
 
 const agency = (name) => h.evaluate(`GAME_DATA.adAgents.find(a => a.name === ${JSON.stringify(name)})`);

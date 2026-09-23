@@ -19,8 +19,15 @@ export default {
     // Helpers and fixtures live under tests/ but are not themselves suites.
     testPathIgnorePatterns: ['/node_modules/', '/tests/helpers/'],
 
-    // No coverage target is configured. The app's only executable files are
-    // script.js and data.js, both loaded through a VM harness rather than
-    // imported, so istanbul cannot instrument them. Coverage becomes meaningful
-    // once script.js is a module that tests import directly.
+    // Coverage is measurable as of 2026-09-23. It reported 0% for a long time,
+    // which read as "cannot be instrumented" but was really "never reached
+    // Jest": the old harness read every file with readFile and evaluated it in
+    // node:vm. Suites now load through loadInstrumentedApp, which imports the
+    // src/ modules instead, and the first honest baseline is ~32% statements.
+    //
+    // Only src/ is collected. data.js, script.js and src/app/state.js are still
+    // evaluated rather than imported, because they declare globals a module
+    // scope would swallow, so they cannot be instrumented and would report a
+    // misleading 0%.
+    collectCoverageFrom: ['src/**/*.js'],
 };

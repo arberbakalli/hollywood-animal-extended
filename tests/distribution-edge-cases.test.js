@@ -1,12 +1,12 @@
 import { describe, test, expect, beforeAll } from '@jest/globals';
-import { loadGameData, loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadGameData, loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 let gameData;
 let h;
 
 beforeAll(async () => {
   gameData = await loadGameData();
-  h = await loadLegacyScript();
+  h = await loadInstrumentedApp();
 });
 
 /**

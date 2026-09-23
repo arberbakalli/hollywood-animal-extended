@@ -1,4 +1,4 @@
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * Behemoth policy effects on the distribution grid.
@@ -32,7 +32,7 @@ describe('Distribution — Behemoth policy', () => {
         });
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('all weeks receive 25% boost', () => {

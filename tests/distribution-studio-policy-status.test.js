@@ -1,4 +1,4 @@
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * The status line under the distribution toggles.
@@ -19,7 +19,7 @@ describe('Distribution — studio policy status line', () => {
     const describe_ = (options) => h.call('HACDistributionPlanner.describeStudioPolicies', options);
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('nothing active', () => {

@@ -67,15 +67,21 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 ## Tooling
 
-- Test coverage reads 0% across every file, while 270 tests pass through them. The cause is the
-  harness, not the classic scripts: `tests/helpers/legacyHarness.js` reads each file with `readFile`
-  and evaluates it in `node:vm`, so nothing passes through Jest's transformer and istanbul sees
-  nothing to instrument.
-  - **Corrected 2026-09-23.** This previously said coverage becomes available only after the module
-    flip. That is wrong, and it made a one-file fix look like a 28-file atomic refactor. Measured: a
-    test that merely `import`s `src/app/domIds.js`, unchanged and still a classic IIFE with no
-    `export`, reports 75% statements on it; and all 28 `src/` modules import cleanly with nothing but
-    a fake DOM on `globalThis`. The work is to make the harness import rather than evaluate.
+- **Coverage is measurable as of 2026-09-23, and the first honest baseline is 31.63% statements,
+  41.93% functions** (`npm run test:coverage`). It had read 0% for a long time, which looked like
+  "cannot be instrumented" but was really "never reached Jest": the harness read every file with
+  `readFile` and evaluated it in `node:vm`. All 17 vm-loaded suites now use `loadInstrumentedApp`,
+  which imports the `src/` modules instead. Per-suite test counts were identical before and after.
+  - It was **not** blocked by the module flip, as this file previously claimed. That framing made a
+    one-file fix look like a 28-file atomic refactor. A classic IIFE is valid ESM-importable
+    JavaScript; all 28 `src/` modules import cleanly given a fake DOM.
+  - By area: `data` 57.7%, `evaluation` 57.3%, `ui` 35.8%, `marketing` 31.7%, `selectors` 19.7%,
+    `library` 16.8%, `generator` 15.4%, `app` 6.5%. The low numbers are honest rather than alarming:
+    the Jest suites stub the DOM, so UI wiring is covered by Playwright, which istanbul does not see.
+  - `data.js`, `script.js` and `src/app/state.js` are still evaluated rather than imported, because
+    they declare globals a module scope would swallow — `data.js` uses a top-level `const GAME_DATA`,
+    a global *lexical* binding that `globalThis` never exposes and that does not escape an `eval`.
+    They are excluded from collection rather than reported as a misleading 0%.
 - Bare `npx jest` fails all suites. See `AGENTS.md` for the reason and the workaround.
 - There is still no committed formatter or npm `lint` script. A temporary Qodana setup was removed
   because the `qodana-js` linter needs a `QODANA_TOKEN` even for local native scans.

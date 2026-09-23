@@ -1,11 +1,11 @@
 import { beforeAll, describe, expect, test } from '@jest/globals';
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 describe('Production edge cases and state helpers', () => {
     let h;
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
         await h.ensureCompatibilityLoaded();
     });
 

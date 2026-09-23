@@ -1,11 +1,11 @@
 import { afterEach, beforeAll, describe, expect, test } from '@jest/globals';
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 describe('Generator lock and exclusion logic', () => {
     let h;
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
         await h.ensureGenrePairsLoaded();
     });
 

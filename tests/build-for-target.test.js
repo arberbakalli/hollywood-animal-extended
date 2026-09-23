@@ -1,4 +1,4 @@
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 import { countByCategory, isStoryElement } from './helpers/gameTestBuilders.js';
 
 /**
@@ -12,7 +12,7 @@ describe('Build for Target', () => {
     let h;
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('category naming', () => {
@@ -92,7 +92,7 @@ describe('Build for Target — category cardinality', () => {
     const STORY_ELEMENT_BUDGET = 10;
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
         await h.ensureCompatibilityLoaded();
 
         const allTags = Object.values(h.GAME_DATA.tags).filter(t => t && t.id);

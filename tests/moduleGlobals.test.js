@@ -1,5 +1,5 @@
 import { describe, test, expect } from '@jest/globals';
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * The module split moved code out of script.js one slice at a time. When a
@@ -28,12 +28,12 @@ describe('shared classic-script state', () => {
     ];
 
     test.each(SHARED_BINDINGS)('%s resolves after the bundle loads', async binding => {
-        const app = await loadLegacyScript();
+        const app = await loadInstrumentedApp();
         expect(app.evaluate(`typeof ${binding}`)).not.toBe('undefined');
     });
 
     test('searchDebounceTimers is a Map, so the debounce path works', async () => {
-        const app = await loadLegacyScript();
+        const app = await loadInstrumentedApp();
         expect(app.evaluate('searchDebounceTimers instanceof Map')).toBe(true);
     });
 });

@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll, afterEach } from '@jest/globals';
-import { loadLegacyScript, loadScoringModules, round } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp, loadScoringModules, round } from './helpers/legacyHarness.js';
 import { tag } from './helpers/gameTestBuilders.js';
 
 /**
@@ -20,7 +20,7 @@ let cat;
 let scoringModules;
 
 beforeAll(async () => {
-    h = await loadLegacyScript();
+    h = await loadInstrumentedApp();
     // Load deferred data for tests
     await h.ensureCompatibilityLoaded();
     await h.ensureGenrePairsLoaded();

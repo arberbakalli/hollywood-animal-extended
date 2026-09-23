@@ -1,4 +1,4 @@
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * Holiday release bonuses on the distribution grid.
@@ -24,7 +24,7 @@ describe('Holiday release', () => {
     const HALLOWEEN = { name: 'Halloween', bonuses: { TM: 22, TF: 22, YM: 18, YF: 18, AM: 15, AF: 15 } };
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('holidayBonusFor', () => {
@@ -128,7 +128,7 @@ describe('holiday bonuses match the extracted game config', () => {
     beforeAll(async () => {
         const { readFile } = await import('node:fs/promises');
         gameHolidays = JSON.parse(await readFile(GAME_FILE, 'utf8'));
-        appHolidays = (await loadLegacyScript()).GAME_DATA.holidays;
+        appHolidays = (await loadInstrumentedApp()).GAME_DATA.holidays;
     });
 
     const gameBonuses = (key) => {

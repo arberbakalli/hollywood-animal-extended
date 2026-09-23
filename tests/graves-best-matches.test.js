@@ -1,4 +1,4 @@
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * Best Matches paging and band ordering.
@@ -34,7 +34,7 @@ describe('Graves Best Matches', () => {
     });
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('page size', () => {

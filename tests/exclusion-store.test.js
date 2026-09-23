@@ -1,4 +1,4 @@
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * Persistence of the Excluded Elements list.
@@ -13,7 +13,7 @@ describe('Exclusion store', () => {
     let h;
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('serializeExclusions', () => {

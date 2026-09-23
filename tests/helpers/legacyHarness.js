@@ -283,6 +283,13 @@ export async function loadInstrumentedApp() {
         callAsync: async (name, ...args) => await resolveName(name)(...args),
         ensureCompatibilityLoaded: () => globalThis.ensureCompatibilityLoaded(),
         ensureGenrePairsLoaded: () => globalThis.ensureGenrePairsLoaded(),
+        /** Restore browser-like globals after tests that replace document or app state. */
+        resetBrowserState: () => {
+            installBrowserStubs();
+            if (typeof globalThis.currentGenProfile !== 'undefined') {
+                globalThis.currentGenProfile = 'custom';
+            }
+        },
         get GAME_DATA() { return globalThis.GAME_DATA; },
     };
 }

@@ -1,4 +1,4 @@
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * Severity and summary for the Graves Conflicts panel.
@@ -24,7 +24,7 @@ describe('Graves conflicts', () => {
     });
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('gravesConflictSeverity', () => {

@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from '@jest/globals';
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -231,7 +231,7 @@ describe('category ids are derived, not hand-written', () => {
     let h;
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     test.each([

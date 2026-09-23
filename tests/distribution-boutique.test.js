@@ -1,4 +1,4 @@
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
  * Boutique studio policy on the distribution grid.
@@ -31,7 +31,7 @@ describe('Distribution — Boutique policy', () => {
         h.call('HACDistributionPlanner.resolveDecayRate', com, art, behemoth, boutique);
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('gate', () => {

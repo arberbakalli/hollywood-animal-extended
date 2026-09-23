@@ -14,7 +14,8 @@
     "test:repair": "achilles-self-repair",
     "test:mutate": "node tools/run-achilles-mutate.mjs",
     "test:mutate:calibrate": "node tools/run-achilles-mutate.mjs --calibrate",
-    "git:unlock": "node tools/git-unlock.mjs"
+    "git:unlock": "node tools/git-unlock.mjs",
+    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "devDependencies": {
     "@civitas-cerebrum/element-interactions": "^0.3.9",

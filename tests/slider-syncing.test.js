@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from '@jest/globals';
-import { loadLegacyScript, readInputDefault } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp, readInputDefault } from './helpers/legacyHarness.js';
 
 /**
  * Max Element Pool <-> Target Movie Score syncing.
@@ -22,7 +22,7 @@ describe('Slider syncing — pool and target score mappings', () => {
     const poolTrack = (pool) => h.call('HACAppShell.poolSizeTrackPercent', pool);
 
     beforeAll(async () => {
-        h = await loadLegacyScript();
+        h = await loadInstrumentedApp();
     });
 
     describe('target score to pool size', () => {

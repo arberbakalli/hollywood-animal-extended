@@ -1,11 +1,11 @@
 import { describe, test, expect, beforeAll } from '@jest/globals';
-import { loadLegacyScript } from './helpers/legacyHarness.js';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 describe('Genre mix percentage validation', () => {
   let h;
 
   beforeAll(async () => {
-    h = await loadLegacyScript();
+    h = await loadInstrumentedApp();
   });
 
   test.each([
