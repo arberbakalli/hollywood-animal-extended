@@ -118,6 +118,28 @@ describe('Graves Best Matches', () => {
             expect(h.call('contextUsesGlobalExclusions', 'graves')).toBe(true);
             expect(h.call('contextUsesGlobalExclusions', 'generator')).toBe(true);
         });
+
+        test('Best Matches additions are not limited to the Starting Tags deck', () => {
+            const starterIds = new Set(h.GAME_DATA.starterWhitelist);
+            const selected = [{
+                ...h.GAME_DATA.tags.ACTION,
+                percent: 1
+            }];
+            const candidates = Object.values(h.GAME_DATA.tags)
+                .filter(tag => tag.id !== 'ACTION');
+            const nonStarterCandidate = candidates.find(tag => !starterIds.has(tag.id));
+
+            const rows = h.call(
+                'HACGravesBestMatchesEngine.buildAdditions',
+                selected,
+                candidates,
+                0,
+                10
+            );
+
+            expect(nonStarterCandidate).toBeDefined();
+            expect(rows.map(row => row.candidate.id)).toContain(nonStarterCandidate.id);
+        });
     });
 
     /**

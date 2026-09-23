@@ -66,10 +66,7 @@ describe('BDD scenario markers', () => {
             }
         }
 
-        expect(backlog).toEqual([
-            'verified colman-graves.feature Scenario: The verdict follows a successful average fit',
-            'verified colman-graves.feature Scenario: All available tags are shown in Best Matches suggestions',
-        ]);
+        expect(backlog).toEqual([]);
     });
 
     test('keeps cited E2E test ids honest', async () => {

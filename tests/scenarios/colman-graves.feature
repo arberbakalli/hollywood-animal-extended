@@ -272,8 +272,8 @@ Feature: Script Evaluation — Colman Graves
     Then the element is removed from the Graves script
     And a message names the element that was removed
 
-  # [verified] The verdict label and tone are banded off the average fit,
-  # with "Success" at 4.0 and above.
+  # [automated] Unit coverage in tests/graves.test.js pins verdict label and
+  # tone bands, including "Success" at 4.0 and above.
   Scenario: The verdict follows a successful average fit
     Given a script whose average fit is 4.2
     When the user evaluates the script
@@ -328,8 +328,9 @@ Feature: Script Evaluation — Colman Graves
     When the user generates Best Additions and nothing is found at any threshold
     Then the minimum fit control still reads "4.0+"
 
-  # [verified] Starting Tags filter was removed; all available tags (except
-  # excluded ones) are shown in suggestions. Single source of truth is Script Lab.
+  # [automated] Unit coverage in tests/graves-best-matches.test.js pins that
+  # Best Matches additions are not limited to the Starting Tags deck. Single
+  # source of truth is Script Lab.
   Scenario: All available tags are shown in Best Matches suggestions
     Given the user has evaluated a script
     When the user generates best matches

@@ -207,6 +207,17 @@ describe('Graves Evaluation', () => {
         expect(evaluation.movieScores.artistic).toBeGreaterThan(0);
     });
 
+    test.each([
+        [4.0, 'Success', 'success'],
+        [3.5, 'Common', 'accent'],
+        [3.0, 'Risky', 'danger'],
+        [2.99, 'Failed', 'danger'],
+    ])('Graves verdict for an average fit of %s is %s', (rawAverage, label, tone) => {
+        const verdict = h.call('HACGravesAnalysis.getGravesVerdict', rawAverage);
+
+        expect(verdict).toMatchObject({ label, tone });
+    });
+
     test('Generate Best Matches works from one seed element', async () => {
         const result = await h.evaluate(`(async () => {
             const feedback = ${buildGravesBestMatchesDom(`[
