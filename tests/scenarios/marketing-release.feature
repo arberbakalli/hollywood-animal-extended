@@ -119,7 +119,8 @@ Feature: Marketing and Release
     And recommended advertisers are ranked from highest to lowest
     And a recommended advertisement duration is given
 
-  # [verified] The audience panel has a High / Moderate Interest legend.
+  # [automated] TC04-000027. The audience panel has a High / Moderate Interest
+  # legend and renders audience pills after analysis.
   Scenario: The target audience distinguishes interest levels
     Given the user has analysed a script
     Then audiences are marked as high or moderate interest
@@ -195,7 +196,7 @@ Feature: Marketing and Release
   # The percentages are separately pinned against that file.
   Scenario: The holiday bonus affects only the opening week
     Given the user has selected a holiday release window
-    Then weeks 3 through 8 match their unboosted figures
+    Then weeks 2 through 8 match their unboosted figures
 
   # [verified] Behemoth boost applies regardless of commercial score. The slower
   # decay rule is independent and only applies when score > 9. Pinned by
@@ -223,27 +224,27 @@ Feature: Marketing and Release
     When the user raises the commercial score to 9.1
     Then week 3 shows the boost and uses the slower decay rate
 
-  # [verified] Studio policy status messaging shows the user exactly what effects
-  # are active based on the current state (budget + score gates). Confirmed in app.
+  # [automated] TC04-000028. Studio policy status messaging shows the user
+  # exactly what effects are active based on the current state.
   Scenario: Behemoth status shows boost-only when score below 9
     When the user sets the commercial score to 8.0
     And the user enables the Behemoth studio policy
     Then the studio policy status reads "Behemoth: +25% Boost Active (Slower decay at commercial 9+)"
 
-  # [verified] Behemoth status shows both effects when score exceeds 9.
+  # [automated] TC04-000028. Behemoth status shows both effects when score exceeds 9.
   Scenario: Behemoth status shows boost plus decay when score above 9
     When the user sets the commercial score to 10.0
     And the user enables the Behemoth studio policy
     Then the studio policy status reads "Behemoth: +25% Boost + Slower Decay Active"
 
-  # [verified] Boutique messaging appears when enabled, showing decay status.
+  # [automated] TC04-000028. Boutique messaging appears when enabled, showing decay status.
   Scenario: Boutique status messaging tracks artistic score threshold
     When the user sets the artistic score to 8.0
     And the user enables the Boutique studio policy
     Then the studio policy status reads "Boutique: Slower Decay at artistic 9+"
     And the artistic score is displayed in the distribution info
 
-  # [verified] When both studio policies are active, both show in status.
+  # [automated] TC04-000028. When both studio policies are active, both show in status.
   Scenario: Both Behemoth and Boutique messages appear when both active
     When the user sets the commercial score to 10.0
     And the user sets the artistic score to 10.0

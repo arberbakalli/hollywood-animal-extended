@@ -118,7 +118,7 @@ Feature: Build for Target
     When the user types 5 into the budget number field
     Then the budget slider reads 5
 
-  # [verified] 2026-09-22. The reachable path the previous note was missing: the
+  # [automated] TC05-000017. The reachable path the previous note was missing: the
   # generator returns nothing when the surviving pool cannot fill the budget,
   # because each candidate combination is discarded unless it spends the budget
   # in full. Measured directly — three story elements against a budget of ten
@@ -130,14 +130,12 @@ Feature: Build for Target
     When the user searches for top combinations
     Then an empty state explains that nothing matched
 
-  # [verified] 2026-09-22, by reading findTargetedCombinations and confirming in
-  # the app. NOT automated: this was briefly marked automated against
+  # [automated] TC05-000016, by reading findTargetedCombinations and confirming in
+  # the app through Playwright. This was briefly marked automated against
   # "an advertiser selection wins over an audience selection" in
   # tests/build-for-target.test.js, but that test asserted a resolveAgencies
   # copy declared inside the test file rather than the product, and was removed
-  # for exactly that reason. Covering this for real needs the agency resolution
-  # lifted out of findTargetedCombinations, or a Playwright test — it is a
-  # genuine gap, not a covered behaviour.
+  # for exactly that reason. The real coverage now drives the UI.
   #
   # Corrected 2026-09-22. This asked for results reflecting BOTH constraints,
   # which the app has never done: findTargetedCombinations reads

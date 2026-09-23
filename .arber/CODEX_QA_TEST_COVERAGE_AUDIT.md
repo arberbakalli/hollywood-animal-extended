@@ -135,23 +135,25 @@ Date: 2026-09-18
   rule is settled and recorded in docs/GAME_RULES.md section 5: one exclusion
   list feeds every context, a ban removes the element everywhere at once, and a
   lifted ban restores it with no reload. Pinned by TC09-000018.
-- Marketing audience interest legend: verified in prose, but not yet automated.
-- Holiday bonus later-week behavior: currently marked unverified because the
-  exact game-file rule is not proven.
+- Graves unavailable-Setting message: **parked for owner decision.** The global
+  exclusion rule is settled, but the UI copy that explains "Script Lab
+  exclusions are hiding this choice" is still undecided.
+- ~~Marketing audience interest legend~~ - **closed 2026-09-23.** Pinned by
+  TC04-000027.
+- ~~Holiday bonus later-week behavior~~ - **closed 2026-09-23.** Owner confirmed
+  the bonus affects opening week only; TC04-000019 now asserts weeks 2-8 remain
+  unchanged.
 - ~~Build for Target no-match empty state~~ - **closed 2026-09-22.** The path
   exists: the generator discards any combination that does not spend the budget
   in full, so a pool too thin to fill it returns nothing. Measured - three story
   elements against a budget of ten yields zero combinations where the full pool
   yields twenty. Reached by excluding most story elements, or raising Max
   Element Pool past the remaining supply.
-- Build for Target with both audience and advertiser selected: semantics are
-  settled - `findTargetedCombinations` reads `if (advertisers) ... else if
-  (audiences)`, so an advertiser overrides the audience rather than narrowing
-  with it. The scenario records that and is `[verified]`. Still a real coverage
-  gap: the test that claimed to cover it asserted a `resolveAgencies` copy
-  declared inside the test file, and was rightly removed. Covering it needs the
-  agency resolution lifted out of `findTargetedCombinations`, or a Playwright
-  test.
+- ~~Build for Target with both audience and advertiser selected~~ - **closed
+  2026-09-23.** Semantics are settled:
+  `findTargetedCombinations` reads `if (advertisers) ... else if (audiences)`,
+  so an advertiser overrides the audience rather than narrowing with it. Pinned
+  through the UI by TC05-000016.
 
 ## QA Recommendation
 

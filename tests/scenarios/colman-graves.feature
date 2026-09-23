@@ -206,10 +206,10 @@ Feature: Script Evaluation — Colman Graves
     When the next ten suggestions are revealed
     Then the first ten remain in their original order
 
-  # [verified] Watched in the app on 2026-09-19 with Action seeded: the panel
-  # opened with 10 rows and "Show more suggestions (122 more available)"; one
-  # click took it to 20 rows, left the first ten untouched, and relabelled the
-  # control to 112. No spec clicks the button yet, so this is not [automated].
+  # [automated] TC03-000031. Watched in the app on 2026-09-19 with Action
+  # seeded, then pinned by Playwright: the panel opens with 10 rows, the Show
+  # more label names remaining suggestions, and the next page preserves the
+  # first ten rows.
   Scenario: The Show more control names how many suggestions remain
     Given more than ten suggestions qualify
     When the user generates best matches
@@ -279,9 +279,9 @@ Feature: Script Evaluation — Colman Graves
     When the user evaluates the script
     Then the verdict reads "Success"
 
-  # [verified] Pair Analysis panel shows all element pair scores grouped by
+  # [automated] TC03-000032 covers the rendered Pair Analysis bands. Band
   # success band: successful (≥4.0), common (2.0-4.0), unsuccessful (<2.0).
-  # Band thresholds are pinned by tests/graves.test.js; no e2e spec yet.
+  # thresholds and in-band ranking are pinned by tests/graves.test.js.
   Scenario: Pair Analysis shows element combinations grouped by success band
     Given the user has evaluated a script
     Then the Pair Analysis panel is visible
@@ -290,8 +290,8 @@ Feature: Script Evaluation — Colman Graves
     And unsuccessful pairs are listed with a red band
     And pairs within each band are ranked from highest to lowest score
 
-  # [verified] Band titles show pair counts and are clickable to collapse/expand,
-  # reducing visual bloat in Swap Suggestions while keeping all data accessible.
+  # [automated] TC03-000032. Band titles show pair counts and are clickable to
+  # collapse/expand, reducing visual bloat while keeping all data accessible.
   Scenario: Pair Analysis bands are collapsible with pair counts
     Given the user has evaluated a script
     When the user views the Pair Analysis panel
