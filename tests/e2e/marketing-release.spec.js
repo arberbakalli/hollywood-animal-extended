@@ -672,7 +672,7 @@ test.describe('Marketing and Release — Build for Target', () => {
   });
 
   // TC05-000016 covers the override itself. This covers whether the user can
-  // see it coming: the label says "Or Select Advertiser", but both lists stayed
+  // see it coming: the label read "Or Select Advertiser", but both lists stayed
   // live, so an audience could be picked and then silently discarded. Measured
   // against a real 158-ban profile - selecting both returned results identical
   // to the advertiser alone, with nothing on screen saying so.

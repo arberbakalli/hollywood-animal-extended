@@ -194,13 +194,28 @@ place to go stale.
 
 ---
 
+### Holiday bonuses
+
+A week is simply the game's unit of time — roughly four to a month. A holiday
+lifts **only the week it falls in**, by its own percentage. Release into that
+week and that week is boosted; the weeks after it decay normally, from the
+unboosted base, so nothing downstream moves.
+
+The per-demographic percentages are game-file sourced, extracted from
+`Configs/Holidays.json` and pinned against it by `tests/holiday-release.test.js`.
+`audienceBonuses` is keyed `AUDIENCE|type` (0 base, 1 artistic, 2 commercial),
+all three carrying the same value, so type 0 is the number; a demographic the
+game omits scores zero.
+
+> Scope confirmed by the owner against the game on 2026-09-23, after the
+> extraction settled the amounts but not the duration — `Holidays.json` has no
+> week dimension at all. Weeks 1, 2 and 3+ are each asserted separately.
+
+---
+
 ## 6. Not settled
 
 Do not encode these as rules. They need evidence, not a decision.
-
-- **Holiday bonus scope.** The app applies it to week 1 alone. This is an
-  assumption traced to no game file. Confirm against a real release before
-  trusting weeks 2–8.
 - **Attendance / occupancy.** Deliberately not modelled. The calculator outputs
   demand in screenings and assumes it is met; the game reports occupancy against
   400 seats per show. Deriving it needs a viewers model that exists nowhere in

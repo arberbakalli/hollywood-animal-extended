@@ -1633,6 +1633,10 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     margin-bottom: 20px;
 }
 
+.targeted-field-help {
+    margin: -6px 0 12px;
+}
+
 .targeted-field-label {
     display: block;
     margin-bottom: 12px;

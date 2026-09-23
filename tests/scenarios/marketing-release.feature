@@ -180,10 +180,19 @@ Feature: Marketing and Release
     When the user selects that same holiday again
     Then the distribution grid returns to its unboosted figures
 
-  # [unverified] ASSUMPTION, not traced to any extracted file: the holiday bonus
-  # is applied to week 1 alone. Release timing plausibly moves the opening rather
-  # than the whole run, but nothing in the game data states this. Confirm against
-  # a real release before trusting the later weeks.
+  # [automated] tests/holiday-release.test.js asserts each week separately: a
+  # holiday lifts week 1 by its bonus, week 2 never moves whatever the holiday,
+  # and weeks 3+ are untouched because they decay from week 2.
+  #
+  # Confirmed by the owner against the game on 2026-09-23. A week is simply the
+  # game's unit of time, and a holiday lifts only the week it falls in - release
+  # into that week and that week is boosted, while the weeks after it decay from
+  # the unboosted base.
+  #
+  # This was marked unverified because the extraction settled the amounts but
+  # not the duration: Configs/Holidays.json carries per-demographic percentages
+  # and no week dimension at all, so the game file could never have answered it.
+  # The percentages are separately pinned against that file.
   Scenario: The holiday bonus affects only the opening week
     Given the user has selected a holiday release window
     Then weeks 3 through 8 match their unboosted figures

@@ -42,7 +42,9 @@ Feature: Build for Target
     Then the results panel is hidden
     And the audience selections are cleared
 
-  # [automated] Tags are optional; the label says "Leave Empty for All".
+  # [automated] These are locks: anything picked here appears in every
+  # combination. The label read "Add Tags (Optional - Leave Empty for All)",
+  # which never said all what; it now names the effect.
   Scenario: Narrowing the search with optional tags
     Given the user has selected a target audience
     When the user adds a story element to the tag builder
