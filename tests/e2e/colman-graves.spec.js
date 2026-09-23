@@ -217,7 +217,8 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('resultsSection', 'ColmanGraves').verifyState('hidden');
   });
 
-  // Guard: the required categories alone are only three elements.
+  // Guard: the required categories are three tags but only ONE story element -
+  // Genre and Setting are context and spend no budget (GAME_RULES.md section 1).
   test('TC03-000004 fewer than five elements is refused with the count', async ({ steps }) => {
     for (const select of ['genreSelect', 'settingSelect', 'protagonistSelect']) {
       await steps.selectDropdown(select, 'ColmanGraves', FIRST_OPTION);
@@ -226,7 +227,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('evaluateButton', 'ColmanGraves').click();
 
     await steps.on('feedbackMessage', 'ColmanGraves').verifyTextContains('at least 5 story elements');
-    await steps.on('feedbackMessage', 'ColmanGraves').verifyTextContains('You selected 3');
+    await steps.on('feedbackMessage', 'ColmanGraves').verifyTextContains('You selected 1');
     await steps.on('resultsSection', 'ColmanGraves').verifyState('hidden');
   });
 
@@ -578,5 +579,86 @@ test.describe('Script Evaluation — Colman Graves', () => {
 
     expect(hiddenFocusedPanelId).toBeNull();
     expect(ariaWarnings).toEqual([]);
+  });
+  /**
+   * Regression, reported 2026-09-23: a legal nine-element script was refused as
+   * "You selected 11". Both Graves guards counted raw tags, so Genre and Setting
+   * — context that spends no budget (GAME_RULES.md section 1) — were charged
+   * against the 5..10 story-element bounds.
+   *
+   * This is the reporter's script shape exactly: 11 tags, 9 story elements.
+   */
+  const THEMES = [
+    'THEME_TREASURE_HUNT',
+    'THEME_LOVE_TRIANGLE',
+    'THEME_LONG_JOURNEY',
+    'THEME_A_CURSE',
+    'THEME_STRUGGLE_FOR_BETTER_LIFE',
+    'THEME_WAR_IS_HELL',
+    'THEME_UNREQUITED_LOVE',
+  ];
+
+  // Only row 1 and row 2 are named in the element repository, so further rows
+  // are reached positionally inside the category container.
+  const buildScriptWithThemes = async (steps, page, themeCount) => {
+    for (const [select, value] of [
+      ['genreSelect', 'THRILLER'],
+      ['settingSelect', 'MODERN_AMERICAN_CITY'],
+      ['protagonistSelect', 'PROTAGONIST_OUTCAST'],
+      ['antagonistSelect', 'ANTAGONIST_HEARTLESS_BUREAUCRAT'],
+      ['supportingCharacterSelect', 'SUPPORTINGCHARACTER_PARENT_FIGURE'],
+      ['finaleSelect', 'FINALE_ANTAGONIST_GETS_PUNISHED'],
+    ]) {
+      await steps.selectDropdown(select, 'ColmanGraves', {
+        type: DropdownSelectType.VALUE,
+        value,
+      });
+    }
+
+    // Adding a row re-renders the category container and clears values already
+    // set, so every row is created first and only then filled.
+    for (let index = 1; index < themeCount; index += 1) {
+      await steps.on('themeEventAddButton', 'ColmanGraves').click();
+    }
+
+    const rows = page.locator('#inputs-theme-event-graves select.tag-selector');
+    await expect(rows).toHaveCount(themeCount);
+
+    for (let index = 0; index < themeCount; index += 1) {
+      await rows.nth(index).selectOption(THEMES[index]);
+    }
+
+    // Guard the helper itself: a half-filled script would make the bounds test
+    // pass for the wrong reason.
+    expect(await rows.evaluateAll(nodes => nodes.map(node => node.value)))
+      .toEqual(THEMES.slice(0, themeCount));
+  };
+
+  test('TC03-000035 a nine-element script is evaluated, not refused for its tag count', async ({ steps, page }) => {
+    // 5 themes + Protagonist + Antagonist + Supporting Character + Finale = 9
+    // story elements, carried by 11 tags once Genre and Setting are counted.
+    await buildScriptWithThemes(steps, page, 5);
+
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+
+    const feedback = await steps.on('feedbackMessage', 'ColmanGraves').getText();
+    expect(feedback).not.toContain('evaluates up to 10');
+  });
+
+  /**
+   * The upper bound had no e2e coverage at all, while colman-graves.feature
+   * marked the scenario [automated]. Eleven genuine story elements: seven
+   * themes plus the four mandatory-or-chosen singles.
+   */
+  test('TC03-000036 eleven story elements is refused with the story-element count', async ({ steps, page }) => {
+    await buildScriptWithThemes(steps, page, 7);
+
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+
+    await steps.on('feedbackMessage', 'ColmanGraves').verifyTextContains('evaluates up to 10 story elements');
+    await steps.on('feedbackMessage', 'ColmanGraves').verifyTextContains('You selected 11');
+    await steps.on('resultsSection', 'ColmanGraves').verifyState('hidden');
   });
 });

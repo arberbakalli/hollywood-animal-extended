@@ -49,13 +49,18 @@
             return;
         }
 
-        if (selectedTags.length < 5) {
-            showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements for a real script evaluation. You selected ${selectedTags.length}.`, 'accent');
+        // The bounds are on story elements, not on tags: Genre and Setting are
+        // context and spend no budget. Counting raw tags rejected a legal
+        // nine-element script as eleven.
+        const storyElements = HACGravesAnalysis.storyElementsOf(selectedTags);
+
+        if (storyElements.length < 5) {
+            showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements for a real script evaluation. You selected ${storyElements.length}.`, 'accent');
             return;
         }
 
-        if (selectedTags.length > 10) {
-            showFeedbackMessage('gravesFeedbackMessage', `Colman evaluates up to 10 story elements at once. You selected ${selectedTags.length}.`, 'accent');
+        if (storyElements.length > 10) {
+            showFeedbackMessage('gravesFeedbackMessage', `Colman evaluates up to 10 story elements at once. You selected ${storyElements.length}.`, 'accent');
             return;
         }
 

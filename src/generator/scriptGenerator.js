@@ -164,7 +164,7 @@
         }
 
         // Validate
-        const scoringFixed = fixedTags.filter(t => t.category !== "Genre" && t.category !== "Setting");
+        const scoringFixed = HACGravesAnalysis.storyElementsOf(fixedTags);
 
         if (scoringFixed.length > targetCount) {
             showFeedbackMessage(

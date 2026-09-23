@@ -114,7 +114,7 @@ describe('Graves Evaluation', () => {
         expect(result).toContain('A script needs at least one Setting, Protagonist.');
     });
 
-    test('Evaluate Script rejects fewer than 5 selected tags after required categories are present', async () => {
+    test('Evaluate Script rejects fewer than 5 story elements after required categories are present', async () => {
         const result = await h.evaluate(`(async () => {
             const feedback = ${buildGravesBestMatchesDom(`[
                 { value: 'ACTION', dataset: { category: 'Genre' } },
@@ -127,7 +127,8 @@ describe('Graves Evaluation', () => {
         })()`);
 
         expect(result).toContain('at least 5 story elements');
-        expect(result).toContain('You selected 3');
+        // Three tags, but Genre and Setting are context: one story element.
+        expect(result).toContain('You selected 1');
     });
 
     test('Graves pair bands classify real compatibility pairs by production thresholds', () => {
@@ -260,13 +261,13 @@ describe('Graves Evaluation', () => {
         expect(result.rows).toBeGreaterThan(0);
     });
 
-    test('Generate Best Matches rejects more than 10 selected elements', async () => {
+    test('Generate Best Matches rejects more than 10 story elements', async () => {
         const result = await h.evaluate(`(async () => {
             const feedback = ${buildGravesBestMatchesDom(`[
                 { value: 'ACTION', dataset: { category: 'Genre' } },
                 { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
                 { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } },
-                ...Array.from({ length: 8 }, (_, index) => ({
+                ...Array.from({ length: 10 }, (_, index) => ({
                     value: 'TEST_TAG_' + index,
                     dataset: { category: 'Supporting Character' }
                 }))
@@ -280,13 +281,13 @@ describe('Graves Evaluation', () => {
         expect(result).toContain('You selected 11');
     });
 
-    test('Evaluate Script rejects more than 10 selected elements', async () => {
+    test('Evaluate Script rejects more than 10 story elements', async () => {
         const result = await h.evaluate(`(async () => {
             const feedback = ${buildGravesBestMatchesDom(`[
                 { value: 'ACTION', dataset: { category: 'Genre' } },
                 { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
                 { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } },
-                ...Array.from({ length: 8 }, (_, index) => ({
+                ...Array.from({ length: 10 }, (_, index) => ({
                     value: 'TEST_TAG_' + index,
                     dataset: { category: 'Supporting Character' }
                 }))

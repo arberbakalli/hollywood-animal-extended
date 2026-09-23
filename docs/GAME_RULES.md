@@ -29,8 +29,25 @@ plus its context, never a fixed number.
 Colman Graves accepts a script only when Genre, Setting and Protagonist are all
 present *and* the story-element count is between 5 and 10.
 
-> Enforced in: `src/evaluation/gravesAnalysis.js`, `src/marketing/targetedAds.js`
-> (`isStoryElement`, `TARGETED_MANDATORY_CATEGORIES`).
+> **The rule is one function:** `isStoryElement` / `storyElementsOf` in
+> `src/evaluation/gravesAnalysis.js`. Every caller delegates to it.
+>
+> Enforced at the user-facing boundaries in:
+> - `src/evaluation/gravesAudience.js` — the Evaluate 5..10 bounds
+> - `src/evaluation/gravesBestMatches.js` — the Best Matches bound and Add button
+> - `src/marketing/targetedAds.js` — the Build for Target budget
+> - `src/generator/scriptGenerator.js` — the locked-tag validation
+>
+> Two modules keep a deliberate private copy because they load earlier or take
+> no globals: `gravesBestMatchesEngine.js` and `movieScoreEstimator.js`. Both are
+> allowlisted in `tests/story-element-rule.test.js`, which fails if any *other*
+> module starts filtering Genre and Setting by hand.
+>
+> **Counting raw tags instead of story elements is the recurring bug here.** It
+> shipped in `gravesAudience.js` and refused a legal nine-element script as
+> "You selected 11" (2026-09-23), and it survived because two tests asserted
+> that rejection. The count in any user-facing message is a story-element
+> count, never a tag count.
 
 ### Genre is uncapped
 

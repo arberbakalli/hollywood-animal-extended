@@ -116,7 +116,7 @@
     // Genre and Setting are structural picks every script carries, so they never
     // spend the Max Element Pool budget.
     function scoringElementsOf(tags) {
-        return tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting');
+        return HACGravesAnalysis.storyElementsOf(tags);
     }
 
     /**
@@ -210,7 +210,7 @@
     const TARGETED_MANDATORY_CATEGORIES = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale'];
 
     function isStoryElement(tag) {
-        return tag.category !== 'Genre' && tag.category !== 'Setting';
+        return HACGravesAnalysis.isStoryElement(tag);
     }
 
     function countByCategory(tags) {

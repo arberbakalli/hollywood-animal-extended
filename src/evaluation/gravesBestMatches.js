@@ -127,10 +127,7 @@
     }
 
     function atElementBudget(selectedTags) {
-        const budgeted = selectedTags.filter(tag =>
-            tag.category !== 'Genre' && tag.category !== 'Setting'
-        ).length;
-        return budgeted >= maxElementPool();
+        return HACGravesAnalysis.storyElementsOf(selectedTags).length >= maxElementPool();
     }
 
     function elementBudgetMessage() {
@@ -218,9 +215,7 @@
 
         // Only a genuine Add grows the pool. A Swap trades within a category,
         // and Genre and Setting are context rather than budgeted elements.
-        const growsPool = label === 'Add'
-            && candidate.category !== 'Genre'
-            && candidate.category !== 'Setting';
+        const growsPool = label === 'Add' && HACGravesAnalysis.isStoryElement(candidate);
         const blocked = growsPool && atElementBudget(selectedTags);
         const blockedAttrs = blocked
             ? ` disabled aria-disabled="true" title="This script already uses all ${maxElementPool()} story elements it is allowed. Raise Max Element Pool, or swap an element instead."`
@@ -542,8 +537,10 @@
             return;
         }
 
-        if (selectedTags.length > 10) {
-            showFeedbackMessage('gravesFeedbackMessage', `Colman suggests matches for up to 10 story elements at once. You selected ${selectedTags.length}.`, 'accent');
+        const storyElements = HACGravesAnalysis.storyElementsOf(selectedTags);
+
+        if (storyElements.length > 10) {
+            showFeedbackMessage('gravesFeedbackMessage', `Colman suggests matches for up to 10 story elements at once. You selected ${storyElements.length}.`, 'accent');
             return;
         }
 

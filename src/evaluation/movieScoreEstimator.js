@@ -1,5 +1,8 @@
 (function(global) {
     function getScoringElementCount(tags) {
+        // Deliberately standalone: this module is unit-tested in isolation and
+        // loads before gravesAnalysis.js, so it cannot reach for the shared
+        // helper. Pinned by "getScoringElementCount excludes Genre and Setting".
         return tags.filter(t => t.category !== "Genre" && t.category !== "Setting").length;
     }
 

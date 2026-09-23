@@ -85,12 +85,14 @@ Feature: Script Evaluation — Colman Graves
     Then a message names the missing Genre
     And no results are shown
 
-  # [automated] Guard: the three required categories alone are only three elements.
+  # [automated] TC03-000004. Genre and Setting are context and spend no budget,
+  # so the three required categories are ONE story element, not three. The count
+  # in the message used to be the raw tag count.
   Scenario: Fewer than five elements is refused with the count
     Given only a Genre, Setting and Protagonist are selected
     When the user evaluates the script
     Then a message says Colman needs at least 5 story elements
-    And the message states that 3 were selected
+    And the message states that 1 was selected
     And no results are shown
 
   # [automated] The minimum-fit filter defaults to 4.0+, which an arbitrary
@@ -156,12 +158,24 @@ Feature: Script Evaluation — Colman Graves
     Then the results are hidden
     And no story element remains selected
 
-  # [automated] More than ten elements is refused with the count.
+  # [automated] TC03-000036. Eleven STORY elements - seven Theme & Events plus
+  # Protagonist, Antagonist, Supporting Character and Finale - carried by
+  # thirteen tags. This scenario was marked [automated] for months with no spec
+  # asserting it.
   Scenario: More than ten elements is refused
     Given eleven story elements are selected
     When the user evaluates the script
     Then a message says Colman evaluates up to 10 story elements at once
     And the message states that 11 were selected
+
+  # [automated] TC03-000035. The regression reported 2026-09-23: eleven tags
+  # carrying nine story elements is a legal script, and was being refused as
+  # "You selected 11" because both guards counted raw tags.
+  Scenario: A nine-element script is evaluated, whatever its tag count
+    Given a script of one Genre, one Setting and nine story elements
+    When the user evaluates the script
+    Then the results are shown
+    And no message says the script has too many elements
 
   # [automated] Category filter offers all seven categories and restricts rows.
   Scenario: Restricting best matches to one category

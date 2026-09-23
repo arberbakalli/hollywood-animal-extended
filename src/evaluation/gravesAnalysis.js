@@ -158,6 +158,20 @@
         };
     }
 
+    /**
+     * Genre and Setting are context every script carries: they occupy no budget
+     * (GAME_RULES.md section 1). This is the ONE copy of that rule. Panels
+     * delegate here rather than re-filtering, because three separate copies is
+     * exactly how Evaluate came to reject a nine-element script as eleven.
+     */
+    function isStoryElement(tag) {
+        return Boolean(tag) && tag.category !== 'Genre' && tag.category !== 'Setting';
+    }
+
+    function storyElementsOf(tags) {
+        return (tags || []).filter(isStoryElement);
+    }
+
     function formatFinalRating(value) {
         if (value >= 10) return "10.0";
         return formatMovieScore(value);
@@ -165,6 +179,8 @@
 
     global.HACGravesAnalysis = {
         calculateGravesAudience,
+        isStoryElement,
+        storyElementsOf,
         findGravesConflicts,
         findGravesPairsByBand,
         formatFinalRating,
