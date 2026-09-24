@@ -1,8 +1,17 @@
-(function(global) {
-    "use strict";
+// Age & Gender Appeal Panel Handler
+// Create stub immediately so appShell.js doesn't error
+if (!window.HACAnalysisAgeRoleBreakdown) {
+    window.HACAnalysisAgeRoleBreakdown = {
+        setupAgeRoleBreakdownListeners: () => {}
+    };
+}
+
+// Populate with actual implementation
+window.HACAnalysisAgeRoleBreakdown = (() => {
+    'use strict';
 
     let ageRoleData = null;
-    const genderState = {}; // Track selected gender per role type: { protagonist: 'M', antagonist: 'M', supporting: 'M' }
+    const genderState = { protagonist: 'M', antagonist: 'M', supporting: 'M' };
 
     const ROLE_COLORS = {
         'protagonist': '#55EA83',
@@ -17,8 +26,8 @@
     };
 
     const GENDER_BUTTON_COLORS = {
-        'M': { border: '#5ba3d0', bg: 'rgba(91, 163, 208, 0.15)', text: '#5ba3d0' },      // Light blue
-        'F': { border: '#d976a8', bg: 'rgba(217, 118, 168, 0.15)', text: '#d976a8' }     // Light pink
+        'M': { border: '#5ba3d0', bg: 'rgba(91, 163, 208, 0.15)', text: '#5ba3d0' },
+        'F': { border: '#d976a8', bg: 'rgba(217, 118, 168, 0.15)', text: '#d976a8' }
     };
 
     async function loadAgeRoleData() {
@@ -41,7 +50,11 @@
             '#inputs-protagonist-generator .tag-selector:not([value=""])'
         );
         if (protagonistSelect && protagonistSelect.value) {
-            roles.push({ type: 'protagonist', id: protagonistSelect.value, displayName: protagonistSelect.options[protagonistSelect.selectedIndex].text });
+            roles.push({
+                type: 'protagonist',
+                id: protagonistSelect.value,
+                displayName: protagonistSelect.options[protagonistSelect.selectedIndex].text
+            });
         }
 
         // Antagonist
@@ -49,7 +62,11 @@
             '#inputs-antagonist-generator .tag-selector:not([value=""])'
         );
         if (antagonistSelect && antagonistSelect.value) {
-            roles.push({ type: 'antagonist', id: antagonistSelect.value, displayName: antagonistSelect.options[antagonistSelect.selectedIndex].text });
+            roles.push({
+                type: 'antagonist',
+                id: antagonistSelect.value,
+                displayName: antagonistSelect.options[antagonistSelect.selectedIndex].text
+            });
         }
 
         // Supporting Characters
@@ -58,9 +75,12 @@
         );
         supportingSelects.forEach(select => {
             if (select.value) {
-                // Normalize ID: convert SUPPORTINGCHARACTER_ to SUPPORTING_CHARACTER_
                 const normalizedId = select.value.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_');
-                roles.push({ type: 'supporting', id: normalizedId, displayName: select.options[select.selectedIndex].text });
+                roles.push({
+                    type: 'supporting',
+                    id: normalizedId,
+                    displayName: select.options[select.selectedIndex].text
+                });
             }
         });
 
@@ -125,10 +145,6 @@
         genderState[roleType] = gender;
     }
 
-    function getGender(roleType) {
-        return genderState[roleType] || 'M';
-    }
-
     function buildAgeTable(roles, ageGroups) {
         if (roles.length === 0) {
             return '<p style="color: #999; text-align: center; padding: 20px;">Select at least one role to see age appeal</p>';
@@ -148,7 +164,7 @@
 
         let html = '<div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">';
 
-        // Add header row
+        // Header row
         html += '<div style="display: flex; align-items: center; padding: 10px 15px; gap: 15px; border-bottom: 1px solid #444; margin-bottom: 5px;">';
         html += '<div style="flex: 0 0 120px; color: #999; font-weight: 600; font-size: 12px;">Role</div>';
         html += '<div style="flex: 1; text-align: center; color: #999; font-weight: 600; font-size: 12px;">Young</div>';
@@ -168,11 +184,8 @@
                 const borderColor = ROLE_BORDER_COLORS[roleType];
 
                 html += `<div style="display: flex; align-items: center; padding: 12px 15px; background: ${bgColor}; border-left: 3px solid ${borderColor}; border-radius: 4px; gap: 15px;">`;
-
-                // Role name (colored by role type)
                 html += `<div style="flex: 0 0 120px; color: ${roleColor}; font-weight: 500;">${role.displayName}</div>`;
 
-                // Age ratings (colored by rating: Good=dark green, Neutral=dark gray, Bad=dark red)
                 ['YOUNG', 'MID', 'OLD'].forEach(ageGroup => {
                     const rating = roleData[ageGroup];
                     const ratingText = rating || '—';
@@ -180,15 +193,12 @@
                     html += `<div style="flex: 1; text-align: center; color: ${ratingColor}; font-weight: 500; font-size: 14px;">${ratingText}</div>`;
                 });
 
-                // Gender toggle container (on the right)
                 html += `<div id="gender-toggle-${roleType}-${role.id}" style="flex: 0 0 auto; width: 60px; text-align: center;"></div>`;
-
                 html += '</div>';
             }
         });
 
         html += '</div>';
-
         return html;
     }
 
@@ -217,14 +227,12 @@
         const contentDiv = document.getElementById('age-role-content');
         if (!contentDiv) return;
 
-        // Header
         let headerHtml = '<p style="margin: 0 0 15px 0; color: #999; font-size: 14px;">Select gender to view age appeal ratings:</p>';
-
         const tableHtml = buildAgeTable(roles, data);
 
         contentDiv.innerHTML = headerHtml + tableHtml;
 
-        // Append gender toggle buttons to each role row
+        // Setup gender toggles
         roles.forEach(role => {
             const toggleContainer = document.getElementById(`gender-toggle-${role.type}-${role.id}`);
             if (toggleContainer) {
@@ -238,13 +246,13 @@
         if (panel) panel.style.display = 'none';
     }
 
-    async function initAgeRoleBreakdown() {
-        // Initialize gender state with defaults
+    function setupAgeRoleBreakdownListeners() {
+        // Initialize gender state
         genderState['protagonist'] = 'M';
         genderState['antagonist'] = 'M';
         genderState['supporting'] = 'M';
 
-        await updateAgeRoleBreakdown();
+        updateAgeRoleBreakdown();
 
         // Listen for role changes
         document.addEventListener('change', (e) => {
@@ -285,22 +293,23 @@
         }
     }
 
-    // Expose to global scope with try-catch to handle early execution
-    if (!global.HACAnalysisAgeRoleBreakdown) {
-        console.log('Setting HACAnalysisAgeRoleBreakdown on global');
-        global.HACAnalysisAgeRoleBreakdown = {
-            setupAgeRoleBreakdownListeners: initAgeRoleBreakdown,
-            update: updateAgeRoleBreakdown,
-            hidePanel: hideAgeRolePanel
-        };
-        console.log('HACAnalysisAgeRoleBreakdown set:', typeof global.HACAnalysisAgeRoleBreakdown);
-    }
+    // Return public API
+    return {
+        setupAgeRoleBreakdownListeners,
+        update: updateAgeRoleBreakdown,
+        hidePanel: hideAgeRolePanel
+    };
+})();
 
-    // Auto-init when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAgeRoleBreakdown);
-    } else {
-        initAgeRoleBreakdown();
+// Auto-init when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.HACAnalysisAgeRoleBreakdown) {
+            window.HACAnalysisAgeRoleBreakdown.setupAgeRoleBreakdownListeners();
+        }
+    });
+} else {
+    if (window.HACAnalysisAgeRoleBreakdown) {
+        window.HACAnalysisAgeRoleBreakdown.setupAgeRoleBreakdownListeners();
     }
-
-})(window);
+}
