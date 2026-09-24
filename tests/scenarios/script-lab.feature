@@ -27,8 +27,9 @@ Feature: Script Lab
     And at least one script card is listed
     And each card shows its story element chips
 
-  # [automated] TC01-000034. When user selects a protagonist or antagonist,
+  # [unverified] When user selects a protagonist or antagonist,
   # display age × gender compatibility breakdown with appeal ratings and insight.
+  # Behavior implemented and unit-tested; e2e coverage pending.
   Scenario: Age-to-role breakdown shows appeal by age and gender
     When the user selects a Protagonist
     Then the age-to-role breakdown panel becomes visible
