@@ -182,3 +182,34 @@ mutation testing (defects reintroduced, tests run, restored).
 Jest 283/283, Playwright 165/165 — both green.
 
 **Commit:** 1cb439e (pushed to origin/main 2026-09-24)
+
+---
+
+## Sprint 1 Progress (2026-09-24)
+
+### Completed
+✅ P1–P6 audits complete (827 lines documentation)
+✅ Three invariant-drift guards in place (panels, repeatable categories, mandatory categories)
+✅ Tests: 283 → 286; all green
+✅ Two new tests with proven teeth (TC05-000019, TC05-000020)
+
+### Remaining (To Close Sprint)
+
+**Two more invariant guards** (planned):
+1. **Bridge exports vs callers** (appShell.js) — exports that callers depend on
+   - Guard: `EXPORTED_FUNCTIONS` constant must match all sites that call `global.HAC*`
+   - Cost: 1 hour | Value: catch if an export is removed while callers remain
+
+2. **Script load order** (index.html) — implicit dependency contract
+   - Guard: assert `DEPENDENCIES` array in comments matches actual parse order
+   - Cost: 1 hour | Value: verify load order is necessary and sufficient
+
+**Extend mutation harness** (`.achilles/mutations.mjs`):
+- Currently: 1 mutation defined (unused)
+- Goal: 5–10 mutations covering budget/exclusion/categorization guards
+- Cost: 2 hours | Value: `npm run test:mutate` validates teeth automatically
+
+### Next Sprint
+- Full P2 audit (all 283 tests)
+- Fix ~20–30 vacuous tests
+- Run P1–P6 quarterly on schedule
