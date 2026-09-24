@@ -608,12 +608,24 @@ select:focus { outline: none; border-color: var(--accent); }
 
 .select-row.has-selected-tag > select.tag-selector,
 select.tag-selector.has-selected-tag {
-    color: var(--success);
-    border-color: var(--success-border);
-    background:
-        linear-gradient(90deg, var(--success-soft), transparent 34%),
-        var(--input-bg);
-    box-shadow: inset 3px 0 0 var(--success);
+    color: var(--category-color);
+    border-color: var(--category-color);
+    background: var(--input-bg);
+    box-shadow: inset 3px 0 0 var(--category-color);
+}
+
+/* Genre selector (gold) */
+select[data-category="Genre"].has-selected-tag {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* Setting (gray/subtle) */
+select[data-category="Setting"].has-selected-tag {
+    color: #888;
+    border-color: #666;
+    box-shadow: inset 3px 0 0 #666;
 }
 
 select.tag-selector option.strong-fit-option,
