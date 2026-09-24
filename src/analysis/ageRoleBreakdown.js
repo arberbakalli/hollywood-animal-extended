@@ -4,10 +4,10 @@
     let ageRoleData = null;
     const genderState = {}; // Track selected gender per role type: { protagonist: 'M', antagonist: 'M', supporting: 'M' }
 
-    const RATING_SCALE = {
-        "Good": "⭐⭐⭐",
-        "Neutral": "⭐⭐",
-        "Bad": "⭐"
+    const ROLE_COLORS = {
+        'protagonist': '#55EA83',
+        'antagonist': '#A1B1FF',
+        'supporting': '#8BEAFF'
     };
 
     async function loadAgeRoleData() {
@@ -136,14 +136,14 @@
 
             if (roleData) {
                 const bgColor = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+                const roleColor = ROLE_COLORS[roleType];
                 html += `<tr style="border-bottom: 1px solid #333; background: ${bgColor};">`;
                 html += `<td style="padding: 10px; color: #ccc;">${role.displayName}</td>`;
 
                 ['YOUNG', 'MID', 'OLD'].forEach(ageGroup => {
                     const rating = roleData[ageGroup];
-                    const stars = RATING_SCALE[rating] || '—';
-                    const ratingColor = rating === 'Good' ? '#55EA83' : rating === 'Neutral' ? '#FFB800' : '#FF6B6B';
-                    html += `<td style="padding: 10px; text-align: center; color: ${ratingColor};">${stars}</td>`;
+                    const ratingText = rating || '—';
+                    html += `<td style="padding: 10px; text-align: center; color: ${roleColor}; font-weight: 500;">${ratingText}</td>`;
                 });
 
                 html += '</tr>';
