@@ -3275,7 +3275,8 @@ option.finale { color: var(--cat-finale); }
 /* Genre: per-genre color in all contexts */
 #group-genre-excluded select.tag-selector.has-selected-tag,
 #group-genre-graves select.tag-selector.has-selected-tag,
-#group-genre-advertisers select.tag-selector.has-selected-tag {
+#group-genre-advertisers select.tag-selector.has-selected-tag,
+#group-genre-generator select.tag-selector.has-selected-tag {
     color: var(--category-color) !important;
 }
 
