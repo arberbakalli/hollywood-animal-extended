@@ -3374,3 +3374,120 @@ option[data-selected-elsewhere="true"] {
 .graves-conflict-row.severity-severe .graves-raw-score { color: #e2574c; }
 .graves-conflict-row.severity-serious .graves-raw-score { color: #e8863c; }
 .graves-conflict-row.severity-mild .graves-raw-score { color: #d4af37; }
+
+/* Age-to-Role Breakdown Panel (Feature 3a) */
+.age-role-breakdown-card {
+    margin-top: 20px;
+}
+
+.age-role-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.18);
+    margin-top: 12px;
+}
+
+.age-role-appeal-table {
+    width: 100%;
+    min-width: 500px;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.age-role-appeal-table th,
+.age-role-appeal-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.16);
+    border-right: 1px solid rgba(212, 175, 55, 0.1);
+    text-align: center;
+}
+
+.age-role-appeal-table th {
+    color: var(--text-main);
+    background: rgba(212, 175, 55, 0.08);
+    font-weight: 800;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.age-role-appeal-table th:first-child,
+.age-role-appeal-table td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: #252525;
+}
+
+.age-group-label {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.appeal-cell {
+    padding: 12px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.appeal-value {
+    font-weight: 600;
+}
+
+.appeal-excellent {
+    background: rgba(85, 234, 131, 0.2);
+    color: #55EA83;
+}
+
+.appeal-very-good {
+    background: rgba(139, 234, 255, 0.2);
+    color: #8BEAFF;
+}
+
+.appeal-good {
+    background: rgba(212, 175, 55, 0.2);
+    color: #d4af37;
+}
+
+.appeal-slightly-good {
+    background: rgba(212, 175, 55, 0.15);
+    color: #b89b2e;
+}
+
+.appeal-neutral {
+    background: rgba(200, 200, 200, 0.15);
+    color: var(--text-muted);
+}
+
+.appeal-slightly-bad {
+    background: rgba(255, 159, 10, 0.2);
+    color: #ff9f0a;
+}
+
+.appeal-bad {
+    background: rgba(255, 79, 79, 0.2);
+    color: #ff4f4f;
+}
+
+.appeal-very-bad {
+    background: rgba(255, 79, 79, 0.3);
+    color: #ff3333;
+}
+
+.appeal-disastrous {
+    background: rgba(226, 87, 76, 0.3);
+    color: #e2574c;
+}
+
+.age-role-insight {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(212, 175, 55, 0.08);
+    border-left: 3px solid rgba(212, 175, 55, 0.5);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    font-weight: 500;
+}

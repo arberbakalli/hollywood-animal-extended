@@ -146,6 +146,23 @@
                         <div id="selectors-container-excluded" class="tag-selector-grid"></div>
                     </div>
 
+                    <div class="divider-line"></div>
+
+                    <!-- AGE-TO-ROLE BREAKDOWN PANEL (Feature 3a) -->
+                    <div id="ageRoleBreakdownPanel" class="card result-card age-role-breakdown-card hidden">
+                        <div class="card-header collapsible-header">
+                            <button id="toggleAgeRoleBreakdownButton" class="header-left collapsible-toggle" type="button" aria-controls="age-role-content" aria-expanded="true" data-toggle="age-role-content">
+                                <span class="chevron rotate-90">›</span>
+                                <span class="collapsible-title">Age & Gender Appeal</span>
+                            </button>
+                        </div>
+                        <div id="age-role-content" class="collapsible-content">
+                            <p id="ageRoleSelectedRole" class="subtitle"></p>
+                            <div id="ageRoleTableContainer" class="age-role-table-wrapper"></div>
+                            <p id="ageRoleInsight" class="age-role-insight"></p>
+                        </div>
+                    </div>
+
                     <div id="generator-actions" class="action-area">
                         <div id="generatorFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="generateScriptsButton" class="analyze-btn" type="button">Generate Scripts</button>
@@ -627,6 +644,7 @@
     <script src="src/marketing/agencySourceMapper.js"></script>
     <script src="src/marketing/marketingPlanner.js"></script>
     <script src="src/marketing/targetedAds.js"></script>
+    <script src="src/analysis/ageRoleBreakdown.js"></script>
     <script src="src/ui/collapsibleSections.js"></script>
     <script src="src/app/appShell.js"></script>
     <script src="script.js"></script>

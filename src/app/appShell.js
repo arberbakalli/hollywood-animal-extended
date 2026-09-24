@@ -66,6 +66,7 @@
         setupSearchListeners();
         setupScoreSync();
         setupGeneratorControls();
+        HACAnalysisAgeRoleBreakdown.setupAgeRoleBreakdownListeners();
 
         // Try to setup distribution, but gracefully handle if elements aren't ready yet
         try {

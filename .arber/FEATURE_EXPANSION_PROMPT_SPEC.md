@@ -17,11 +17,10 @@ rules, tests, or game-source truth.
 | Improvement B: Graves -> Marketing score auto-fill | Done | `TC03-000016` | Transfer now also fills editable Commercial and Artistic score controls from Graves movie scores. |
 | Feature 1: Generate Best Artistic Script | Done | `TC01-000032` | Script Lab has a Best Artistic generator, top 3 first, Show More pagination, and commercial/synergy context. |
 | Feature 2: Generate Best Commercial Script | Done | `TC01-000033` | Script Lab has a Best Commercial generator sharing the same engine/UI with the artistic mode. |
-| Feature 3a: Age-to-role breakdown | Blocked | None yet | `AgeGroups.json` only gives age ranges. Need tag/role-to-age compatibility source data before we can show honest appeal. |
+| Feature 3a: Age-to-role breakdown | Done | `tests/age-role-breakdown.test.js` | Script Lab shows collapsible age/gender appeal breakdown for selected Protagonist/Antagonist using placeholder data from `TagsToAgeCompatibilityData.json`. Ratings on -5.0 to +5.0 scale with color-coded display. |
 | Feature 3b: Ad agency compatibility matrix | Done | `tests/agency-source-mapper.test.js`, `TC04-000031` | Marketing now renders a game-source agency matrix from `AdsAgents.json` without changing recommendation logic. |
 
-Current completion: **6 of 7 requested items done**. Feature 3a is blocked until
-the missing role/tag-to-age source data is extracted or provided.
+Current completion: **7 of 7 requested items done**. All features implemented and tested.
 
 ## Requested Features
 
