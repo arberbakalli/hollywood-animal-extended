@@ -2,25 +2,18 @@
     "use strict";
 
     let ageRoleData = null;
+    const genderState = {}; // Track selected gender per role type: { protagonist: 'M', antagonist: 'M', supporting: 'M' }
 
-    const APPEAL_SCALE = {
-        "-5.0": "Disastrous",
-        "-4.0": "Very Bad",
-        "-3.0": "Bad",
-        "-2.0": "Slightly Bad",
-        "-1.0": "Slightly Bad",
-        "0.0": "Neutral",
-        "1.0": "Slightly Good",
-        "2.0": "Slightly Good",
-        "3.0": "Good",
-        "4.0": "Very Good",
-        "5.0": "Excellent"
+    const RATING_SCALE = {
+        "Good": "⭐⭐⭐",
+        "Neutral": "⭐⭐",
+        "Bad": "⭐"
     };
 
     async function loadAgeRoleData() {
         if (ageRoleData) return ageRoleData;
         try {
-            const response = await fetch('data/TagsToAgeCompatibilityData.json');
+            const response = await fetch('data/age-role-compatibility.json');
             ageRoleData = await response.json();
             return ageRoleData;
         } catch (error) {
@@ -29,100 +22,138 @@
         }
     }
 
-    function getSelectedRoleInGenerator() {
-        const protagonistSelect = document.querySelector(
-            '#inputs-protagonist-generator .tag-selector'
-        );
-        const antagonistSelect = document.querySelector(
-            '#inputs-antagonist-generator .tag-selector'
-        );
+    function getSelectedRoles() {
+        const roles = [];
 
+        // Protagonist
+        const protagonistSelect = document.querySelector(
+            '#inputs-protagonist-generator .tag-selector:not([value=""])'
+        );
         if (protagonistSelect && protagonistSelect.value) {
-            return { type: 'Protagonist', id: protagonistSelect.value };
+            roles.push({ type: 'protagonist', id: protagonistSelect.value, displayName: protagonistSelect.options[protagonistSelect.selectedIndex].text });
         }
+
+        // Antagonist
+        const antagonistSelect = document.querySelector(
+            '#inputs-antagonist-generator .tag-selector:not([value=""])'
+        );
         if (antagonistSelect && antagonistSelect.value) {
-            return { type: 'Antagonist', id: antagonistSelect.value };
+            roles.push({ type: 'antagonist', id: antagonistSelect.value, displayName: antagonistSelect.options[antagonistSelect.selectedIndex].text });
         }
-        return null;
+
+        // Supporting Characters
+        const supportingSelects = document.querySelectorAll(
+            '#inputs-supporting-character-generator .tag-selector'
+        );
+        supportingSelects.forEach(select => {
+            if (select.value) {
+                roles.push({ type: 'supporting', id: select.value, displayName: select.options[select.selectedIndex].text });
+            }
+        });
+
+        return roles;
     }
 
-    function buildAgeRoleTable(roleId, roleData) {
-        const ageGroups = [
-            { key: 'YOUNG', label: 'Young (18-39M / 18-34F)' },
-            { key: 'MID', label: 'Mid (40-59M / 35-49F)' },
-            { key: 'OLD', label: 'Old (60+M / 50+F)' }
-        ];
+    function createGenderToggle(roleType) {
+        const container = document.createElement('div');
+        container.className = 'gender-toggle';
+        container.style.cssText = 'display: flex; gap: 8px; margin-left: auto;';
 
-        const genders = [
-            { key: 'M', label: 'Male' },
-            { key: 'F', label: 'Female' }
-        ];
+        const currentGender = genderState[roleType] || 'M';
 
-        let html = '<table class="age-role-appeal-table">';
-        html += '<thead><tr><th>Age Group</th>';
-        genders.forEach(g => {
-            html += `<th>${g.label}</th>`;
-        });
+        // Male button
+        const maleBtn = document.createElement('button');
+        maleBtn.innerHTML = '♂';
+        maleBtn.className = `gender-btn ${currentGender === 'M' ? 'active' : ''}`;
+        maleBtn.style.cssText = `
+            padding: 6px 12px;
+            border: 1px solid ${currentGender === 'M' ? '#55EA83' : '#666'};
+            background: ${currentGender === 'M' ? 'rgba(85, 234, 131, 0.2)' : 'transparent'};
+            color: ${currentGender === 'M' ? '#55EA83' : '#999'};
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        `;
+        maleBtn.onclick = (e) => {
+            e.stopPropagation();
+            setGender(roleType, 'M');
+            updateAgeRoleBreakdown();
+        };
+
+        // Female button
+        const femaleBtn = document.createElement('button');
+        femaleBtn.innerHTML = '♀';
+        femaleBtn.className = `gender-btn ${currentGender === 'F' ? 'active' : ''}`;
+        femaleBtn.style.cssText = `
+            padding: 6px 12px;
+            border: 1px solid ${currentGender === 'F' ? '#A1B1FF' : '#666'};
+            background: ${currentGender === 'F' ? 'rgba(161, 177, 255, 0.2)' : 'transparent'};
+            color: ${currentGender === 'F' ? '#A1B1FF' : '#999'};
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        `;
+        femaleBtn.onclick = (e) => {
+            e.stopPropagation();
+            setGender(roleType, 'F');
+            updateAgeRoleBreakdown();
+        };
+
+        container.appendChild(maleBtn);
+        container.appendChild(femaleBtn);
+        return container;
+    }
+
+    function setGender(roleType, gender) {
+        genderState[roleType] = gender;
+    }
+
+    function getGender(roleType) {
+        return genderState[roleType] || 'M';
+    }
+
+    function buildAgeTable(roles, ageGroups) {
+        if (roles.length === 0) {
+            return '<p style="color: #999; text-align: center; padding: 20px;">Select at least one role to see age appeal</p>';
+        }
+
+        let html = '<div style="overflow-x: auto;">';
+        html += '<table class="age-appeal-table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">';
+        html += '<thead><tr style="border-bottom: 2px solid #333;">';
+        html += '<th style="padding: 10px; text-align: left; color: #ccc;">Role</th>';
+        html += '<th style="padding: 10px; text-align: center; color: #ccc;">Young</th>';
+        html += '<th style="padding: 10px; text-align: center; color: #ccc;">Mid</th>';
+        html += '<th style="padding: 10px; text-align: center; color: #ccc;">Old</th>';
         html += '</tr></thead><tbody>';
 
-        ageGroups.forEach(age => {
-            html += `<tr><td class="age-group-label">${age.label}</td>`;
-            genders.forEach(gender => {
-                const dataKey = `${age.key}_${gender.key}`;
-                const appeal = roleData[dataKey] || 0;
-                const appealClass = getAppealClass(appeal);
-                const appealLabel = getAppealLabel(appeal);
-                html += `<td class="appeal-cell ${appealClass}" title="${appealLabel}">
-                    <span class="appeal-value">${appeal.toFixed(1)}</span>
-                </td>`;
-            });
-            html += '</tr>';
+        roles.forEach((role, idx) => {
+            const roleType = role.type;
+            const gender = getGender(roleType);
+            const genderKey = `${roleType === 'protagonist' ? 'protagonists' : roleType === 'antagonist' ? 'antagonists' : 'supportingCharacters'}`;
+            const roleData = ageGroups[genderKey]?.[role.id];
+
+            if (roleData) {
+                const bgColor = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+                html += `<tr style="border-bottom: 1px solid #333; background: ${bgColor};">`;
+                html += `<td style="padding: 10px; color: #ccc;">${role.displayName}</td>`;
+
+                ['YOUNG', 'MID', 'OLD'].forEach(ageGroup => {
+                    const rating = roleData[ageGroup];
+                    const stars = RATING_SCALE[rating] || '—';
+                    const ratingColor = rating === 'Good' ? '#55EA83' : rating === 'Neutral' ? '#FFB800' : '#FF6B6B';
+                    html += `<td style="padding: 10px; text-align: center; color: ${ratingColor};">${stars}</td>`;
+                });
+
+                html += '</tr>';
+            }
         });
 
         html += '</tbody></table>';
+        html += '</div>';
+
         return html;
-    }
-
-    function getAppealClass(appeal) {
-        if (appeal >= 4.0) return 'appeal-excellent';
-        if (appeal >= 3.0) return 'appeal-very-good';
-        if (appeal >= 2.0) return 'appeal-good';
-        if (appeal >= 1.0) return 'appeal-slightly-good';
-        if (appeal >= -1.0) return 'appeal-neutral';
-        if (appeal >= -2.0) return 'appeal-slightly-bad';
-        if (appeal >= -3.0) return 'appeal-bad';
-        if (appeal >= -4.0) return 'appeal-very-bad';
-        return 'appeal-disastrous';
-    }
-
-    function getAppealLabel(appeal) {
-        const key = appeal.toFixed(1);
-        return APPEAL_SCALE[key] || 'Unknown';
-    }
-
-    function getTopAgeGenderCombination(roleData) {
-        let topAppeal = -Infinity;
-        let topAgeGender = '';
-
-        for (const [key, value] of Object.entries(roleData)) {
-            if (key.includes('_') && value > topAppeal) {
-                topAppeal = value;
-                topAgeGender = key;
-            }
-        }
-
-        if (topAgeGender === '') return '';
-
-        const [age, gender] = topAgeGender.split('_');
-        const ageLabel = {
-            YOUNG: 'Young',
-            MID: 'Mid-aged',
-            OLD: 'Older'
-        }[age];
-
-        const genderLabel = gender === 'M' ? 'Male' : 'Female';
-
-        return `Peak appeal: ${genderLabel} ${ageLabel} audiences (${topAppeal.toFixed(1)})`;
     }
 
     async function updateAgeRoleBreakdown() {
@@ -132,71 +163,130 @@
             return;
         }
 
-        const selected = getSelectedRoleInGenerator();
-        if (!selected) {
+        const roles = getSelectedRoles();
+        if (roles.length === 0) {
             hideAgeRolePanel();
             return;
         }
 
-        const roleData = data[selected.id];
-        if (!roleData) {
-            hideAgeRolePanel();
-            return;
-        }
-
-        showAgeRolePanel(selected, roleData);
+        showAgeRolePanel(roles, data);
     }
 
-    function showAgeRolePanel(selected, roleData) {
+    function showAgeRolePanel(roles, data) {
         const panel = document.getElementById('ageRoleBreakdownPanel');
         if (!panel) return;
 
-        const roleLabel = document.getElementById('ageRoleSelectedRole');
-        const tableContainer = document.getElementById('ageRoleTableContainer');
-        const insight = document.getElementById('ageRoleInsight');
+        panel.style.display = 'flex';
 
-        if (roleLabel) {
-            const tagData = GAME_DATA.tags[selected.id];
-            const tagName = tagData ? tagData.name : selected.id;
-            roleLabel.textContent = `Appeal by age group and gender for: ${tagName} (${selected.type})`;
+        const contentDiv = document.getElementById('age-role-content');
+        if (!contentDiv) return;
+
+        // Add gender toggles for each role type
+        let headerHtml = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">';
+        headerHtml += '<p style="margin: 0; color: #999; font-size: 14px;">Select gender to view age appeal ratings:</p>';
+        headerHtml += '<div style="display: flex; gap: 20px;">';
+
+        // Add toggle for protagonist if selected
+        if (roles.some(r => r.type === 'protagonist')) {
+            headerHtml += '<div style="display: flex; align-items: center; gap: 8px;">';
+            headerHtml += '<span style="color: #55EA83; font-size: 12px; font-weight: bold;">Protagonist</span>';
+            headerHtml += '<div id="gender-toggle-protagonist"></div>';
+            headerHtml += '</div>';
         }
 
-        if (tableContainer) {
-            tableContainer.innerHTML = buildAgeRoleTable(selected.id, roleData);
+        // Add toggle for antagonist if selected
+        if (roles.some(r => r.type === 'antagonist')) {
+            headerHtml += '<div style="display: flex; align-items: center; gap: 8px;">';
+            headerHtml += '<span style="color: #A1B1FF; font-size: 12px; font-weight: bold;">Antagonist</span>';
+            headerHtml += '<div id="gender-toggle-antagonist"></div>';
+            headerHtml += '</div>';
         }
 
-        if (insight) {
-            insight.textContent = getTopAgeGenderCombination(roleData);
+        // Add toggle for supporting if selected
+        if (roles.some(r => r.type === 'supporting')) {
+            headerHtml += '<div style="display: flex; align-items: center; gap: 8px;">';
+            headerHtml += '<span style="color: #8BEAFF; font-size: 12px; font-weight: bold;">Supporting</span>';
+            headerHtml += '<div id="gender-toggle-supporting"></div>';
+            headerHtml += '</div>';
         }
 
-        panel.classList.remove('hidden');
+        headerHtml += '</div></div>';
+
+        const tableHtml = buildAgeTable(roles, data);
+
+        contentDiv.innerHTML = headerHtml + tableHtml;
+
+        // Append gender toggle buttons
+        if (roles.some(r => r.type === 'protagonist')) {
+            const protoToggleContainer = document.getElementById('gender-toggle-protagonist');
+            if (protoToggleContainer) {
+                protoToggleContainer.appendChild(createGenderToggle('protagonist'));
+            }
+        }
+
+        if (roles.some(r => r.type === 'antagonist')) {
+            const antToggleContainer = document.getElementById('gender-toggle-antagonist');
+            if (antToggleContainer) {
+                antToggleContainer.appendChild(createGenderToggle('antagonist'));
+            }
+        }
+
+        if (roles.some(r => r.type === 'supporting')) {
+            const suppToggleContainer = document.getElementById('gender-toggle-supporting');
+            if (suppToggleContainer) {
+                suppToggleContainer.appendChild(createGenderToggle('supporting'));
+            }
+        }
     }
 
     function hideAgeRolePanel() {
         const panel = document.getElementById('ageRoleBreakdownPanel');
-        if (panel) panel.classList.add('hidden');
+        if (panel) panel.style.display = 'none';
     }
 
-    function setupAgeRoleBreakdownListeners() {
-        const protagonistContainer = document.getElementById('inputs-protagonist-generator');
-        const antagonistContainer = document.getElementById('inputs-antagonist-generator');
+    async function initAgeRoleBreakdown() {
+        // Initialize gender state with defaults
+        genderState['protagonist'] = 'M';
+        genderState['antagonist'] = 'M';
+        genderState['supporting'] = 'M';
 
-        if (protagonistContainer) {
-            protagonistContainer.addEventListener('change', () => {
+        await updateAgeRoleBreakdown();
+
+        // Listen for role changes
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('tag-selector')) {
                 updateAgeRoleBreakdown();
-            });
+            }
+        });
+
+        // Listen for role additions/removals
+        const observer = new MutationObserver(() => {
+            updateAgeRoleBreakdown();
+        });
+
+        const lockedContent = document.getElementById('locked-content');
+        const excludedContent = document.getElementById('excluded-content');
+
+        if (lockedContent) {
+            observer.observe(lockedContent, { childList: true, subtree: true });
         }
-
-        if (antagonistContainer) {
-            antagonistContainer.addEventListener('change', () => {
-                updateAgeRoleBreakdown();
-            });
+        if (excludedContent) {
+            observer.observe(excludedContent, { childList: true, subtree: true });
         }
     }
 
-    global.HACAnalysisAgeRoleBreakdown = {
-        setupAgeRoleBreakdownListeners,
-        updateAgeRoleBreakdown,
-        loadAgeRoleData
+    // Expose to global scope
+    global.HACRoleAge = {
+        init: initAgeRoleBreakdown,
+        update: updateAgeRoleBreakdown,
+        hidePanel: hideAgeRolePanel
     };
-})(globalThis);
+
+    // Auto-init when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAgeRoleBreakdown);
+    } else {
+        initAgeRoleBreakdown();
+    }
+
+})(window);
