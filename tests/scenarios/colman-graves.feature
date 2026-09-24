@@ -19,12 +19,12 @@ Feature: Script Evaluation — Colman Graves
     Given the Hollywood Animal Calculator is open
     And the Evaluate tab is selected
 
-  # [automated] Regression: before the category fix, Genre, Setting and
+  # [automated] TC03-000001. Regression: before the category fix, Genre, Setting and
   # Protagonist had no picker at all, so Graves could never be satisfied.
   Scenario: All seven story element categories are offered
     Then a picker is offered for each of the seven categories
 
-  # [automated] Only the categories the game allows to repeat should expose "+"
+  # [automated] TC06-000001. Only the categories the game allows to repeat should expose "+"
   # controls. A broad "all categories" rule once broke genre mixing.
   Scenario: Only repeatable categories accept multiple selections
     Then Genre accepts multiple selections
@@ -35,7 +35,7 @@ Feature: Script Evaluation — Colman Graves
     And Antagonist does not accept multiple selections
     And Finale does not accept multiple selections
 
-  # [automated] Genre mix is always a 100% allocation in five-point steps.
+  # [automated] TC06-000003 and TC06-000004. Genre mix is always a 100% allocation in five-point steps.
   Scenario: Adding genres keeps the mix visible, stepped and balanced
     Given only one Genre row is shown
     Then that Genre owns 100 percent of the mix
@@ -47,7 +47,7 @@ Feature: Script Evaluation — Colman Graves
     And every Genre share is at least 5 percent
     And every Genre share uses five-point steps
 
-  # [automated] Moving one Genre should rebalance the rest without breaking the
+  # [automated] TC06-000006 and TC06-000007. Moving one Genre should rebalance the rest without breaking the
   # 100% total or the 5% floor.
   Scenario: Genre mix sliders preserve the total and minimum share
     Given the user has two Genre rows
@@ -57,13 +57,13 @@ Feature: Script Evaluation — Colman Graves
     Then the first Genre is capped at 95 percent
     And the second Genre keeps 5 percent
 
-  # [automated] Removed Genre rows must release their options for reuse.
+  # [automated] TC06-000008. Removed Genre rows must release their options for reuse.
   Scenario: Removing Genre rows re-enables their options
     Given several Genre rows are selected
     When the user removes those Genre rows
     Then the removed Genre options can be selected again
 
-  # [automated]
+  # [automated] TC03-000002.
   Scenario: Submitting a valid script produces a verdict and scores
     Given no results are shown
     When the user selects a Genre, Setting, Protagonist, Antagonist and Supporting Character
@@ -78,7 +78,7 @@ Feature: Script Evaluation — Colman Graves
     And the Graves analysis text is shown
     And the likely audience is described
 
-  # [automated] Guard: name what is missing rather than fail silently.
+  # [automated] TC03-000003. Guard: name what is missing rather than fail silently.
   Scenario: A script missing required categories names what is missing
     Given only a Supporting Character is selected
     When the user evaluates the script
@@ -95,7 +95,7 @@ Feature: Script Evaluation — Colman Graves
     And the message states that 1 was selected
     And no results are shown
 
-  # [automated] The minimum-fit filter defaults to 4.0+, which an arbitrary
+  # [automated] TC03-000005. The minimum-fit filter defaults to 4.0+, which an arbitrary
   # script may have no candidate for, so the test widens it first.
   Scenario: Best matches open and the analysis modes switch
     Given the user has evaluated a script
@@ -108,7 +108,7 @@ Feature: Script Evaluation — Colman Graves
     When the user selects the Pairwise mode
     Then the panel is re-rendered for that mode
 
-  # [automated] Regression: Best Matches is exploratory, not a full script
+  # [automated] TC03-000011. Regression: Best Matches is exploratory, not a full script
   # evaluation. It must work from one seed and suggest ideal additions around it.
   Scenario: Best matches can start from one seed element
     Given only one Genre is selected
@@ -118,7 +118,7 @@ Feature: Script Evaluation — Colman Graves
     And suggestions are listed
     And no full-script validation message is shown
 
-  # [automated] Regression: the full-script rules belong to Evaluate Script, not
+  # [automated] tests/graves.test.js. Regression: the full-script rules belong to Evaluate Script, not
   # Generate Best Matches. Missing Genre, Setting or Protagonist must not block
   # exploratory matching.
   Scenario: Best matches do not require the full script structure
@@ -151,7 +151,7 @@ Feature: Script Evaluation — Colman Graves
     Then excluded Settings are not selectable
     And the Graves exclusion notice explains that Script Lab exclusions are hiding suggestions or choices
 
-  # [automated]
+  # [automated] TC03-000006.
   Scenario: Resetting clears the submission and hides the verdict
     Given the user has evaluated a script
     When the user resets
@@ -177,21 +177,21 @@ Feature: Script Evaluation — Colman Graves
     Then the results are shown
     And no message says the script has too many elements
 
-  # [automated] Category filter offers all seven categories and restricts rows.
+  # [automated] TC03-000012. Category filter offers all seven categories and restricts rows.
   Scenario: Restricting best matches to one category
     Given the user has evaluated a script
     When the user restricts the match category to "Supporting Character"
     And the user generates best matches
     Then only supporting character suggestions are listed
 
-  # [automated] Minimum-fit filter offers 3.0+ through 5.0 only.
+  # [automated] TC03-000013. Minimum-fit filter offers 3.0+ through 5.0 only.
   Scenario: Restricting best matches by minimum fit
     Given the user has evaluated a script
     When the user sets the minimum fit to "4.5+"
     And the user generates best matches
     Then every suggestion has a fit of at least 4.5
 
-  # [automated] A "Starting tags only" checkbox exists and filters rows.
+  # [unverified] the "Starting tags only" control was removed from this panel, so this describes behaviour that no longer ships. Owner to confirm deletion.
   Scenario: Limiting suggestions to starting tags
     Given the user has evaluated a script
     When the user limits suggestions to starting tags only
@@ -205,7 +205,7 @@ Feature: Script Evaluation — Colman Graves
     When the user generates best matches
     Then the first ten suggestions are listed
 
-  # [automated] The page fills in band order, so a conflicted candidate can never
+  # [automated] tests/graves-best-matches.test.js. The page fills in band order, so a conflicted candidate can never
   # push a clean one onto page two. Covered by tests/graves-best-matches.test.js.
   Scenario: Stronger suggestions fill the first page before weaker ones
     Given more than ten suggestions qualify
@@ -213,7 +213,7 @@ Feature: Script Evaluation — Colman Graves
     Then successful suggestions are listed before common ones
     And common suggestions are listed before unsuccessful ones
 
-  # [automated] A second page is a superset of the first, never a reshuffle, so
+  # [automated] TC03-000031. A second page is a superset of the first, never a reshuffle, so
   # what the user has already read stays where it was.
   Scenario: Revealing more suggestions keeps the ones already read in place
     Given more than ten suggestions qualify
@@ -242,7 +242,7 @@ Feature: Script Evaluation — Colman Graves
     And candidates are grouped by fit band (successful, common, unsuccessful)
     And candidates are ranked from highest to lowest fit
 
-  # [automated] DISCOVERED BUG: Best Additions suggests categories that are
+  # [automated] TC03-000028. DISCOVERED BUG: Best Additions suggests categories that are
   # already at their cardinality limit. Genre is uncapped because it is a
   # percentage split, while Setting, Protagonist, Antagonist and Finale hold one
   # slot each. The mode should only block categories that are actually full.
@@ -252,20 +252,20 @@ Feature: Script Evaluation — Colman Graves
     Then no suggestion is a category already at its maximum
     And every suggestion is for a category that can accept more members
 
-  # [automated] Each suggestion row carries an Add control.
+  # [automated] TC03-000008. Each suggestion row carries an Add control.
   Scenario: Adding a suggested element to the script
     Given best matches are listed
     When the user adds the first suggestion
     Then that element joins the current script selection
 
-  # [automated] Save to Script Library should write a reusable script card.
+  # [automated] TC03-000015. Save to Script Library should write a reusable script card.
   Scenario: Saving an evaluated script to the library
     Given the user has evaluated a script
     When the user saves the script to the library
     Then the user is told the script was saved
     And the script appears in the Script Library
 
-  # [automated] The Marketing & Release transfer is a workflow button, not a
+  # [automated] TC03-000016. The Marketing & Release transfer is a workflow button, not a
   # decorative link. It should carry the current script into analysis.
   Scenario: Transferring an evaluated script to Marketing and Release
     Given the user has evaluated a script
@@ -334,7 +334,7 @@ Feature: Script Evaluation — Colman Graves
     And the message points to Max Element Pool and to Swap Suggestions
     And the message states that Genre and Setting do not count toward the budget
 
-  # [automated] The auto-widening retry must not leave the control reading a
+  # [automated] TC03-000030. The auto-widening retry must not leave the control reading a
   # threshold the user never chose, or the next search silently runs under the
   # wrong filter.
   Scenario: A failed search restores the minimum fit the user chose
@@ -351,7 +351,7 @@ Feature: Script Evaluation — Colman Graves
     Then no "Starting tags only" checkbox is visible
     And all non-excluded tags from their categories are eligible for suggestion
 
-  # [automated] Search fields must not disappear while the user is typing or
+  # [automated] BUG-002. Search fields must not disappear while the user is typing or
   # after a search has no matches.
   Scenario: Category search fields stay visible while filtering
     Given the Colman Graves Finale search field is visible

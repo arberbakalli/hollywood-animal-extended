@@ -13,12 +13,12 @@ Feature: Script Lab
     Given the Hollywood Animal Calculator is open
     And the Build tab is selected
 
-  # [automated]
+  # [automated] TC01-000001.
   Scenario: The Build tab reveals the Script Lab panel
     Then the Script Lab panel is visible
     And the Generate Scripts button is labelled "Generate Scripts"
 
-  # [automated]
+  # [automated] TC01-000003.
   Scenario: Generating with default targets produces script cards
     Given no scripts have been generated yet
     And the generated results section is hidden
@@ -27,30 +27,30 @@ Feature: Script Lab
     And at least one script card is listed
     And each card shows its story element chips
 
-  # [automated] Empty state should be explicit before the first generation run.
+  # [automated] TC08-000003. Empty state should be explicit before the first generation run.
   Scenario: Generated results start empty
     Given the user has not generated scripts yet
     Then no generated script cards are listed
     And the generated results section is hidden
 
-  # [automated]
+  # [automated] TC01-000005.
   Scenario: The compatibility slider drives its paired number input
     When the user sets the target average compatibility slider to 5
     Then the compatibility number input reads 5
 
-  # [automated]
+  # [automated] TC01-000007.
   Scenario: Banning a tag increments the excluded counter
     Given the excluded counter reads 0
     When the user bans the supporting character "Sidekick"
     Then the excluded counter reads 1
 
-  # [automated]
+  # [automated] TC01-000008.
   Scenario: Reset Bans clears the excluded counter
     Given the user has banned the supporting character "Sidekick"
     When the user resets the bans
     Then the excluded counter reads 0
 
-  # [automated] The Excluded Elements list is the source of truth across the
+  # [automated] TC01-000018. The Excluded Elements list is the source of truth across the
   # app, so it must survive a browser reload.
   Scenario: Excluded Elements persist after reload
     Given the user has banned the supporting character "Sidekick"
@@ -86,14 +86,14 @@ Feature: Script Lab
     Then the removed Supporting Character is available in the picker
     And the Excluded Elements list reflects the change
 
-  # [automated]
+  # [automated] tests/lock-exclude-logic.test.js.
   Scenario: The tag availability profile switches between Starting and Custom
     Given the Custom profile is active
     When the user selects the Starting Tags profile
     Then the Starting Tags profile is active
     And the Custom profile is no longer active
 
-  # [automated]
+  # [automated] TC01-000010.
   Scenario: Pinning a generated script populates the Script Library
     Given the user has generated scripts
     When the user pins the first generated script
@@ -101,19 +101,19 @@ Feature: Script Lab
     And the pinned script is listed
     And the Save and Load controls are available
 
-  # [automated] Saving an empty library should explain the problem instead of
+  # [automated] TC01-000023. Saving an empty library should explain the problem instead of
   # starting a useless download.
   Scenario: Save Library refuses an empty script library
     Given no scripts are pinned
     When the user saves the Script Library
     Then a message says there are no pinned scripts to save
 
-  # [automated] Invalid imports must fail loudly and keep the library intact.
+  # [automated] TC01-000024. Invalid imports must fail loudly and keep the library intact.
   Scenario: Load Library explains invalid JSON shape
     When the user loads a JSON file that is not a script array
     Then a message says the file format is invalid
 
-  # [automated] Generated result action buttons should carry the generated
+  # [automated] TC01-000025. Generated result action buttons should carry the generated
   # script into the richer analysis surfaces.
   Scenario Outline: Transferring a generated script to another product surface
     Given the user has generated scripts
@@ -126,7 +126,7 @@ Feature: Script Lab
       | Graves                | Colman Graves         | evaluation results         |
       | Marketing and Release | Marketing and Release | marketing analysis results |
 
-  # [automated] Regression: only 2 of the 7 categories used to render.
+  # [automated] TC01-000011. Regression: only 2 of the 7 categories used to render.
   Scenario Outline: Every story element category offers a picker
     Then a picker is offered for <category>
 
@@ -140,7 +140,7 @@ Feature: Script Lab
       | Theme & Event        |
       | Finale               |
 
-  # [automated] Regression: a counter shared across all six panels made row ids
+  # [automated] TC01-000014. Regression: a counter shared across all six panels made row ids
   # shift whenever any other panel added a row.
   Scenario Outline: Tag selector row ids are numbered per category and context
     Then the first <category> row in <context> is numbered 1
@@ -151,7 +151,7 @@ Feature: Script Lab
       | Genre                | Script Lab        |
       | Supporting Character | Script Evaluation |
 
-  # [automated] Collapsible sections exist and default to expanded.
+  # [automated] TC01-000002. Collapsible sections exist and default to expanded.
   Scenario Outline: Collapsing a Script Lab section hides its selectors
     Given the <section> section is expanded
     When the user collapses the <section> section
@@ -162,27 +162,27 @@ Feature: Script Lab
       | Locked Elements   | locked         |
       | Excluded Elements | excluded       |
 
-  # [automated] Only Supporting Character and Theme & Event render as selectors.
+  # [automated] TC01-000004. Only Supporting Character and Theme & Event render as selectors.
   Scenario: Locking a tag constrains the generated scripts
     When the user locks the supporting character "Sidekick"
     And the user generates scripts
     Then every generated script includes "Sidekick"
 
-  # [automated] Reset Locks clears user picks rather than only repainting the panel.
+  # [automated] TC01-000020. Reset Locks clears user picks rather than only repainting the panel.
   Scenario: Reset Locks clears locked selections
     Given the user has locked the supporting character "Sidekick"
     When the user resets the locks
     Then no locked Supporting Character remains selected
     And generated results are hidden
 
-  # [automated] A collapsed section should stay recoverable after tab navigation.
+  # [automated] TC08-000006. A collapsed section should stay recoverable after tab navigation.
   Scenario: Locked Elements remains expandable after tab switching
     Given the user has collapsed the Locked Elements section
     When the user opens Script Evaluation
     And the user returns to Script Lab
     Then the Locked Elements toggle is still visible
 
-  # [automated] The "+" control adds another dropdown row per category and context.
+  # [automated] TC01-000012. The "+" control adds another dropdown row per category and context.
   Scenario Outline: Adding a second selector row for the same category
     When the user adds another <row> row
     Then two <dropdowns> dropdowns are available
@@ -192,7 +192,7 @@ Feature: Script Lab
       | Supporting Character          | Supporting Character          |
       | excluded Supporting Character | excluded Supporting Character |
 
-  # [automated] A per-category search box filters that category's options.
+  # [automated] TC01-000013. A per-category search box filters that category's options.
   Scenario Outline: Filtering a category's options by search text
     When the user types "Sidekick" into the <search_box> search box
     Then only matching <option_type> remain selectable in that category
@@ -202,19 +202,19 @@ Feature: Script Lab
       | Supporting Character          | options     |
       | excluded Supporting Character | ban options |
 
-  # [automated] Search inputs should not disappear while filtering or when no
+  # [automated] BUG-001. Search inputs should not disappear while filtering or when no
   # option matches the search text.
   Scenario: Excluded search stays visible while filtering
     Given the Excluded Elements section is expanded
     When the user searches excluded Genre options for "action"
     Then the excluded Genre search field remains visible
 
-  # [automated] The movie-score slider updates the required-elements hint.
+  # [automated] TC01-000006. The movie-score slider updates the required-elements hint.
   Scenario: Raising the target movie score changes the required element count
     When the user raises the target movie score
     Then the required story elements hint updates
 
-  # [automated] Regression: the hint used the movie score itself as the story
+  # [automated] TC01-000016. Regression: the hint used the movie score itself as the story
   # element count at higher scores, so score 7 showed 7, score 9 showed 9, etc.
   Scenario Outline: Target movie score shows the correct story element count
     When the user sets the target movie score to <movie_score>
@@ -228,7 +228,7 @@ Feature: Script Lab
       | 9           | 8              |
       | 10          | 9              |
 
-  # [automated] Regression: white text on the red circular counter was hard to
+  # [automated] TC01-000017. Regression: white text on the red circular counter was hard to
   # read and visually harsh. The counter should remain visible without eye strain.
   Scenario: Excluded counter text is readable on the danger badge
     Given the excluded counter is visible

@@ -9,7 +9,10 @@ const E2E_DIR = join(ROOT, 'tests', 'e2e');
 const STATUS_MARKER_PATTERN = /^\s*# \[(automated|verified|unverified)\]/;
 const SCENARIO_PATTERN = /^\s*Scenario(?: Outline)?:/;
 const SECTION_PATTERN = /^\s*(Feature|Background):/;
-const FULL_TEST_ID_PATTERN = /\bTC(?:\d{2}|-[A-Z]+)-\d{3,6}\b/g;
+// Two id conventions ship in tests/e2e: TCnn-nnnnnn and BUG-nnn
+// (search-field-persistence.spec.js). Both must be checkable, or a citation
+// to a BUG- test is invisible to this guard.
+const FULL_TEST_ID_PATTERN = /\b(?:TC(?:\d{2}|-[A-Z]+)-\d{3,6}|BUG-\d{3})\b/g;
 
 describe('BDD scenario markers', () => {
     test('keeps exactly one status marker immediately above each scenario', async () => {
@@ -66,7 +69,14 @@ describe('BDD scenario markers', () => {
             }
         }
 
-        expect(backlog).toEqual([]);
+        // Updated 2026-09-24 with the repository owner's approval, naming this
+        // test. P3 found 91 of 128 [automated] scenarios citing no test at all.
+        // Every scenario that had coverage now cites it; these two did not, and
+        // are declared here rather than left claiming automation they never had.
+        expect(backlog).toEqual([
+            'unverified colman-graves.feature Scenario: Limiting suggestions to starting tags',
+            'verified marketing-release.feature Scenario: The advertiser shortlist states which way the movie leans',
+        ]);
     });
 
     test('keeps cited E2E test ids honest', async () => {

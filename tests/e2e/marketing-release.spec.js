@@ -721,4 +721,102 @@ test.describe('Marketing and Release — Build for Target', () => {
     expect(Number.isNaN(second)).toBe(false);
     expect(first).toBeGreaterThanOrEqual(second);
   });
+  /**
+   * The over-budget refusal had no test in either suite. It is the Build for
+   * Target twin of the Colman Graves defect fixed on 2026-09-23: both count
+   * story elements against the pool, and Genre and Setting must stay outside
+   * it. Six story elements against a pool of five must name SIX, never eight.
+   */
+  test('TC05-000019 more story elements than the budget is refused, counting story elements only', async ({ steps, page }) => {
+    await steps.on('marketTab', 'Navigation').click();
+    await steps.on('buildForTargetModeButton', 'MarketingRelease').click();
+    await steps.on('allTagSelects', 'BuildForTarget').waitForState('visible');
+
+    await steps.on('elementPoolInput', 'Navigation').fill('5');
+
+    for (const [select, value] of [
+      ['genreSelect', 'THRILLER'],
+      ['settingSelect', 'MODERN_AMERICAN_CITY'],
+      ['protagonistSelect', 'PROTAGONIST_OUTCAST'],
+      ['antagonistSelect', 'ANTAGONIST_HEARTLESS_BUREAUCRAT'],
+      ['themeEventSelect', 'THEME_TREASURE_HUNT'],
+      ['finaleSelect', 'FINALE_ANTAGONIST_GETS_PUNISHED'],
+    ]) {
+      await steps.selectDropdown(select, 'BuildForTarget', {
+        type: DropdownSelectType.VALUE,
+        value,
+      });
+    }
+
+    // Two Supporting Characters take the script to six story elements. Adding a
+    // row re-renders the category and clears values set before it, so both rows
+    // are created first and then filled positionally.
+    await steps.on('addSupportingCharacterRow', 'BuildForTarget').click();
+    const supporting = page.locator('#inputs-supporting-character-targeted select.tag-selector');
+    await expect(supporting).toHaveCount(2);
+    await supporting.nth(0).selectOption('SUPPORTINGCHARACTER_PARENT_FIGURE');
+    await supporting.nth(1).selectOption('SUPPORTINGCHARACTER_SIDEKICK');
+
+    await steps.on('findCombinationsButton', 'BuildForTarget').click();
+
+    await steps.on('feedbackMessage', 'BuildForTarget')
+      .verifyTextContains('Max Element Pool is set to 5, but you selected 6');
+    // The count is the whole point: eight tags are selected, six of them budgeted.
+    const message = await steps.on('feedbackMessage', 'BuildForTarget').getText();
+    expect(message).not.toContain('you selected 8');
+  });
+
+  /**
+   * TC05-000017 proves exclusions can empty the result. This proves the
+   * narrower, more useful thing: with combinations still being produced, a
+   * banned element is absent from all of them.
+   *
+   * The test calibrates itself. A hardcoded tag made it vacuous - banning
+   * Sidekick passed even with exclusion filtering removed, because Sidekick was
+   * never in the top combinations anyway. So it bans a story element it has
+   * just watched appear, which is what makes its absence afterwards mean
+   * something.
+   */
+  test('TC05-000020 an element banned in Script Lab never appears in a combination', async ({ steps, page }) => {
+    const openBuildForTarget = async () => {
+      await steps.on('marketTab', 'Navigation').click();
+      await steps.on('buildForTargetModeButton', 'MarketingRelease').click();
+      await steps.on('allTagSelects', 'BuildForTarget').waitForState('visible');
+      await steps.on('audienceCheckboxes', 'BuildForTarget').first().check();
+      await steps.on('findCombinationsButton', 'BuildForTarget').click();
+      await steps.on('resultsPanel', 'BuildForTarget').verifyState('visible');
+      await steps.on('combinationCards', 'BuildForTarget').verifyCount({ greaterThan: 0 });
+    };
+
+    await openBuildForTarget();
+
+    // A story element that genuinely appears - Genre and Setting chips are
+    // skipped because the generator seeds those regardless.
+    const victim = await page.evaluate(() => {
+      const chips = document.querySelectorAll(
+        '#targetedResultsList .targeted-combination-card:first-child .targeted-tag-chip'
+      );
+      for (const chip of chips) {
+        if (chip.classList.contains('genre') || chip.classList.contains('setting')) continue;
+        const name = chip.textContent.trim();
+        const tag = Object.values(GAME_DATA.tags).find(t => t && t.name === name);
+        if (tag) return { id: tag.id, category: tag.category, name: tag.name };
+      }
+      return null;
+    });
+
+    expect(victim, 'expected a story element in the first combination').not.toBeNull();
+
+    await page.evaluate(item => localStorage.setItem(
+      'hac.excludedTags.v1',
+      JSON.stringify([{ id: item.id, category: item.category }])
+    ), victim);
+    await page.reload();
+    await page.waitForFunction(() => window.__hollywoodReady === true);
+
+    await openBuildForTarget();
+
+    const results = await page.locator('#targetedResultsList').innerText();
+    expect(results).not.toContain(victim.name);
+  });
 });

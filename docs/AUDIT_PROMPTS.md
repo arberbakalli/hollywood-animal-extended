@@ -74,10 +74,12 @@ one of my own, which asserted a row *count* while only one row was filled.
 > fail 2. For the second group, quote the scenario's Then-step next to what the
 > cited test asserts.
 
-**Current state, measured 2026-09-23:** 128 scenarios are `[automated]`. **91 of
-them cite no test at all** and are unfalsifiable by the existing guard; 37 cite
-an id. Zero scenarios are `[verified]` or `[unverified]`, which means the
-backlog now claims total coverage.
+**Run 2026-09-24 — see `.arber/MARKER_TRUTH_AUDIT.md`.** It went from 91 of 128
+scenarios citing no test, to **zero**. Two real gaps became tests
+(`TC05-000019`, `TC05-000020`); two scenarios are declared in the backlog
+instead of claiming automation they never had. Three of the matcher's proposed
+citations were wrong and were caught by reading the test — a similarity score is
+not evidence.
 
 `tests/featureScenarioMarkers.test.js` enforces check 1 **only for markers that
 cite an id**, and cannot do check 2 at all — a Script Lab scenario citing a

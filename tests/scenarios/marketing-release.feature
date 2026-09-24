@@ -17,19 +17,19 @@ Feature: Marketing and Release
     And the Market tab is selected
     And the Analyze Script mode is active
 
-  # [automated]
+  # [automated] TC04-000001.
   Scenario: The distribution calculator is available before any analysis
     Then no analysis results are shown
     And the distribution calculator is shown
 
-  # [automated] Commercial and Art inputs are 0-10, both defaulting to 5.0.
+  # [automated] TC04-000006. Commercial and Art inputs are 0-10, both defaulting to 5.0.
   Scenario: Setting the movie scores
     When the user sets the commercial score to 8.0
     And the user sets the artistic score to 3.0
     Then the commercial score input reads 8.0
     And the artistic score input reads 3.0
 
-  # [automated] Typing in the number fields is a separate interaction path from
+  # [automated] TC04-000016. Typing in the number fields is a separate interaction path from
   # dragging the sliders and must drive the same state.
   Scenario: Typing movie scores updates sliders and distribution
     When the user types 7.5 into the commercial score field
@@ -38,19 +38,19 @@ Feature: Marketing and Release
     And the artistic score slider reads 2.5
     And the distribution calculator reports a target commercial score of 7.5
 
-  # [automated]
+  # [automated] TC04-000005.
   Scenario: The distribution calculator follows the commercial score
     When the user sets the commercial score to 8.0
     Then the distribution calculator reports a target commercial score of 8.0
     And the weekly screening projections update
 
-  # [automated]
+  # [automated] TC04-000003.
   Scenario: Weekly screening projections decline across the run
     Then screening projections are listed for weeks 1 through 8
     And each week card is addressable by its week number
     And the week 8 figure is lower than the week 1 figure
 
-  # [automated] Extracted game-file formula: commercial only.
+  # [automated] TC04-000004. Extracted game-file formula: commercial only.
   Scenario Outline: Screening projections follow the extracted distribution grid
     When the user sets the commercial score to <score>
     Then the screening projections are <week_1>, <week_2>, <week_3>, <week_4>, <week_5>, <week_6>, <week_7>, and <week_8>
@@ -60,13 +60,13 @@ Feature: Marketing and Release
       | 5.0   | 10000  | 5000   | 4000   | 3200   | 2560   | 2048   | 1638   | 1310   |
       | 10.0  | 20000  | 10000  | 8000   | 6400   | 5120   | 4096   | 3277   | 2621   |
 
-  # [automated] Owned Theatres input defaults to 3185.
+  # [automated] TC04-000007. Owned Theatres input defaults to 3185.
   Scenario: Changing the number of owned theatres
     When the user changes the owned theatres to 5000
     Then the owned and rented split changes
     And audience demand does not change
 
-  # [automated] Two opening-viewer switches sit in the distribution header.
+  # [automated] TC04-000008 and TC04-000009. Two opening-viewer switches sit in the distribution header.
   Scenario Outline: Distribution bonuses can be toggled independently
     When the user enables the "<bonus>" bonus
     Then the screening projections are recalculated
@@ -86,14 +86,14 @@ Feature: Marketing and Release
     When the user raises the commercial score above 9
     Then week 3 keeps more attendance than the normal grid
 
-  # [automated] The control should explain that the Behemoth boost represents
+  # [automated] TC-BEH-002. The control should explain that the Behemoth boost represents
   # the Behemoth budget policy rather than a score-only rule.
   Scenario: Behemoth control explains its budget requirement
     Then the Behemoth policy toggle is visible
     And its label mentions the budget over $1M requirement
     And its tooltip explains the 25 percent boost to all weeks
 
-  # [automated] Boutique is the artistic counterpart: it never changes week 1,
+  # [automated] TC04-000014. Boutique is the artistic counterpart: it never changes week 1,
   # and its slower decay is gated by artistic score above 9.
   Scenario: Boutique slows later weeks only for highly artistic films
     When the user sets the artistic score to 10
@@ -101,7 +101,7 @@ Feature: Marketing and Release
     Then week 1 demand is unchanged
     And week 3 keeps more attendance than the normal grid
 
-  # [automated] Both studio policies can apply to the same film; they stack on
+  # [automated] TC04-000015. Both studio policies can apply to the same film; they stack on
   # the decay rate while all weeks receive their respective boosts.
   Scenario: Behemoth and Boutique policies stack
     When the user sets both movie scores to 10
@@ -109,7 +109,7 @@ Feature: Marketing and Release
     Then all weeks 1-8 receive the Behemoth 25% boost
     And week 3 uses the stacked studio decay rate
 
-  # [automated] Analyze control and results markup exist.
+  # [automated] TC04-000010. Analyze control and results markup exist.
   Scenario: Analysing a script produces a marketing profile
     When the user selects story elements for the script
     And the user analyses the script
@@ -125,25 +125,25 @@ Feature: Marketing and Release
     Given the user has analysed a script
     Then audiences are marked as high or moderate interest
 
-  # [automated] A "Movie Lean Towards" field precedes the advertiser list.
+  # [verified] Not automated: no test asserts the commercial/artistic lean of the shortlist. A "Movie Lean Towards" field precedes the advertiser list.
   Scenario: The advertiser shortlist states which way the movie leans
     Given the user has analysed a script
     Then the movie's lean is stated
     And advertisers are listed beneath it
 
-  # [automated] Reset and Save to Script Library controls exist.
+  # [automated] TC04-000018. Reset and Save to Script Library controls exist.
   Scenario: Resetting clears the marketing selection
     Given the user has selected story elements
     When the user resets
     Then the selection is cleared
 
-  # [automated] Save control exists in this mode.
+  # [automated] TC04-000017. Save control exists in this mode.
   Scenario: Saving an analysed script to the library
     Given the user has analysed a script
     When the user saves the script to the library
     Then the script appears in the Script Library
 
-  # [automated] Reset returns Analyze Script to a clean selection state.
+  # [automated] TC04-000018. Reset returns Analyze Script to a clean selection state.
   Scenario: Resetting after analysis clears the marketing selection
     Given the user has selected story elements
     When the user resets
