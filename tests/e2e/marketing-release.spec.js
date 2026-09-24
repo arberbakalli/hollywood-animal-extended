@@ -370,6 +370,19 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await expect(page.locator('#targetAudienceDisplay .audience-pill').first()).toBeVisible();
   });
 
+  test('TC04-000031 agency compatibility matrix renders extracted source agencies', async ({ steps }) => {
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
+    await buildMarketingScript(steps);
+
+    await steps.on('analyzeScriptButton', 'MarketingRelease').click();
+
+    await steps.on('agencyCompatibilityPanel', 'MarketingRelease').verifyState('visible');
+    await steps.on('agencyCompatibilitySummary', 'MarketingRelease').verifyTextContains('80 source agencies');
+    await steps.on('agencyCompatibilityRows', 'MarketingRelease').verifyCount({ exactly: 80 });
+    await steps.on('agencyCompatibilityTyc1Row', 'MarketingRelease').verifyTextContains('TYC1');
+    await steps.on('agencyCompatibilityTyc1Row', 'MarketingRelease').verifyTextContains('Com');
+  });
+
   test('TC04-000028 studio policy status names active gates', async ({ steps, page }) => {
     const status = page.locator('#studio-policy-status');
 

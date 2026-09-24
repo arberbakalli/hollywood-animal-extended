@@ -86,7 +86,7 @@ Feature: Script Lab
     Then the removed Supporting Character is available in the picker
     And the Excluded Elements list reflects the change
 
-  # [automated] tests/lock-exclude-logic.test.js.
+  # [automated] TC01-000026. Tag availability profile switches between Starting and Custom.
   Scenario: The tag availability profile switches between Starting and Custom
     Given the Custom profile is active
     When the user selects the Starting Tags profile
@@ -210,7 +210,7 @@ Feature: Script Lab
       | Supporting Character          | options     |
       | excluded Supporting Character | ban options |
 
-  # [automated] BUG-001. Search inputs should not disappear while filtering or when no
+  # [automated] TC01-000027. Search inputs should not disappear while filtering or when no
   # option matches the search text.
   Scenario: Excluded search stays visible while filtering
     Given the Excluded Elements section is expanded

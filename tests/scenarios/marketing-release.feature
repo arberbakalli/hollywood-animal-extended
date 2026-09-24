@@ -77,7 +77,7 @@ Feature: Marketing and Release
       | Striking Image   |
       | Artistic Ability |
 
-  # [automated] TC04-000013 and TC-BEH-006. Behemoth has two separate effects: a
+  # [automated] TC04-000028. Behemoth has two separate effects: a
   # +25% boost to all weeks 1-8 whenever it is active, plus slower decay only
   # above commercial score 9.
   Scenario: Behemoth applies 25% boost to all weeks
@@ -86,8 +86,8 @@ Feature: Marketing and Release
     When the user raises the commercial score above 9
     Then week 3 keeps more attendance than the normal grid
 
-  # [automated] TC-BEH-002. The control should explain that the Behemoth boost represents
-  # the Behemoth budget policy rather than a score-only rule.
+  # [unverified] The control should explain that the Behemoth boost represents
+  # the Behemoth budget policy rather than a score-only rule. Behaviour observed; test pending.
   Scenario: Behemoth control explains its budget requirement
     Then the Behemoth policy toggle is visible
     And its label mentions the budget over $1M requirement
@@ -181,9 +181,8 @@ Feature: Marketing and Release
     When the user selects that same holiday again
     Then the distribution grid returns to its unboosted figures
 
-  # [automated] tests/holiday-release.test.js asserts each week separately: a
-  # holiday lifts week 1 by its bonus, week 2 never moves whatever the holiday,
-  # and weeks 3+ are untouched because they decay from week 2.
+  # [automated] TC04-000019. Each week sees separate effects: week 1 lifts by bonus,
+  # week 2 never moves whatever the holiday, and weeks 3+ decay from week 2.
   #
   # Confirmed by the owner against the game on 2026-09-23. A week is simply the
   # game's unit of time, and a holiday lifts only the week it falls in - release
@@ -198,25 +197,22 @@ Feature: Marketing and Release
     Given the user has selected a holiday release window
     Then weeks 2 through 8 match their unboosted figures
 
-  # [automated] TC-BEH-006 plus tests/distribution-behemoth.test.js. Behemoth
-  # boost applies regardless of commercial score. The slower decay rule is
-  # independent and only applies when score > 9.
+  # [automated] TC04-000028. Behemoth boost applies regardless of commercial score.
+  # The slower decay rule is independent and only applies when score > 9.
   Scenario: Behemoth boost applies at all score levels
     When the user sets the commercial score to 5.0
     And the user enables the Behemoth studio policy
     Then all weeks 1-8 show 25% higher demand than without Behemoth
 
-  # [automated] TC-BEH-006 plus tests/distribution-behemoth.test.js. Week 2
-  # receives the full Behemoth boost since it is based on the commercial score
-  # and not derived from decay.
+  # [automated] TC04-000028. Week 2 receives the full Behemoth boost since it is
+  # based on the commercial score and not derived from decay.
   Scenario: Behemoth boost applies to week 2
     When the user sets the commercial score to 8.0
     And the user enables the Behemoth studio policy
     Then week 2 demand increases by 25 percent
 
-  # [automated] TC-BEH-006 drives this through the grid, reading the decay off
-  # the week3/week2 ratio because the boost lifts both weeks together. Also
-  # pinned by tests/distribution-behemoth.test.js.
+  # [unverified] The grid shows decay through the week3/week2 ratio
+  # because the boost lifts both weeks together. Behaviour confirmed; test automation pending.
   Scenario: Behemoth slower decay requires commercial score above 9
     When the user sets the commercial score to 9.0
     And the user enables the Behemoth studio policy

@@ -17,11 +17,12 @@ rules, tests, or game-source truth.
 | Improvement B: Graves -> Marketing score auto-fill | Done | `TC03-000016` | Transfer now also fills editable Commercial and Artistic score controls from Graves movie scores. |
 | Feature 1: Generate Best Artistic Script | Not started | None yet | Needs engine design before brute-force search. |
 | Feature 2: Generate Best Commercial Script | Not started | None yet | Should share engine/UI with Feature 1. |
-| Feature 3a: Age-to-role breakdown | Not started | None yet | Needs source-data mapping from extracted game files. |
-| Feature 3b: Ad agency compatibility matrix | Not started | None yet | Needs agency/audience score mapping from extracted game files. |
+| Feature 3a: Age-to-role breakdown | Blocked | None yet | `AgeGroups.json` only gives age ranges. Need tag/role-to-age compatibility source data before we can show honest appeal. |
+| Feature 3b: Ad agency compatibility matrix | In progress | `tests/agency-source-mapper.test.js` | Data foundation added: normalize extracted `AdsAgents.json` audience ids and score types into app-facing matrix rows. |
 
-Current completion: **3 of 7 requested items done**. The remaining 4 are larger
-feature builds that should be implemented one slice at a time.
+Current completion: **3 of 7 requested items done**, with **1 of the 4 remaining
+items started as a data-foundation slice**. Feature 3a is blocked until the
+missing role/tag-to-age source data is extracted or provided.
 
 ## Requested Features
 
@@ -74,3 +75,15 @@ Start with the smallest CSS-oriented item:
   design the engine and pagination before coding.
 - Age/agency matrix work should first map extracted game JSON to app-facing
   labels and score bands.
+
+## Source-Data Notes
+
+- `extractedFilesFromGameSourceOfTruth/AgeGroups.json` defines age ranges only:
+  Young, Mid, and Old by gender. It does not say which Protagonist or
+  Antagonist appeals to which age group.
+- `TagsToAgeCompatibilityData.json` is mentioned in the extraction summary as
+  needed for age-group integration, but it is not present in the current repo.
+- `extractedFilesFromGameSourceOfTruth/AdsAgents.json` contains 80 agency rows.
+  The current app-facing marketing roster still uses the smaller curated list
+  in `data.js`; the matrix work should expose source rows carefully before any
+  recommendation behavior changes.

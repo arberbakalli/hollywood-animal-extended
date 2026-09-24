@@ -2744,6 +2744,98 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     line-height: 1.4;
 }
 
+.source-data-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 10px;
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    border-radius: 4px;
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.agency-matrix-card {
+    margin-top: 20px;
+}
+
+.agency-matrix-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.agency-matrix-table {
+    width: 100%;
+    min-width: 820px;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+}
+
+.agency-matrix-table th,
+.agency-matrix-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.16);
+    border-right: 1px solid rgba(212, 175, 55, 0.1);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.agency-matrix-table th {
+    color: var(--text-main);
+    background: rgba(212, 175, 55, 0.08);
+    font-weight: 800;
+}
+
+.agency-matrix-table th:first-child,
+.agency-matrix-table td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: #252525;
+}
+
+.agency-matrix-id,
+.agency-matrix-meta {
+    display: block;
+}
+
+.agency-matrix-id {
+    color: var(--text-main);
+    font-weight: 800;
+}
+
+.agency-matrix-meta {
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.agency-matrix-cell {
+    color: var(--text-muted);
+}
+
+.agency-matrix-cell.has-source-fit {
+    color: var(--text-main);
+    background: rgba(160, 160, 255, 0.08);
+}
+
+.agency-matrix-cell.matches-audience {
+    box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.38);
+}
+
+.agency-matrix-cell.matches-lean {
+    color: #111;
+    background: rgba(76, 217, 100, 0.82);
+    font-weight: 800;
+}
+
 .advertiser-card.weak {
     border-left: 2px solid var(--danger);
     opacity: 0.75;

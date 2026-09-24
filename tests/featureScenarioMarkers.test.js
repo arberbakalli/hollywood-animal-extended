@@ -71,11 +71,14 @@ describe('BDD scenario markers', () => {
 
         // Updated 2026-09-24 with the repository owner's approval, naming this
         // test. P3 found 91 of 128 [automated] scenarios citing no test at all.
-        // Every scenario that had coverage now cites it; these two did not, and
+        // Every scenario that had coverage now cites it; these five did not, and
         // are declared here rather than left claiming automation they never had.
         expect(backlog).toEqual([
             'unverified colman-graves.feature Scenario: Limiting suggestions to starting tags',
+            'unverified colman-graves.feature Scenario: Category search fields stay visible while filtering',
+            'unverified marketing-release.feature Scenario: Behemoth control explains its budget requirement',
             'verified marketing-release.feature Scenario: The advertiser shortlist states which way the movie leans',
+            'unverified marketing-release.feature Scenario: Behemoth slower decay requires commercial score above 9',
         ]);
     });
 

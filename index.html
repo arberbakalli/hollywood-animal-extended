@@ -522,6 +522,17 @@
                             <div id="campaignStrategyDisplay"></div>
                         </div>
                     </div>
+
+                    <div id="agency-compatibility-panel" class="card result-card agency-matrix-card">
+                        <div class="card-header-row">
+                            <h3>Agency Compatibility Matrix</h3>
+                            <span id="agencyCompatibilitySummary" class="source-data-badge">Source data</span>
+                        </div>
+                        <div class="list-subtitle">Game-file agency coverage by audience and score lean</div>
+                        <div id="agencyCompatibilityMatrix" class="agency-matrix-scroll">
+                            <div class="empty-state">Run Analyze Script to inspect source agency coverage.</div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -611,6 +622,7 @@
     <script src="src/evaluation/gravesBestMatches.js"></script>
     <script src="src/marketing/advertiserMatcher.js"></script>
     <script src="src/marketing/distributionPlanner.js"></script>
+    <script type="module" src="src/marketing/agencySourceMapper.js"></script>
     <script src="src/marketing/marketingPlanner.js"></script>
     <script src="src/marketing/targetedAds.js"></script>
     <script src="src/ui/collapsibleSections.js"></script>

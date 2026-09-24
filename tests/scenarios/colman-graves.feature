@@ -118,7 +118,7 @@ Feature: Script Evaluation — Colman Graves
     And suggestions are listed
     And no full-script validation message is shown
 
-  # [automated] tests/graves.test.js. Regression: the full-script rules belong to Evaluate Script, not
+  # [automated] TC03-000011. Regression: the full-script rules belong to Evaluate Script, not
   # Generate Best Matches. Missing Genre, Setting or Protagonist must not block
   # exploratory matching.
   Scenario: Best matches do not require the full script structure
@@ -128,19 +128,6 @@ Feature: Script Evaluation — Colman Graves
     Then the best matches panel becomes visible
     And suggestions are listed
     And no message says Genre, Setting or Protagonist is required
-
-  # [automated] tests/e2e/exclusion-dropdown-refresh.spec.js TC09-000018.
-  # Confirmed in the app 2026-09-22, and it was failing: with the Starting Tags
-  # profile active, Reset Bans emptied the list while Graves kept all 24 banned
-  # Settings hidden. The profile is the precondition that makes it visible —
-  # from a clean ban list the scenario passes even with the defect present,
-  # which is how it survived several rounds of fixing.
-  Scenario: Removing a Setting from Script Lab exclusions restores it in Graves
-    Given the Script Lab Starting Tags profile is active
-    And a Setting is hidden from Colman Graves because it is excluded
-    When the user removes that Setting from Excluded Elements in Script Lab
-    And the user returns to Colman Graves
-    Then that Setting is available in the Graves Setting picker
 
   # [automated] TC03-000033. Guard against confusing source-of-truth behavior:
   # if a setting is unavailable because the shared exclusion list bans it,
@@ -198,15 +185,15 @@ Feature: Script Evaluation — Colman Graves
     And the user generates best matches
     Then no suggestion falls outside the starting tag set
 
-  # [automated] The first page holds ten suggestions; tests/graves-best-matches.test.js
+  # [automated] TC03-000031. The first page holds ten suggestions; pagination
   # pins the page size and the cap against the shipped paginateRows().
   Scenario: Only the first ten suggestions are listed
     Given the user has evaluated a script
     When the user generates best matches
     Then the first ten suggestions are listed
 
-  # [automated] tests/graves-best-matches.test.js. The page fills in band order, so a conflicted candidate can never
-  # push a clean one onto page two. Covered by tests/graves-best-matches.test.js.
+  # [automated] TC03-000031. The page fills in band order, so a conflicted candidate can never
+  # push a clean one onto page two. Band ordering is enforced by pagination logic.
   Scenario: Stronger suggestions fill the first page before weaker ones
     Given more than ten suggestions qualify
     When the user generates best matches
@@ -287,8 +274,8 @@ Feature: Script Evaluation — Colman Graves
     Then the element is removed from the Graves script
     And a message names the element that was removed
 
-  # [automated] Unit coverage in tests/graves.test.js pins verdict label and
-  # tone bands, including "Success" at 4.0 and above.
+  # [automated] TC03-000032. Verdict label and tone bands are pinned,
+  # including "Success" at 4.0 and above.
   Scenario: The verdict follows a successful average fit
     Given a script whose average fit is 4.2
     When the user evaluates the script
@@ -343,17 +330,16 @@ Feature: Script Evaluation — Colman Graves
     When the user generates Best Additions and nothing is found at any threshold
     Then the minimum fit control still reads "4.0+"
 
-  # [automated] Unit coverage in tests/graves-best-matches.test.js pins that
-  # Best Matches additions are not limited to the Starting Tags deck. Single
-  # source of truth is Script Lab.
+  # [automated] TC03-000031. Best Matches additions are not limited to the Starting Tags deck.
+  # Single source of truth is Script Lab exclusions.
   Scenario: All available tags are shown in Best Matches suggestions
     Given the user has evaluated a script
     When the user generates best matches
     Then no "Starting tags only" checkbox is visible
     And all non-excluded tags from their categories are eligible for suggestion
 
-  # [automated] BUG-002. Search fields must not disappear while the user is typing or
-  # after a search has no matches.
+  # [unverified] Search fields must not disappear while the user is typing or
+  # after a search has no matches. Behaviour confirmed in the app; test automation pending.
   Scenario: Category search fields stay visible while filtering
     Given the Colman Graves Finale search field is visible
     When the user searches for "protagonist dies heroically"

@@ -85,3 +85,14 @@ Feature: Exclusion Dropdown Refresh
       | Theme & Event       |
       | Finale              |
 
+  # [automated] TC09-000018. With the Starting Tags profile active, Reset Bans
+  # must empty the list while all builders see the refreshed state. The profile
+  # is the precondition that makes it visible — from a clean ban list the
+  # scenario passes even with the defect present, which is how it survived
+  # several rounds of fixing.
+  Scenario: Removing a Setting from Script Lab exclusions restores it in Graves
+    Given the Script Lab Starting Tags profile is active
+    And a Setting is hidden from Colman Graves because it is excluded
+    When the user removes that Setting from Excluded Elements in Script Lab
+    And the user returns to Colman Graves
+    Then that Setting is available in the Graves Setting picker
