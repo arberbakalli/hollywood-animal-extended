@@ -79,6 +79,7 @@ describe('BDD scenario markers', () => {
             'unverified marketing-release.feature Scenario: Behemoth control explains its budget requirement',
             'verified marketing-release.feature Scenario: The advertiser shortlist states which way the movie leans',
             'unverified marketing-release.feature Scenario: Behemoth slower decay requires commercial score above 9',
+            'unverified script-lab.feature Scenario: Age-to-role breakdown shows appeal by age and gender',
         ]);
     });
 

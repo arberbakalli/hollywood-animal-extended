@@ -611,21 +611,18 @@ select.tag-selector.has-selected-tag {
     color: var(--category-color);
     border-color: var(--category-color);
     background: var(--input-bg);
-    box-shadow: inset 3px 0 0 var(--category-color);
 }
 
 /* Genre selector (gold) */
 select[data-category="Genre"].has-selected-tag {
     color: var(--accent);
     border-color: var(--accent);
-    box-shadow: inset 3px 0 0 var(--accent);
 }
 
-/* Setting (gray/subtle) */
+/* Setting (gray/subtle to match category label) */
 select[data-category="Setting"].has-selected-tag {
-    color: #888;
-    border-color: #666;
-    box-shadow: inset 3px 0 0 #666;
+    color: #a0a0a0;
+    border-color: #a0a0a0;
 }
 
 select.tag-selector option.strong-fit-option,
