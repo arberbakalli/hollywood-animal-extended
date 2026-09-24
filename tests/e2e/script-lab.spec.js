@@ -73,6 +73,38 @@ test.describe('Script Lab — generator', () => {
     }
   });
 
+  test('TC01-000031 selected tags and strong-fit options get positive visual feedback', async ({ page }) => {
+    const fixture = await page.evaluate(async () => {
+      await ensureCompatibilityLoaded();
+      const tags = Object.values(GAME_DATA.tags);
+      const protagonist = tags.find(tag => {
+        if (tag.category !== 'Protagonist') return false;
+        return tags.some(candidate =>
+          candidate.id !== tag.id &&
+          HACCompatibilityEngine.getRawCompatibilityScore(candidate, tag, GAME_DATA) >= 4
+        );
+      });
+      const strongPartner = tags.find(candidate =>
+        candidate.id !== protagonist.id &&
+        HACCompatibilityEngine.getRawCompatibilityScore(candidate, protagonist, GAME_DATA) >= 4
+      );
+
+      return { protagonistId: protagonist.id, strongPartnerId: strongPartner.id };
+    });
+    const select = page.locator('#inputs-protagonist-generator select.tag-selector').first();
+    const row = page.locator('#inputs-protagonist-generator .select-row').first();
+
+    await select.selectOption(fixture.protagonistId);
+
+    await expect(select).toHaveClass(/has-selected-tag/);
+    await expect(row).toHaveClass(/has-selected-tag/);
+    await expect.poll(() =>
+      page.locator(`#selectors-container-generator option[value="${fixture.strongPartnerId}"]`).first()
+        .getAttribute('data-synergy')
+    ).toBe('high');
+    await expect(select).toHaveCSS('color', 'rgb(76, 217, 100)');
+  });
+
   test('TC01-000020 Reset Locks clears locked selections', async ({ steps }) => {
     await steps.selectDropdown('lockedSupportingCharacterSelect', 'ScriptLab', {
       type: DropdownSelectType.VALUE,

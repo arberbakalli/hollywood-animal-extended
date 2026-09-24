@@ -9,6 +9,8 @@
     --border: #333;
     --danger: #ff5f5f;
     --success: #4cd964;
+    --success-soft: rgba(76, 217, 100, 0.14);
+    --success-border: rgba(76, 217, 100, 0.55);
     --moderate: #ff9f0a;
     --ha-commercial: #d4af37;
     --ha-artistic: #a0a0ff;
@@ -603,6 +605,23 @@ select {
 select:focus { outline: none; border-color: var(--accent); }
 
 #selectors-container-excluded select:focus { border-color: var(--danger); }
+
+.select-row.has-selected-tag > select.tag-selector,
+select.tag-selector.has-selected-tag {
+    color: var(--success);
+    border-color: var(--success-border);
+    background:
+        linear-gradient(90deg, var(--success-soft), transparent 34%),
+        var(--input-bg);
+    box-shadow: inset 3px 0 0 var(--success);
+}
+
+select.tag-selector option.strong-fit-option,
+select.tag-selector option[data-synergy="high"] {
+    color: var(--success);
+    background-color: var(--success-soft);
+    font-weight: 700;
+}
 
 .remove-btn {
     background: transparent;

@@ -1,6 +1,6 @@
 # Feature Test Coverage Matrix
 
-Date: 2026-09-23
+Date: 2026-09-24
 
 ## QA Term
 
@@ -18,14 +18,14 @@ Source: `tests/scenarios/*.feature` markers.
 | Feature area | Automated | Verified only | Unverified | Heat | Notes |
 | --- | ---: | ---: | ---: | --- | --- |
 | App Shell | 5 | 0 | 0 | Green | Tabs, language, boot failure, retry, rapid tab switching covered. |
-| Script Lab | 29 | 0 | 0 | Green | Strong UI, Script Library and exclusion coverage. |
+| Script Lab | 30 | 0 | 0 | Green | Strong UI, visual feedback, Script Library and exclusion coverage. |
 | Colman Graves | 35 | 0 | 0 | Green | Core scoring, verdict bands, best matches, pair analysis and exclusion messaging covered. |
 | Marketing and Release | 29 | 0 | 0 | Green | Distribution, studio policies, holiday boosts and marketing profile paths covered. |
 | Build for Target | 15 | 0 | 0 | Green | Audience/advertiser, exclusions, empty state, ranking and budget covered. |
 | Exclusion Dropdown Refresh | 7 | 0 | 0 | Green | Global exclusion propagation covered across contexts. |
 | Slider Syncing | 7 | 0 | 0 | Green | Pool-score mapping and max score edge covered. |
 
-Totals: **120 scenario markers** = **120 automated**, **0 verified-only**, **0 unverified**.
+Totals: **121 scenario markers** = **121 automated**, **0 verified-only**, **0 unverified**.
 
 ## Red-Flag Backlog
 

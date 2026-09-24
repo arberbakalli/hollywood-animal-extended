@@ -168,6 +168,14 @@ Feature: Script Lab
     And the user generates scripts
     Then every generated script includes "Sidekick"
 
+  # [automated] TC01-000031. Improvement A: selected tags should get positive
+  # visual feedback, and available strong-fit options should be hinted without
+  # using red/negative styling for weak fits.
+  Scenario: Selected tags and strong-fit options get positive visual feedback
+    When the user locks a Protagonist
+    Then the selected dropdown uses success styling
+    And high-synergy available options are marked as strong fits
+
   # [automated] TC01-000020. Reset Locks clears user picks rather than only repainting the panel.
   Scenario: Reset Locks clears locked selections
     Given the user has locked the supporting character "Sidekick"
