@@ -3267,7 +3267,9 @@ option.finale { color: var(--cat-finale); }
 #selectors-container-excluded select[data-category="Setting"] {
     color: var(--cat-setting) !important;
 }
-#selectors-container-excluded select[data-category="Genre"] {
+
+/* Genre in exclusion: apply per-genre colors to select when option is selected */
+#group-genre-excluded select.tag-selector.has-selected-tag {
     color: var(--category-color) !important;
 }
 
