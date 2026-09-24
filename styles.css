@@ -3537,5 +3537,5 @@ option[data-selected-elsewhere="true"] {
 }
 
 /* TEMPORARY: Hide panels pending UI redesign */
-#ageRoleBreakdownPanel { display: none; }
+/* #ageRoleBreakdownPanel { display: none; } */
 #agency-compatibility-panel { display: none; }
