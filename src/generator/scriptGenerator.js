@@ -243,6 +243,9 @@
         const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
         const generatedBatch = [];
 
+        // Map scoreKind to bonus property: 'artistic' -> 'art', 'commercial' -> 'com'
+        const bonusKey = scoreKind === 'artistic' ? 'art' : 'com';
+
         for (let i = 0; i < OPTIMIZED_RESULT_COUNT; i++) {
             let bestCandidate = null;
             const maxAttempts = 35;
@@ -250,11 +253,18 @@
             for (let attempt = 0; attempt < maxAttempts; attempt++) {
                 const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
 
-                if (!bestCandidate ||
-                    candidate.scores[scoreKind] > bestCandidate.scores[scoreKind] ||
-                    (candidate.scores[scoreKind] === bestCandidate.scores[scoreKind] &&
-                        candidate.stats.avgComp > bestCandidate.stats.avgComp)) {
-                    bestCandidate = candidate;
+                // Calculate bonuses for this candidate
+                const evaluation = HACScriptEvaluation.calculateScriptEvaluation(candidate.tags);
+                const candidateBonus = evaluation.bonuses[bonusKey];
+
+                if (!bestCandidate) {
+                    bestCandidate = { ...candidate, _bonus: candidateBonus, _evaluation: evaluation };
+                } else {
+                    const existingBonus = bestCandidate._bonus;
+                    if (candidateBonus > existingBonus ||
+                        (candidateBonus === existingBonus && candidate.stats.avgComp > bestCandidate.stats.avgComp)) {
+                        bestCandidate = { ...candidate, _bonus: candidateBonus, _evaluation: evaluation };
+                    }
                 }
             }
 
@@ -264,9 +274,10 @@
             }
         }
 
+        // Sort by bonus (highest first), then by average compatibility
         generatedBatch.sort((a, b) => {
-            if (b.scores[scoreKind] !== a.scores[scoreKind]) {
-                return b.scores[scoreKind] - a.scores[scoreKind];
+            if (b._bonus !== a._bonus) {
+                return b._bonus - a._bonus;
             }
             return b.stats.avgComp - a.stats.avgComp;
         });
