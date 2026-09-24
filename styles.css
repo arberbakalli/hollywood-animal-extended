@@ -3500,3 +3500,7 @@ option[data-selected-elsewhere="true"] {
     color: var(--text-main);
     font-weight: 500;
 }
+
+/* TEMPORARY: Hide panels pending UI redesign */
+#ageRoleBreakdownPanel { display: none; }
+#agency-compatibility-panel { display: none; }
