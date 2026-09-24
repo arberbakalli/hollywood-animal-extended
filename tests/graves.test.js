@@ -111,7 +111,7 @@ describe('Graves Evaluation', () => {
             return feedback.textContent;
         })()`);
 
-        expect(result).toContain('A script needs at least one Setting, Protagonist, Antagonist, Finale.');
+        expect(result).toContain('A script needs at least one Setting, Protagonist.');
     });
 
     test('Evaluate Script rejects fewer than 5 story elements after required categories are present', async () => {

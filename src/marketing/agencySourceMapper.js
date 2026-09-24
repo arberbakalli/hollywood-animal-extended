@@ -64,15 +64,4 @@ const HACAgencySourceMapper = {
     normalizeGameAudienceTarget,
 };
 
-if (typeof globalThis !== 'undefined') {
-    globalThis.HACAgencySourceMapper = HACAgencySourceMapper;
-}
-
-export {
-    AUDIENCE_ID_BY_GAME_ID,
-    HACAgencySourceMapper,
-    SCORE_KIND_BY_GAME_SCORE_TYPE,
-    normalizeGameAdAgency,
-    normalizeGameAdAgencies,
-    normalizeGameAudienceTarget,
-};
+globalThis.HACAgencySourceMapper = HACAgencySourceMapper;

@@ -59,11 +59,14 @@
 
         { "elementName": "feedbackMessage", "selector": { "css": "#generatorFeedbackMessage" } },
         { "elementName": "generateButton", "selector": { "css": "#generateScriptsButton" } },
+        { "elementName": "bestArtisticButton", "selector": { "css": "#generateBestArtisticScriptsButton" } },
+        { "elementName": "bestCommercialButton", "selector": { "css": "#generateBestCommercialScriptsButton" } },
 
         { "elementName": "resultsSection", "selector": { "css": "#results-generator" } },
         { "elementName": "resultsList", "selector": { "css": "#generatorResultsList" } },
         { "elementName": "generatedCards", "selector": { "css": "#generatorResultsList .gen-card" } },
         { "elementName": "generatedTagChips", "selector": { "css": "#generatorResultsList .gen-tag-chip" } },
+        { "elementName": "generatedShowMoreButton", "selector": { "css": "#showMoreGeneratedScriptsButton" } },
         { "elementName": "generatedPinButtons", "selector": { "css": "#generatorResultsList [id^='generated-script-pin-']" } },
         { "elementName": "generatedGravesButtons", "selector": { "css": "#generatorResultsList [data-role='script-graves-button']" } },
         { "elementName": "generatedMarketingButtons", "selector": { "css": "#generatorResultsList [data-role='script-transfer-button']" } },

@@ -185,6 +185,10 @@ async function generateScripts() {
     return HACScriptGenerator.generateScripts();
 }
 
+async function generateBestScoreScripts(scoreKind) {
+    return HACScriptGenerator.generateBestScoreScripts(scoreKind);
+}
+
 function runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags) {
     return HACScriptGenerator.runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
 }

@@ -49,6 +49,10 @@
         return {
             tags: tags.map(tag => ({ id: tag.id, category: tag.category, percent: tag.percent })),
             stats: buildScriptStats(evaluation.matrix, evaluation.movieScores),
+            scores: {
+                commercial: evaluation.movieScores.commercial,
+                artistic: evaluation.movieScores.artistic
+            },
             name,
             uniqueId: createScriptId()
         };
@@ -141,6 +145,10 @@
         return {
             tags: bestSet,
             stats: buildScriptStats(bestStats, movieScores),
+            scores: {
+                commercial: movieScores.commercial,
+                artistic: movieScores.artistic
+            },
             uniqueId: createScriptId()
         };
     }

@@ -53,6 +53,32 @@ test.describe('Script Lab — generator', () => {
     await steps.on('generatedTagChips', 'ScriptLab').verifyCount({ greaterThan: 0 });
   });
 
+  test('TC01-000032 best artistic scripts show top three and score context', async ({ steps, page }) => {
+    await steps.on('bestArtisticButton', 'ScriptLab').click();
+
+    await steps.on('resultsSection', 'ScriptLab').verifyState('visible');
+    await steps.on('generatedCards', 'ScriptLab').verifyCount({ exactly: 3 });
+    const firstCard = page.locator('#generatorResultsList .gen-card').first();
+    await expect(firstCard).toContainText('Artistic');
+    await expect(firstCard).toContainText('Commercial');
+    await expect(firstCard).toContainText('Synergy');
+
+    await steps.on('generatedShowMoreButton', 'ScriptLab').verifyTextContains('Show More');
+    await steps.on('generatedShowMoreButton', 'ScriptLab').click();
+    await steps.on('generatedCards', 'ScriptLab').verifyCount({ greaterThan: 3 });
+  });
+
+  test('TC01-000033 best commercial scripts show top three and score context', async ({ steps, page }) => {
+    await steps.on('bestCommercialButton', 'ScriptLab').click();
+
+    await steps.on('resultsSection', 'ScriptLab').verifyState('visible');
+    await steps.on('generatedCards', 'ScriptLab').verifyCount({ exactly: 3 });
+    const firstCard = page.locator('#generatorResultsList .gen-card').first();
+    await expect(firstCard).toContainText('Commercial');
+    await expect(firstCard).toContainText('Artistic');
+    await expect(firstCard).toContainText('Synergy');
+  });
+
   // Given a supporting character is locked
   // When scripts are generated
   // Then every rendered script card keeps that locked pick

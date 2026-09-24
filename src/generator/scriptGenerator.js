@@ -1,6 +1,14 @@
 (function(global) {
     "use strict";
 
+    const OPTIMIZED_RESULT_COUNT = 12;
+    const INITIAL_OPTIMIZED_VISIBLE_COUNT = 3;
+    let generatorResultsState = {
+        scripts: [],
+        visibleCount: 0,
+        mode: 'standard'
+    };
+
     function setupScoreSync() {
         // Existing Advertiser Tab Sync
         const pairs = [
@@ -86,7 +94,7 @@
         setupMovieScoreSliderSync();
     }
 
-    const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist", "Antagonist", "Finale"];
+    const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist"];
 
     function getMaxElementPoolSize() {
         const input = document.getElementById('globalElementPoolInput');
@@ -131,7 +139,7 @@
         slider.style.setProperty('--slider-fill-percent', percent + '%');
     }
 
-    async function generateScripts() {
+    async function prepareGenerationInputs() {
         await ensureCompatibilityLoaded();
         clearFeedbackMessage('generatorFeedbackMessage');
 
@@ -160,7 +168,7 @@
                 'generatorFeedbackMessage',
                 `A script needs at least one available ${missingRequiredCategories.join(', ')}. Remove exclusions or switch availability.`
             );
-            return;
+            return null;
         }
 
         // Validate
@@ -171,7 +179,7 @@
                 'generatorFeedbackMessage',
                 `You locked ${scoringFixed.length} scoring elements, but this Movie Score allows about ${targetCount}. Raise the score target or remove locked elements.`
             );
-            return;
+            return null;
         }
 
         const unavailableFixed = fixedTags.filter(t => excludedIds.has(t.id));
@@ -183,9 +191,17 @@
                 'generatorFeedbackMessage',
                 `Locked elements are unavailable or excluded: ${unavailableNames}.`
             );
-            return;
+            return null;
         }
 
+        return { targetComp, targetCount, fixedTags, excludedTags };
+    }
+
+    async function generateScripts() {
+        const inputs = await prepareGenerationInputs();
+        if (!inputs) return;
+
+        const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
 
         const generatedBatch = [];
 
@@ -220,6 +236,48 @@
         renderGeneratedScripts(generatedBatch);
     }
 
+    async function generateBestScoreScripts(scoreKind) {
+        const inputs = await prepareGenerationInputs();
+        if (!inputs) return;
+
+        const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
+        const generatedBatch = [];
+
+        for (let i = 0; i < OPTIMIZED_RESULT_COUNT; i++) {
+            let bestCandidate = null;
+            const maxAttempts = 35;
+
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
+
+                if (!bestCandidate ||
+                    candidate.scores[scoreKind] > bestCandidate.scores[scoreKind] ||
+                    (candidate.scores[scoreKind] === bestCandidate.scores[scoreKind] &&
+                        candidate.stats.avgComp > bestCandidate.stats.avgComp)) {
+                    bestCandidate = candidate;
+                }
+            }
+
+            if (bestCandidate) {
+                bestCandidate.optimizedFor = scoreKind;
+                generatedBatch.push(bestCandidate);
+            }
+        }
+
+        generatedBatch.sort((a, b) => {
+            if (b.scores[scoreKind] !== a.scores[scoreKind]) {
+                return b.scores[scoreKind] - a.scores[scoreKind];
+            }
+            return b.stats.avgComp - a.stats.avgComp;
+        });
+
+        generatedScriptsCache = generatedBatch;
+        renderGeneratedScripts(generatedBatch, {
+            mode: scoreKind,
+            visibleCount: INITIAL_OPTIMIZED_VISIBLE_COUNT
+        });
+    }
+
     function runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags) {
         return HACScriptGenerationEngine.runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
     }
@@ -232,15 +290,40 @@
         return HACScriptGenerationEngine.getRandomTagByCategory(category, currentTags, excludedIds);
     }
 
-    function renderGeneratedScripts(scripts) {
+    function renderGeneratedScripts(scripts, options = {}) {
         const container = document.getElementById('generatorResultsList');
         container.innerHTML = '';
         document.getElementById('results-generator').classList.remove('hidden');
 
-        scripts.forEach((script, index) => {
+        generatorResultsState = {
+            scripts,
+            visibleCount: options.visibleCount || scripts.length,
+            mode: options.mode || 'standard'
+        };
+
+        const visibleScripts = scripts.slice(0, generatorResultsState.visibleCount);
+        visibleScripts.forEach((script, index) => {
             // false passed here means it's NOT in the pinned section (no editable name)
             const card = createScriptCardHTML(script, false);
             container.appendChild(card);
+        });
+
+        if (generatorResultsState.visibleCount < scripts.length) {
+            const button = document.createElement('button');
+            button.id = 'showMoreGeneratedScriptsButton';
+            button.type = 'button';
+            button.className = 'analyze-btn secondary-btn generated-show-more-btn';
+            button.dataset.role = 'generated-show-more-button';
+            button.textContent = `Show More (${scripts.length - generatorResultsState.visibleCount} remaining)`;
+            button.addEventListener('click', showMoreGeneratedScripts);
+            container.appendChild(button);
+        }
+    }
+
+    function showMoreGeneratedScripts() {
+        renderGeneratedScripts(generatorResultsState.scripts, {
+            mode: generatorResultsState.mode,
+            visibleCount: Math.min(generatorResultsState.visibleCount + INITIAL_OPTIMIZED_VISIBLE_COUNT, generatorResultsState.scripts.length)
         });
     }
 
@@ -292,6 +375,48 @@
             tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${tagClass} ${isFixed ? 'tag-fixed' : ''}">${tagName} <small>${t.category}</small></span>`;
         });
 
+        const isOptimized = scriptObj.optimizedFor === 'artistic' || scriptObj.optimizedFor === 'commercial';
+        const primaryLabel = scriptObj.optimizedFor === 'artistic' ? 'Artistic' : 'Commercial';
+        const secondaryLabel = scriptObj.optimizedFor === 'artistic' ? 'Commercial' : 'Artistic';
+        const fallbackMovieScore = Number.parseFloat(scriptObj.stats.movieScore) || 0;
+        const primaryScore = scriptObj.optimizedFor === 'artistic'
+            ? scriptObj.scores?.artistic ?? fallbackMovieScore
+            : scriptObj.scores?.commercial ?? fallbackMovieScore;
+        const secondaryScore = scriptObj.optimizedFor === 'artistic'
+            ? scriptObj.scores?.commercial ?? fallbackMovieScore
+            : scriptObj.scores?.artistic ?? fallbackMovieScore;
+        const scoreBadgesHtml = isOptimized ? `
+                        <div class="gen-badge-group gen-badge-group--primary">
+                            <span class="gen-badge-label">${primaryLabel}</span>
+                            <span class="gen-badge-val val-mid">${primaryScore.toFixed(1)}</span>
+                        </div>
+                        <div class="gen-badge-group">
+                            <span class="gen-badge-label">${secondaryLabel}</span>
+                            <span class="gen-badge-val val-mid">${secondaryScore.toFixed(1)}</span>
+                        </div>
+                        <div class="gen-badge-group">
+                            <span class="gen-badge-label">Avg Fit</span>
+                            <span class="gen-badge-val ${compClass}">${scriptObj.stats.avgComp.toFixed(1)}</span>
+                        </div>
+                        <div class="gen-badge-group">
+                            <span class="gen-badge-label">Synergy</span>
+                            <span class="gen-badge-val val-mid">${scriptObj.stats.synergySum.toFixed(2)}</span>
+                        </div>
+        ` : `
+                        <div class="gen-badge-group">
+                            <span class="gen-badge-label">Avg Comp</span>
+                            <span class="gen-badge-val ${compClass}">${scriptObj.stats.avgComp.toFixed(1)}</span>
+                        </div>
+                        <div class="gen-badge-group">
+                            <span class="gen-badge-label">Movie Score</span>
+                            <span class="gen-badge-val val-mid">${scriptObj.stats.movieScore}</span>
+                        </div>
+                        <div class="gen-badge-group">
+                            <span class="gen-badge-label">Script Qual</span>
+                            <span class="gen-badge-val val-mid">${scriptObj.stats.maxScriptQuality}</span>
+                        </div>
+        `;
+
         // Check if truly pinned to set Icon state
         const isActuallyPinned = pinnedScripts.some(s => s.uniqueId === scriptObj.uniqueId);
         const pinClass = isActuallyPinned ? 'pinned' : '';
@@ -310,18 +435,7 @@
                 <div class="gen-left-col">
                     ${nameInputHtml}
                     <div class="gen-info-row">
-                        <div class="gen-badge-group">
-                            <span class="gen-badge-label">Avg Comp</span>
-                            <span class="gen-badge-val ${compClass}">${scriptObj.stats.avgComp.toFixed(1)}</span>
-                        </div>
-                        <div class="gen-badge-group">
-                            <span class="gen-badge-label">Movie Score</span>
-                            <span class="gen-badge-val val-mid">${scriptObj.stats.movieScore}</span>
-                        </div>
-                        <div class="gen-badge-group">
-                            <span class="gen-badge-label">Script Qual</span>
-                            <span class="gen-badge-val val-mid">${scriptObj.stats.maxScriptQuality}</span>
-                        </div>
+                        ${scoreBadgesHtml}
                     </div>
                 </div>
                 <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" type="button" title="${pinTitle}" data-role="script-pin-button">
@@ -362,10 +476,12 @@
         REQUIRED_SCRIPT_CATEGORIES,
         setupGeneratorControls,
         generateScripts,
+        generateBestScoreScripts,
         runGenerationAlgorithm,
         getCompatibleGenres,
         getRandomTagByCategory,
         renderGeneratedScripts,
+        showMoreGeneratedScripts,
         createScriptId,
         buildScriptStats,
         buildScriptFromTags,

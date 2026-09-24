@@ -1,13 +1,15 @@
 import { describe, expect, test } from '@jest/globals';
 import { readFile } from 'node:fs/promises';
 
-import {
+import '../src/marketing/agencySourceMapper.js';
+
+const {
     AUDIENCE_ID_BY_GAME_ID,
     SCORE_KIND_BY_GAME_SCORE_TYPE,
     normalizeGameAdAgencies,
     normalizeGameAdAgency,
     normalizeGameAudienceTarget,
-} from '../src/marketing/agencySourceMapper.js';
+} = globalThis.HACAgencySourceMapper;
 
 const loadRawAgencies = async () =>
     JSON.parse(await readFile('extractedFilesFromGameSourceOfTruth/AdsAgents.json', 'utf8'));

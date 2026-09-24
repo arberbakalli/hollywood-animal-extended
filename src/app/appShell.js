@@ -256,33 +256,36 @@
         });
 
         function applyStartingTagsExclusions() {
-            const buildExcludedList = () => {
-                resetSelectors('excluded');
-                const whitelist = new Set(GAME_DATA.starterWhitelist || []);
-                const allTags = Object.values(GAME_DATA.tags);
-                const container = document.getElementById('selectors-container-excluded');
+            resetSelectors('excluded');
+            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+            const allTags = Object.values(GAME_DATA.tags);
+            const container = document.getElementById('selectors-container-excluded');
 
-                if (!container) return;
-                container.classList.add('is-batching');
+            if (!container) return;
+            container.classList.add('is-batching');
+            try {
                 allTags.forEach(tag => {
                     if (!whitelist.has(tag.id)) {
                         addDropdown(tag.category, tag.id, 'excluded');
                     }
                 });
+            } finally {
                 container.classList.remove('is-batching');
-                updateExcludedCount();
+            }
 
-                // Refresh all script builder dropdowns to re-filter based on new exclusions
-                if (typeof refreshCategoryDropdowns === 'function') {
-                    ['generator', 'graves', 'advertisers', 'targeted'].forEach(context => {
-                        GAME_DATA.categories.forEach(category => {
-                            refreshCategoryDropdowns(category, context);
-                        });
+            updateExcludedCount();
+            if (typeof global.HACExclusionStore?.saveExclusions === 'function') {
+                global.HACExclusionStore.saveExclusions();
+            }
+
+            // Refresh all script builder dropdowns to re-filter based on new exclusions
+            if (typeof refreshCategoryDropdowns === 'function') {
+                ['generator', 'graves', 'advertisers', 'targeted'].forEach(context => {
+                    GAME_DATA.categories.forEach(category => {
+                        refreshCategoryDropdowns(category, context);
                     });
-                }
-            };
-
-            setTimeout(buildExcludedList, 0);
+                });
+            }
         }
 
         function saveExclusionProfile() {
@@ -340,6 +343,8 @@
             ['loadPinnedScriptsButton', triggerLoadScripts],
             ['evaluateGravesButton', evaluateColmanGravesScript],
             ['generateBestMatchesButton', generateBestMatches],
+            ['generateBestArtisticScriptsButton', () => generateBestScoreScripts('artistic')],
+            ['generateBestCommercialScriptsButton', () => generateBestScoreScripts('commercial')],
             ['gravesExclusionJumpButton', jumpToExclusionEditor],
             ['transferGravesTagsButton', () => transferTagsToAdvertisers('graves')],
             ['analyzeMovieButton', analyzeMovie],

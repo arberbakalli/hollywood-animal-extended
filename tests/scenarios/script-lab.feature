@@ -27,6 +27,23 @@ Feature: Script Lab
     And at least one script card is listed
     And each card shows its story element chips
 
+  # [automated] TC01-000032. Best Artistic uses the shared generation engine but
+  # ranks by artistic movie score and shows commercial score as context.
+  Scenario: Generating best artistic scripts ranks artistic score first
+    When the user generates best artistic scripts
+    Then three generated script cards are shown
+    And the first card shows Artistic as the primary score
+    And the card also shows Commercial and Synergy context
+    And Show More reveals additional generated scripts
+
+  # [automated] TC01-000033. Best Commercial mirrors Best Artistic with the
+  # primary sort flipped to commercial movie score.
+  Scenario: Generating best commercial scripts ranks commercial score first
+    When the user generates best commercial scripts
+    Then three generated script cards are shown
+    And the first card shows Commercial as the primary score
+    And the card also shows Artistic and Synergy context
+
   # [automated] TC08-000003. Empty state should be explicit before the first generation run.
   Scenario: Generated results start empty
     Given the user has not generated scripts yet

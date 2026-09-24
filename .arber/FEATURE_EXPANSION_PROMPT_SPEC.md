@@ -15,14 +15,13 @@ rules, tests, or game-source truth.
 | Improvement A: Script Lab visual feedback | Done | `TC01-000031` | Selected Script Lab dropdowns get success styling; high-fit options get subtle `data-synergy="high"` hints. |
 | Improvement C: Verify Marketing data flow | Done | `TC03-000016` | Graves already transfers tag data into Marketing and triggers analysis. |
 | Improvement B: Graves -> Marketing score auto-fill | Done | `TC03-000016` | Transfer now also fills editable Commercial and Artistic score controls from Graves movie scores. |
-| Feature 1: Generate Best Artistic Script | Not started | None yet | Needs engine design before brute-force search. |
-| Feature 2: Generate Best Commercial Script | Not started | None yet | Should share engine/UI with Feature 1. |
+| Feature 1: Generate Best Artistic Script | Done | `TC01-000032` | Script Lab has a Best Artistic generator, top 3 first, Show More pagination, and commercial/synergy context. |
+| Feature 2: Generate Best Commercial Script | Done | `TC01-000033` | Script Lab has a Best Commercial generator sharing the same engine/UI with the artistic mode. |
 | Feature 3a: Age-to-role breakdown | Blocked | None yet | `AgeGroups.json` only gives age ranges. Need tag/role-to-age compatibility source data before we can show honest appeal. |
-| Feature 3b: Ad agency compatibility matrix | In progress | `tests/agency-source-mapper.test.js` | Data foundation added: normalize extracted `AdsAgents.json` audience ids and score types into app-facing matrix rows. |
+| Feature 3b: Ad agency compatibility matrix | Done | `tests/agency-source-mapper.test.js`, `TC04-000031` | Marketing now renders a game-source agency matrix from `AdsAgents.json` without changing recommendation logic. |
 
-Current completion: **3 of 7 requested items done**, with **1 of the 4 remaining
-items started as a data-foundation slice**. Feature 3a is blocked until the
-missing role/tag-to-age source data is extracted or provided.
+Current completion: **6 of 7 requested items done**. Feature 3a is blocked until
+the missing role/tag-to-age source data is extracted or provided.
 
 ## Requested Features
 

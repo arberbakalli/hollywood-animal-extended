@@ -184,6 +184,7 @@ describe('HTML structure', () => {
             'src/evaluation/gravesBestMatches.js',
             'src/marketing/advertiserMatcher.js',
             'src/marketing/distributionPlanner.js',
+            'src/marketing/agencySourceMapper.js',
             'src/marketing/marketingPlanner.js',
             'src/marketing/targetedAds.js',
             'src/ui/collapsibleSections.js',
