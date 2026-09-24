@@ -15,6 +15,28 @@
         };
     }
 
+    function setMarketingScoreControl(inputId, sliderId, value) {
+        const normalized = Math.min(10, Math.max(0, Number(value) || 0)).toFixed(1);
+        const input = document.getElementById(inputId);
+        const slider = document.getElementById(sliderId);
+
+        if (input) input.value = normalized;
+        if (slider) {
+            slider.value = normalized;
+            updateSliderTrack(slider);
+        }
+
+        input?.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function autofillMarketingScoresFromTags(tags) {
+        if (!tags || tags.length === 0) return;
+
+        const scores = calculateScriptEvaluation(tags).movieScores;
+        setMarketingScoreControl('comScoreInput', 'comScoreSlider', scores.commercial);
+        setMarketingScoreControl('artScoreInput', 'artScoreSlider', scores.artistic);
+    }
+
     function transferTagsToAdvertisers(sourceContext = 'graves') {
         const inputs = collectTagInputs(sourceContext);
         if (inputs.length === 0) return;
@@ -41,11 +63,13 @@
                 }
             });
         }
+        autofillMarketingScoresFromTags(inputs);
         analyzeMovie();
     }
 
     global.HACScriptEvaluation = {
         calculateScriptEvaluation,
+        autofillMarketingScoresFromTags,
         transferTagsToAdvertisers
     };
 })(globalThis);

@@ -448,11 +448,15 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await buildValidScript(steps);
     await steps.on('evaluateButton', 'ColmanGraves').click();
     await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
+    const gravesCommercial = await steps.on('commercialScore', 'ColmanGraves').getText();
+    const gravesArtistic = await steps.on('artisticScore', 'ColmanGraves').getText();
 
     await steps.on('transferToMarketButton', 'ColmanGraves').click();
 
     await steps.on('panel', 'MarketingRelease').verifyState('visible');
     await steps.expect('genreSelect', 'MarketingRelease').value.toBe('THRILLER');
+    await steps.expect('commercialScoreInput', 'MarketingRelease').value.toBe(gravesCommercial);
+    await steps.expect('artisticScoreInput', 'MarketingRelease').value.toBe(gravesArtistic);
     await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
     await steps.on('recommendedAdvertisers', 'MarketingRelease').verifyText();
   });

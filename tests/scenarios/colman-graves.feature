@@ -272,6 +272,7 @@ Feature: Script Evaluation — Colman Graves
     When the user transfers it to Marketing and Release
     Then the Marketing and Release panel is shown
     And the script's Genre is selected there
+    And the Commercial and Artistic score fields match the Graves movie scores
     And marketing analysis results are shown
 
   # [automated] TC03-000034. Rewritten: the journey it described cannot happen.
