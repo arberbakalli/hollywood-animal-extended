@@ -421,6 +421,33 @@
         if (selectedId) select.value = selectedId;
         row.appendChild(select);
 
+        // Set genre color immediately if this is a genre select with a value
+        const genreColorMap = {
+            'action': '#804830',
+            'adventure': '#486030',
+            'comedy': '#305860',
+            'detective': '#583050',
+            'drama': '#303860',
+            'historical': '#906038',
+            'horror': '#604038',
+            'romance': '#508058',
+            'science-fiction': '#404860',
+            'slapstick-comedy': '#485030',
+            'thriller': '#784030'
+        };
+
+        function updateGenreColor() {
+            if (category === 'Genre' && select.value) {
+                const selectedTag = GAME_DATA.tags[select.value];
+                if (selectedTag && selectedTag.id) {
+                    const genreId = HACDomIds.toDomId(selectedTag.id);
+                    const genreColor = genreColorMap[genreId] || '#588098';
+                    select.style.setProperty('color', genreColor, 'important');
+                }
+            }
+        }
+        updateGenreColor();
+
         // When selection changes, refresh all dropdowns in this category to enforce deduplication
         select.addEventListener('change', () => {
             if (select.value && isTagExcludedForContext(select.value, context)) {
@@ -429,6 +456,8 @@
             }
             refreshCategoryDropdowns(category, context);
             refreshSelectorVisualHints(context);
+            updateGenreColor();
+
             if (context === 'excluded') {
                 updateExcludedCount();
                 propagateExclusionChange(category);

@@ -514,12 +514,14 @@ h3 {
 .category-group[data-category="Supporting Character"] { --category-color: var(--ha-category-supporting-character); }
 .category-group[data-category="Theme & Event"] { --category-color: var(--ha-category-theme-event); }
 .category-group[data-category="Finale"] { --category-color: var(--ha-category-finale); }
+.category-group[data-category="Setting"] { --category-color: var(--cat-setting); }
 
 .category-group[data-category="Protagonist"],
 .category-group[data-category="Antagonist"],
 .category-group[data-category="Supporting Character"],
 .category-group[data-category="Theme & Event"],
-.category-group[data-category="Finale"] {
+.category-group[data-category="Finale"],
+.category-group[data-category="Setting"] {
     border-left-color: color-mix(in srgb, var(--category-color) 70%, transparent);
 }
 
@@ -527,7 +529,8 @@ h3 {
 .category-group[data-category="Antagonist"] .category-label,
 .category-group[data-category="Supporting Character"] .category-label,
 .category-group[data-category="Theme & Event"] .category-label,
-.category-group[data-category="Finale"] .category-label {
+.category-group[data-category="Finale"] .category-label,
+.category-group[data-category="Setting"] .category-label {
     color: var(--category-color);
 }
 
@@ -3272,13 +3275,8 @@ option.finale { color: var(--cat-finale); }
     color: var(--cat-setting) !important;
 }
 
-/* Genre: per-genre color in all contexts */
-#group-genre-excluded select.tag-selector.has-selected-tag,
-#group-genre-graves select.tag-selector.has-selected-tag,
-#group-genre-advertisers select.tag-selector.has-selected-tag,
-#group-genre-generator select.tag-selector.has-selected-tag {
-    color: var(--category-color) !important;
-}
+/* Genre: per-genre color in all contexts (set dynamically by storyElementSelector.js) */
+/* Removed CSS rule - color is set via JavaScript setProperty with !important */
 
 option[data-selected-elsewhere="true"] {
   color: #777 !important;
