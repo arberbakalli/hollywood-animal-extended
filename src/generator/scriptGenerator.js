@@ -387,23 +387,26 @@
         });
 
         const isOptimized = scriptObj.optimizedFor === 'artistic' || scriptObj.optimizedFor === 'commercial';
-        const primaryLabel = scriptObj.optimizedFor === 'artistic' ? 'Artistic' : 'Commercial';
-        const secondaryLabel = scriptObj.optimizedFor === 'artistic' ? 'Commercial' : 'Artistic';
-        const fallbackMovieScore = Number.parseFloat(scriptObj.stats.movieScore) || 0;
-        const primaryScore = scriptObj.optimizedFor === 'artistic'
-            ? scriptObj.scores?.artistic ?? fallbackMovieScore
-            : scriptObj.scores?.commercial ?? fallbackMovieScore;
-        const secondaryScore = scriptObj.optimizedFor === 'artistic'
-            ? scriptObj.scores?.commercial ?? fallbackMovieScore
-            : scriptObj.scores?.artistic ?? fallbackMovieScore;
+        const primaryLabel = scriptObj.optimizedFor === 'artistic' ? 'Artistic Bonus' : 'Commercial Bonus';
+        const secondaryLabel = scriptObj.optimizedFor === 'artistic' ? 'Commercial Bonus' : 'Artistic Bonus';
+
+        // Calculate bonuses from script evaluation
+        const evaluation = HACScriptEvaluation.calculateScriptEvaluation(scriptObj.tags);
+        const primaryBonus = scriptObj.optimizedFor === 'artistic'
+            ? evaluation.bonuses.art
+            : evaluation.bonuses.com;
+        const secondaryBonus = scriptObj.optimizedFor === 'artistic'
+            ? evaluation.bonuses.com
+            : evaluation.bonuses.art;
+
         const scoreBadgesHtml = isOptimized ? `
                         <div class="gen-badge-group gen-badge-group--primary">
                             <span class="gen-badge-label">${primaryLabel}</span>
-                            <span class="gen-badge-val val-mid">${primaryScore.toFixed(1)}</span>
+                            <span class="gen-badge-val val-mid">${primaryBonus.toFixed(2)}</span>
                         </div>
                         <div class="gen-badge-group">
                             <span class="gen-badge-label">${secondaryLabel}</span>
-                            <span class="gen-badge-val val-mid">${secondaryScore.toFixed(1)}</span>
+                            <span class="gen-badge-val val-mid">${secondaryBonus.toFixed(2)}</span>
                         </div>
                         <div class="gen-badge-group">
                             <span class="gen-badge-label">Avg Fit</span>
