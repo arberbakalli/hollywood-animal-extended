@@ -131,6 +131,15 @@ Feature: Marketing and Release
     Then the movie's lean is stated
     And advertisers are listed beneath it
 
+  # [automated] TC04-000031. The matrix is an inspection view over
+  # extractedFilesFromGameSourceOfTruth/AdsAgents.json. It must not be limited
+  # to the curated recommendation roster in data.js.
+  Scenario: Agency compatibility matrix shows extracted source agencies
+    Given the user has analysed a script
+    Then the agency compatibility matrix is shown
+    And all extracted source agencies are listed
+    And each audience column names the score lean the source agency covers
+
   # [automated] TC04-000018. Reset and Save to Script Library controls exist.
   Scenario: Resetting clears the marketing selection
     Given the user has selected story elements
