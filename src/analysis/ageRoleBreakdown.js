@@ -6,12 +6,18 @@ if (!window.HACAnalysisAgeRoleBreakdown) {
     };
 }
 
+// Fixed genders for specific roles
+const FIXED_GENDERS = {
+    'PROTAGONIST_AMBITIOUS_WOMAN': 'F',
+    'SUPPORTING_CHARACTER_PATRIARCH': 'M'
+};
+
 // Populate with actual implementation
 window.HACAnalysisAgeRoleBreakdown = (() => {
     'use strict';
 
     let ageRoleData = null;
-    const genderState = { protagonist: 'M', antagonist: 'M', supporting: 'M' };
+    const genderState = {}; // Track gender per role ID, not type
 
     const ROLE_COLORS = {
         'protagonist': '#55EA83',
@@ -87,12 +93,19 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
         return roles;
     }
 
-    function createGenderToggle(roleType) {
+    function createGenderToggle(roleType, roleId) {
         const container = document.createElement('div');
         container.className = 'gender-toggle';
         container.style.cssText = 'display: flex; gap: 6px;';
 
-        const currentGender = genderState[roleType] || 'M';
+        // Use fixed gender if defined for this role
+        if (FIXED_GENDERS[roleId]) {
+            container.style.opacity = '0.5';
+            container.style.cursor = 'not-allowed';
+            container.title = 'This role has a fixed gender';
+        }
+
+        const currentGender = FIXED_GENDERS[roleId] || genderState[roleId] || 'M';
 
         // Male button
         const maleBtn = document.createElement('button');
@@ -111,8 +124,10 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
         `;
         maleBtn.onclick = (e) => {
             e.stopPropagation();
-            setGender(roleType, 'M');
-            updateAgeRoleBreakdown();
+            if (!FIXED_GENDERS[roleId]) {
+                setGender(roleId, 'M');
+                updateAgeRoleBreakdown();
+            }
         };
 
         // Female button
@@ -132,8 +147,10 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
         `;
         femaleBtn.onclick = (e) => {
             e.stopPropagation();
-            setGender(roleType, 'F');
-            updateAgeRoleBreakdown();
+            if (!FIXED_GENDERS[roleId]) {
+                setGender(roleId, 'F');
+                updateAgeRoleBreakdown();
+            }
         };
 
         container.appendChild(maleBtn);
@@ -141,8 +158,8 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
         return container;
     }
 
-    function setGender(roleType, gender) {
-        genderState[roleType] = gender;
+    function setGender(roleId, gender) {
+        genderState[roleId] = gender;
     }
 
     function buildAgeTable(roles, ageGroups) {
@@ -236,7 +253,7 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
         roles.forEach(role => {
             const toggleContainer = document.getElementById(`gender-toggle-${role.type}-${role.id}`);
             if (toggleContainer) {
-                toggleContainer.appendChild(createGenderToggle(role.type));
+                toggleContainer.appendChild(createGenderToggle(role.type, role.id));
             }
         });
     }
@@ -247,10 +264,7 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
     }
 
     function setupAgeRoleBreakdownListeners() {
-        // Initialize gender state
-        genderState['protagonist'] = 'M';
-        genderState['antagonist'] = 'M';
-        genderState['supporting'] = 'M';
+        // Initialize gender state (per role ID, not type)
 
         updateAgeRoleBreakdown();
 
