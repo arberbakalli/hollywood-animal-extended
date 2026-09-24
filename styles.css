@@ -613,22 +613,31 @@ select.tag-selector.has-selected-tag {
     background: var(--input-bg);
 }
 
-/* Genre selector (gold) */
+/* Genre selector - use per-genre color when selected */
 select[data-category="Genre"].has-selected-tag {
-    color: var(--accent);
-    border-color: var(--accent);
+    border-color: var(--category-color);
+    /* color handled by individual genre class */
 }
 
-/* Setting (gray/subtle to match category label) */
+/* Setting - gray to match category label */
 select[data-category="Setting"].has-selected-tag {
-    color: #a0a0a0;
-    border-color: #a0a0a0;
+    color: var(--cat-setting);
+    border-color: var(--cat-setting);
 }
 
+/* Category labels - Genre gold, Setting gray */
+.category-group[data-category="Genre"] .category-label {
+    color: var(--accent);
+}
+.category-group[data-category="Setting"] .category-label {
+    color: var(--cat-setting);
+}
+
+/* High synergy options - subtle highlight, not neon green */
 select.tag-selector option.strong-fit-option,
 select.tag-selector option[data-synergy="high"] {
-    color: var(--success);
-    background-color: var(--success-soft);
+    color: #a8d5a8;
+    background-color: rgba(168, 213, 168, 0.08);
     font-weight: 700;
 }
 
@@ -3217,17 +3226,15 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
   --cat-genre-horror: var(--ha-genre-horror);
   --cat-genre-romance: #508058;
   --cat-genre-science-fiction: var(--ha-genre-science-fiction);
+  --cat-genre-slapstick-comedy: #485030;
   --cat-genre-thriller: #784030;
   --cat-protagonist: var(--ha-category-protagonist);
   --cat-antagonist: var(--ha-category-antagonist);
   --cat-supporting: var(--ha-category-supporting-character);
   --cat-theme-event: var(--ha-category-theme-event);
   --cat-finale: var(--ha-category-finale);
-  --cat-setting: #8fa3d1; /* neutral fallback, placeholder pending image */
-  /* Genre has per-genre colours but no generic one, so every `var(--cat-genre)`
-     was an invalid declaration that fell through to the inherited near-white.
-     Neutral matches how Submit Script labels Genre. */
-  --cat-genre: var(--text-muted);
+  --cat-setting: #a0a0a0; /* gray to match Setting label */
+  --cat-genre: var(--text-muted); /* neutral for generic */
 }
 
 /* Apply category colors to option text */
@@ -3241,6 +3248,8 @@ option.genre-horror { color: var(--cat-genre-horror); }
 option.genre-romance { color: var(--cat-genre-romance); }
 option.genre-science-fiction,
 option.genre-science_fiction { color: var(--cat-genre-science-fiction); }
+option.genre-slapstick-comedy,
+option.genre-slapstick_comedy { color: var(--cat-genre-slapstick-comedy); }
 option.genre-thriller { color: var(--cat-genre-thriller); }
 option.setting { color: var(--cat-setting); }
 option.protagonist { color: var(--cat-protagonist); }
