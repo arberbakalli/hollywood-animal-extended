@@ -81,6 +81,7 @@
     "SUPPORTING_CHARACTER_LOVE_INTEREST": { "YOUNG": "Good", "MID": "Neutral", "OLD": "Bad" },
     "SUPPORTING_CHARACTER_MENTOR": { "YOUNG": "Bad", "MID": "Neutral", "OLD": "Bad" },
     "SUPPORTING_CHARACTER_PARENT_FIGURE": { "YOUNG": "Bad", "MID": "Neutral", "OLD": "Neutral" },
+    "SUPPORTING_CHARACTER_PATRIARCH": { "YOUNG": "Neutral", "MID": "Good", "OLD": "Good" },
     "SUPPORTING_CHARACTER_RIVAL": { "YOUNG": "Good", "MID": "Good", "OLD": "Good" },
     "SUPPORTING_CHARACTER_SHERIFF": { "YOUNG": "Neutral", "MID": "Good", "OLD": "Good" },
     "SUPPORTING_CHARACTER_SIDEKICK": { "YOUNG": "Good", "MID": "Good", "OLD": "Neutral" },

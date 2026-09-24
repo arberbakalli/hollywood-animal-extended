@@ -58,7 +58,9 @@
         );
         supportingSelects.forEach(select => {
             if (select.value) {
-                roles.push({ type: 'supporting', id: select.value, displayName: select.options[select.selectedIndex].text });
+                // Normalize ID: convert SUPPORTINGCHARACTER_ to SUPPORTING_CHARACTER_
+                const normalizedId = select.value.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_');
+                roles.push({ type: 'supporting', id: normalizedId, displayName: select.options[select.selectedIndex].text });
             }
         });
 
@@ -146,6 +148,15 @@
 
         let html = '<div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">';
 
+        // Add header row
+        html += '<div style="display: flex; align-items: center; padding: 10px 15px; gap: 15px; border-bottom: 1px solid #444; margin-bottom: 5px;">';
+        html += '<div style="flex: 0 0 120px; color: #999; font-weight: 600; font-size: 12px;">Role</div>';
+        html += '<div style="flex: 1; text-align: center; color: #999; font-weight: 600; font-size: 12px;">Young</div>';
+        html += '<div style="flex: 1; text-align: center; color: #999; font-weight: 600; font-size: 12px;">Mid</div>';
+        html += '<div style="flex: 1; text-align: center; color: #999; font-weight: 600; font-size: 12px;">Old</div>';
+        html += '<div style="flex: 0 0 auto; color: #999; font-weight: 600; font-size: 12px; width: 60px; text-align: center;">Gender</div>';
+        html += '</div>';
+
         roles.forEach(role => {
             const roleType = role.type;
             const genderKey = `${roleType === 'protagonist' ? 'protagonists' : roleType === 'antagonist' ? 'antagonists' : 'supportingCharacters'}`;
@@ -170,7 +181,7 @@
                 });
 
                 // Gender toggle container (on the right)
-                html += `<div id="gender-toggle-${roleType}-${role.id}" style="flex: 0 0 auto;"></div>`;
+                html += `<div id="gender-toggle-${roleType}-${role.id}" style="flex: 0 0 auto; width: 60px; text-align: center;"></div>`;
 
                 html += '</div>';
             }
@@ -258,12 +269,16 @@
         }
     }
 
-    // Expose to global scope
-    global.HACRoleAge = {
-        init: initAgeRoleBreakdown,
-        update: updateAgeRoleBreakdown,
-        hidePanel: hideAgeRolePanel
-    };
+    // Expose to global scope with try-catch to handle early execution
+    if (!global.HACAnalysisAgeRoleBreakdown) {
+        console.log('Setting HACAnalysisAgeRoleBreakdown on global');
+        global.HACAnalysisAgeRoleBreakdown = {
+            setupAgeRoleBreakdownListeners: initAgeRoleBreakdown,
+            update: updateAgeRoleBreakdown,
+            hidePanel: hideAgeRolePanel
+        };
+        console.log('HACAnalysisAgeRoleBreakdown set:', typeof global.HACAnalysisAgeRoleBreakdown);
+    }
 
     // Auto-init when DOM is ready
     if (document.readyState === 'loading') {
