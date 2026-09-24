@@ -267,6 +267,22 @@
         if (excludedContent) {
             observer.observe(excludedContent, { childList: true, subtree: true });
         }
+
+        // Setup collapsible toggle for Age & Gender Appeal panel
+        const ageToggle = document.querySelector('#toggleAgeRoleBreakdownButton');
+        const ageContent = document.getElementById('age-role-content');
+        if (ageToggle && ageContent) {
+            const chevron = ageToggle.querySelector('.chevron');
+            ageToggle.addEventListener('click', function() {
+                const isHidden = ageContent.classList.contains('hidden');
+                ageContent.classList.toggle('hidden');
+                ageContent.hidden = !isHidden;
+                if (chevron) {
+                    chevron.classList.toggle('rotate-90');
+                }
+                this.setAttribute('aria-expanded', String(isHidden));
+            });
+        }
     }
 
     // Expose to global scope with try-catch to handle early execution
