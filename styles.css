@@ -3263,13 +3263,19 @@ option.supporting-character { color: var(--cat-supporting); }
 option.theme-event { color: var(--cat-theme-event); }
 option.finale { color: var(--cat-finale); }
 
-/* Exclusion context: color selected items in dropdowns */
-#selectors-container-excluded select[data-category="Setting"] {
+/* Apply category colors to selected dropdowns across ALL contexts */
+
+/* Setting: blue color in all contexts */
+#group-setting-excluded select.tag-selector.has-selected-tag,
+#group-setting-graves select.tag-selector.has-selected-tag,
+#group-setting-advertisers select.tag-selector.has-selected-tag {
     color: var(--cat-setting) !important;
 }
 
-/* Genre in exclusion: apply per-genre colors to select when option is selected */
-#group-genre-excluded select.tag-selector.has-selected-tag {
+/* Genre: per-genre color in all contexts */
+#group-genre-excluded select.tag-selector.has-selected-tag,
+#group-genre-graves select.tag-selector.has-selected-tag,
+#group-genre-advertisers select.tag-selector.has-selected-tag {
     color: var(--category-color) !important;
 }
 
