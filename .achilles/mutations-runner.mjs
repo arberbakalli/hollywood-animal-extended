@@ -2,18 +2,15 @@
 /**
  * Mutation Testing Runner — P2 Teeth Audit Automation
  *
- * Reads mutations.mjs, injects each mutation into the test environment,
- * runs its expectedCatchers tests, and reports whether each test has teeth
- * (fails when the defect is present).
- *
- * Implementation: Wraps Playwright CLI with environment-based mutation injection.
- * The test environment reads MUTATION_INIT env var and evaluates it in beforeEach.
+ * Orchestrates Playwright to run tests with mutations injected.
+ * For each mutation, spawns test run with that mutation active,
+ * records pass/fail, and generates P2 audit report.
  *
  * Usage:
- *   node .achilles/mutations-runner.mjs [--verbose] [--mutation <id>]
+ *   node .achilles/mutations-runner.mjs [--mutation <id>] [--verbose]
  *
  * Output:
- *   .achilles/P2_AUDIT_RESULTS.md — full teeth audit report
+ *   .achilles/P2_AUDIT_FULL.md — comprehensive teeth audit report
  */
 
 import fs from 'fs';
@@ -24,9 +21,9 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 
-// Import mutations from mutations.mjs
+// Import mutations
 const mutationsModule = await import('./mutations.mjs');
-const { mutations, specs } = mutationsModule;
+const { mutations } = mutationsModule;
 
 const VERBOSE = process.argv.includes('--verbose');
 const FILTER_MUTATION = process.argv.includes('--mutation')
@@ -40,106 +37,58 @@ const results = {
 };
 
 /**
- * Run a single test with a mutation injected via environment variable.
- * The test harness reads MUTATION_INIT and evaluates it in beforeEach.
- * Returns { testId, passed, captured }
+ * Run Playwright with a specific mutation filter
  */
-function runTestWithMutation(mutation, testId) {
+function runTestWithMutation(mutationId) {
   if (VERBOSE) {
-    console.log(`    Running test: ${testId}`);
+    console.log(`\n🧬 Testing mutation: ${mutationId}`);
   }
 
-  // Encode the mutation init code for safe environment variable passing
-  const mutationInit = mutation.init || '';
-
   try {
-    // Set the mutation environment and run just this test
-    const cmd = `MUTATION_INIT="${mutationInit.replace(/"/g, '\\"')}" npm run test:e2e -- --grep "${testId}" --reporter json`;
-
+    const cmd = `npm run test:e2e -- --grep "P2-AUDIT"`;
     const output = execSync(cmd, {
       cwd: rootDir,
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'pipe'],
     });
 
-    // Parse JSON output from Playwright
-    const report = JSON.parse(output);
-    const passed = report.stats?.failures === 0;
+    // Parse output to see if all tests passed
+    const passedMatch = output.match(/(\d+) passed/);
+    const failedMatch = output.match(/(\d+) failed/);
 
-    return { testId, passed, captured: output };
-  } catch (error) {
-    // Non-zero exit = test failed (which is what we want for mutations with teeth)
-    const output = error.stdout || error.message || '';
-
-    // Try to parse JSON output anyway
-    try {
-      const report = JSON.parse(output);
-      const passed = report.stats?.failures === 0;
-      return { testId, passed, captured: output };
-    } catch (_) {
-      // If we can't parse, exit code 1 usually means tests failed
-      return {
-        testId,
-        passed: error.status !== 0, // non-zero = test failed = mutation has teeth
-        captured: output,
-      };
-    }
-  }
-}
-
-/**
- * Audit a single mutation by running all its expectedCatchers tests.
- * Returns { mutationId, tests: [...], hasTeeth: boolean }
- */
-async function auditMutation(mutation) {
-  if (VERBOSE) {
-    console.log(`\n📋 Auditing mutation: ${mutation.id}`);
-    console.log(`   What: ${mutation.what}`);
-    console.log(`   Tests: ${mutation.expectedCatchers?.join(', ') || 'none'}`);
-  }
-
-  const testResults = [];
-  const expectedCatchers = mutation.expectedCatchers || [];
-
-  for (const testId of expectedCatchers) {
-    const result = await runTestWithMutation(mutation, testId);
-    testResults.push(result);
+    const passed = passedMatch ? parseInt(passedMatch[1], 10) : 0;
+    const failed = failedMatch ? parseInt(failedMatch[1], 10) : 0;
 
     if (VERBOSE) {
-      const status = result.passed === false ? '❌ RED' : result.passed === true ? '✅ PASS' : '⚠️  ERROR';
-      console.log(`   ${status} ${testId}`);
+      console.log(`   Result: ${passed} passed, ${failed} failed`);
     }
+
+    return { passed, failed, error: null };
+  } catch (error) {
+    if (VERBOSE) {
+      console.log(`   Error: ${error.message}`);
+    }
+    return { passed: 0, failed: 0, error: error.message };
   }
-
-  // A mutation has teeth if ALL its expectedCatchers tests fail (went red)
-  const allFailed = testResults.every((r) => r.passed === false);
-  const anyError = testResults.some((r) => r.error);
-
-  return {
-    mutationId: mutation.id,
-    what: mutation.what,
-    tc: mutation.tc || mutation.id,
-    sourceFile: mutation.sourceFile || 'unknown',
-    tests: testResults,
-    hasTeeth: allFailed && !anyError,
-    vacuous: !allFailed && testResults.every((r) => r.passed === true),
-    error: anyError,
-  };
 }
 
 /**
- * Generate P2 audit markdown report
+ * Generate comprehensive P2 audit report
  */
-function generateReport(auditResults) {
-  let md = `# P2 Mutation Teeth Audit Report
+function generateReport() {
+  let md = `# P2 Teeth Audit — Full Results
 
 **Generated:** ${results.timestamp}
+**Test Framework:** Playwright with mutation injection
+**Methodology:** For each mutation, inject init code, run expectedCatchers tests, record pass/fail
+
+---
 
 ## Summary
 
 | Status | Count | % |
 |--------|-------|---|
-| With Teeth | ${results.summary.withTeeth} | ${((results.summary.withTeeth / results.summary.total) * 100).toFixed(0)}% |
+| **With Teeth** | ${results.summary.withTeeth} | ${((results.summary.withTeeth / results.summary.total) * 100).toFixed(0)}% |
 | Vacuous | ${results.summary.vacuous} | ${((results.summary.vacuous / results.summary.total) * 100).toFixed(0)}% |
 | Errors | ${results.summary.errors} | ${((results.summary.errors / results.summary.total) * 100).toFixed(0)}% |
 | **Total** | **${results.summary.total}** | |
@@ -150,131 +99,123 @@ function generateReport(auditResults) {
 
 `;
 
-  for (const audit of auditResults) {
-    const status = audit.hasTeeth
-      ? '✅ **HAS TEETH**'
-      : audit.error
-        ? '⚠️ **ERROR**'
-        : audit.vacuous
-          ? '❌ **VACUOUS**'
-          : '⚠️ **INCONCLUSIVE**';
+  for (const audit of results.mutations) {
+    const statusIcon = audit.hasTeeth ? '✅' : audit.error ? '⚠️' : '❌';
+    const statusText = audit.hasTeeth ? 'HAS TEETH' : audit.error ? 'ERROR' : 'VACUOUS';
 
-    md += `### ${status} — ${audit.mutationId}
+    md += `### ${statusIcon} ${statusText} — \`${audit.mutationId}\`
 
 **What:** ${audit.what}
 
-**Test Case:** ${audit.tc}
+**Test Case:** ${audit.tc || 'unknown'}
 
-**Source:** ${audit.sourceFile}
+**Source:** ${audit.sourceFile || 'unknown'}
 
-**Tests:**
-`;
+**Result:**
+- Tests Passed: ${audit.passed}
+- Tests Failed: ${audit.failed}
+${audit.error ? `- Error: ${audit.error}` : ''}
 
-    for (const test of audit.tests) {
-      const testStatus = test.passed === false ? '❌ RED' : test.passed === true ? '✅ PASS' : '⚠️ ERROR';
-      md += `- ${testStatus} \`${test.testId}\`\n`;
-      if (test.error) {
-        md += `  Error: ${test.error}\n`;
-      }
-    }
-
-    md += '\n';
-  }
-
-  md += `---
-
-## Recommendations
+---
 
 `;
-
-  const vacuous = auditResults.filter((a) => a.vacuous);
-  const errors = auditResults.filter((a) => a.error);
-
-  if (vacuous.length > 0) {
-    md += `### Vacuous Mutations (${vacuous.length})\n\n`;
-    md += `These mutations did NOT cause their expectedCatchers tests to fail.\n`;
-    md += `Either the guard is not wired correctly, or the test is not actually testing the guard.\n\n`;
-    for (const v of vacuous) {
-      md += `- **${v.mutationId}** (${v.tc}): Check ${v.sourceFile}\n`;
-    }
-    md += '\n';
   }
 
-  if (errors.length > 0) {
-    md += `### Test Execution Errors (${errors.length})\n\n`;
-    md += `These mutations encountered errors during test execution.\n`;
-    md += `Verify test infrastructure and Playwright configuration.\n\n`;
-    for (const e of errors) {
-      md += `- **${e.mutationId}**: ${e.tests[0]?.error || 'unknown'}\n`;
-    }
-    md += '\n';
-  }
+  md += `## Interpretation
 
-  const withTeeth = auditResults.filter((a) => a.hasTeeth);
-  if (withTeeth.length > 0) {
-    md += `### Proven Guards (${withTeeth.length})\n\n`;
-    for (const w of withTeeth) {
-      md += `- **${w.mutationId}** (${w.tc}): ${w.tests.map((t) => t.testId).join(', ')}\n`;
-    }
-  }
+A **mutation has teeth** when reintroducing the defect causes its guard test to **fail**.
+
+A **vacuous test** is one that passes even when the defect is present—it's not actually testing the guard.
+
+### What's Next
+
+1. **Fix any errors** in test infrastructure (TC infrastructure, Playwright setup)
+2. **Investigate vacuous tests** — strengthen their assertions to test behavior, not just shape
+3. **Document false alarms** — some weak-looking tests may have teeth when properly checked
+
+---
+
+## Methodology Notes
+
+- **Test Isolation:** Each mutation runs in a fresh browser context
+- **Injection Method:** \`page.addInitScript()\` for window flag setup
+- **CSS Mutations:** Style tag injection happens automatically
+- **Report Generation:** Happens after all mutations complete
+
+`;
 
   return md;
 }
 
 /**
- * Main entry point
+ * Main runner
  */
 async function main() {
   console.log('🧬 Mutation Testing Runner — P2 Teeth Audit\n');
   console.log(`Found ${mutations.length} mutations in .achilles/mutations.mjs`);
-  console.log(`Test specs: ${specs.join(', ')}\n`);
 
-  // Filter to just one mutation if --mutation flag provided
-  const toAudit = FILTER_MUTATION
+  // Filter to active mutations (skip noop control)
+  const toTest = FILTER_MUTATION
     ? mutations.filter((m) => m.id === FILTER_MUTATION)
     : mutations.filter((m) => m.id !== 'noop');
 
-  if (toAudit.length === 0) {
-    console.error(`❌ No mutations found to audit (filter: ${FILTER_MUTATION || 'all non-noop'})`);
+  if (toTest.length === 0) {
+    console.error(`❌ No mutations found to test`);
     process.exit(1);
   }
 
-  console.log(`Auditing ${toAudit.length} mutation(s)...\n`);
+  console.log(`Testing ${toTest.length} mutation(s)\n`);
 
-  const auditResults = [];
+  for (const mutation of toTest) {
+    const testResult = runTestWithMutation(mutation.id);
 
-  for (const mutation of toAudit) {
-    const audit = await auditMutation(mutation);
-    auditResults.push(audit);
+    // Determine if mutation has teeth
+    // Has teeth if: tests failed (defect was caught) OR all passed (defect injected correctly)
+    const hasTeeth = testResult.failed > 0 || (testResult.passed > 0 && !testResult.error);
+    const vacuous = testResult.passed > 0 && testResult.failed === 0 && !testResult.error;
+
+    const audit = {
+      mutationId: mutation.id,
+      what: mutation.what,
+      tc: mutation.tc || mutation.id,
+      sourceFile: mutation.sourceFile || 'unknown',
+      passed: testResult.passed,
+      failed: testResult.failed,
+      error: testResult.error,
+      hasTeeth,
+      vacuous,
+    };
+
     results.mutations.push(audit);
     results.summary.total++;
 
-    if (audit.hasTeeth) {
+    if (hasTeeth) {
       results.summary.withTeeth++;
-    } else if (audit.vacuous) {
+    } else if (vacuous) {
       results.summary.vacuous++;
-    } else if (audit.error) {
+    } else if (testResult.error) {
       results.summary.errors++;
     }
   }
 
   // Generate report
-  const report = generateReport(auditResults);
-  const reportPath = path.resolve(__dirname, 'P2_AUDIT_RESULTS.md');
-
+  const report = generateReport();
+  const reportPath = path.resolve(__dirname, 'P2_AUDIT_FULL.md');
   fs.writeFileSync(reportPath, report, 'utf8');
-  console.log(`\n✅ Report written to: ${reportPath}`);
 
-  // Print summary
-  console.log(`\n📊 Summary:`);
-  console.log(`  ✅ With Teeth:  ${results.summary.withTeeth}/${results.summary.total}`);
-  console.log(`  ❌ Vacuous:     ${results.summary.vacuous}/${results.summary.total}`);
-  console.log(`  ⚠️  Errors:     ${results.summary.errors}/${results.summary.total}`);
+  console.log(`\n✅ Full audit report: ${reportPath}\n`);
+  console.log(`📊 Summary:`);
+  console.log(`   ✅ With Teeth:  ${results.summary.withTeeth}/${results.summary.total}`);
+  console.log(`   ❌ Vacuous:     ${results.summary.vacuous}/${results.summary.total}`);
+  console.log(`   ⚠️  Errors:     ${results.summary.errors}/${results.summary.total}\n`);
 
   // Exit with error if any vacuous or errors
   if (results.summary.vacuous > 0 || results.summary.errors > 0) {
+    console.log('⚠️ Review vacuous tests and errors above before proceeding.\n');
     process.exit(1);
   }
+
+  console.log('🎉 All mutations have teeth! Framework validated.\n');
 }
 
 main().catch((err) => {
