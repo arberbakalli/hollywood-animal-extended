@@ -3567,6 +3567,87 @@ option[data-selected-elsewhere="true"] {
     color: #d976a8;
 }
 
+.age-ranges-reference {
+    display: grid;
+    grid-template-columns: minmax(140px, 0.9fr) minmax(0, 2.4fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.age-ranges-reference-header {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.age-ranges-reference-title {
+    color: var(--accent);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.age-ranges-reference-note {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.age-ranges-grid {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(212, 175, 55, 0.16);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.12);
+    font-size: 0.78rem;
+}
+
+.age-ranges-grid-header,
+.age-ranges-grid-row {
+    display: grid;
+    grid-template-columns: minmax(68px, 0.8fr) repeat(3, minmax(64px, 1fr));
+    align-items: center;
+}
+
+.age-ranges-cell {
+    min-width: 0;
+    padding: 7px 8px;
+    text-align: center;
+    border-right: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.age-ranges-cell:last-child {
+    border-right: 0;
+}
+
+.age-ranges-grid-header {
+    border-bottom: 1px solid rgba(212, 175, 55, 0.14);
+    background: rgba(212, 175, 55, 0.05);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.age-ranges-grid-row + .age-ranges-grid-row {
+    border-top: 1px solid rgba(212, 175, 55, 0.08);
+}
+
+.age-ranges-cell--gender {
+    text-align: left;
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+.age-ranges-cell--value {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
 .age-role-appeal-table {
     width: 100%;
     min-width: 500px;
@@ -3663,12 +3744,17 @@ option[data-selected-elsewhere="true"] {
 .age-role-insight {
     margin-top: 16px;
     padding: 12px;
-    background: rgba(212, 175, 55, 0.08);
-    border-left: 3px solid rgba(212, 175, 55, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.16);
+    border-left: 3px solid rgba(212, 175, 55, 0.45);
     border-radius: 4px;
-    font-size: 0.9rem;
+    background: rgba(212, 175, 55, 0.045);
     color: var(--text-main);
-    font-weight: 500;
+}
+
+@media (max-width: 720px) {
+    .age-ranges-reference {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* TEMPORARY: Hide panels pending UI redesign */

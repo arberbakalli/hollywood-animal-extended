@@ -66,7 +66,9 @@
         setupSearchListeners();
         setupScoreSync();
         setupGeneratorControls();
-        HACAnalysisAgeRoleBreakdown.setupAgeRoleBreakdownListeners();
+        if (global.HACAnalysisAgeRoleBreakdown && global.HACAnalysisAgeRoleBreakdown.setupAgeRoleBreakdownListeners) {
+            global.HACAnalysisAgeRoleBreakdown.setupAgeRoleBreakdownListeners();
+        }
 
         // Try to setup distribution, but gracefully handle if elements aren't ready yet
         try {

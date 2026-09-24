@@ -6,7 +6,7 @@ if (!window.HACAnalysisAgeRoleBreakdown) {
     };
 }
 
-window.HACAnalysisAgeRoleBreakdown = (() => {
+window.HACAnalysisAgeRoleBreakdown = (function() {
     'use strict';
 
     const AGE_GROUPS = ['YOUNG', 'MID', 'OLD'];
@@ -207,6 +207,35 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
         showAgeRolePanel(roles, data);
     }
 
+    function buildAgeRangesTable(data) {
+        if (!data?.ageRoleData?.ageGroups) return '';
+
+        const ageGroups = data.ageRoleData.ageGroups;
+        let html = '<div class="age-ranges-reference">';
+        html += '<div class="age-ranges-reference-header">';
+        html += '<span class="age-ranges-reference-title">Age Ranges</span>';
+        html += '<span class="age-ranges-reference-note">Game audience brackets by gender</span>';
+        html += '</div>';
+        html += '<div class="age-ranges-grid" role="table" aria-label="Age ranges by gender">';
+        html += '<div class="age-ranges-grid-header" role="row">';
+        html += '<span class="age-ranges-cell age-ranges-cell--gender" role="columnheader">Gender</span>';
+        AGE_GROUPS.forEach(ageGroup => {
+            html += `<span class="age-ranges-cell age-ranges-cell--group" role="columnheader">${AGE_LABELS[ageGroup]}</span>`;
+        });
+        html += '</div>';
+        ['male', 'female'].forEach(gender => {
+            html += '<div class="age-ranges-grid-row" role="row">';
+            html += `<span class="age-ranges-cell age-ranges-cell--gender" role="cell">${gender === 'male' ? 'Male' : 'Female'}</span>`;
+            AGE_GROUPS.forEach(ageGroup => {
+                html += `<span class="age-ranges-cell age-ranges-cell--value" role="cell">${escapeHtml(ageGroups[ageGroup][gender])}</span>`;
+            });
+            html += '</div>';
+        });
+        html += '</div>';
+        html += '</div>';
+        return html;
+    }
+
     function showAgeRolePanel(roles, data) {
         const panel = document.getElementById('ageRoleBreakdownPanel');
         const roleLabel = document.getElementById('ageRoleSelectedRole');
@@ -225,7 +254,7 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
         tableContainer.innerHTML = buildAgeTable(roles, data);
 
         if (insight) {
-            insight.textContent = 'Use the gender control for roles where the game lets you choose the character gender.';
+            insight.innerHTML = buildAgeRangesTable(data);
         }
 
         roles.forEach(role => {

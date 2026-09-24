@@ -9,7 +9,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given the user is on Script Lab
   // When they select a protagonist role
   // Then the Age & Gender Appeal panel appears with ratings
-  test('TC03-000001 panel appears when protagonist is selected', async ({ steps, page }) => {
+  test('TC03-000017 panel appears when protagonist is selected', async ({ steps, page }) => {
     const protagonistSelect = page.locator('#inputs-protagonist-generator .tag-selector');
     await protagonistSelect.selectOption('PROTAGONIST_COP');
 
@@ -23,7 +23,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given a role is selected
   // When the user views the panel
   // Then they see all three age groups (Young, Mid, Old)
-  test('TC03-000002 displays all three age groups with ratings', async ({ steps, page }) => {
+  test('TC03-000018 displays all three age groups with ratings', async ({ steps, page }) => {
     const protagonistSelect = page.locator('#inputs-protagonist-generator .tag-selector');
     await protagonistSelect.selectOption('PROTAGONIST_COP');
 
@@ -39,7 +39,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given a flexible-gender role is selected
   // When the user views the gender column
   // Then they see both male and female buttons
-  test('TC03-000003 shows both gender buttons for flexible-gender roles', async ({ page }) => {
+  test('TC03-000019 shows both gender buttons for flexible-gender roles', async ({ page }) => {
     const protagonistSelect = page.locator('#inputs-protagonist-generator .tag-selector');
     await protagonistSelect.selectOption('PROTAGONIST_COP');
 
@@ -54,7 +54,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given a female-only role is selected
   // When the user views the gender column
   // Then they see only the female button
-  test('TC03-000004 shows only female button for female-locked roles', async ({ page }) => {
+  test('TC03-000020 shows only female button for female-locked roles', async ({ page }) => {
     const supportingSelect = page.locator(
       '#inputs-supporting-character-generator .tag-selector'
     ).first();
@@ -77,7 +77,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given a male-only role is selected
   // When the user views the gender column
   // Then they see only the male button
-  test('TC03-000005 shows only male button for male-locked roles', async ({ page }) => {
+  test('TC03-000021 shows only male button for male-locked roles', async ({ page }) => {
     const supportingSelect = page.locator(
       '#inputs-supporting-character-generator .tag-selector'
     ).first();
@@ -100,7 +100,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given protagonist and antagonist are selected
   // When the user views the panel
   // Then they see both rows with correct category colors
-  test('TC03-000006 displays multiple roles with category-specific colors', async ({ page }) => {
+  test('TC03-000022 displays multiple roles with category-specific colors', async ({ page }) => {
     const protagonistSelect = page.locator('#inputs-protagonist-generator .tag-selector');
     const antagonistSelect = page.locator('#inputs-antagonist-generator .tag-selector');
 
@@ -117,7 +117,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given a flexible-gender role is selected
   // When the user switches gender by clicking the button
   // Then the displayed ratings update based on the new gender
-  test('TC03-000007 ratings update when gender is switched', async ({ page }) => {
+  test('TC03-000023 ratings update when gender is switched', async ({ page }) => {
     const protagonistSelect = page.locator('#inputs-protagonist-generator .tag-selector');
     await protagonistSelect.selectOption('PROTAGONIST_COP');
 
@@ -140,7 +140,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given a role is displayed
   // When the user views the panel
   // Then role names use the correct category color
-  test('TC03-000008 role names display in category-specific colors', async ({ page }) => {
+  test('TC03-000024 role names display in category-specific colors', async ({ page }) => {
     const protagonistSelect = page.locator('#inputs-protagonist-generator .tag-selector');
     const antagonistSelect = page.locator('#inputs-antagonist-generator .tag-selector');
 
@@ -158,7 +158,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given multiple supporting characters are selected
   // When the user views the panel
   // Then all selected roles are displayed in the table
-  test('TC03-000009 displays all selected supporting characters', async ({ page }) => {
+  test('TC03-000025 displays all selected supporting characters', async ({ page }) => {
     const addBtn = page.locator('[data-action="add-tag-row"][data-category="Supporting Character"]');
     const firstSelect = page.locator('#inputs-supporting-character-generator .tag-selector').nth(0);
     const secondSelect = page.locator('#inputs-supporting-character-generator .tag-selector').nth(1);
@@ -175,7 +175,7 @@ test.describe('Age & Gender Appeal Panel', () => {
   // Given the panel is expanded
   // When the user collapses the Age & Gender Appeal section
   // Then the content is hidden and the toggle state updates
-  test('TC03-000010 collapsing panel hides content and updates toggle state', async ({ page }) => {
+  test('TC03-000026 collapsing panel hides content and updates toggle state', async ({ page }) => {
     const protagonistSelect = page.locator('#inputs-protagonist-generator .tag-selector');
     await protagonistSelect.selectOption('PROTAGONIST_COP');
 
