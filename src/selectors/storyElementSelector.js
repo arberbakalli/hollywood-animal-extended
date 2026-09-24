@@ -437,12 +437,19 @@
         };
 
         function updateGenreColor() {
-            if (category === 'Genre' && select.value) {
-                const selectedTag = GAME_DATA.tags[select.value];
-                if (selectedTag && selectedTag.id) {
-                    const genreId = HACDomIds.toDomId(selectedTag.id);
-                    const genreColor = genreColorMap[genreId] || '#588098';
-                    select.style.setProperty('color', genreColor, 'important');
+            if (category === 'Genre') {
+                if (select.value) {
+                    const selectedTag = GAME_DATA.tags[select.value];
+                    if (selectedTag && selectedTag.id) {
+                        const genreId = HACDomIds.toDomId(selectedTag.id);
+                        const genreColor = genreColorMap[genreId];
+                        if (genreColor) {
+                            select.style.setProperty('color', genreColor, 'important');
+                        }
+                    }
+                } else {
+                    // Clear color when no selection
+                    select.style.removeProperty('color');
                 }
             }
         }
