@@ -27,6 +27,16 @@ Feature: Script Lab
     And at least one script card is listed
     And each card shows its story element chips
 
+  # [automated] TC01-000034. When user selects a protagonist or antagonist,
+  # display age × gender compatibility breakdown with appeal ratings and insight.
+  Scenario: Age-to-role breakdown shows appeal by age and gender
+    When the user selects a Protagonist
+    Then the age-to-role breakdown panel becomes visible
+    And the panel shows appeal ratings for YOUNG, MID, and OLD age groups
+    And each age group shows appeal for Male and Female
+    And appeal ratings are displayed on the -5.0 to +5.0 scale
+    And a peak appeal insight is shown
+
   # [automated] TC01-000032. Best Artistic uses the shared generation engine but
   # ranks by artistic movie score and shows commercial score as context.
   Scenario: Generating best artistic scripts ranks artistic score first
