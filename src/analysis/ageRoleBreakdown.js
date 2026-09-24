@@ -105,17 +105,16 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
     }
 
     function createGenderButton(roleId, gender, currentGender, validGenders) {
+        if (!validGenders.includes(gender)) return null;
+
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = gender === 'M' ? '\u2642' : '\u2640';
         button.className = `gender-btn gender-btn--${gender === 'M' ? 'male' : 'female'}`;
         button.classList.toggle('active', currentGender === gender);
-        button.disabled = !validGenders.includes(gender);
-        button.title = button.disabled ? `This role is not available as ${gender === 'M' ? 'male' : 'female'}` : '';
         button.setAttribute('aria-label', `${gender === 'M' ? 'Male' : 'Female'} audience appeal`);
         button.addEventListener('click', event => {
             event.stopPropagation();
-            if (!validGenders.includes(gender)) return;
             setGender(roleId, gender);
             updateAgeRoleBreakdown();
         });
@@ -133,8 +132,10 @@ window.HACAnalysisAgeRoleBreakdown = (() => {
             genderState[roleId] = validGenders[0];
         }
 
-        container.appendChild(createGenderButton(roleId, 'M', currentGender, validGenders));
-        container.appendChild(createGenderButton(roleId, 'F', currentGender, validGenders));
+        const maleBtn = createGenderButton(roleId, 'M', currentGender, validGenders);
+        const femaleBtn = createGenderButton(roleId, 'F', currentGender, validGenders);
+        if (maleBtn) container.appendChild(maleBtn);
+        if (femaleBtn) container.appendChild(femaleBtn);
         return container;
     }
 
