@@ -10,6 +10,17 @@
         'supporting': '#8BEAFF'
     };
 
+    const RATING_COLORS = {
+        'Good': '#2d7a3d',      // Dark green
+        'Neutral': '#666666',   // Dark gray
+        'Bad': '#8b3a3a'        // Dark red
+    };
+
+    const GENDER_BUTTON_COLORS = {
+        'M': { border: '#5ba3d0', bg: 'rgba(91, 163, 208, 0.15)', text: '#5ba3d0' },      // Light blue
+        'F': { border: '#d976a8', bg: 'rgba(217, 118, 168, 0.15)', text: '#d976a8' }     // Light pink
+    };
+
     async function loadAgeRoleData() {
         if (ageRoleData) return ageRoleData;
         try {
@@ -65,11 +76,12 @@
         const maleBtn = document.createElement('button');
         maleBtn.innerHTML = '♂';
         maleBtn.className = `gender-btn ${currentGender === 'M' ? 'active' : ''}`;
+        const maleColors = GENDER_BUTTON_COLORS['M'];
         maleBtn.style.cssText = `
             padding: 4px 10px;
-            border: 1px solid ${currentGender === 'M' ? '#55EA83' : '#555'};
-            background: ${currentGender === 'M' ? 'rgba(85, 234, 131, 0.15)' : 'transparent'};
-            color: ${currentGender === 'M' ? '#55EA83' : '#888'};
+            border: 1px solid ${currentGender === 'M' ? maleColors.border : '#555'};
+            background: ${currentGender === 'M' ? maleColors.bg : 'transparent'};
+            color: ${currentGender === 'M' ? maleColors.text : '#888'};
             border-radius: 3px;
             cursor: pointer;
             font-size: 14px;
@@ -85,11 +97,12 @@
         const femaleBtn = document.createElement('button');
         femaleBtn.innerHTML = '♀';
         femaleBtn.className = `gender-btn ${currentGender === 'F' ? 'active' : ''}`;
+        const femaleColors = GENDER_BUTTON_COLORS['F'];
         femaleBtn.style.cssText = `
             padding: 4px 10px;
-            border: 1px solid ${currentGender === 'F' ? '#A1B1FF' : '#555'};
-            background: ${currentGender === 'F' ? 'rgba(161, 177, 255, 0.15)' : 'transparent'};
-            color: ${currentGender === 'F' ? '#A1B1FF' : '#888'};
+            border: 1px solid ${currentGender === 'F' ? femaleColors.border : '#555'};
+            background: ${currentGender === 'F' ? femaleColors.bg : 'transparent'};
+            color: ${currentGender === 'F' ? femaleColors.text : '#888'};
             border-radius: 3px;
             cursor: pointer;
             font-size: 14px;
@@ -145,14 +158,15 @@
 
                 html += `<div style="display: flex; align-items: center; padding: 12px 15px; background: ${bgColor}; border-left: 3px solid ${borderColor}; border-radius: 4px; gap: 15px;">`;
 
-                // Role name
-                html += `<div style="flex: 0 0 120px; color: #e0e0e0; font-weight: 500;">${role.displayName}</div>`;
+                // Role name (colored by role type)
+                html += `<div style="flex: 0 0 120px; color: ${roleColor}; font-weight: 500;">${role.displayName}</div>`;
 
-                // Age ratings
+                // Age ratings (colored by rating: Good=dark green, Neutral=dark gray, Bad=dark red)
                 ['YOUNG', 'MID', 'OLD'].forEach(ageGroup => {
                     const rating = roleData[ageGroup];
                     const ratingText = rating || '—';
-                    html += `<div style="flex: 1; text-align: center; color: ${roleColor}; font-weight: 500; font-size: 14px;">${ratingText}</div>`;
+                    const ratingColor = RATING_COLORS[rating] || '#888';
+                    html += `<div style="flex: 1; text-align: center; color: ${ratingColor}; font-weight: 500; font-size: 14px;">${ratingText}</div>`;
                 });
 
                 // Gender toggle container (on the right)
