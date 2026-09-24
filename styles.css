@@ -2963,7 +2963,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .collapsible-title {
-    color: var(--text-main);
+    color: var(--accent);
     font-family: 'Inter', sans-serif;
     font-size: 1.2rem;
     font-weight: 700;
