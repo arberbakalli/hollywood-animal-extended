@@ -3263,6 +3263,14 @@ option.supporting-character { color: var(--cat-supporting); }
 option.theme-event { color: var(--cat-theme-event); }
 option.finale { color: var(--cat-finale); }
 
+/* Exclusion context: color selected items in dropdowns */
+#selectors-container-excluded select[data-category="Setting"] {
+    color: var(--cat-setting) !important;
+}
+#selectors-container-excluded select[data-category="Genre"] {
+    color: var(--category-color) !important;
+}
+
 option[data-selected-elsewhere="true"] {
   color: #777 !important;
 }
