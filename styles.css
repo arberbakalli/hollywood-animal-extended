@@ -3744,10 +3744,9 @@ option[data-selected-elsewhere="true"] {
 .age-role-insight {
     margin-top: 16px;
     padding: 12px;
-    border: 1px solid rgba(212, 175, 55, 0.16);
-    border-left: 3px solid rgba(212, 175, 55, 0.45);
+    border: none;
     border-radius: 4px;
-    background: rgba(212, 175, 55, 0.045);
+    background: transparent;
     color: var(--text-main);
 }
 
