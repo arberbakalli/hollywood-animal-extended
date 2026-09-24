@@ -139,9 +139,17 @@ describe('Graves Best Matches', () => {
 
             expect(nonStarterCandidate).toBeDefined();
             expect(nonStarterCandidate).toHaveProperty('id');
-            expect(nonStarterCandidate).toHaveProperty('name');
-            expect(nonStarterCandidate).toHaveProperty('category');
+            expect(nonStarterCandidate.id).toBeTruthy();
             expect(typeof nonStarterCandidate.id).toBe('string');
+            expect(nonStarterCandidate.id.length).toBeGreaterThan(0);
+            expect(nonStarterCandidate).toHaveProperty('name');
+            expect(nonStarterCandidate.name).toBeTruthy();
+            expect(typeof nonStarterCandidate.name).toBe('string');
+            expect(nonStarterCandidate.name.length).toBeGreaterThan(0);
+            expect(nonStarterCandidate).toHaveProperty('category');
+            expect(nonStarterCandidate.category).toBeTruthy();
+            expect(typeof nonStarterCandidate.category).toBe('string');
+            expect(nonStarterCandidate.category.length).toBeGreaterThan(0);
             expect(rows.map(row => row.candidate.id)).toContain(nonStarterCandidate.id);
         });
     });

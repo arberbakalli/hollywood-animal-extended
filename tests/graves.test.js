@@ -160,6 +160,8 @@ describe('Graves Evaluation', () => {
     test('loads real game data for compatibility lookup', () => {
         const gd = h.GAME_DATA;
         expect(gd.tags).toBeDefined();
+        expect(gd.tags).toMatchObject({});
+        expect(Object.keys(gd.tags).length).toBeGreaterThan(0);
         expect(gd.compatibility).toBeDefined();
 
         // Verify tags have required structure: each must have id, name, category

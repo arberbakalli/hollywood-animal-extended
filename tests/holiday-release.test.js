@@ -150,6 +150,9 @@ describe('holiday bonuses match the extracted game config', () => {
     test.each(Object.keys(GAME_KEY_BY_NAME))('%s carries the game config bonuses', (name) => {
         const app = appHolidays.find(holiday => holiday.name === name);
         expect(app).toBeDefined();
+        expect(app.name).toBe(name);
+        expect(app.bonuses).toBeDefined();
+        expect(typeof app.bonuses).toBe('object');
 
         const shipped = Object.fromEntries(
             AUDIENCES.map(audience => [audience, app.bonuses[audience] || 0])

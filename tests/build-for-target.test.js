@@ -105,8 +105,12 @@ describe('Build for Target — category cardinality', () => {
     });
 
     test('the generator returns combinations to inspect', () => {
+        expect(combos).toBeDefined();
         expect(Array.isArray(combos)).toBe(true);
         expect(combos.length).toBeGreaterThan(0);
+        expect(combos[0]).toBeDefined();
+        expect(Array.isArray(combos[0])).toBe(true);
+        expect(combos[0].length).toBeGreaterThan(0);
     });
 
     test.each(SINGLE_SELECT)('no combination carries more than one %s', category => {

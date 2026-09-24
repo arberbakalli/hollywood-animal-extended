@@ -20,26 +20,30 @@ describe('Boundary cases for high-risk rules', () => {
     describe('Story Element Budget', () => {
         test('4 story elements is rejected (below lower bound)', () => {
             const storyElements = Array(4).fill({ category: 'Protagonist' });
-            // Rule: must have >= 5
-            expect(storyElements.length < 5).toBe(true);
+            expect(storyElements.length).toBe(4);
+            expect(storyElements.length).toBeLessThan(5);
+            expect(storyElements.length).not.toBeGreaterThanOrEqual(5);
         });
 
         test('5 story elements is accepted (at lower bound)', () => {
             const storyElements = Array(5).fill({ category: 'Protagonist' });
-            // Rule: must have >= 5
-            expect(storyElements.length >= 5).toBe(true);
+            expect(storyElements.length).toBe(5);
+            expect(storyElements.length).toBeGreaterThanOrEqual(5);
+            expect(storyElements.length).not.toBeLessThan(5);
         });
 
         test('10 story elements is accepted (at upper bound)', () => {
             const storyElements = Array(10).fill({ category: 'Protagonist' });
-            // Rule: must have <= 10
-            expect(storyElements.length <= 10).toBe(true);
+            expect(storyElements.length).toBe(10);
+            expect(storyElements.length).toBeLessThanOrEqual(10);
+            expect(storyElements.length).not.toBeGreaterThan(10);
         });
 
         test('11 story elements is rejected (above upper bound)', () => {
             const storyElements = Array(11).fill({ category: 'Protagonist' });
-            // Rule: must have <= 10
-            expect(storyElements.length > 10).toBe(true);
+            expect(storyElements.length).toBe(11);
+            expect(storyElements.length).toBeGreaterThan(10);
+            expect(storyElements.length).not.toBeLessThanOrEqual(10);
         });
     });
 
@@ -53,10 +57,13 @@ describe('Boundary cases for high-risk rules', () => {
                 { category: 'Genre', id: 'THRILLER' },
                 { category: 'Setting', id: 'MODERN_CITY' }
             ];
-            const storyElements = tags.filter(t => 
+            const storyElements = tags.filter(t =>
                 t.category !== 'Genre' && t.category !== 'Setting'
             );
-            expect(storyElements.length).toBe(0);
+            expect(storyElements).toHaveLength(0);
+            expect(tags).toHaveLength(2);
+            expect(tags.filter(t => t.category === 'Genre')).toHaveLength(1);
+            expect(tags.filter(t => t.category === 'Setting')).toHaveLength(1);
         });
 
         test('5 story elements + genres/settings is accepted', () => {
@@ -69,10 +76,20 @@ describe('Boundary cases for high-risk rules', () => {
                 { category: 'Theme & Event', id: 'TREASURE_HUNT' },
                 { category: 'Finale', id: 'HAPPY_ENDING' }
             ];
-            const storyElements = tags.filter(t => 
+            const storyElements = tags.filter(t =>
                 t.category !== 'Genre' && t.category !== 'Setting'
             );
-            expect(storyElements.length).toBe(5);
+            expect(storyElements).toHaveLength(5);
+            expect(tags).toHaveLength(7);
+            expect(storyElements.map(e => e.category).sort()).toEqual([
+                'Antagonist',
+                'Finale',
+                'Protagonist',
+                'Supporting Character',
+                'Theme & Event'
+            ].sort());
+            const context = tags.filter(t => t.category === 'Genre' || t.category === 'Setting');
+            expect(context).toHaveLength(2);
         });
     });
 
@@ -84,19 +101,25 @@ describe('Boundary cases for high-risk rules', () => {
         test('One element below pool is accepted', () => {
             const pool = 8;
             const selected = 7;
-            expect(selected <= pool).toBe(true);
+            expect(selected).toBeLessThan(pool);
+            expect(selected).toBeLessThanOrEqual(pool);
+            expect(selected).not.toBeGreaterThan(pool);
         });
 
         test('Exactly at pool is accepted', () => {
             const pool = 8;
             const selected = 8;
-            expect(selected <= pool).toBe(true);
+            expect(selected).toBe(pool);
+            expect(selected).toBeLessThanOrEqual(pool);
+            expect(selected).not.toBeGreaterThan(pool);
         });
 
         test('One element above pool is rejected', () => {
             const pool = 8;
             const selected = 9;
-            expect(selected > pool).toBe(true);
+            expect(selected).toBeGreaterThan(pool);
+            expect(selected).not.toBeLessThanOrEqual(pool);
+            expect(selected - pool).toBe(1);
         });
     });
 
@@ -106,21 +129,31 @@ describe('Boundary cases for high-risk rules', () => {
      */
     describe('Repeatable category limits', () => {
         test('Genre: 0 selections rejected (mandatory)', () => {
-            expect(0 > 0).toBe(false); // Rule: must have >= 1
+            const genreCount = 0;
+            expect(genreCount).toBe(0);
+            expect(genreCount).toBeLessThan(1);
+            expect(genreCount).not.toBeGreaterThanOrEqual(1);
         });
 
         test('Genre: 1 selection accepted (minimum)', () => {
-            expect(1 >= 1).toBe(true);
+            const genreCount = 1;
+            expect(genreCount).toBe(1);
+            expect(genreCount).toBeGreaterThanOrEqual(1);
+            expect(genreCount).not.toBeLessThan(1);
         });
 
         test('Genre: 3 selections accepted (repeatable)', () => {
-            expect(3 >= 1).toBe(true); // No upper limit
+            const genreCount = 3;
+            expect(genreCount).toBeGreaterThanOrEqual(1);
+            expect(genreCount).toBeGreaterThan(1);
+            expect(genreCount).toBe(3);
         });
 
         test('Protagonist: 2 selections rejected (single-select)', () => {
-            // Rule: only Genre, Supporting Character, Theme & Event are repeatable
-            // Protagonist must hold exactly 1
-            expect(2 === 1).toBe(false);
+            const protagonistCount = 2;
+            expect(protagonistCount).toBe(2);
+            expect(protagonistCount).not.toBe(1);
+            expect(protagonistCount).toBeGreaterThan(1);
         });
     });
 });
