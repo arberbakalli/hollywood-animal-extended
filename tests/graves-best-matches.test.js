@@ -138,6 +138,10 @@ describe('Graves Best Matches', () => {
             );
 
             expect(nonStarterCandidate).toBeDefined();
+            expect(nonStarterCandidate).toHaveProperty('id');
+            expect(nonStarterCandidate).toHaveProperty('name');
+            expect(nonStarterCandidate).toHaveProperty('category');
+            expect(typeof nonStarterCandidate.id).toBe('string');
             expect(rows.map(row => row.candidate.id)).toContain(nonStarterCandidate.id);
         });
     });

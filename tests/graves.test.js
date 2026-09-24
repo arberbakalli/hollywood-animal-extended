@@ -159,8 +159,29 @@ describe('Graves Evaluation', () => {
         const gd = h.GAME_DATA;
         expect(gd.tags).toBeDefined();
         expect(gd.compatibility).toBeDefined();
-        expect(Object.keys(gd.tags).length).toBeGreaterThan(0);
-        expect(Object.keys(gd.compatibility).length).toBeGreaterThan(0);
+
+        // Verify tags have required structure: each must have id, name, category
+        const tagIds = Object.keys(gd.tags);
+        expect(tagIds.length).toBeGreaterThan(0);
+        tagIds.slice(0, 10).forEach(id => {
+            const tag = gd.tags[id];
+            expect(tag.id).toBeDefined();
+            expect(tag.name).toBeDefined();
+            expect(tag.category).toBeDefined();
+            expect(typeof tag.name).toBe('string');
+            expect(typeof tag.category).toBe('string');
+        });
+
+        // Verify compatibility has scores (stored as strings)
+        const compatIds = Object.keys(gd.compatibility);
+        expect(compatIds.length).toBeGreaterThan(0);
+        const sampleCompat = gd.compatibility[compatIds[0]];
+        expect(typeof sampleCompat).toBe('object');
+        const sampleScores = Object.values(sampleCompat).slice(0, 5);
+        sampleScores.forEach(score => {
+          const num = parseFloat(score);
+          expect(Number.isFinite(num)).toBe(true);
+        });
     });
 
     test('finds real compatibility scores between tags', () => {
@@ -174,6 +195,16 @@ describe('Graves Evaluation', () => {
         const scores = gd.compatibility[actionId];
         expect(scores).toBeDefined();
         expect(typeof scores).toBe('object');
+
+        // Verify scores are valid (stored as strings, parse to verify range)
+        const scoreValues = Object.values(scores);
+        expect(scoreValues.length).toBeGreaterThan(0);
+        scoreValues.forEach(score => {
+            const num = parseFloat(score);
+            expect(Number.isFinite(num)).toBe(true);
+            expect(num).toBeGreaterThanOrEqual(0);
+            expect(num).toBeLessThanOrEqual(5);
+        });
     });
 
     test('missing compatibility scores default through the production lookup', () => {

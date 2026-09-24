@@ -67,7 +67,10 @@ describe('Exclusion store', () => {
 
         test('keeps every entry when no tag dictionary is supplied', () => {
             const raw = JSON.stringify([{ id: 'ANYTHING', category: 'Finale' }]);
-            expect(h.call('HACExclusionStore.parseStoredExclusions', raw, null)).toHaveLength(1);
+            const result = h.call('HACExclusionStore.parseStoredExclusions', raw, null);
+            expect(result).toHaveLength(1);
+            expect(result[0].id).toBe('ANYTHING');
+            expect(result[0].category).toBe('Finale');
         });
 
         test('drops entries whose fields are the wrong type', () => {

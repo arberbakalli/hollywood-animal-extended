@@ -31,7 +31,7 @@ const auditResults = {
 /**
  * Mutation 1: Lower bound broken
  */
-test('P2-AUDIT-001 graves-story-elements-lower-bound-broken has teeth', async ({
+test('TC06-000201 graves-story-elements-lower-bound-broken has teeth', async ({
   page,
 }) => {
   const mutation = mutations.find((m) => m.id === 'graves-story-elements-lower-bound-broken');
@@ -84,7 +84,7 @@ test('P2-AUDIT-001 graves-story-elements-lower-bound-broken has teeth', async ({
 /**
  * Mutation 2: Upper bound broken
  */
-test('P2-AUDIT-002 graves-story-elements-upper-bound-broken has teeth', async ({
+test('TC06-000202 graves-story-elements-upper-bound-broken has teeth', async ({
   page,
 }) => {
   const mutation = mutations.find((m) => m.id === 'graves-story-elements-upper-bound-broken');
@@ -135,7 +135,7 @@ test('P2-AUDIT-002 graves-story-elements-upper-bound-broken has teeth', async ({
 /**
  * Mutation 3: Exclusion filter broken
  */
-test('P2-AUDIT-003 exclusion-filter-broken has teeth', async ({ page }) => {
+test('TC06-000203 exclusion-filter-broken has teeth', async ({ page }) => {
   const mutation = mutations.find((m) => m.id === 'exclusion-filter-broken');
   if (!mutation) {
     test.skip();
@@ -171,7 +171,7 @@ test('P2-AUDIT-003 exclusion-filter-broken has teeth', async ({ page }) => {
 /**
  * Mutation 4: Targeted ads budget broken
  */
-test('P2-AUDIT-004 targeted-ads-budget-broken has teeth', async ({ page }) => {
+test('TC06-000204 targeted-ads-budget-broken has teeth', async ({ page }) => {
   const mutation = mutations.find((m) => m.id === 'targeted-ads-budget-broken');
   if (!mutation) {
     test.skip();
@@ -204,7 +204,7 @@ test('P2-AUDIT-004 targeted-ads-budget-broken has teeth', async ({ page }) => {
 /**
  * Mutation 5: Visibility override
  */
-test('P2-AUDIT-005 graves-exclusion-notice-visible has teeth', async ({ page }) => {
+test('TC06-000205 graves-exclusion-notice-visible has teeth', async ({ page }) => {
   const mutation = mutations.find((m) => m.id === 'graves-exclusion-notice-visible');
   if (!mutation) {
     test.skip();
