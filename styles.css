@@ -3432,6 +3432,138 @@ option[data-selected-elsewhere="true"] {
     margin-top: 12px;
 }
 
+.age-role-empty-state {
+    color: var(--text-muted);
+    padding: 20px;
+    text-align: center;
+}
+
+.age-role-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 560px;
+}
+
+.age-role-grid-header,
+.age-role-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1.25fr) repeat(3, minmax(72px, 1fr)) minmax(72px, 0.7fr);
+    align-items: center;
+    gap: 15px;
+}
+
+.age-role-grid-header {
+    margin-bottom: 5px;
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.age-role-header-cell {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.age-role-cell-role {
+    text-align: left;
+}
+
+.age-role-cell-rating,
+.age-role-cell-gender {
+    text-align: center;
+}
+
+.age-role-row {
+    padding: 12px 15px;
+    border-left: 3px solid var(--age-role-accent);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--age-role-accent) 20%, transparent);
+}
+
+.age-role-row--protagonist {
+    --age-role-accent: #508058;
+    --age-role-text: #55ea83;
+}
+
+.age-role-row--antagonist {
+    --age-role-accent: #584090;
+    --age-role-text: #a1b1ff;
+}
+
+.age-role-row--supporting {
+    --age-role-accent: #588098;
+    --age-role-text: #8beaff;
+}
+
+.age-role-role-name {
+    color: var(--age-role-text);
+    font-weight: 700;
+}
+
+.age-role-rating {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.age-role-rating--good {
+    color: #55ea83;
+}
+
+.age-role-rating--neutral {
+    color: var(--text-muted);
+}
+
+.age-role-rating--bad {
+    color: #e2574c;
+}
+
+.age-role-gender-slot {
+    display: flex;
+    justify-content: center;
+}
+
+.gender-toggle {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.gender-toggle--fixed {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.gender-btn {
+    min-width: 32px;
+    padding: 4px 10px;
+    border: 1px solid #555;
+    border-radius: 3px;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.gender-btn:disabled {
+    cursor: not-allowed;
+}
+
+.gender-btn--male.active {
+    border-color: #5ba3d0;
+    background: rgba(91, 163, 208, 0.15);
+    color: #5ba3d0;
+}
+
+.gender-btn--female.active {
+    border-color: #d976a8;
+    background: rgba(217, 118, 168, 0.15);
+    color: #d976a8;
+}
+
 .age-role-appeal-table {
     width: 100%;
     min-width: 500px;
@@ -3537,5 +3669,4 @@ option[data-selected-elsewhere="true"] {
 }
 
 /* TEMPORARY: Hide panels pending UI redesign */
-/* #ageRoleBreakdownPanel { display: none; } */
 #agency-compatibility-panel { display: none; }
