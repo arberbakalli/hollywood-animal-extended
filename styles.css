@@ -613,10 +613,10 @@ select.tag-selector.has-selected-tag {
     background: var(--input-bg);
 }
 
-/* Genre selector - use per-genre color when selected */
+/* Genre selector - use per-genre color for text AND border when selected */
 select[data-category="Genre"].has-selected-tag {
+    color: var(--category-color);
     border-color: var(--category-color);
-    /* color handled by individual genre class */
 }
 
 /* Setting - blue to match category label */
