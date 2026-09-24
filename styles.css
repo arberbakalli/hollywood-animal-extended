@@ -648,10 +648,9 @@ select[data-category="Finale"].has-selected-tag {
     color: var(--cat-setting);
 }
 
-/* High synergy options - subtle highlight, not neon green */
+/* High synergy options - subtle highlight with bold font, preserve genre colors */
 select.tag-selector option.strong-fit-option,
 select.tag-selector option[data-synergy="high"] {
-    color: #a8d5a8;
     background-color: rgba(168, 213, 168, 0.08);
     font-weight: 700;
 }
