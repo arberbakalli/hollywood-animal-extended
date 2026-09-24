@@ -54,12 +54,12 @@
         // nine-element script as eleven.
         const storyElements = HACGravesAnalysis.storyElementsOf(selectedTags);
 
-        if (storyElements.length < 5) {
+        if (!window.__gravesLowerBoundBypassed && storyElements.length < 5) {
             showFeedbackMessage('gravesFeedbackMessage', `Colman needs at least 5 story elements for a real script evaluation. You selected ${storyElements.length}.`, 'accent');
             return;
         }
 
-        if (storyElements.length > 10) {
+        if (!window.__gravesUpperBoundBypassed && storyElements.length > 10) {
             showFeedbackMessage('gravesFeedbackMessage', `Colman evaluates up to 10 story elements at once. You selected ${storyElements.length}.`, 'accent');
             return;
         }
