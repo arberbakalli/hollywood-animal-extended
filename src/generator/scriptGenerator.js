@@ -86,7 +86,7 @@
         setupMovieScoreSliderSync();
     }
 
-    const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist"];
+    const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist", "Antagonist", "Finale"];
 
     function getMaxElementPoolSize() {
         const input = document.getElementById('globalElementPoolInput');

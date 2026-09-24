@@ -111,7 +111,7 @@ describe('Graves Evaluation', () => {
             return feedback.textContent;
         })()`);
 
-        expect(result).toContain('A script needs at least one Setting, Protagonist.');
+        expect(result).toContain('A script needs at least one Setting, Protagonist, Antagonist, Finale.');
     });
 
     test('Evaluate Script rejects fewer than 5 story elements after required categories are present', async () => {
@@ -119,7 +119,9 @@ describe('Graves Evaluation', () => {
             const feedback = ${buildGravesBestMatchesDom(`[
                 { value: 'ACTION', dataset: { category: 'Genre' } },
                 { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
-                { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } }
+                { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } },
+                { value: 'ANTAGONIST_VILLAIN', dataset: { category: 'Antagonist' } },
+                { value: 'FINALE_PROTAGONIST_TRIUMPHS', dataset: { category: 'Finale' } }
             ]`)};
 
             await evaluateColmanGravesScript();
@@ -127,8 +129,8 @@ describe('Graves Evaluation', () => {
         })()`);
 
         expect(result).toContain('at least 5 story elements');
-        // Three tags, but Genre and Setting are context: one story element.
-        expect(result).toContain('You selected 1');
+        // Five tags, but Genre and Setting are context: three story elements (Protagonist, Antagonist, Finale).
+        expect(result).toContain('You selected 3');
     });
 
     test('Graves pair bands classify real compatibility pairs by production thresholds', () => {
@@ -318,7 +320,9 @@ describe('Graves Evaluation', () => {
                 { value: 'ACTION', dataset: { category: 'Genre' } },
                 { value: 'MODERN_AMERICAN_CITY', dataset: { category: 'Setting' } },
                 { value: 'PROTAGONIST_COP', dataset: { category: 'Protagonist' } },
-                ...Array.from({ length: 10 }, (_, index) => ({
+                { value: 'ANTAGONIST_VILLAIN', dataset: { category: 'Antagonist' } },
+                { value: 'FINALE_PROTAGONIST_TRIUMPHS', dataset: { category: 'Finale' } },
+                ...Array.from({ length: 8 }, (_, index) => ({
                     value: 'TEST_TAG_' + index,
                     dataset: { category: 'Supporting Character' }
                 }))

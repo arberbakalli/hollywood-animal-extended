@@ -1,25 +1,31 @@
 # P2 Teeth Audit Results
 
-**Timestamp:** 2026-09-24T12:30:09.630Z
+**Timestamp:** 2026-09-24T12:40:27.229Z
 
 ## Summary
 
 | Status | Count |
 |--------|-------|
-| With Teeth | 0/2 |
-| Vacuous | 2/2 |
+| With Teeth | 0/3 |
+| Vacuous | 3/3 |
 
 ## Details
 
-### ❌ VACUOUS — exclusion-filter-broken
+### ❌ VACUOUS — graves-story-elements-lower-bound-broken
 
-- Test Case: TC05-000020
-- Expected Catcher: TC05-000020
+- Test Case: TC03-000004
+- Expected Catcher: TC03-000004
 - Defect Injected: Yes
 
-### ❌ VACUOUS — targeted-ads-budget-broken
+### ❌ VACUOUS — graves-story-elements-upper-bound-broken
 
-- Test Case: TC05-000019
-- Expected Catcher: TC05-000019
+- Test Case: TC03-000036
+- Expected Catcher: TC03-000036
+- Defect Injected: Yes
+
+### ❌ VACUOUS — graves-exclusion-notice-visible
+
+- Test Case: undefined
+- Expected Catcher: TC03-000007
 - Defect Injected: Yes
 
