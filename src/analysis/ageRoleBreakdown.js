@@ -57,7 +57,7 @@
     function createGenderToggle(roleType) {
         const container = document.createElement('div');
         container.className = 'gender-toggle';
-        container.style.cssText = 'display: flex; gap: 8px; margin-left: auto;';
+        container.style.cssText = 'display: flex; gap: 6px;';
 
         const currentGender = genderState[roleType] || 'M';
 
@@ -66,13 +66,13 @@
         maleBtn.innerHTML = '♂';
         maleBtn.className = `gender-btn ${currentGender === 'M' ? 'active' : ''}`;
         maleBtn.style.cssText = `
-            padding: 6px 12px;
-            border: 1px solid ${currentGender === 'M' ? '#55EA83' : '#666'};
-            background: ${currentGender === 'M' ? 'rgba(85, 234, 131, 0.2)' : 'transparent'};
-            color: ${currentGender === 'M' ? '#55EA83' : '#999'};
-            border-radius: 4px;
+            padding: 4px 10px;
+            border: 1px solid ${currentGender === 'M' ? '#55EA83' : '#555'};
+            background: ${currentGender === 'M' ? 'rgba(85, 234, 131, 0.15)' : 'transparent'};
+            color: ${currentGender === 'M' ? '#55EA83' : '#888'};
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.2s;
         `;
         maleBtn.onclick = (e) => {
@@ -86,13 +86,13 @@
         femaleBtn.innerHTML = '♀';
         femaleBtn.className = `gender-btn ${currentGender === 'F' ? 'active' : ''}`;
         femaleBtn.style.cssText = `
-            padding: 6px 12px;
-            border: 1px solid ${currentGender === 'F' ? '#A1B1FF' : '#666'};
-            background: ${currentGender === 'F' ? 'rgba(161, 177, 255, 0.2)' : 'transparent'};
-            color: ${currentGender === 'F' ? '#A1B1FF' : '#999'};
-            border-radius: 4px;
+            padding: 4px 10px;
+            border: 1px solid ${currentGender === 'F' ? '#A1B1FF' : '#555'};
+            background: ${currentGender === 'F' ? 'rgba(161, 177, 255, 0.15)' : 'transparent'};
+            color: ${currentGender === 'F' ? '#A1B1FF' : '#888'};
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.2s;
         `;
         femaleBtn.onclick = (e) => {
@@ -119,38 +119,49 @@
             return '<p style="color: #999; text-align: center; padding: 20px;">Select at least one role to see age appeal</p>';
         }
 
-        let html = '<div style="overflow-x: auto;">';
-        html += '<table class="age-appeal-table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">';
-        html += '<thead><tr style="border-bottom: 2px solid #333;">';
-        html += '<th style="padding: 10px; text-align: left; color: #ccc;">Role</th>';
-        html += '<th style="padding: 10px; text-align: center; color: #ccc;">Young</th>';
-        html += '<th style="padding: 10px; text-align: center; color: #ccc;">Mid</th>';
-        html += '<th style="padding: 10px; text-align: center; color: #ccc;">Old</th>';
-        html += '</tr></thead><tbody>';
+        const ROLE_BG_COLORS = {
+            'protagonist': 'rgba(80, 128, 88, 0.3)',
+            'antagonist': 'rgba(88, 64, 144, 0.3)',
+            'supporting': 'rgba(88, 128, 152, 0.3)'
+        };
 
-        roles.forEach((role, idx) => {
+        const ROLE_BORDER_COLORS = {
+            'protagonist': '#508058',
+            'antagonist': '#584090',
+            'supporting': '#588098'
+        };
+
+        let html = '<div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">';
+
+        roles.forEach(role => {
             const roleType = role.type;
-            const gender = getGender(roleType);
             const genderKey = `${roleType === 'protagonist' ? 'protagonists' : roleType === 'antagonist' ? 'antagonists' : 'supportingCharacters'}`;
             const roleData = ageGroups[genderKey]?.[role.id];
 
             if (roleData) {
-                const bgColor = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
                 const roleColor = ROLE_COLORS[roleType];
-                html += `<tr style="border-bottom: 1px solid #333; background: ${bgColor};">`;
-                html += `<td style="padding: 10px; color: #ccc;">${role.displayName}</td>`;
+                const bgColor = ROLE_BG_COLORS[roleType];
+                const borderColor = ROLE_BORDER_COLORS[roleType];
 
+                html += `<div style="display: flex; align-items: center; padding: 12px 15px; background: ${bgColor}; border-left: 3px solid ${borderColor}; border-radius: 4px; gap: 15px;">`;
+
+                // Role name
+                html += `<div style="flex: 0 0 120px; color: #e0e0e0; font-weight: 500;">${role.displayName}</div>`;
+
+                // Age ratings
                 ['YOUNG', 'MID', 'OLD'].forEach(ageGroup => {
                     const rating = roleData[ageGroup];
                     const ratingText = rating || '—';
-                    html += `<td style="padding: 10px; text-align: center; color: ${roleColor}; font-weight: 500;">${ratingText}</td>`;
+                    html += `<div style="flex: 1; text-align: center; color: ${roleColor}; font-weight: 500; font-size: 14px;">${ratingText}</div>`;
                 });
 
-                html += '</tr>';
+                // Gender toggle container (on the right)
+                html += `<div id="gender-toggle-${roleType}-${role.id}" style="flex: 0 0 auto;"></div>`;
+
+                html += '</div>';
             }
         });
 
-        html += '</tbody></table>';
         html += '</div>';
 
         return html;
@@ -181,62 +192,20 @@
         const contentDiv = document.getElementById('age-role-content');
         if (!contentDiv) return;
 
-        // Add gender toggles for each role type
-        let headerHtml = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">';
-        headerHtml += '<p style="margin: 0; color: #999; font-size: 14px;">Select gender to view age appeal ratings:</p>';
-        headerHtml += '<div style="display: flex; gap: 20px;">';
-
-        // Add toggle for protagonist if selected
-        if (roles.some(r => r.type === 'protagonist')) {
-            headerHtml += '<div style="display: flex; align-items: center; gap: 8px;">';
-            headerHtml += '<span style="color: #55EA83; font-size: 12px; font-weight: bold;">Protagonist</span>';
-            headerHtml += '<div id="gender-toggle-protagonist"></div>';
-            headerHtml += '</div>';
-        }
-
-        // Add toggle for antagonist if selected
-        if (roles.some(r => r.type === 'antagonist')) {
-            headerHtml += '<div style="display: flex; align-items: center; gap: 8px;">';
-            headerHtml += '<span style="color: #A1B1FF; font-size: 12px; font-weight: bold;">Antagonist</span>';
-            headerHtml += '<div id="gender-toggle-antagonist"></div>';
-            headerHtml += '</div>';
-        }
-
-        // Add toggle for supporting if selected
-        if (roles.some(r => r.type === 'supporting')) {
-            headerHtml += '<div style="display: flex; align-items: center; gap: 8px;">';
-            headerHtml += '<span style="color: #8BEAFF; font-size: 12px; font-weight: bold;">Supporting</span>';
-            headerHtml += '<div id="gender-toggle-supporting"></div>';
-            headerHtml += '</div>';
-        }
-
-        headerHtml += '</div></div>';
+        // Header
+        let headerHtml = '<p style="margin: 0 0 15px 0; color: #999; font-size: 14px;">Select gender to view age appeal ratings:</p>';
 
         const tableHtml = buildAgeTable(roles, data);
 
         contentDiv.innerHTML = headerHtml + tableHtml;
 
-        // Append gender toggle buttons
-        if (roles.some(r => r.type === 'protagonist')) {
-            const protoToggleContainer = document.getElementById('gender-toggle-protagonist');
-            if (protoToggleContainer) {
-                protoToggleContainer.appendChild(createGenderToggle('protagonist'));
+        // Append gender toggle buttons to each role row
+        roles.forEach(role => {
+            const toggleContainer = document.getElementById(`gender-toggle-${role.type}-${role.id}`);
+            if (toggleContainer) {
+                toggleContainer.appendChild(createGenderToggle(role.type));
             }
-        }
-
-        if (roles.some(r => r.type === 'antagonist')) {
-            const antToggleContainer = document.getElementById('gender-toggle-antagonist');
-            if (antToggleContainer) {
-                antToggleContainer.appendChild(createGenderToggle('antagonist'));
-            }
-        }
-
-        if (roles.some(r => r.type === 'supporting')) {
-            const suppToggleContainer = document.getElementById('gender-toggle-supporting');
-            if (suppToggleContainer) {
-                suppToggleContainer.appendChild(createGenderToggle('supporting'));
-            }
-        }
+        });
     }
 
     function hideAgeRolePanel() {
