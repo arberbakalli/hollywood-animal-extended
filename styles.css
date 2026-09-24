@@ -3428,7 +3428,7 @@ option[data-selected-elsewhere="true"] {
     overflow-x: auto;
     border: 1px solid var(--border);
     border-radius: 6px;
-    background: rgba(0, 0, 0, 0.18);
+    background: rgba(0, 0, 0, 0.16);
     margin-top: 12px;
 }
 
@@ -3441,22 +3441,21 @@ option[data-selected-elsewhere="true"] {
 .age-role-grid {
     display: flex;
     flex-direction: column;
-    gap: 10px;
     min-width: 560px;
 }
 
 .age-role-grid-header,
 .age-role-row {
     display: grid;
-    grid-template-columns: minmax(120px, 1.25fr) repeat(3, minmax(72px, 1fr)) minmax(72px, 0.7fr);
+    grid-template-columns: minmax(140px, 1.35fr) repeat(3, minmax(78px, 1fr)) minmax(86px, 0.75fr);
     align-items: center;
-    gap: 15px;
+    column-gap: 14px;
 }
 
 .age-role-grid-header {
-    margin-bottom: 5px;
-    padding: 10px 15px;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.24);
+    background: rgba(212, 175, 55, 0.045);
 }
 
 .age-role-header-cell {
@@ -3476,10 +3475,14 @@ option[data-selected-elsewhere="true"] {
 }
 
 .age-role-row {
-    padding: 12px 15px;
+    padding: 13px 16px;
     border-left: 3px solid var(--age-role-accent);
-    border-radius: 4px;
-    background: color-mix(in srgb, var(--age-role-accent) 20%, transparent);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+    background: color-mix(in srgb, var(--age-role-accent) 12%, rgba(0, 0, 0, 0.08));
+}
+
+.age-role-row:last-child {
+    border-bottom: 0;
 }
 
 .age-role-row--protagonist {
@@ -3509,7 +3512,7 @@ option[data-selected-elsewhere="true"] {
 }
 
 .age-role-rating--good {
-    color: #55ea83;
+    color: #79b884;
 }
 
 .age-role-rating--neutral {

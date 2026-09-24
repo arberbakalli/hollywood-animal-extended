@@ -79,4 +79,89 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         expect(styles).toContain('.appeal-bad');
         expect(styles).toContain('.appeal-disastrous');
     });
+
+    // New tests for restructured JSON with metadata
+    test('age-role-compatibility.json has new metadata structure', async () => {
+        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+
+        // Check that roles have the new structure
+        const protagonist = data.protagonists['PROTAGONIST_COP'];
+        expect(protagonist).toHaveProperty('ratings');
+        expect(protagonist).toHaveProperty('locked_gender');
+        expect(protagonist).toHaveProperty('data_source');
+    });
+
+    test('ratings field contains age group compatibility', async () => {
+        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const protagonist = data.protagonists['PROTAGONIST_COP'];
+
+        expect(protagonist.ratings).toHaveProperty('YOUNG');
+        expect(protagonist.ratings).toHaveProperty('MID');
+        expect(protagonist.ratings).toHaveProperty('OLD');
+        expect(['Good', 'Neutral', 'Bad']).toContain(protagonist.ratings.YOUNG);
+    });
+
+    test('gender-locked roles have locked_gender field set', async () => {
+        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+
+        // Check known gender-locked roles
+        expect(data.protagonists['PROTAGONIST_AMBITIOUS_WOMAN'].locked_gender).toBe('F');
+        expect(data.supportingCharacters['SUPPORTING_CHARACTER_PATRIARCH'].locked_gender).toBe('M');
+        expect(data.supportingCharacters['SUPPORTING_CHARACTER_FEMME_FATALE'].locked_gender).toBe('F');
+        expect(data.supportingCharacters['SUPPORTING_CHARACTER_DAMSEL_IN_DISTRESS'].locked_gender).toBe('F');
+    });
+
+    test('flexible-gender roles have locked_gender as null', async () => {
+        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+
+        // Check roles that allow both genders
+        expect(data.protagonists['PROTAGONIST_COP'].locked_gender).toBeNull();
+        expect(data.antagonists['ANTAGONIST_ALIEN'].locked_gender).toBeNull();
+        expect(data.supportingCharacters['SUPPORTING_CHARACTER_SIDEKICK'].locked_gender).toBeNull();
+    });
+
+    test('data_source field distinguishes verified from estimated data', async () => {
+        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+
+        // All roles should have a data_source field
+        Object.entries(data.protagonists).forEach(([roleId, roleData]) => {
+            expect(['verified', 'estimated']).toContain(roleData.data_source);
+        });
+
+        Object.entries(data.supportingCharacters).forEach(([roleId, roleData]) => {
+            expect(['verified', 'estimated']).toContain(roleData.data_source);
+        });
+    });
+
+    test('all protagonists have complete rating data', async () => {
+        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+
+        Object.entries(data.protagonists).forEach(([roleId, roleData]) => {
+            expect(roleData.ratings.YOUNG).toBeDefined();
+            expect(roleData.ratings.MID).toBeDefined();
+            expect(roleData.ratings.OLD).toBeDefined();
+        });
+    });
+
+    test('antagonists section exists with expected structure', async () => {
+        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        expect(data.antagonists).toBeDefined();
+        expect(Object.keys(data.antagonists).length).toBeGreaterThan(10);
+    });
+
+    test('supporting characters section has expected entries', async () => {
+        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        expect(data.supportingCharacters).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTING_CHARACTER_PATRIARCH']).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTING_CHARACTER_FEMME_FATALE']).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTING_CHARACTER_DAMSEL_IN_DISTRESS']).toBeDefined();
+    });
+
+    test('stylesheet includes age/gender appeal row styling', async () => {
+        const styles = await readFile('styles.css', 'utf8');
+        expect(styles).toContain('.age-role-row--protagonist');
+        expect(styles).toContain('.age-role-row--antagonist');
+        expect(styles).toContain('.age-role-row--supporting');
+        expect(styles).toContain('.gender-btn');
+    });
 });
