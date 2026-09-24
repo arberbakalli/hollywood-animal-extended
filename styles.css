@@ -3484,17 +3484,17 @@ option[data-selected-elsewhere="true"] {
 
 .age-role-row--protagonist {
     --age-role-accent: #508058;
-    --age-role-text: #55ea83;
+    --age-role-text: #508058;
 }
 
 .age-role-row--antagonist {
     --age-role-accent: #584090;
-    --age-role-text: #a1b1ff;
+    --age-role-text: #584090;
 }
 
 .age-role-row--supporting {
     --age-role-accent: #588098;
-    --age-role-text: #8beaff;
+    --age-role-text: #588098;
 }
 
 .age-role-role-name {
