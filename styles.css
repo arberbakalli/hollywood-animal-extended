@@ -619,10 +619,15 @@ select[data-category="Genre"].has-selected-tag {
     /* color handled by individual genre class */
 }
 
-/* Setting - gray to match category label */
+/* Setting - blue to match category label */
 select[data-category="Setting"].has-selected-tag {
     color: var(--cat-setting);
     border-color: var(--cat-setting);
+}
+
+/* Finale - use category color for border */
+select[data-category="Finale"].has-selected-tag {
+    border-color: var(--ha-category-finale);
 }
 
 /* Category labels - Genre gold, Setting gray */
@@ -3233,7 +3238,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
   --cat-supporting: var(--ha-category-supporting-character);
   --cat-theme-event: var(--ha-category-theme-event);
   --cat-finale: var(--ha-category-finale);
-  --cat-setting: #a0a0a0; /* gray to match Setting label */
+  --cat-setting: #8fa3d1; /* lovely blue */
   --cat-genre: var(--text-muted); /* neutral for generic */
 }
 
