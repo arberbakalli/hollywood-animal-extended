@@ -2965,8 +2965,8 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .score-cell.neutral {
-    background: rgba(212, 175, 55, 0.05);
-    color: #d4af37;
+    background: rgba(160, 160, 160, 0.05);
+    color: #a0a0a0;
 }
 
 .score-cell.bad {

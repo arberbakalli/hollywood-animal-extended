@@ -85,6 +85,25 @@ re-implement the arithmetic in a panel — three copies of it have now been remo
 The category is **`Setting`**. Filtering on `Settings` matches nothing and
 silently miscounts every script.
 
+### Genre color complexity
+
+**Genre is the only category with per-element colors.** Other categories have one
+fixed color per category (Protagonist = green, Antagonist = purple, etc.). Genre
+has a distinct color for each genre tag (Historical = one color, Comedy = another,
+Action = another, etc.).
+
+This affects:
+- UI rendering (e.g., compatibility table, tag chips, category styling)
+- CSS class generation (`getCategoryClass` in `audienceCompatibility.js` handles
+  most categories uniformly, but Genre requires individual `genre-${genreId}` classes)
+- Updates to the audience compatibility table (adding a Genre may not update
+  immediately if event listeners don't fire; Genre changes fire all change events
+  before rendering completes, so changes appear only on the next interaction)
+
+> When Genre is selected and the table doesn't update immediately, select another
+> element (any category) to trigger a re-render. This is a timing/event-queue issue,
+> not a bug in the Genre data.
+
 ---
 
 ## 2. The element budget

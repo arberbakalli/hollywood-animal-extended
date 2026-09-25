@@ -309,9 +309,39 @@
     }
 
     function generateTargetingReasoning(tags, agencyScores, constraintAudiences) {
-        const topAgencies = [...agencyScores].sort((a, b) => b.score - a.score).slice(0, 2);
-        const tagNames = tags.map(t => t.name).join(', ');
-        return `Strongest with ${topAgencies.map(a => a.agency.name).join(' and ')}. Tags: ${tagNames}`;
+        const DEMOGRAPHICS = ['TF', 'TM', 'YF', 'YM', 'AF', 'AM'];
+        const DEMOGRAPHIC_LABELS = {
+            'TF': 'Teen Female',
+            'TM': 'Teen Male',
+            'YF': 'Young Female',
+            'YM': 'Young Male',
+            'AF': 'Adult Female',
+            'AM': 'Adult Male'
+        };
+
+        // Calculate average demographic appeal across all tags
+        const audienceFit = {};
+        DEMOGRAPHICS.forEach(demo => {
+            const scores = tags
+                .filter(t => t.weights && t.weights[demo] !== undefined)
+                .map(t => parseFloat(t.weights[demo]));
+            if (scores.length > 0) {
+                audienceFit[demo] = scores.reduce((a, b) => a + b, 0) / scores.length;
+            }
+        });
+
+        // Find top 3 demographics by appeal
+        const topAudiences = Object.entries(audienceFit)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([demo, score]) => `${DEMOGRAPHIC_LABELS[demo]} (${score.toFixed(1)})`);
+
+        const topAgencies = [...agencyScores].sort((a, b) => b.score - a.score).slice(0, 1);
+
+        if (topAudiences.length > 0) {
+            return `Strongest with ${topAgencies.map(a => a.agency.name).join(' and ')}. Best audience fit: ${topAudiences.join(', ')}`;
+        }
+        return `Strongest with ${topAgencies.map(a => a.agency.name).join(' and ')}.`;
     }
 
     function compatibilityTone(rawAverage) {
