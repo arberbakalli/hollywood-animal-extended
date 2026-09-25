@@ -9,13 +9,13 @@ const scoreIn = async (steps, elementName) => {
 const FIRST_OPTION = { type: DropdownSelectType.INDEX, index: 1 };
 
 const VALID_GRAVES_SCRIPT = [
-  ['genreSelect', 'THRILLER'],
-  ['settingSelect', 'MODERN_AMERICAN_CITY'],
-  ['protagonistSelect', 'PROTAGONIST_DETECTIVE'],
-  ['antagonistSelect', 'ANTAGONIST_TRIBAL_CHIEF'],
-  ['supportingCharacterSelect', 'SUPPORTINGCHARACTER_LOVE_INTEREST'],
-  ['themeEventSelect', 'THEME_TREASURE_HUNT'],
-  ['finaleSelect', 'FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM'],
+  ['genreSelect', 'DRAMA'],
+  ['settingSelect', 'MODERN_AMERICAN_TOWN'],
+  ['protagonistSelect', 'PROTAGONIST_HOPELESS_ROMANTIC'],
+  ['antagonistSelect', 'ANTAGONIST_MURDERER'],
+  ['supportingCharacterSelect', 'SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS'],
+  ['themeEventSelect', 'THEME_LOVE_TRIANGLE'],
+  ['finaleSelect', 'FINALE_SWEETHEARTS_STAY_TOGETHER'],
 ];
 
 const buildValidScript = async (steps) => {
@@ -25,6 +25,32 @@ const buildValidScript = async (steps) => {
       value,
     });
   }
+};
+
+const buildScoreProducingStarterScript = async (steps, page) => {
+  await steps.setSliderValue('elementPoolSlider', 'Navigation', 7);
+
+  for (const [select, value] of [
+    ['genreSelect', 'ROMANCE'],
+    ['settingSelect', 'WILD_WEST'],
+    ['protagonistSelect', 'PROTAGONIST_DARING_ADVENTURER'],
+    ['antagonistSelect', 'ANTAGONIST_CRIMINAL_MASTERMIND'],
+    ['supportingCharacterSelect', 'SUPPORTINGCHARACTER_LOVE_INTEREST'],
+    ['finaleSelect', 'FINALE_ANTAGONIST_GETS_KILLED'],
+  ]) {
+    await steps.selectDropdown(select, 'ColmanGraves', {
+      type: DropdownSelectType.VALUE,
+      value,
+    });
+  }
+
+  await steps.on('themeEventAddButton', 'ColmanGraves').click();
+  await steps.on('themeEventAddButton', 'ColmanGraves').click();
+  const themeRows = page.locator('#inputs-theme-event-graves select.tag-selector');
+  await expect(themeRows).toHaveCount(3);
+  await themeRows.nth(0).selectOption('THEME_WINNING_THE_BELOVED');
+  await themeRows.nth(1).selectOption('THEME_TREASURE_HUNT');
+  await themeRows.nth(2).selectOption('EVENTS_PRISON_BREAK');
 };
 
 // Max Element Pool defaults to 5 and a complete script carries exactly 5 story
@@ -68,11 +94,11 @@ const buildMultiSupportingScript = async (steps) => {
   });
   await steps.selectDropdown('themeEventSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'THEME_WRONGFULLY_ACCUSED',
+    value: 'THEME_TREASURE_HUNT',
   });
   await steps.selectDropdown('finaleSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM',
+    value: 'FINALE_ANTAGONIST_GETS_PUNISHED',
   });
 };
 
@@ -93,7 +119,7 @@ const buildCardinalityLimitScript = async (steps) => {
   });
   await steps.selectDropdown('finaleSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM',
+    value: 'FINALE_ANTAGONIST_GETS_PUNISHED',
   });
   // Two Genres are allowed, but Genre itself is not capped at two.
   await steps.selectDropdown('genreSelect', 'ColmanGraves', {
@@ -103,7 +129,7 @@ const buildCardinalityLimitScript = async (steps) => {
   await steps.on('genreAddButton', 'ColmanGraves').click();
   await steps.selectDropdown('genreSelectRow2', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'DRAMA',
+    value: 'ROMANCE',
   });
   // Supporting Character and Theme & Event: 1 each (not at limit)
   await steps.selectDropdown('supportingCharacterSelect', 'ColmanGraves', {
@@ -181,10 +207,10 @@ test.describe('Script Evaluation — Colman Graves', () => {
   });
 
   // The happy flow: submit a valid script and read the verdict.
-  test('TC03-000002 submitting a valid script produces a verdict and scores', async ({ steps }) => {
+  test('TC03-000002 submitting a valid script produces a verdict and scores', async ({ steps, page }) => {
     await steps.on('resultsSection', 'ColmanGraves').verifyState('hidden');
 
-    await buildValidScript(steps);
+    await buildScoreProducingStarterScript(steps, page);
     await steps.on('evaluateButton', 'ColmanGraves').click();
 
     await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
@@ -454,7 +480,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('transferToMarketButton', 'ColmanGraves').click();
 
     await steps.on('panel', 'MarketingRelease').verifyState('visible');
-    await steps.expect('genreSelect', 'MarketingRelease').value.toBe('THRILLER');
+    await steps.expect('genreSelect', 'MarketingRelease').value.toBe('DRAMA');
     await steps.expect('commercialScoreInput', 'MarketingRelease').value.toBe(gravesCommercial);
     await steps.expect('artisticScoreInput', 'MarketingRelease').value.toBe(gravesArtistic);
     await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
