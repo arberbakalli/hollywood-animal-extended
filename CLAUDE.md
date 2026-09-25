@@ -1,6 +1,10 @@
-# Hollywood Animal Calculator — Agent Instructions
+﻿# Hollywood Animal Calculator â€” Agent Instructions
 
 ## 1. The test suite is the specification
+Read `docs/QA_FRAMEWORK.md` before editing tests, scenarios, selectors, feature
+rules, or deleted-feature cleanup. The framework defines three test layers (BDD,
+unit, negative/edge), autonomous actions (test writing, audits, runs), and
+actions requiring approval (deletions, rule changes, main pushes).
 
 The tests in `tests/` are the source of truth for how this app behaves. They are
 owned by the repository owner, not by the agent working in it.
@@ -35,7 +39,7 @@ Applies to Jest specs, Playwright specs, and `.feature` scenarios alike:
 
 - Changing an expected value to match observed output
 - Adding `.skip`, `.only`, `test.fixme`, or commenting a test out
-- Loosening an assertion (`toBe` → `toBeCloseTo`, exact count → `toBeGreaterThan`,
+- Loosening an assertion (`toBe` â†’ `toBeCloseTo`, exact count â†’ `toBeGreaterThan`,
   removing a field from a shape assertion)
 - Widening a numeric tolerance or raising a timeout to get past a failure
 - Adding a conditional guard that lets the test pass vacuously
@@ -50,12 +54,12 @@ timeout, never to mask a slow or broken code path.
 ### Deleting tests requires a coverage-parity check
 
 A test file may be removed only when the behaviour it covered is genuinely gone
-from the product — not merely because it fails, and not because the feature
+from the product â€” not merely because it fails, and not because the feature
 moved. Removing a red file is the quietest way to turn a suite green, and it
 leaves no trace in the summary line.
 
 Before deleting any spec or feature file, list every behaviour it asserted and,
-for each one, name where that behaviour is still covered — or state plainly that
+for each one, name where that behaviour is still covered â€” or state plainly that
 coverage is being dropped and why. Put that list in the commit message. If a
 behaviour has no new home and the feature still ships, the file does not get
 deleted; the tests get rewritten against current behaviour instead.
@@ -81,23 +85,23 @@ test changed.
 `tests/scenarios/*.feature` describe behaviour in the owner's language and carry
 a status marker per scenario:
 
-- `[automated]` — a spec in `tests/e2e/` asserts this
-- `[verified]` — confirmed against the running app, not yet automated
-- `[unverified]` — plausible but unconfirmed; **do not automate until watched**
+- `[automated]` â€” a spec in `tests/e2e/` asserts this
+- `[verified]` â€” confirmed against the running app, not yet automated
+- `[unverified]` â€” plausible but unconfirmed; **do not automate until watched**
 
 Never promote a scenario to `[automated]` without the spec actually existing,
-and never write a spec for an `[unverified]` scenario — confirm the behaviour in
+and never write a spec for an `[unverified]` scenario â€” confirm the behaviour in
 the app with the owner first. A guessed scenario automated into a test becomes a
 false record of intent.
 
 ## 3. Running the suite
 
 ```bash
-npm test          # Jest — needs the ESM flag, which the script sets
+npm test          # Jest â€” needs the ESM flag, which the script sets
 npm run test:e2e  # Playwright
 ```
 
-Run `npm test`, never a bare `npx jest` — without
+Run `npm test`, never a bare `npx jest` â€” without
 `NODE_OPTIONS=--experimental-vm-modules` most suites fail to parse, which looks
 like real breakage and is not.
 
@@ -117,7 +121,7 @@ instead, or a failing suite reads as green.
 ## 4. Domain rules live in one file
 
 **`docs/GAME_RULES.md` is the source of truth for how the game and the app
-behave** — script shape, Genre being uncapped, the element budget and which
+behave** â€” script shape, Genre being uncapped, the element budget and which
 features spend it, scoring thresholds, distribution and the studio policies,
 exclusions. Read it before answering any "should it be X or Y?" question, and
 add rules there rather than here, so there is one place to correct.
@@ -136,7 +140,7 @@ inferring one from the code: the code has been wrong about several of them.
   symptom is every selected element rendering as its raw id
   (`FINALE_PROTAGONIST_FINDS_TREASURE`), because `options.displayName` is gone
   and the engine falls back to `tag.name || tag.id`. That is a lookup failure
-  upstream, never a string that needs reformatting — reformatting it corrupts
+  upstream, never a string that needs reformatting â€” reformatting it corrupts
   the names that were already correct ("Damsel in Distress" -> "Damsel in
   distress").
 - `hideGravesEvaluationResults` and the list that reveals panels after an
@@ -155,7 +159,7 @@ for the entire life of the argument-order bug above, and three tests named for
 the element budget passed with that bug present.
 
 - **Prove a new test has teeth.** Reintroduce the defect and confirm the test
-  goes red. If it still passes, it is vacuous — rewrite or drop it. Do not keep
+  goes red. If it still passes, it is vacuous â€” rewrite or drop it. Do not keep
   it as reassurance.
 - **Re-render before reading the DOM.** After editing JS or CSS, reload with a
   cache-buster *and* re-trigger the render. A reload alone leaves the previous
