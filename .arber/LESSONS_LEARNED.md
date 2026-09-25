@@ -351,3 +351,70 @@ unless a test in it can go red for the right reason.
 **Cheap check for next time.** The standing clause at the end of
 `docs/AUDIT_PROMPTS.md` — append it to every bug report so the enumeration
 happens before the fix is called done.
+
+---
+
+## 18. A test written from an agent's guess becomes the spec
+
+**What broke.** Neon green (`#4cd964`) on every selected dropdown kept coming
+back after the owner removed it.
+
+**The real cause.** Not a stray CSS rule. A chain:
+
+1. `.arber/FEATURE_EXPANSION_PROMPT_SPEC.md` asked for "green/success
+   treatment" on selected tags. It named no colour.
+2. `d94da15` (2026-09-24) chose `--success: #4cd964` and wrote TC01-000031 to
+   assert exactly `rgb(76, 217, 100)`. The spec also said "add Playwright
+   coverage so this visual behaviour stays intentional", so the guess was locked.
+3. From then on, section 1 of `CLAUDE.md` treated that guess as the owner's
+   intent: code changes to satisfy tests, never the reverse. When the colour
+   drifted, `35b1a47` set it back to exactly the pinned value, in a commit
+   titled "Fix exclusion persistence". The same commit also resized the Graves
+   portrait and rewrote the strong-fit hints, none of it in the message.
+4. `d075ae9` removed the CSS but not the test, so main went red. Nobody ran the
+   full suite after that commit.
+
+**The rule.** An exact visual value (a colour, a size) is pinned only when the
+owner specified it. An agent's own choice of shade is asserted as behaviour
+(the selected class is present), not as a value. One concern per commit, and
+the message names every file's change.
+
+**Guard.** TC01-000031 now asserts the selected dropdown is *not*
+`rgb(76, 217, 100)`, colour and border. Proven: it goes red when the neon is
+injected with `E2E_MUTATION_CSS`. The spec file carries the ruling.
+
+---
+
+## 19. The suite ran in a state no player is in
+
+**What broke.** On 2026-09-25 Age & Gender Appeal listed 16 characters in
+production with nothing locked. They were Starting Tags *bans*:
+`getSelectedRoles` read the excluded list as if it were the script.
+
+**Why the suite missed it.** `tests/fixtures/base.js` marks Starting Tags as
+already seeded, so every spec starts with **zero** bans. A real first visit has
+**193**. TC-AGEAPL-RG-003 went further and asserted that a banned protagonist
+*appears* in the panel: the bug, pinned as a feature.
+
+**The rule.** Bans are not script content. Any feature that reads "selected"
+elements reads Locked Elements (the `generator` context) only. Any feature that
+reads a selector list needs one spec that clicks Apply Starting Tags first.
+
+**Guard.** `tests/e2e/age-gender-appeal-exclusions.spec.js` (EX-001, EX-002),
+plus rewritten RG-003/RG-004. All four go red with the defect restored. The
+general rule (a first-run spec for every such panel) is **unguarded**.
+
+---
+
+## 20. Deleting a feature without its test leaves main red
+
+**What broke.** `4d4d08d`/`637fb0a` deleted the Agency Compatibility Matrix and
+left TC04-000031 asserting it. The session reported "205/205 E2E", a number
+measured *before* those commits.
+
+**The rule.** A pass count describes the commit it was measured on. Re-run
+both suites after the last commit, and quote that run. Deleting a feature
+includes its specs, its `.feature` scenario and its page-repository entries,
+with the coverage-parity list in the commit message (`CLAUDE.md` section 1).
+
+**Guard.** None executes. This one depends on the agent running the suites.

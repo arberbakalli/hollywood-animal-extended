@@ -48,6 +48,9 @@ Current completion: **7 of 7 requested items done**. All features implemented an
 
 1. **Script Lab visual feedback**
    - Selected tags should read as selected with green/success treatment.
+     **Owner ruling 2026-09-25: never neon green (`#4cd964`).** That shade was
+     an agent's guess, pinned by a test, and was removed. See lesson 18 in
+     `.arber/LESSONS_LEARNED.md`.
    - High-synergy available tags should get subtle positive visual hints.
    - Avoid red/negative styling for weak fits.
 
