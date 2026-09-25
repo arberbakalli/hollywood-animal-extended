@@ -38,12 +38,20 @@
         const container = document.getElementById('compatibilityTableContainer');
         if (!container) return;
 
+        // Get excluded tags to filter them out
+        const excludedTags = new Set();
+        if (typeof HACExclusionStore !== 'undefined' && typeof HACExclusionStore.loadExclusions === 'function') {
+            HACExclusionStore.loadExclusions().forEach(excl => {
+                excludedTags.add(excl.id);
+            });
+        }
+
         if (!elements || elements.length === 0) {
-            // Show all available elements grouped by category in game order
+            // Show all available elements grouped by category in game order (excluding banned tags)
             const CATEGORY_ORDER = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Supporting Character', 'Theme & Event', 'Finale'];
 
             const allElements = Object.values(GAME_DATA.tags)
-                .filter(tag => tag && tag.weights && tag.category)
+                .filter(tag => tag && tag.weights && tag.category && !excludedTags.has(tag.id))
                 .sort((a, b) => {
                     const aIdx = CATEGORY_ORDER.indexOf(a.category);
                     const bIdx = CATEGORY_ORDER.indexOf(b.category);

@@ -2911,7 +2911,8 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .category-header-row {
-    background: rgba(212, 175, 55, 0.12) !important;
+    background: transparent !important;
+    height: auto;
 }
 
 .category-header {
@@ -2919,8 +2920,9 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     font-weight: 700;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
-    padding: 10px 8px !important;
+    padding: 12px 8px !important;
     color: var(--text-muted);
+    border: none !important;
 }
 
 .element-name.category-protagonist {
