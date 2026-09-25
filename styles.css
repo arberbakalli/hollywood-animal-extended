@@ -1423,12 +1423,12 @@ input[type="text"] {
 }
 
 .graves-portrait {
-    width: 64px;
-    height: 64px;
+    width: 100px;
+    height: 100px;
     display: block;
     flex: 0 0 auto;
     border-radius: 8px;
-    border: 1px solid rgba(212, 175, 55, 0.6);
+    border: 2px solid rgba(212, 175, 55, 0.8);
     object-fit: cover;
 }
 
@@ -1690,7 +1690,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
         width: 100%;
     }
     .graves-heading-block { align-items: flex-start; }
-    .graves-portrait { width: 52px; height: 52px; }
+    .graves-portrait { width: 80px; height: 80px; }
     .graves-heading-block,
     .best-match-pair {
         flex-direction: column;
