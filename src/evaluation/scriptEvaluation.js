@@ -2,8 +2,8 @@
     "use strict";
 
     function calculateScriptEvaluation(tags, matrix = null, bonuses = null) {
-        const matrixResult = matrix || calculateMatrixScore(tags);
-        const bonusResult = bonuses || calculateTotalBonuses(tags);
+        const matrixResult = matrix || HACCompatibilityEngine.calculateMatrixScore(tags, GAME_DATA);
+        const bonusResult = bonuses || HACCompatibilityEngine.calculateTotalBonuses(tags, GAME_DATA);
 
         return {
             tags,
