@@ -56,9 +56,11 @@
         // here is a bug worth surfacing, not a condition to swallow — the old
         // catch-all turned any of it into a silently half-rendered page.
 
-        // Initialize only the default and excluded tabs at startup
+        // Graves selector IDs are part of the ready-state DOM contract even
+        // though its interactions and analysis listeners remain tab-lazy.
         initializeSelectors('generator');
         initializeSelectors('excluded');
+        initializeSelectors('graves');
         performance.mark('selectors:initialized');
 
         setupGlobalCategorySearch();
@@ -288,17 +290,6 @@
 
         document.querySelectorAll('[data-reset-context]').forEach(button => {
             button.addEventListener('click', () => resetSelectors(button.dataset.resetContext));
-        });
-
-        document.getElementById('transferToMarketingButton')?.addEventListener('click', () => {
-            const gravesSelection = collectTagInputs('graves');
-            resetSelectors('targeted');
-            gravesSelection.forEach(tag => {
-                addTagToSelectorContext(tag, 'targeted');
-            });
-            switchTab('targeted');
-            const targetedBtn = document.getElementById('targeted-mode-targeted-button');
-            if (targetedBtn) targetedBtn.click();
         });
 
         function applyStartingTagsExclusions() {
