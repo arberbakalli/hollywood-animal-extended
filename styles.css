@@ -3164,8 +3164,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .agency-matrix-cell.matches-lean {
-    color: #111;
-    background: rgba(76, 217, 100, 0.82);
     font-weight: 800;
 }
 
