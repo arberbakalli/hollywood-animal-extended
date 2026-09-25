@@ -155,22 +155,21 @@
                 let totalScore = 0;
                 let parts = [];
                 primaryTargets.forEach(id => {
-                    const bonus = h.bonuses[id] || 0;
-                    if (bonus > 0) {
-                        totalScore += bonus;
-                        parts.push({
-                            val: bonus,
-                            text: `${bonus}% Bonus Towards ${GAME_DATA.demographics[id].name}`
-                        });
+                    const insight = holidayAudienceInsight(h, id);
+                    if (insight) {
+                        totalScore += insight.val;
+                        parts.push(insight);
                     }
                 });
                 parts.sort((a, b) => b.val - a.val);
-                const contextText = parts.length > 0 ? parts.map(p => p.text).join(', ') : "No significant bonus.";
+                const contextText = parts.length > 0 ? parts.map(p => p.text).join(' - ') : "No significant bonus.";
                 return {
+                    id: h.id,
                     name: h.name,
                     totalScore: totalScore,
                     bonusPercent: holidayBonusFor(h, primaryTargets),
-                    contextText: contextText
+                    contextText: contextText,
+                    opportunityText: holidayOpportunityText(h)
                 };
             });
 
@@ -381,6 +380,7 @@
             <div class="hol-left">
                 <span class="hol-name">${holiday.name}</span>
                 <span class="hol-target">${holiday.contextText}</span>
+                <span class="hol-opportunity">${holiday.opportunityText}</span>
             </div>
             <span class="hol-boost">+${holiday.bonusPercent.toFixed(1)}% week 1</span>
         `;
@@ -411,6 +411,42 @@
             row.classList.toggle('is-selected', selected);
             row.setAttribute('aria-pressed', String(selected));
         });
+    }
+
+    function holidayAudienceInsight(holiday, audienceId) {
+        const bonus = holiday.bonuses?.[audienceId] || 0;
+        if (bonus <= 0) return null;
+
+        const audienceName = GAME_DATA.demographics[audienceId]?.name || audienceId;
+        const range = holiday.bonusRanges?.[audienceId];
+        const rangeText = range && range.min !== range.max
+            ? `${formatHolidayPercent(range.min)}-${formatHolidayPercent(range.max)}% depending on tier`
+            : `${formatHolidayPercent(bonus)}% in each tier`;
+
+        return {
+            val: bonus,
+            text: `${audienceName} +${rangeText}`
+        };
+    }
+
+    function holidayOpportunityText(holiday) {
+        const audienceScores = Object.keys(GAME_DATA.demographics)
+            .map(id => ({
+                id,
+                name: GAME_DATA.demographics[id].name,
+                bonus: holiday.bonuses?.[id] || 0
+            }))
+            .sort((a, b) => b.bonus - a.bonus);
+
+        const best = audienceScores[0];
+        const weakest = audienceScores[audienceScores.length - 1];
+        if (!best || best.bonus <= 0) return 'No seasonal audience edge found.';
+
+        return `Seasonal edge: ${best.name} leads at +${formatHolidayPercent(best.bonus)}%; weakest is ${weakest.name} at +${formatHolidayPercent(weakest.bonus)}%.`;
+    }
+
+    function formatHolidayPercent(value) {
+        return Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1);
     }
 
     // Each holiday carries a per-demographic bonus percentage. The ranked list
@@ -471,6 +507,21 @@
         `;
     }
 
+    function transferToGenerator() {
+        const tagInputs = collectTagInputs('advertisers');
+        resetSelectors('targeted');
+        tagInputs.forEach(input => {
+            const tag = GAME_DATA.tags[input.id] || input;
+            addTagToSelectorContext(tag, 'targeted');
+        });
+
+        // Switch to Build for Target feature tab
+        const targetedBtn = document.getElementById('marketing-mode-targeted-button');
+        if (targetedBtn) {
+            targetedBtn.click();
+        }
+    }
+
     function setupFactoryPolicyListener() {
         const toggle = document.getElementById('factoryPolicyToggle');
         if (!toggle) return;
@@ -499,6 +550,7 @@
         holidayBonusFor,
         syncHolidayRowStates,
         setupFactoryPolicyListener,
+        transferToGenerator,
         renderCampaignDuration
     };
 })(globalThis);

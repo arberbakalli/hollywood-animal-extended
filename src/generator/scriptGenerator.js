@@ -325,7 +325,9 @@
             button.type = 'button';
             button.className = 'analyze-btn secondary-btn generated-show-more-btn';
             button.dataset.role = 'generated-show-more-button';
-            button.textContent = `Show More (${scripts.length - generatorResultsState.visibleCount} remaining)`;
+            const toShow = Math.min(INITIAL_OPTIMIZED_VISIBLE_COUNT, scripts.length - generatorResultsState.visibleCount);
+            const remainingAfter = scripts.length - (generatorResultsState.visibleCount + toShow);
+            button.textContent = `Show ${toShow} More (${remainingAfter} remaining)`;
             button.addEventListener('click', showMoreGeneratedScripts);
             container.appendChild(button);
         }
@@ -466,7 +468,7 @@
                         Evaluate with Graves &rarr;
                     </button>
                     <button id="${cardScope}-transfer-${scriptDomId}" class="transfer-link-btn" type="button" data-role="script-transfer-button">
-                        Find Best Advertisers &rarr;
+                        Analyze Script &rarr;
                     </button>
                 </div>
             </div>

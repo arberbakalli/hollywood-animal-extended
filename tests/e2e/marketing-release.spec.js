@@ -442,6 +442,17 @@ test.describe('Marketing and Release — distribution calculator', () => {
     expect((await weeklyDemands()).slice(1)).toEqual(baseWeeks.slice(1));
   });
 
+  test('TC04-000032 holiday recommendations explain tier and seasonal audience opportunity', async ({ steps, page }) => {
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
+    await buildMarketingScript(steps);
+    await steps.on('analyzeScriptButton', 'MarketingRelease').click();
+    await steps.on('resultsSection', 'MarketingRelease').verifyState('visible');
+
+    const firstHoliday = page.locator('#holidayDisplay .holiday-row-selectable').first();
+    await expect(firstHoliday.locator('.hol-target')).toContainText(/in each tier|depending on tier/);
+    await expect(firstHoliday.locator('.hol-opportunity')).toContainText('Seasonal edge:');
+  });
+
   test('TC04-000020 selecting the active holiday again restores the base curve', async ({ steps }) => {
     await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
     await buildMarketingScript(steps);

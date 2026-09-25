@@ -728,6 +728,18 @@ select.tag-selector option[data-synergy="high"] {
     align-items: center;
 }
 
+.appeal-description {
+    width: 100%;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.appeal-description p {
+    margin: 0;
+}
+
 .analyze-btn {
     width: 100%;
     padding: 15px;
@@ -1092,11 +1104,17 @@ input[type="text"] {
     margin-top: 10px;
     padding-top: 15px;
     border-top: 1px solid #333;
+    gap: 12px;
 }
 
 .script-id {
     color: #666;
     font-size: 0.8rem;
+    margin-right: auto;
+}
+
+.gen-actions .transfer-link-btn {
+    white-space: nowrap;
 }
 
 /* Pin Button */
@@ -1243,7 +1261,7 @@ input[type="text"] {
 .holiday-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     background: rgba(255, 255, 255, 0.05);
     padding: 12px 14px;
     border-radius: 6px;
@@ -1260,9 +1278,20 @@ input[type="text"] {
     border-color: var(--accent);
 }
 .holiday-row-empty { color: #666; font-style: italic; font-size: 0.95rem; }
-.hol-left { display: flex; flex-direction: column; }
+.hol-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
 .hol-name { font-weight: 700; font-size: 0.95rem; color: #fff; margin-bottom: 2px; }
 .hol-target { font-size: 0.75rem; color: #aaa; max-width: 100%; }
+.hol-opportunity {
+    max-width: 100%;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: rgba(212, 175, 55, 0.82);
+}
 
 /* Advertisers */
 .strategy-content {
@@ -1393,20 +1422,14 @@ input[type="text"] {
     gap: 18px;
 }
 
-.graves-monogram {
+.graves-portrait {
     width: 64px;
     height: 64px;
-    display: grid;
-    place-items: center;
+    display: block;
     flex: 0 0 auto;
     border-radius: 8px;
-    background: #121212;
     border: 1px solid rgba(212, 175, 55, 0.6);
-    color: var(--accent);
-    font-weight: 800;
-    font-size: 1.2rem;
-    letter-spacing: 0;
-    box-shadow: inset 0 0 16px rgba(212, 175, 55, 0.12);
+    object-fit: cover;
 }
 
 .graves-copy-block h3 {
@@ -1667,7 +1690,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
         width: 100%;
     }
     .graves-heading-block { align-items: flex-start; }
-    .graves-monogram { width: 52px; height: 52px; }
+    .graves-portrait { width: 52px; height: 52px; }
     .graves-heading-block,
     .best-match-pair {
         flex-direction: column;
@@ -2075,25 +2098,26 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .file-action-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    padding: 6px 12px;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: #000;
+    padding: 8px 14px;
     border-radius: 4px;
     font-size: 0.8rem;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 5px;
 }
 
 .file-action-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(212, 175, 55, 0.05);
+    border-color: #ffed4e;
+    color: #000;
+    background: #ffed4e;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
 }
 
 .file-action-btn:active {
@@ -3343,7 +3367,7 @@ option[data-selected-elsewhere="true"] {
    and a selected state. The boost figure is what the distribution grid applies. */
 .holiday-row-selectable {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
     width: 100%;
@@ -3756,5 +3780,3 @@ option[data-selected-elsewhere="true"] {
     }
 }
 
-/* TEMPORARY: Hide panels pending UI redesign */
-#agency-compatibility-panel { display: none; }

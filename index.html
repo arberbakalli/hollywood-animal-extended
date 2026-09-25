@@ -66,7 +66,7 @@
                 <span class="product-area-label">Script Evaluation</span>
             </button>
             <button id="tab-advertisers-button" class="tab-btn product-area-btn" type="button" aria-pressed="false" data-tab="advertisers">
-                <span class="product-area-kicker">Market</span>
+                <span class="product-area-kicker">Marketing</span>
                 <span class="product-area-label">Marketing &amp; Release</span>
             </button>
         </nav>
@@ -166,8 +166,13 @@
                     <div id="generator-actions" class="action-area">
                         <div id="generatorFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="generateScriptsButton" class="analyze-btn" type="button">Generate Scripts</button>
-                        <button id="generateBestArtisticScriptsButton" class="analyze-btn artistic-script-btn" type="button">Best Artistic Scripts</button>
-                        <button id="generateBestCommercialScriptsButton" class="analyze-btn commercial-script-btn" type="button">Best Commercial Scripts</button>
+
+                        <div id="appeal-buttons-info" class="appeal-description">
+                            <p>These generate scripts optimized for a single appeal type, ignoring overall score. A script may have high commercial or artistic appeal individually while scoring lower on synergy—use these to find specialized options.</p>
+                        </div>
+
+                        <button id="generateBestArtisticScriptsButton" class="analyze-btn artistic-script-btn" type="button">Highest Artistic Appeal</button>
+                        <button id="generateBestCommercialScriptsButton" class="analyze-btn commercial-script-btn" type="button">Highest Commercial Appeal</button>
                     </div>
                 </div>
 
@@ -207,7 +212,7 @@
 
                 <div id="graves-intro-panel" class="card graves-case-card">
                     <div id="graves-heading-block" class="graves-heading-block">
-                        <div id="graves-monogram" class="graves-monogram" aria-hidden="true">CG</div>
+                        <img id="graves-portrait" class="graves-portrait" src="assets/colman-graves.png" alt="Colman Graves, script evaluation expert">
                         <div id="graves-copy-block" class="graves-copy-block">
                             <p id="graves-role-label" class="graves-role-label">Script evaluation</p>
                             <h3>Colman Graves</h3>
@@ -500,6 +505,9 @@
                     <div id="target-audience-panel" class="card result-card">
                         <div class="card-header-row">
                             <h3>Target Audience</h3>
+                            <button id="transferToGeneratorButton" class="file-action-btn" type="button" title="Transfer selected tags to Build for Target">
+                                <span>Build for Target</span>
+                            </button>
                         </div>
                         <div class="audience-legend">
                             <div class="legend-item"><span class="legend-dot best"></span> High Interest</div>

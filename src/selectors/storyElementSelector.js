@@ -698,7 +698,7 @@
 
         if (context === 'generator' || context === 'excluded') {
             document.getElementById(`results-generator`).classList.add('hidden');
-        } else {
+        } else if (context !== 'targeted') {
             document.getElementById(`results-${context}`).classList.add('hidden');
         }
 

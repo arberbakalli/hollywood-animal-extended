@@ -228,7 +228,16 @@
         }
 
         document.querySelectorAll('.tab-btn[data-tab]').forEach(button => {
-            button.addEventListener('click', () => switchTab(button.dataset.tab));
+            button.addEventListener('click', function() {
+                const tab = this.dataset.tab;
+                // Special handling for Marketing tab: cycle through feature tabs on repeated clicks
+                if (tab === 'advertisers' && (currentTab === 'advertisers' || currentTab === 'targeted')) {
+                    const nextTab = currentTab === 'targeted' ? 'advertisers' : 'targeted';
+                    switchTab(nextTab);
+                } else {
+                    switchTab(tab);
+                }
+            });
         });
 
         document.querySelectorAll('[data-feature-tab]').forEach(button => {
@@ -351,6 +360,7 @@
             ['gravesExclusionJumpButton', jumpToExclusionEditor],
             ['transferGravesTagsButton', () => transferTagsToAdvertisers('graves')],
             ['analyzeMovieButton', analyzeMovie],
+            ['transferToGeneratorButton', () => global.HACMarketingPlanner?.transferToGenerator?.()],
         ];
 
         clickBindings.forEach(([id, handler]) => {

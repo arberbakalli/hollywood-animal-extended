@@ -77,32 +77,8 @@ const GAME_DATA = {
         { id: "TYC1", name: "Spice Mice", targets: ["TM", "TF", "YM", "YF"], type: 2, level: 2 }
     ],
 
-    holidays: [
-        { 
-            name: "Valentine's Day", 
-            bonuses: { "TM": 7, "TF": 15, "YM": 12, "YF": 30, "AM": 15, "AF": 0 }
-        },
-        { 
-            name: "Halloween", 
-            bonuses: { "TM": 22, "TF": 22, "YM": 18, "YF": 18, "AM": 15, "AF": 15 }
-        },
-        { 
-            name: "Thanksgiving", 
-            bonuses: { "TM": 7, "TF": 7, "YM": 15, "YF": 15, "AM": 22, "AF": 22 }
-        },
-        { 
-            name: "Independence Day", 
-            bonuses: { "TM": 9, "TF": 0, "YM": 13, "YF": 5, "AM": 18, "AF": 7 }
-        },
-        { 
-            name: "Christmas", 
-            bonuses: { "TM": 15, "TF": 15, "YM": 15, "YF": 15, "AM": 10, "AF": 10 }
-        },
-        { 
-            name: "Memorial Day", 
-            bonuses: { "TM": 9, "TF": 0, "YM": 16, "YF": 5, "AM": 18, "AF": 7 }
-        }
-    ],
+    // Populated from data/Holidays.json by HACDataLoaders.loadExternalData().
+    holidays: [],
 
     categories: [
         "Genre", "Setting", "Protagonist", "Antagonist", "Supporting Character", "Theme & Event", "Finale"
