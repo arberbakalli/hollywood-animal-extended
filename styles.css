@@ -3958,51 +3958,6 @@ option[data-selected-elsewhere="true"] {
     font-weight: 600;
 }
 
-.appeal-excellent {
-    background: rgba(85, 234, 131, 0.2);
-    color: #55EA83;
-}
-
-.appeal-very-good {
-    background: rgba(139, 234, 255, 0.2);
-    color: #8BEAFF;
-}
-
-.appeal-good {
-    background: rgba(212, 175, 55, 0.2);
-    color: #d4af37;
-}
-
-.appeal-slightly-good {
-    background: rgba(212, 175, 55, 0.15);
-    color: #b89b2e;
-}
-
-.appeal-neutral {
-    background: rgba(200, 200, 200, 0.15);
-    color: var(--text-muted);
-}
-
-.appeal-slightly-bad {
-    background: rgba(255, 159, 10, 0.2);
-    color: #ff9f0a;
-}
-
-.appeal-bad {
-    background: rgba(255, 79, 79, 0.2);
-    color: #ff4f4f;
-}
-
-.appeal-very-bad {
-    background: rgba(255, 79, 79, 0.3);
-    color: #ff3333;
-}
-
-.appeal-disastrous {
-    background: rgba(226, 87, 76, 0.3);
-    color: #e2574c;
-}
-
 .age-role-insight {
     margin-top: 16px;
     padding: 12px;

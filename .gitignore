@@ -11,12 +11,7 @@ graphify-out/
 .intellij-inspections/
 output/
 show-recordings/
-.achilles/history/
-.achilles/runs/
-.achilles/show/
-.achilles/self-repair/
-.achilles/mutation-out/
-.achilles/run-summary.json
+.achilles/
 .DS_Store
 
 npm-debug.log*

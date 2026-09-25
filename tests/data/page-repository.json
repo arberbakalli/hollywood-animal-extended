@@ -20,9 +20,6 @@
         { "elementName": "panel", "selector": { "css": "#tab-generator" } },
         { "elementName": "settingsPanel", "selector": { "css": "#generator-settings-panel" } },
 
-        { "elementName": "startingTagsProfile", "selector": { "css": "#btn-profile-starting" } },
-        { "elementName": "profileDescription", "selector": { "css": "#profile-desc-text" } },
-
         { "elementName": "compatibilityInput", "selector": { "css": "#genCompInput" } },
         { "elementName": "compatibilitySlider", "selector": { "css": "#genCompSlider" } },
         { "elementName": "movieScoreInput", "selector": { "css": "#genScoreInput" } },
@@ -234,7 +231,6 @@
         { "elementName": "findCombinationsButton", "selector": { "css": "#findCombinationsButton" } },
         { "elementName": "resultsPanel", "selector": { "css": "#targeted-results-panel" } },
         { "elementName": "resultsList", "selector": { "css": "#targetedResultsList" } },
-        { "elementName": "elementsInput", "selector": { "css": "#targetedElementsInput" } },
         { "elementName": "combinationCards", "selector": { "css": "#targetedResultsList .targeted-combination-card" } },
         { "elementName": "combinationScores", "selector": { "css": "#targetedResultsList .targeted-score-value" } },
         { "elementName": "firstCombinationTagChips", "selector": { "css": "#targetedResultsList .targeted-combination-card:first-child .targeted-tag-chip" } },

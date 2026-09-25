@@ -88,7 +88,7 @@
         const maxElements = getTargetedElementBudget();
         const storyElementTags = scoringElementsOf(selectedTags);
 
-        if (!window.__targetedBudgetBypassed && storyElementTags.length > maxElements) {
+        if (storyElementTags.length > maxElements) {
             showFeedbackMessage('targetedFeedbackMessage', `Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`, 'accent');
             return;
         }
@@ -141,7 +141,7 @@
         await ensureCompatibilityLoaded();
 
         const excludedIds = getGeneratorExcludedIds();
-        const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id && (window.__exclusionFilterBypassed || !excludedIds.has(t.id)));
+        const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id && !excludedIds.has(t.id));
         const lockedTags = resolveTargetedTagInputs(constraintTags);
         const combinations = generateTargetedCombinations(allTags, lockedTags, targetAgencies, storyElementBudget, maxResults * 4);
         const scoredCombinations = [];

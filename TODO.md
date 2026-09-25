@@ -1,4 +1,4 @@
-# Open items
+﻿# Open items
 
 Written 2026-09-07, at the end of the session that added the Playwright suite.
 Everything below is either an unacted finding or a decision waiting on a human.
@@ -13,7 +13,7 @@ the source of truth for behaviour questions.
 
 ---
 
-## 1. ~~Move the test static server off Python~~ — DONE
+## 1. ~~Move the test static server off Python~~ â€” DONE
 
 Replaced by `tools/static-server.mjs`, a zero-dependency Node server. Python is
 no longer required to run the suite.
@@ -27,7 +27,7 @@ Measured, two runs each:
 | Node | 4 | 58s | 58s | green |
 | Node | 8 | 55s | 55s | green |
 
-Parallelism was the real gain, not raw throughput — Python forced `workers: 1`.
+Parallelism was the real gain, not raw throughput â€” Python forced `workers: 1`.
 Settled on 4, since 8 buys almost nothing and the suite is CPU-bound from there.
 
 The server also sends `cache-control: no-store` and refuses dotfile paths, so it
@@ -35,38 +35,12 @@ will not serve `.git/` or a stray `.env` the way `python -m http.server` did.
 
 ---
 
-## 1b. ~~`@civitas-cerebrum/achilles` makes the repo uninstallable~~ — MOSTLY FIXED
+## 1b. Achilles tooling removed
 
-The original diagnosis was wrong, and the correction matters more than the
-finding did.
-
-**Claimed:** a missing `../achilles` makes `npm install` fail outright.
-**Actually:** npm symlinks a `file:` path without checking that it exists. The
-install reports success and leaves a dangling symlink behind; the failure
-surfaces later, when something resolves through it. Verified both ways — a
-missing `file:` target installs green as a `devDependency` *and* as an
-`optionalDependency`, exit 0 in both cases.
-
-That is worse than an install failure, not better. A fresh clone would go green
-on install and then crash on `npx playwright test` with a module-not-found
-raised from the config file, which reads as a broken test suite rather than as a
-missing checkout.
-
-**Fixed** by treating the reporter as optional. `playwright.config.js` resolves
-`@civitas-cerebrum/achilles/reporter` inside a try/catch and drops it from the
-reporter list when it is absent, so the suite runs anywhere. The dependency moved
-to `optionalDependencies` to state the same intent in `package.json`. Both
-branches were exercised before committing.
-
-**Still true, and accepted:** the achilles-only scripts (`test:e2e:show`,
-`test:repair`, `test:mutate`) need the sibling checkout and fail without it.
-That is the right trade for optional tooling — they fail on their own with a
-clear error instead of taking the whole suite down.
-
-**Upstream note, unchanged:** npm has `0.1.7`; the local copy is an unreleased
-`0.1.8`, and `reporter/` landed after the `0.1.7` tag, so pinning `^0.1.7` would
-still break the reporter. When upstream tags `0.1.8` the fix is one line. There
-is no longer any urgency, because nothing breaks while we wait.
+Achilles was removed after its self-repair and mutation paths proved able to keep
+weak tests green. Do not add `achilles-self-repair`, mutation scripts, or
+test-only bypass flags back to the repo without an explicit owner decision and a
+reviewed safety contract.
 
 ---
 
@@ -75,14 +49,14 @@ is no longer any urgency, because nothing breaks while we wait.
 `data.js` ships `tags: {}`. There is no offline fallback, despite a comment in
 `dataLoaders.js` that used to claim "relying on data.js default".
 
-As of `02c197b` a failed load fails **visibly** — banner, retry, `hollywood:failed`
+As of `02c197b` a failed load fails **visibly** â€” banner, retry, `hollywood:failed`
 instead of `hollywood:ready`. That is the right default. Still open: do you want a
 real bundled fallback dataset so the app degrades instead of stopping? That is a
 product call, not a bug.
 
 ---
 
-## 3. ~~`src/app/domIds.js` is dead~~ — WRONG, it is load-bearing
+## 3. ~~`src/app/domIds.js` is dead~~ â€” WRONG, it is load-bearing
 
 Retracted. `script.js:11` is not a second copy of `toDomId`, it is a delegation
 wrapper:
@@ -104,10 +78,10 @@ not reading the two lines underneath. Nothing to remove.
 
 ---
 
-## 4. ~~Is a commercial movie score of 0.0 expected?~~ — ANSWERED
+## 4. ~~Is a commercial movie score of 0.0 expected?~~ â€” ANSWERED
 
 Yes. A zero movie score is a real outcome, it just takes a genuinely bad
-combination to reach — the five-element script the tests build scores `-3.13`
+combination to reach â€” the five-element script the tests build scores `-3.13`
 synergy. So the test is right not to assert a non-zero score.
 
 Display only: an exact zero now renders as `0` rather than `0.0`, matching what
@@ -120,12 +94,12 @@ is kept everywhere else, since `0.1` is reachable.
 
 `tests/scenarios/*.feature` tags every scenario `[automated]`, `[verified]` or
 `[unverified]`. The rule that matters: **do not automate from an `[unverified]`
-scenario** — it describes behaviour nobody has watched, and writing a test from an
+scenario** â€” it describes behaviour nobody has watched, and writing a test from an
 assumption produces a suite that documents fiction.
 
 Notable gaps, highest value first:
 
-- ~~**Script Lab — conflicting locks** `[unverified]`~~ — **RESOLVED 2026-09-22.**
+- ~~**Script Lab â€” conflicting locks** `[unverified]`~~ â€” **RESOLVED 2026-09-22.**
   The repro was looked for and does not exist. The trigger was never "locks that
   conflict with each other": that branch fires only when a locked element is
   excluded, and such a lock is cleared, with a message naming it, before
@@ -138,9 +112,9 @@ Notable gaps, highest value first:
   handling.
 - **Graves: more than ten elements refused** `[verified]`. The guard exists in
   `gravesAudience.js`; the under-five guard is automated and this one is not.
-- **Graves best-match filters** `[verified]` — category filter, minimum fit,
+- **Graves best-match filters** `[verified]` â€” category filter, minimum fit,
   starting-tags-only. Currently only the "widen to any" path is covered.
-- **Graves exclusion notice** `[verified]`. Confirmed in the app 2026-09-22 —
+- **Graves exclusion notice** `[verified]`. Confirmed in the app 2026-09-22 â€”
   with the Starting Tags profile on, 24 Settings are correctly unselectable and
   the notice reads "Script Lab is hiding suggestions: 193 excluded elements."
   Still not automated. Note the second half of the old wording is impossible:
@@ -155,14 +129,14 @@ Notable gaps, highest value first:
 
 - `.claude/skills/` is untracked and was deliberately left alone. Decide whether
   it belongs in the repo or in `.gitignore`.
-- ~~Uncommitted at time of writing (another session's work, not touched)~~ —
+- ~~Uncommitted at time of writing (another session's work, not touched)~~ â€”
   stale; that list described a working tree from 2026-09-07 and all of it has
   long since landed. The tree is clean as of 2026-09-22.
 - `.achilles/run-summary.json` is now ignored. It is regenerated per run, its
   diff is only `timestamp` and `git_sha`, and it records no results.
 - One raw CSS selector remains in a spec, in the `script-lab.spec.js` negative
   control's `addStyleTag`. It is a mutation target rather than a locator, and it
-  is commented as such — but it must stay in step with the `resultsSection`
+  is commented as such â€” but it must stay in step with the `resultsSection`
   repository entry.
 
 ---
@@ -171,7 +145,7 @@ Notable gaps, highest value first:
 
 **Assert a delta, not a presence.** The single worst defect found this session was
 a happy-path test where eight of nine assertions were satisfied by the static
-HTML — the scoring engine could have been deleted entirely and the test stayed
+HTML â€” the scoring engine could have been deleted entirely and the test stayed
 green. `index.html` ships `0.0 / 5.0`, `0.00` and `No conflicts found.`. Before
 asserting a value is present, check whether the untouched page already provides
 it.

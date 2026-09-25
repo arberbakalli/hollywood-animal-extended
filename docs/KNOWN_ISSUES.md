@@ -1,14 +1,14 @@
-# Known Issues
+﻿# Known Issues
 
 Last verified: 2026-09-22
 
-Confirmed, unresolved risks. Each entry has been observed directly — in the running app, in test
+Confirmed, unresolved risks. Each entry has been observed directly â€” in the running app, in test
 output, or in the source. Completed work and handoff notes are intentionally excluded.
 
 ## Data Correctness
 
-- **Distribution formula is game-file sourced, not inferred.** Week 1 = commercial score × 2 × 1,000;
-  Week 2 = commercial score × 1 × 1,000; weeks 3-8 = previous week × 0.8 (20% decay). Extracted
+- **Distribution formula is game-file sourced, not inferred.** Week 1 = commercial score Ã— 2 Ã— 1,000;
+  Week 2 = commercial score Ã— 1 Ã— 1,000; weeks 3-8 = previous week Ã— 0.8 (20% decay). Extracted
   from the game files and documented in `GAME_RULES.md`. Capacity (owned theatres) is
   subtracted after demand is calculated, splitting it into owned/rented/spare, never changing the
   demand itself.
@@ -21,18 +21,18 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   i.e. decay 0.80 / 0.85 / 0.90) on the repository owner's reading, pinned by
   `tests/distribution-boutique.test.js`.
 - **Behemoth's week-one boost is gated on budget, not score.** `localization/English.json:12476`
-  ties the +25% opening bonus to a production budget over $1,000,000 — a different trigger from the
+  ties the +25% opening bonus to a production budget over $1,000,000 â€” a different trigger from the
   decay perk above. The calculator has no budget input, so the toggle stands for "my budget
   qualifies".
 - **Attendance is deliberately not modelled.** The calculator outputs demand in screenings and
   assumes it is met. The game reports an occupancy percentage instead, computed against
   `localization/English.json:11269` ("400 seats per show") and surfaced as the
   `RELEASE_RESULTS_OCCUPANCY` column. Deriving it needs a viewers model, which exists nowhere in
-  `src/` and must not be guessed — see Lesson 7 in `.arber/LESSONS_LEARNED.md`.
+  `src/` and must not be guessed â€” see Lesson 7 in `.arber/LESSONS_LEARNED.md`.
 
 ## Behaviour
 
-- A single tag conflict produces two spoiler messages, one from each side — for example
+- A single tag conflict produces two spoiler messages, one from each side â€” for example
   "American Civil War conflicts with Alien" and "Alien conflicts with American Civil War". This is
   current behaviour, captured in the golden-master snapshot and relied on by an E2E assertion.
   Deduplicating it is a deliberate change that will show as a snapshot diff.
@@ -41,12 +41,12 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 - `script.js` is now a ~478-line bridge layer rather than the ~2,000-line monolith this file used to
   describe: behaviour lives in 28 files under `src/`, each an IIFE exposing a `HAC*` namespace, which
-  `script.js` re-exports as bare globals. Everything is still a **classic script** — they contain no
+  `script.js` re-exports as bare globals. Everything is still a **classic script** â€” they contain no
   `import`/`export` and the load-order constraints in `AGENTS.md` still hold. The module flip itself
   has not happened.
   - They can nonetheless be *imported* by a test: a classic IIFE is valid ESM-importable JavaScript,
     and all 28 import cleanly given a fake DOM. "Classic script" constrains how the browser loads
-    them, not whether Node can import them — a distinction this file previously blurred, which is
+    them, not whether Node can import them â€” a distinction this file previously blurred, which is
     what made coverage look blocked on the flip.
 - The bare-global wrappers in `script.js` look like duplicate implementations and are not. They
   delegate to the `src/` namespace, and removing one breaks every caller of the bare name.
@@ -54,13 +54,13 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   one-line delegations to a `HAC*` namespace, with no reimplementation anywhere.
   - It did find one dangling wrapper: `removeBlockedLockedPicks` survived in `script.js` after its
     export was deleted, so that bare global called `undefined`. Both suites stayed green because
-    nothing calls it — a wrapper whose target is gone still parses and still loads, and only fails
+    nothing calls it â€” a wrapper whose target is gone still parses and still loads, and only fails
     when a user reaches it. `tests/domStructure.test.js` now asserts every `HAC*` call in
     `script.js` resolves to a real export, so this cannot recur silently.
 - The flip is larger than the file count suggests: `tests/helpers/legacyHarness.js` runs the classic
   scripts in `node:vm` and reaches bare globals by name, which is exactly what modules remove. It is
   27 conversions **plus** a harness rewrite **plus** 157 `h.call`/`h.evaluate` sites across 18 Jest
-  suites, and no partial state is green — until all of it lands, Jest has no harness at all.
+  suites, and no partial state is green â€” until all of it lands, Jest has no harness at all.
 - The abandoned `generateHighestSynergy` prototype is intentionally parked at
   `docs/parked/generateHighestSynergy.js`. It should stay outside `src/` until it becomes a real
   loaded module again.
@@ -79,21 +79,19 @@ output, or in the source. Completed work and handoff notes are intentionally exc
     `library` 16.8%, `generator` 15.4%, `app` 6.5%. The low numbers are honest rather than alarming:
     the Jest suites stub the DOM, so UI wiring is covered by Playwright, which istanbul does not see.
   - `data.js`, `script.js` and `src/app/state.js` are still evaluated rather than imported, because
-    they declare globals a module scope would swallow — `data.js` uses a top-level `const GAME_DATA`,
+    they declare globals a module scope would swallow â€” `data.js` uses a top-level `const GAME_DATA`,
     a global *lexical* binding that `globalThis` never exposes and that does not escape an `eval`.
     They are excluded from collection rather than reported as a misleading 0%.
 - Bare `npx jest` fails all suites. See `AGENTS.md` for the reason and the workaround.
 - There is still no committed formatter or npm `lint` script. A temporary Qodana setup was removed
   because the `qodana-js` linter needs a `QODANA_TOKEN` even for local native scans.
-- `@civitas-cerebrum/achilles` is wired in as `file:../achilles`. A clone without that sibling
-  checkout installs *green* — npm symlinks a `file:` path without checking it exists — so the
-  absence surfaces at runtime rather than at install. The Playwright reporter is optional and
-  degrades cleanly; the achilles-only scripts (`test:e2e:show`, `test:repair`, `test:mutate`) do
-  not, and fail without the checkout.
+- Achilles was removed from this repo after its self-repair and mutation paths proved able to keep
+  weak tests green. Do not reintroduce `achilles-self-repair`, mutation scripts, or test-only
+  bypass flags without an explicit owner decision and a reviewed safety contract.
 
 ## Graves Evaluation & Best Matches (2026-09-22 work in progress)
 
-- **Pair Analysis band categorization**: The `findGravesPairsByBand()` function groups all element pairs by compatibility band (successful ≥4.0, common 2.0-4.0, unsuccessful <2.0). The HTML structure renders these three bands in Pair Analysis panel plus a separate Conflicts panel (diagnostic subset of unsuccessful). Data structure verified but rendering needs CSS styling for green/yellow/red band backgrounds.
+- **Pair Analysis band categorization**: The `findGravesPairsByBand()` function groups all element pairs by compatibility band (successful â‰¥4.0, common 2.0-4.0, unsuccessful <2.0). The HTML structure renders these three bands in Pair Analysis panel plus a separate Conflicts panel (diagnostic subset of unsuccessful). Data structure verified but rendering needs CSS styling for green/yellow/red band backgrounds.
 - **Swap Suggestions refactor**: `buildSwaps()` now iterates ALL 7 selected elements (not just weakest), finding viable swaps for each. Data structure is `rowsBySlot` organized by element index. Rendering logic updated in `renderSwaps()` to display multiple slots. Jest and the Colman Graves E2E path cover the current behaviour; remaining work is visual polish, not correctness.
 - **Starting Tags profile**: When applied, populates manual exclusion list with 193 items (all non-whitelisted; see `GAME_RULES.md` section 5). Graves evaluation uses manual exclusions only, not profile-based filtering, allowing any script evaluation regardless of Starting Tags membership.
 
@@ -106,5 +104,5 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   any score is numerically correct, so tuning the maths will not turn it red. The golden-master Jest
   snapshots are what pin the numbers.
 - Scenarios in `tests/scenarios/*.feature` tagged `[verified]` or `[unverified]` are not automated.
-  An `[unverified]` scenario describes behaviour nobody has watched — do not write a test from one
+  An `[unverified]` scenario describes behaviour nobody has watched â€” do not write a test from one
   without reproducing it first.

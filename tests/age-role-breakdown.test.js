@@ -70,14 +70,11 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         expect(html).toContain('ageRoleInsight');
     });
 
-    test('stylesheet includes appeal rating color classes', async () => {
+    test('stylesheet includes the rating classes the age-role panel renders', async () => {
         const styles = await readFile('styles.css', 'utf8');
-        expect(styles).toContain('.appeal-excellent');
-        expect(styles).toContain('.appeal-very-good');
-        expect(styles).toContain('.appeal-good');
-        expect(styles).toContain('.appeal-neutral');
-        expect(styles).toContain('.appeal-bad');
-        expect(styles).toContain('.appeal-disastrous');
+        expect(styles).toContain('.age-role-rating--good');
+        expect(styles).toContain('.age-role-rating--neutral');
+        expect(styles).toContain('.age-role-rating--bad');
     });
 
     // New tests for restructured JSON with metadata

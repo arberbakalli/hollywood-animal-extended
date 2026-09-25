@@ -34,7 +34,7 @@ There is no build step, no framework, and no bundler.
 | `styles.css` | All styling |
 | `data/*.json` | Tag, compatibility, genre-pair and audience-weight fixtures |
 | `localization/*.json` | Display names, ten languages |
-| `tools/` | Static server for tests and preview, plus achilles CLI wrappers |
+| `tools/` | Static server for tests and preview |
 | `tests/` | Jest suite over a VM harness, plus a Playwright E2E suite |
 
 `index.html` loads every file as a **classic script** — none is a module. That single fact governs
@@ -75,13 +75,9 @@ rebase, and PR creation. Read-only Git inspection is allowed.
 - Never revert, overwrite, or reformat unrelated changes.
 - Prefer surgical edits over adjacent cleanup.
 - Never use destructive Git commands unless explicitly requested and approved.
-- `cannot lock ref 'HEAD'` is common here, because a second tool commits
-  alongside the editor and on Windows the loser of that race can leave a
-  zero-byte `.git/HEAD.lock` behind **after its own commit has already landed**.
-  Run `npm run git:unlock`. It clears a lock only when no git process is
-  running, the file is empty, and it is more than ten seconds old, and tells you
-  which of those failed otherwise. Do not `rm` the lock by hand: doing that
-  under a live `git commit` lets two writers touch the same ref.
+- `cannot lock ref 'HEAD'` means another Git writer may be active. Do not remove
+  `.git/HEAD.lock` while a Git process is running. Inspect the process list and
+  retry only after the writer exits.
 
 ## The Classic-Script Constraint
 

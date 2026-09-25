@@ -10,11 +10,6 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
-    "test:e2e:show": "achilles-show",
-    "test:repair": "achilles-self-repair",
-    "test:mutate": "node tools/run-achilles-mutate.mjs",
-    "test:mutate:calibrate": "node tools/run-achilles-mutate.mjs --calibrate",
-    "git:unlock": "node tools/git-unlock.mjs",
     "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "devDependencies": {
@@ -23,8 +18,5 @@
     "@playwright/test": "^1.63.0",
     "cross-env": "^10.1.0",
     "jest": "^29.7.0"
-  },
-  "optionalDependencies": {
-    "@civitas-cerebrum/achilles": "file:../achilles"
   }
 }
