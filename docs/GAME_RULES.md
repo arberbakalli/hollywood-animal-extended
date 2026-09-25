@@ -315,10 +315,11 @@ source of truth for what each score means:
 | -4.0 | Extremely Bad |
 | -5.0 | Disastrous |
 
-> Confirmed by the owner 2026-09-26. Reference implementation:
-> `docs/audience-compatibility-reference.html` (score legend and per-tag
-> tables, one label per integer). That page is a standalone reference in a
-> light theme; it is not wired into the live app.
+> Confirmed by the owner 2026-09-26. Previously backed by a standalone
+> reference page, `docs/audience-compatibility-reference.html` (score legend
+> and per-tag tables, one label per integer, light theme, never wired into
+> the live app) — deleted 2026-09-26 once its content was captured in the
+> table above; it had zero references from the app or any code.
 
 ### The live app currently shows 5 bands, not 11
 
