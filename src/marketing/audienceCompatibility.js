@@ -29,6 +29,11 @@
         return 'disastrous';
     }
 
+    function getCategoryClass(category) {
+        if (!category) return '';
+        return `category-${category.toLowerCase().replace(/\s+&\s+/g, '-').replace(/\s+/g, '-')}`;
+    }
+
     function renderCompatibilityTable(elements) {
         const container = document.getElementById('compatibilityTableContainer');
         if (!container) return;
@@ -54,7 +59,8 @@
             html += '</tr></thead><tbody>';
 
             allElements.forEach(tag => {
-                html += `<tr><td class="element-name">${tag.name || tag.id}</td>`;
+                const catClass = getCategoryClass(tag.category);
+                html += `<tr><td class="element-name ${catClass}">${tag.name || tag.id}</td>`;
                 DEMOGRAPHICS.forEach(demo => {
                     const score = parseFloat(tag.weights[demo] || 0);
                     const label = getScoreLabel(score);
@@ -77,7 +83,8 @@
         html += '</tr></thead><tbody>';
 
         elements.forEach(element => {
-            html += `<tr><td class="element-name">${element.name || element.id}</td>`;
+            const catClass = getCategoryClass(element.category);
+            html += `<tr><td class="element-name ${catClass}">${element.name || element.id}</td>`;
             DEMOGRAPHICS.forEach(demo => {
                 const score = element.scores?.[demo] ?? 0;
                 const label = getScoreLabel(score);

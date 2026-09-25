@@ -2906,6 +2906,14 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     min-width: 140px;
 }
 
+.element-name.category-protagonist { color: var(--ha-category-protagonist); }
+.element-name.category-antagonist { color: var(--ha-category-antagonist); }
+.element-name.category-supporting-character { color: var(--ha-category-supporting-character); }
+.element-name.category-theme-event { color: var(--ha-category-theme-event); }
+.element-name.category-finale { color: var(--ha-category-finale); }
+.element-name.category-genre { color: #d4af37; }
+.element-name.category-setting { color: #a8a8a8; }
+
 .score-cell {
     font-weight: 500;
     font-family: 'Courier New', monospace;
