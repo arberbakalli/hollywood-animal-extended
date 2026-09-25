@@ -161,4 +161,86 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         expect(styles).toContain('.age-role-row--supporting');
         expect(styles).toContain('.gender-btn');
     });
+
+    // --- Regression guard for the age-role-compatibility.json id-drift bug ---
+    // Every row in this file claims "data_source": "verified", but a number of
+    // Protagonist/Antagonist keys had drifted from the real ids in
+    // data/TagData.json (typos, a Cyrillic/Latin homoglyph, swapped word
+    // order, a dropped word). A drifted key means Script Lab's Age & Gender
+    // Appeal panel silently renders "-" for a real, selectable role while the
+    // file claims full verified coverage.
+    test('every real Protagonist and Antagonist tag id resolves in age-role-compatibility.json', async () => {
+        const tagData = JSON.parse(await readFile('data/TagData.json', 'utf8'));
+        const ageRole = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const bucketForCategory = { Protagonist: 'protagonists', Antagonist: 'antagonists' };
+
+        // These real tags have NO row at all in age-role-compatibility.json,
+        // under any key -- not a drifted id, an absent one. Renaming a key
+        // only helps when a (wrong-named) row already exists to rename;
+        // inventing appeal ratings that exist nowhere in the current data is
+        // out of scope for this fix (flagged to the repo owner separately).
+        // Listed explicitly so a *new* unresolved id -- an actual regression
+        // -- still fails this test instead of being silently absorbed into
+        // "known gap".
+        const KNOWN_MISSING_ENTRIES = [
+            'PROTAGONIST_LAST_SURVIVOR',
+            'PROTAGONIST_RETIRED_LEGEND',
+            'PROTAGONIST_CHARISMATIC_CRIMINAL',
+            'PROTAGONIST_DIS_IDEALIST',
+            'PROTAGONIST_CYNIC',
+            'ANTAGONIST_VENGEFUL_SPIRIT',
+            'ANTAGONIST_UNDEAD',
+            'ANTAGONIST_ROBBER_WITH_A_HUNDRED_DICKS',
+            'ANTAGONIST_OLD_FRIEND_ENEMY',
+            'ANTAGONIST_ENEMY_FROM_THE_PAST',
+            'ANTAGONIST_RULE_ENFORCER',
+            'ANTAGONIST_TYRANT',
+            'ANTAGONIST_PATRIARCH',
+        ].sort();
+
+        const unresolved = [];
+        Object.entries(tagData).forEach(([id, entry]) => {
+            const bucketName = bucketForCategory[entry?.CategoryID];
+            if (!bucketName) return;
+
+            const roleData = ageRole[bucketName]?.[id];
+            if (!roleData || !roleData.ratings) {
+                unresolved.push(id);
+            }
+        });
+
+        expect(unresolved.sort()).toEqual(KNOWN_MISSING_ENTRIES);
+    });
+
+    // Same id-drift bug, one bucket over: the Supporting Character shim in
+    // src/analysis/ageRoleBreakdown.js:82 rewrites the real
+    // SUPPORTINGCHARACTER_ prefix to SUPPORTING_CHARACTER_ before lookup, but
+    // that only fixes the prefix -- it does not add back an underscore the
+    // real id never had (SUPPORTINGCHARACTER_STEPCHILD / STEPPARENT), so
+    // SUPPORTING_CHARACTER_STEP_CHILD / STEP_PARENT still failed to resolve
+    // even after the shim ran.
+    test('every real Supporting Character tag id resolves in age-role-compatibility.json after the id-shim', async () => {
+        const tagData = JSON.parse(await readFile('data/TagData.json', 'utf8'));
+        const ageRole = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+
+        const KNOWN_MISSING_ENTRIES = [
+            'SUPPORTINGCHARACTER_FIRST_VICTIM',
+            'SUPPORTINGCHARACTER_MYSTERIOUS_GUIDE',
+            'SUPPORTINGCHARACTER_CONCERNED_WIFE',
+            'SUPPORTINGCHARACTER_KEY_WITNESS',
+            'SUPPORTINGCHARACTER_VILLAINS_RIGHT_HAND',
+        ].sort();
+
+        const unresolved = [];
+        Object.entries(tagData).forEach(([id, entry]) => {
+            if (entry?.CategoryID !== 'SupportingCharacter') return;
+            const shimmedId = id.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_');
+            const roleData = ageRole.supportingCharacters?.[shimmedId];
+            if (!roleData || !roleData.ratings) {
+                unresolved.push(id);
+            }
+        });
+
+        expect(unresolved.sort()).toEqual(KNOWN_MISSING_ENTRIES);
+    });
 });
