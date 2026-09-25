@@ -597,7 +597,7 @@ select {
     padding: 10px;
     background: var(--input-bg);
     border: 1px solid var(--border);
-    color: white;
+    color: #888888;
     border-radius: 4px;
     font-size: 0.95rem;
     appearance: none;
@@ -611,8 +611,8 @@ select:focus { outline: none; border-color: var(--accent); }
 
 .select-row.has-selected-tag > select.tag-selector,
 select.tag-selector.has-selected-tag {
-    color: var(--category-color);
-    border-color: var(--category-color);
+    color: #4cd964;
+    border-color: #4cd964;
     background: var(--input-bg);
 }
 
@@ -1423,13 +1423,16 @@ input[type="text"] {
 }
 
 .graves-portrait {
-    width: 100px;
-    height: 100px;
+    width: 117px;
+    height: auto;
+    aspect-ratio: 117 / 154;
     display: block;
     flex: 0 0 auto;
     border-radius: 8px;
     border: 2px solid rgba(212, 175, 55, 0.8);
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
+    background: transparent;
 }
 
 .graves-copy-block h3 {
@@ -1690,7 +1693,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
         width: 100%;
     }
     .graves-heading-block { align-items: flex-start; }
-    .graves-portrait { width: 80px; height: 80px; }
+    .graves-portrait { width: 80px; height: auto; }
     .graves-heading-block,
     .best-match-pair {
         flex-direction: column;
@@ -2875,7 +2878,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .compatibility-table {
     width: 100%;
-    min-width: auto;
+    min-width: 760px;
     border-collapse: collapse;
     font-size: 0.84rem;
 }
@@ -2888,7 +2891,7 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 #audience-compatibility-panel {
-    padding: 20px !important;
+    padding: 20px;
 }
 
 .compatibility-table th {
@@ -2910,19 +2913,20 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     min-width: 140px;
 }
 
-.category-header-row {
-    background: transparent !important;
+.compatibility-category-header-row {
+    background: rgba(212, 175, 55, 0.06);
     height: auto;
 }
 
-.category-header {
+.compatibility-category-header {
     text-align: center;
     font-weight: 700;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
-    padding: 12px 8px !important;
+    padding: 12px 8px;
     color: var(--text-muted);
-    border: none !important;
+    border-block: 1px solid rgba(212, 175, 55, 0.26);
+    text-transform: uppercase;
 }
 
 .element-name.category-protagonist {

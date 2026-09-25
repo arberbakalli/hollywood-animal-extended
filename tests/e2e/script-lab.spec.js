@@ -63,7 +63,9 @@ test.describe('Script Lab — generator', () => {
     await expect(firstCard).toContainText('Commercial');
     await expect(firstCard).toContainText('Synergy');
 
-    await steps.on('generatedShowMoreButton', 'ScriptLab').verifyTextContains('Show More');
+    // Show More button displays count: "Show N More (X remaining)"
+    await steps.on('generatedShowMoreButton', 'ScriptLab').verifyTextContains('Show');
+    await steps.on('generatedShowMoreButton', 'ScriptLab').verifyTextContains('More');
     await steps.on('generatedShowMoreButton', 'ScriptLab').click();
     await steps.on('generatedCards', 'ScriptLab').verifyCount({ greaterThan: 3 });
   });
@@ -77,6 +79,15 @@ test.describe('Script Lab — generator', () => {
     await expect(firstCard).toContainText('Commercial');
     await expect(firstCard).toContainText('Artistic');
     await expect(firstCard).toContainText('Synergy');
+
+    // Show More button displays count: "Show N More (X remaining)"
+    const showMoreBtn = page.locator('#showMoreGeneratedScriptsButton').first();
+    const buttonText = await showMoreBtn.textContent();
+    expect(buttonText).toContain('Show');
+    expect(buttonText).toContain('More');
+
+    await showMoreBtn.click();
+    await steps.on('generatedCards', 'ScriptLab').verifyCount({ greaterThan: 3 });
   });
 
   // Given a supporting character is locked

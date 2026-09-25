@@ -71,7 +71,7 @@ test.describe('Age & Gender Appeal Panel', () => {
     await expect(femaleBtn).toBeVisible();
 
     // Male button should not exist (removed from DOM)
-    await expect(maleBtn).not.toBeInDOM();
+    await expect(maleBtn).toHaveCount(0);
   });
 
   // Given a male-only role is selected
@@ -94,7 +94,7 @@ test.describe('Age & Gender Appeal Panel', () => {
     await expect(maleBtn).toBeVisible();
 
     // Female button should not exist (removed from DOM)
-    await expect(femaleBtn).not.toBeInDOM();
+    await expect(femaleBtn).toHaveCount(0);
   });
 
   // Given protagonist and antagonist are selected
@@ -159,12 +159,16 @@ test.describe('Age & Gender Appeal Panel', () => {
   // When the user views the panel
   // Then all selected roles are displayed in the table
   test('TC03-000025 displays all selected supporting characters', async ({ page }) => {
-    const addBtn = page.locator('[data-action="add-tag-row"][data-category="Supporting Character"]');
-    const firstSelect = page.locator('#inputs-supporting-character-generator .tag-selector').nth(0);
-    const secondSelect = page.locator('#inputs-supporting-character-generator .tag-selector').nth(1);
+    const addBtn = page.locator('#add-supporting-character-generator-button');
+    const supportingSelects = page.locator('#inputs-supporting-character-generator .tag-selector');
+    const firstSelect = supportingSelects.nth(0);
 
     await firstSelect.selectOption('SUPPORTINGCHARACTER_ANGRY_BOSS');
+    await expect(page.locator('.age-role-grid').getByText('Angry Boss')).toBeVisible();
+
     await addBtn.click();
+    await expect(supportingSelects).toHaveCount(2);
+    const secondSelect = supportingSelects.nth(0);
     await secondSelect.selectOption('SUPPORTINGCHARACTER_FEMME_FATALE');
 
     const grid = page.locator('.age-role-grid');

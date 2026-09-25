@@ -288,13 +288,14 @@ describe('Script Scoring Engine (Features 1-5)', () => {
 
     describe('Supporting Character Recommendations (Feature 3a)', () => {
         test('recommends supporting characters for demographic gaps', () => {
-            const tagIds = ['GENRE_ACTION', 'SETTING_WESTERN_TOWN'];
+            const tagIds = ['ROMANCE'];
             const recommendations = h.call('recommendSupportingCharacters', tagIds, 3);
 
             expect(Array.isArray(recommendations)).toBe(true);
+            expect(recommendations.length).toBeGreaterThan(0);
             recommendations.forEach(rec => {
                 expect(rec).toHaveProperty('tagId');
-                expect(rec.tagId).toMatch(/^SUPPORTING_CHARACTER_/);
+                expect(rec.tagId).toMatch(/^SUPPORTINGCHARACTER_/);
                 expect(rec).toHaveProperty('tagName');
                 expect(rec).toHaveProperty('score');
                 expect(rec).toHaveProperty('demographic');
@@ -303,7 +304,7 @@ describe('Script Scoring Engine (Features 1-5)', () => {
         });
 
         test('respects limit parameter for recommendations per gap', () => {
-            const tagIds = ['GENRE_ACTION'];
+            const tagIds = ['ROMANCE'];
             const recommendations = h.call('recommendSupportingCharacters', tagIds, 1);
 
             // Should have at most 1 recommendation per demographic gap
@@ -315,12 +316,14 @@ describe('Script Scoring Engine (Features 1-5)', () => {
             Object.values(demographicCounts).forEach(count => {
                 expect(count).toBeLessThanOrEqual(1);
             });
+            expect(recommendations.length).toBeGreaterThan(0);
         });
 
         test('returns only positive-scoring supporting characters', () => {
-            const tagIds = ['GENRE_ACTION'];
+            const tagIds = ['DRAMA'];
             const recommendations = h.call('recommendSupportingCharacters', tagIds, 3);
 
+            expect(recommendations.length).toBeGreaterThan(0);
             recommendations.forEach(rec => {
                 expect(rec.score).toBeGreaterThan(0);
             });
@@ -329,10 +332,11 @@ describe('Script Scoring Engine (Features 1-5)', () => {
 
     describe('Agency Compatibility Calculation (Feature 3b)', () => {
         test('calculates agency compatibility scores', () => {
-            const tagIds = ['GENRE_ACTION', 'PROTAGONIST_COWBOY'];
+            const tagIds = ['ACTION', 'PROTAGONIST_COWBOY'];
             const compatibility = h.call('calculateAgencyCompatibility', tagIds);
 
             expect(Array.isArray(compatibility)).toBe(true);
+            expect(compatibility.length).toBeGreaterThan(0);
             compatibility.forEach(entry => {
                 expect(entry).toHaveProperty('agencyId');
                 expect(entry).toHaveProperty('agencyName');
@@ -344,9 +348,10 @@ describe('Script Scoring Engine (Features 1-5)', () => {
         });
 
         test('returns agencies sorted by match percentage descending', () => {
-            const tagIds = ['GENRE_ACTION'];
+            const tagIds = ['ACTION'];
             const compatibility = h.call('calculateAgencyCompatibility', tagIds);
 
+            expect(compatibility.length).toBeGreaterThan(0);
             for (let i = 0; i < compatibility.length - 1; i++) {
                 expect(compatibility[i].matchPercentage).toBeGreaterThanOrEqual(
                     compatibility[i + 1].matchPercentage
@@ -355,9 +360,10 @@ describe('Script Scoring Engine (Features 1-5)', () => {
         });
 
         test('normalizes match percentage to 0-100 scale', () => {
-            const tagIds = ['GENRE_ACTION'];
+            const tagIds = ['ACTION'];
             const compatibility = h.call('calculateAgencyCompatibility', tagIds);
 
+            expect(compatibility.length).toBeGreaterThan(0);
             compatibility.forEach(entry => {
                 expect(Number.isInteger(entry.matchPercentage)).toBe(true);
                 expect(entry.matchPercentage).toBeGreaterThanOrEqual(0);

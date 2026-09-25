@@ -41,30 +41,46 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
     function getSelectedRoles() {
         const roles = [];
 
-        const protagonistSelect = document.querySelector('#inputs-protagonist-generator .tag-selector');
-        if (protagonistSelect?.value) {
-            roles.push({
-                type: 'protagonist',
-                id: protagonistSelect.value,
-                displayName: protagonistSelect.options[protagonistSelect.selectedIndex].text
-            });
-        }
+        // Check all contexts: generator, locked, excluded
+        const contextSelectors = {
+            protagonist: ['#inputs-protagonist-generator', '#inputs-protagonist-locked', '#inputs-protagonist-excluded'],
+            antagonist: ['#inputs-antagonist-generator', '#inputs-antagonist-locked', '#inputs-antagonist-excluded'],
+            supporting: ['#inputs-supporting-character-generator', '#inputs-supporting-character-locked', '#inputs-supporting-character-excluded']
+        };
 
-        const antagonistSelect = document.querySelector('#inputs-antagonist-generator .tag-selector');
-        if (antagonistSelect?.value) {
-            roles.push({
-                type: 'antagonist',
-                id: antagonistSelect.value,
-                displayName: antagonistSelect.options[antagonistSelect.selectedIndex].text
-            });
-        }
+        // Check protagonist across all contexts
+        contextSelectors.protagonist.forEach(selector => {
+            const select = document.querySelector(`${selector} .tag-selector`);
+            if (select?.value) {
+                roles.push({
+                    type: 'protagonist',
+                    id: select.value,
+                    displayName: select.options[select.selectedIndex].text
+                });
+            }
+        });
 
-        document.querySelectorAll('#inputs-supporting-character-generator .tag-selector').forEach(select => {
-            if (!select.value) return;
-            roles.push({
-                type: 'supporting',
-                id: select.value.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_'),
-                displayName: select.options[select.selectedIndex].text
+        // Check antagonist across all contexts
+        contextSelectors.antagonist.forEach(selector => {
+            const select = document.querySelector(`${selector} .tag-selector`);
+            if (select?.value) {
+                roles.push({
+                    type: 'antagonist',
+                    id: select.value,
+                    displayName: select.options[select.selectedIndex].text
+                });
+            }
+        });
+
+        // Check supporting characters across all contexts (can be multiple per context)
+        contextSelectors.supporting.forEach(selector => {
+            document.querySelectorAll(`${selector} .tag-selector`).forEach(select => {
+                if (!select.value) return;
+                roles.push({
+                    type: 'supporting',
+                    id: select.value.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_'),
+                    displayName: select.options[select.selectedIndex].text
+                });
             });
         });
 
@@ -200,7 +216,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
 
         const roles = getSelectedRoles();
         if (roles.length === 0) {
-            hideAgeRolePanel();
+            showAgeRolePanel([], data);
             return;
         }
 
@@ -248,7 +264,9 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
 
         if (roleLabel) {
             const roleNames = roles.map(role => role.displayName).join(', ');
-            roleLabel.textContent = `Appeal by age group for ${roleNames}.`;
+            roleLabel.textContent = roles.length > 0
+                ? `Appeal by age group for ${roleNames}.`
+                : 'Select at least one role to see age appeal.';
         }
 
         tableContainer.innerHTML = buildAgeTable(roles, data);
@@ -274,11 +292,8 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
 
     function setupAgeRoleBreakdownListeners() {
         if (listenersBound) {
-            updateAgeRoleBreakdown();
             return;
         }
-
-        updateAgeRoleBreakdown();
 
         document.addEventListener('change', event => {
             if (event.target.classList.contains('tag-selector')) {
@@ -295,6 +310,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
         });
 
         listenersBound = true;
+        updateAgeRoleBreakdown();
     }
 
     return {

@@ -1,9 +1,6 @@
 (function(global) {
     "use strict";
 
-    const STRONG_SELECTOR_FIT_THRESHOLD = 4.0;
-    const VISUAL_HINT_CONTEXTS = new Set(['generator']);
-    let selectorVisualHintsLoadingCompatibility = false;
 
     function contextUsesGlobalExclusions(context) {
         return HACSelectorExclusions.contextUsesGlobalExclusions(context);
@@ -256,10 +253,8 @@
         if (!container) return;
 
         const selectedTags = selectedTagsForVisualHints(context);
-        const selectedIds = new Set(selectedTags.map(tag => tag.id));
-        const canScoreHints = VISUAL_HINT_CONTEXTS.has(context) &&
-            GAME_DATA.compatibility &&
-            Object.keys(GAME_DATA.compatibility).length > 0;
+        const canScore = selectedTags.length > 0 &&
+            typeof HACCompatibilityEngine?.getRawCompatibilityScore === 'function';
 
         container.querySelectorAll('.select-row').forEach(row => {
             const select = row.querySelector('select.tag-selector');
@@ -269,24 +264,23 @@
             row.classList.toggle('has-selected-tag', hasSelection);
             select.classList.toggle('has-selected-tag', hasSelection);
 
-            select.querySelectorAll('option:not(:first-child)').forEach(option => {
+            select.querySelectorAll('option').forEach(option => {
                 option.classList.remove('strong-fit-option');
                 delete option.dataset.synergy;
 
-                if (!canScoreHints || !selectedTags.length || !option.value || selectedIds.has(option.value)) {
-                    return;
-                }
+                if (!canScore || !option.value || option.value === select.value) return;
 
-                const candidate = GAME_DATA.tags[option.value] || { id: option.value };
-                const strongestFit = selectedTags.reduce((best, selectedTag) => {
-                    if (selectedTag.id === candidate.id) return best;
-                    const score = HACCompatibilityEngine.getRawCompatibilityScore(candidate, selectedTag, GAME_DATA);
-                    return Number.isFinite(score) ? Math.max(best, score) : best;
-                }, 0);
+                const optionTag = GAME_DATA.tags[option.value];
+                if (!optionTag) return;
 
-                if (strongestFit >= STRONG_SELECTOR_FIT_THRESHOLD) {
-                    option.classList.add('strong-fit-option');
+                const isStrongFit = selectedTags.some(selectedTag =>
+                    selectedTag.id !== optionTag.id &&
+                    HACCompatibilityEngine.getRawCompatibilityScore(optionTag, selectedTag, GAME_DATA) >= 4
+                );
+
+                if (isStrongFit) {
                     option.dataset.synergy = 'high';
+                    option.classList.add('strong-fit-option');
                 }
             });
         });
@@ -294,22 +288,6 @@
 
     function refreshSelectorVisualHints(context) {
         markSelectorVisualHints(context);
-
-        if (!VISUAL_HINT_CONTEXTS.has(context) ||
-            selectorVisualHintsLoadingCompatibility ||
-            typeof compatibilityLoaded === 'undefined' ||
-            compatibilityLoaded ||
-            typeof ensureCompatibilityLoaded !== 'function') {
-            return;
-        }
-
-        selectorVisualHintsLoadingCompatibility = true;
-        ensureCompatibilityLoaded()
-            .then(() => markSelectorVisualHints(context))
-            .catch(error => console.warn('Failed to load selector fit hints', error))
-            .finally(() => {
-                selectorVisualHintsLoadingCompatibility = false;
-            });
     }
 
     /**

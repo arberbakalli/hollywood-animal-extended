@@ -46,7 +46,13 @@
         if (!store) return false;
 
         try {
-            store.setItem(STORAGE_KEY, JSON.stringify(serializeExclusions(collectTagInputs('excluded'))));
+            const selector = (typeof window !== 'undefined' ? window : global).HACStoryElementSelector;
+            if (!selector || typeof selector.collectTagInputs !== 'function') {
+                return false;
+            }
+            const tags = selector.collectTagInputs('excluded');
+            const serialized = serializeExclusions(tags);
+            store.setItem(STORAGE_KEY, JSON.stringify(serialized));
             return true;
         } catch (error) {
             return false;
@@ -105,8 +111,13 @@
         const saved = loadExclusions();
         if (saved.length === 0) return 0;
 
-        restoreSelection('excluded', saved);
-        updateExcludedCount();
+        const selector = (typeof window !== 'undefined' ? window : global).HACStoryElementSelector;
+        if (selector && typeof selector.restoreSelection === 'function') {
+            selector.restoreSelection('excluded', saved);
+        }
+        if (typeof updateExcludedCount === 'function') {
+            updateExcludedCount();
+        }
         return saved.length;
     }
 

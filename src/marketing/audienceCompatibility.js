@@ -1,7 +1,6 @@
 (function(global) {
     "use strict";
 
-
     const DEMOGRAPHICS = ['TF', 'TM', 'YF', 'YM', 'AF', 'AM'];
     const DEMOGRAPHIC_LABELS = {
         'TF': 'Teen Female',
@@ -11,6 +10,7 @@
         'AF': 'Adult Female',
         'AM': 'Adult Male'
     };
+    const CATEGORY_ORDER = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Supporting Character', 'Theme & Event', 'Finale'];
 
     function getScoreLabel(score) {
         if (score >= 4.0) return 'Excellent';
@@ -39,24 +39,54 @@
         return `genre-${tagId.toLowerCase().replace(/_/g, '-')}`;
     }
 
+    function getElementClasses(element) {
+        const categoryClass = getCategoryClass(element.category);
+        const genreClass = element.category === 'Genre' ? getGenreClass(element.id) : '';
+        return `element-name ${categoryClass} ${genreClass}`.trim();
+    }
+
+    function getExcludedTagIds() {
+        if (typeof HACExclusionStore === 'undefined' || typeof HACExclusionStore.loadExclusions !== 'function') {
+            return new Set();
+        }
+        return new Set(HACExclusionStore.loadExclusions().map(exclusion => exclusion.id));
+    }
+
+    function renderTableHeader() {
+        let html = '<table class="compatibility-table"><thead><tr><th scope="col">Element</th>';
+        DEMOGRAPHICS.forEach(demo => {
+            html += `<th scope="col" title="${DEMOGRAPHIC_LABELS[demo]}">${demo}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+        return html;
+    }
+
+    function renderCategoryHeader(category) {
+        const headerClass = getCategoryClass(category);
+        return `<tr class="compatibility-category-header-row"><th scope="rowgroup" colspan="7" class="compatibility-category-header ${headerClass}">${category.toUpperCase()}</th></tr>`;
+    }
+
+    function renderElementRow(element, getScore) {
+        let html = `<tr><td class="${getElementClasses(element)}">${element.name || element.id}</td>`;
+        DEMOGRAPHICS.forEach(demo => {
+            const score = getScore(element, demo);
+            const label = getScoreLabel(score);
+            const scoreClass = getScoreClass(score);
+            html += `<td class="score-cell ${scoreClass}" title="${label}">${score.toFixed(1)}</td>`;
+        });
+        html += '</tr>';
+        return html;
+    }
+
     function renderCompatibilityTable(elements) {
         const container = document.getElementById('compatibilityTableContainer');
         if (!container) return;
 
-        // Get excluded tags to filter them out
-        const excludedTags = new Set();
-        if (typeof HACExclusionStore !== 'undefined' && typeof HACExclusionStore.loadExclusions === 'function') {
-            HACExclusionStore.loadExclusions().forEach(excl => {
-                excludedTags.add(excl.id);
-            });
-        }
+        const excludedTagIds = getExcludedTagIds();
 
         if (!elements || elements.length === 0) {
-            // Show all available elements grouped by category in game order (excluding banned tags)
-            const CATEGORY_ORDER = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Supporting Character', 'Theme & Event', 'Finale'];
-
             const allElements = Object.values(GAME_DATA.tags)
-                .filter(tag => tag && tag.weights && tag.category && !excludedTags.has(tag.id))
+                .filter(tag => tag && tag.weights && tag.category && !excludedTagIds.has(tag.id))
                 .sort((a, b) => {
                     const aIdx = CATEGORY_ORDER.indexOf(a.category);
                     const bIdx = CATEGORY_ORDER.indexOf(b.category);
@@ -69,58 +99,24 @@
                 return;
             }
 
-            let html = '<table class="compatibility-table"><thead><tr><th scope="col">Element</th>';
-            DEMOGRAPHICS.forEach(demo => {
-                html += `<th scope="col" title="${DEMOGRAPHIC_LABELS[demo]}">${demo}</th>`;
-            });
-            html += '</tr></thead><tbody>';
-
+            let html = renderTableHeader();
             let currentCategory = null;
             allElements.forEach(tag => {
-                // Add category header when category changes
                 if (tag.category !== currentCategory) {
                     currentCategory = tag.category;
-                    const headerClass = getCategoryClass(tag.category);
-                    html += `<tr class="category-header-row"><td colspan="7" class="category-header ${headerClass}">━━━ ${currentCategory.toUpperCase()} ━━━</td></tr>`;
+                    html += renderCategoryHeader(currentCategory);
                 }
-
-                const catClass = getCategoryClass(tag.category);
-                const genreClass = tag.category === 'Genre' ? getGenreClass(tag.id) : '';
-                const allClasses = `element-name ${catClass} ${genreClass}`.trim();
-                html += `<tr><td class="${allClasses}">${tag.name || tag.id}</td>`;
-                DEMOGRAPHICS.forEach(demo => {
-                    const score = parseFloat(tag.weights[demo] || 0);
-                    const label = getScoreLabel(score);
-                    const scoreClass = getScoreClass(score);
-                    html += `<td class="score-cell ${scoreClass}" title="${label}">${score.toFixed(1)}</td>`;
-                });
-                html += '</tr>';
+                html += renderElementRow(tag, (row, demo) => parseFloat(row.weights[demo] || 0));
             });
-
             html += '</tbody></table>';
             container.innerHTML = html;
             return;
         }
 
-        // Show only selected elements
-        let html = '<table class="compatibility-table"><thead><tr><th scope="col">Element</th>';
-        DEMOGRAPHICS.forEach(demo => {
-            html += `<th scope="col" title="${DEMOGRAPHIC_LABELS[demo]}">${demo}</th>`;
-        });
-        html += '</tr></thead><tbody>';
-
+        let html = renderTableHeader();
         elements.forEach(element => {
-            const catClass = getCategoryClass(element.category);
-            html += `<tr><td class="element-name ${catClass}">${element.name || element.id}</td>`;
-            DEMOGRAPHICS.forEach(demo => {
-                const score = element.scores?.[demo] ?? 0;
-                const label = getScoreLabel(score);
-                const scoreClass = getScoreClass(score);
-                html += `<td class="score-cell ${scoreClass}" title="${label}">${score.toFixed(1)}</td>`;
-            });
-            html += '</tr>';
+            html += renderElementRow(element, (row, demo) => row.scores?.[demo] ?? 0);
         });
-
         html += '</tbody></table>';
         container.innerHTML = html;
     }
@@ -173,7 +169,6 @@
             showButton.addEventListener('click', updateCompatibilityDisplay);
         }
 
-        // Listen for changes on all selectors in targeted context
         const container = document.getElementById('selectors-container-targeted');
         if (container) {
             container.addEventListener('change', updateCompatibilityDisplay);

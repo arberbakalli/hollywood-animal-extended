@@ -27,9 +27,9 @@ Feature: Script Lab
     And at least one script card is listed
     And each card shows its story element chips
 
-  # [unverified] When user selects a protagonist or antagonist,
+  # [automated] age-gender-appeal.spec.js. When user selects a protagonist or antagonist,
   # display age × gender compatibility breakdown with appeal ratings and insight.
-  # Behavior implemented and unit-tested; e2e coverage pending.
+  # Behavior implemented and covered by E2E.
   Scenario: Age-to-role breakdown shows appeal by age and gender
     When the user selects a Protagonist
     Then the age-to-role breakdown panel becomes visible

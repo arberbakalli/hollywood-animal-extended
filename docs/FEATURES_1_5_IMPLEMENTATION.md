@@ -82,7 +82,7 @@ All tests passing ✓
 Scoring uses:
 - `GAME_DATA.tags[tagId].weights` - demographic weights per tag (-5.0 to +5.0)
 - `GAME_DATA.demographics` - demographic names and metadata
-- `GAME_DATA.agencies` - agency definitions and target demographics
+- `GAME_DATA.adAgents` - agency definitions and target demographics
 
 ## Next Steps: UI Implementation (Phase 2)
 
@@ -127,7 +127,7 @@ Scoring uses:
 ## Known Limitations
 
 1. **Script Generation:** Engine does not generate scripts, only ranks user-selected combinations
-2. **Agency Data:** `calculateAgencyCompatibility()` requires `GAME_DATA.agencies` structure
+2. **Agency Data:** `calculateAgencyCompatibility()` uses the canonical `GAME_DATA.adAgents` structure
 3. **Wayward Soul:** Tags with no weights (e.g., "Wayward Soul") return 0 for their contribution
 
 ## Testing Guidance

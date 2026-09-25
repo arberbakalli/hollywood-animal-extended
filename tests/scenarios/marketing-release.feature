@@ -86,8 +86,8 @@ Feature: Marketing and Release
     When the user raises the commercial score above 9
     Then week 3 keeps more attendance than the normal grid
 
-  # [unverified] The control should explain that the Behemoth boost represents
-  # the Behemoth budget policy rather than a score-only rule. Behaviour observed; test pending.
+  # [automated] TC-BEH-002 and TC-BEH-003. The control should explain that the Behemoth boost
+  # represents the Behemoth budget policy rather than a score-only rule.
   Scenario: Behemoth control explains its budget requirement
     Then the Behemoth policy toggle is visible
     And its label mentions the budget over $1M requirement
@@ -220,8 +220,8 @@ Feature: Marketing and Release
     And the user enables the Behemoth studio policy
     Then week 2 demand increases by 25 percent
 
-  # [unverified] The grid shows decay through the week3/week2 ratio
-  # because the boost lifts both weeks together. Behaviour confirmed; test automation pending.
+  # [automated] TC-BEH-006. The grid shows decay through the week3/week2 ratio
+  # because the boost lifts both weeks together.
   Scenario: Behemoth slower decay requires commercial score above 9
     When the user sets the commercial score to 9.0
     And the user enables the Behemoth studio policy

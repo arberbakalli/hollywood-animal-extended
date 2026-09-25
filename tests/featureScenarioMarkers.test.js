@@ -74,12 +74,7 @@ describe('BDD scenario markers', () => {
         // Every scenario that had coverage now cites it; these five did not, and
         // are declared here rather than left claiming automation they never had.
         expect(backlog).toEqual([
-            'unverified colman-graves.feature Scenario: Limiting suggestions to starting tags',
-            'unverified colman-graves.feature Scenario: Category search fields stay visible while filtering',
-            'unverified marketing-release.feature Scenario: Behemoth control explains its budget requirement',
             'verified marketing-release.feature Scenario: The advertiser shortlist states which way the movie leans',
-            'unverified marketing-release.feature Scenario: Behemoth slower decay requires commercial score above 9',
-            'unverified script-lab.feature Scenario: Age-to-role breakdown shows appeal by age and gender',
         ]);
     });
 

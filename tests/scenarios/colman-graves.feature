@@ -178,13 +178,6 @@ Feature: Script Evaluation — Colman Graves
     And the user generates best matches
     Then every suggestion has a fit of at least 4.5
 
-  # [unverified] the "Starting tags only" control was removed from this panel, so this describes behaviour that no longer ships. Owner to confirm deletion.
-  Scenario: Limiting suggestions to starting tags
-    Given the user has evaluated a script
-    When the user limits suggestions to starting tags only
-    And the user generates best matches
-    Then no suggestion falls outside the starting tag set
-
   # [automated] TC03-000031. The first page holds ten suggestions; pagination
   # pins the page size and the cap against the shipped paginateRows().
   Scenario: Only the first ten suggestions are listed
@@ -338,8 +331,8 @@ Feature: Script Evaluation — Colman Graves
     Then no "Starting tags only" checkbox is visible
     And all non-excluded tags from their categories are eligible for suggestion
 
-  # [unverified] Search fields must not disappear while the user is typing or
-  # after a search has no matches. Behaviour confirmed in the app; test automation pending.
+  # [automated] BUG-001 and BUG-003. Search fields must not disappear while the user is typing
+  # or after a search has no matches.
   Scenario: Category search fields stay visible while filtering
     Given the Colman Graves Finale search field is visible
     When the user searches for "protagonist dies heroically"

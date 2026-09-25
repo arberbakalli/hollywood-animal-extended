@@ -240,8 +240,10 @@ unboosted base, so nothing downstream moves.
 The per-demographic percentages are game-file sourced, extracted from
 `Configs/Holidays.json` and pinned against it by `tests/holiday-release.test.js`.
 `audienceBonuses` is keyed `AUDIENCE|type` (0 base, 1 artistic, 2 commercial),
-all three carrying the same value, so type 0 is the number; a demographic the
-game omits scores zero.
+and the app consolidates those tiers into a single average percentage for each
+demographic when ranking and displaying holiday opportunities. Current extracted
+values happen to match across the three tiers, but the average keeps the app
+correct if the source data diverges. A demographic the game omits scores zero.
 
 > Scope confirmed by the owner against the game on 2026-09-23, after the
 > extraction settled the amounts but not the duration — `Holidays.json` has no

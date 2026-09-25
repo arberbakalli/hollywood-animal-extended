@@ -201,8 +201,8 @@
             const supportingCharacterScores = [];
 
             Object.entries(GAME_DATA.tags).forEach(([tagId, tagData]) => {
-                // Only consider supporting characters
-                if (!tagId.startsWith('SUPPORTING_CHARACTER_')) return;
+                // Only consider supporting characters from the canonical tag category.
+                if (tagData.category !== 'Supporting Character') return;
                 if (!tagData.weights) return;
 
                 const score = tagData.weights[gap.demographic] || 0;
@@ -235,21 +235,26 @@
      * @returns {Array} Agency compatibility entries with match percentages
      */
     function calculateAgencyCompatibility(tagIds) {
-        if (!GAME_DATA.agencies || GAME_DATA.agencies.length === 0) {
+        const agencies = GAME_DATA.adAgents || GAME_DATA.agencies || [];
+        if (agencies.length === 0) {
             return [];
         }
 
         const scriptAffinity = getCompatibilityElements(tagIds);
         const compatibility = [];
 
-        GAME_DATA.agencies.forEach(agency => {
+        agencies.forEach(agency => {
             let matchScore = 0;
             let matchCount = 0;
 
             // Check demographic matches
-            Object.keys(agency.targets || {}).forEach(demoId => {
+            const targets = Array.isArray(agency.targets)
+                ? agency.targets.map(demoId => [demoId, 1])
+                : Object.entries(agency.targets || {});
+
+            targets.forEach(([demoId, weight]) => {
                 if (scriptAffinity[demoId] !== undefined) {
-                    matchScore += scriptAffinity[demoId] * (agency.targets[demoId] || 0);
+                    matchScore += scriptAffinity[demoId] * weight;
                     matchCount += 1;
                 }
             });
@@ -261,7 +266,9 @@
                 agencyId: agency.id,
                 agencyName: agency.name,
                 matchPercentage: Math.round(matchPercentage),
-                matchScore: avgMatch
+                matchScore: avgMatch,
+                type: agency.type,
+                level: agency.level
             });
         });
 
