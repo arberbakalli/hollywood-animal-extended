@@ -177,21 +177,21 @@ Feature: Script Lab
     Then that banned element is not offered as a suggestion
 
   # [automated] TC01-000032. Best Artistic uses the shared generation engine but
-  # ranks by artistic movie score and shows commercial score as context.
-  Scenario: Generating best artistic scripts ranks artistic score first
+  # ranks by raw artistic bonus and shows commercial bonus as context.
+  Scenario: Generating best artistic scripts ranks artistic bonus first
     When the user generates best artistic scripts
     Then three generated script cards are shown
-    And the first card shows Artistic as the primary score
-    And the card also shows Commercial and Synergy context
+    And the first card shows Artistic Bonus as the primary badge
+    And the card also shows Commercial Bonus and Synergy context
     And Show More reveals additional generated scripts
 
   # [automated] TC01-000033. Best Commercial mirrors Best Artistic with the
-  # primary sort flipped to commercial movie score.
-  Scenario: Generating best commercial scripts ranks commercial score first
+  # primary sort flipped to raw commercial bonus.
+  Scenario: Generating best commercial scripts ranks commercial bonus first
     When the user generates best commercial scripts
     Then three generated script cards are shown
-    And the first card shows Commercial as the primary score
-    And the card also shows Artistic and Synergy context
+    And the first card shows Commercial Bonus as the primary badge
+    And the card also shows Artistic Bonus and Synergy context
 
   # [automated] TC08-000003. Empty state should be explicit before the first generation run.
   Scenario: Generated results start empty
