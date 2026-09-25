@@ -2,6 +2,7 @@
     "use strict";
 
     let bootRetryBound = false;
+    const initializedTabs = new Set(['generator', 'excluded']);
 
     // Bound outside the start-up sequence: the retry control has to work precisely
     // when that sequence has failed.
@@ -38,6 +39,7 @@
         try {
             await changeLanguage('English', false);
             await loadExternalData();
+            performance.mark('data:loaded');
         } catch (error) {
             failBoot(error);
             return;
@@ -53,33 +55,23 @@
         // Everything below builds the interface from data already in memory. A throw
         // here is a bug worth surfacing, not a condition to swallow — the old
         // catch-all turned any of it into a silently half-rendered page.
-        initializeSelectors('advertisers');
-        initializeSelectors('graves');
+
+        // Initialize only the default and excluded tabs at startup
         initializeSelectors('generator');
         initializeSelectors('excluded');
+        performance.mark('selectors:initialized');
 
         setupGlobalCategorySearch();
         setupDomEventBindings();
         setupGlobalElementPoolControl();
 
         buildSearchIndex();
-        setupSearchListeners();
-        setupScoreSync();
         setupGeneratorControls();
         if (global.HACAnalysisAgeRoleBreakdown && global.HACAnalysisAgeRoleBreakdown.setupAgeRoleBreakdownListeners) {
             global.HACAnalysisAgeRoleBreakdown.setupAgeRoleBreakdownListeners();
         }
 
-        // Try to setup distribution, but gracefully handle if elements aren't ready yet
-        try {
-            setupDistributionLogic();
-        } catch (error) {
-            console.warn('Distribution logic setup encountered an error:', error.message);
-        }
-
         setupCollapsibleSections();
-        initializeTargetedAdsTab();
-        initializeDistributionToggles();
         setGeneratorProfile('custom');
 
         // Read before the restore below populates the DOM.
@@ -102,7 +94,12 @@
         // Rendered up front so the Save/Load controls are present from the start.
         renderPinnedScripts();
 
-        window.dispatchEvent(new CustomEvent('hollywood:ready'));
+        performance.mark('app:ready');
+        const marks = performance.getEntriesByType('mark').map(m => ({ name: m.name, time: m.startTime }));
+        const measures = performance.getEntriesByType('measure').map(m => ({ name: m.name, duration: m.duration, start: m.startTime }));
+        window.dispatchEvent(new CustomEvent('hollywood:ready', {
+            detail: { marks, measures, navigationStart: performance.timing.navigationStart || performance.now() - performance.timeOrigin }
+        }));
     }
 
     // The pool slider and the Target Movie Score slider are two views of one
@@ -180,8 +177,45 @@
         slider.style.setProperty('--slider-fill-percent', percent + '%');
     }
 
+    function initializeTabContext(tabName) {
+        // Lazy-initialize deferred tab setup when user switches to that tab
+        if (tabName === 'graves' || tabName === 'advertisers' || tabName === 'targeted') {
+            // Initialize DOM selectors for graves and advertisers if needed
+            if (tabName === 'graves' && !document.getElementById('selectors-container-graves').hasChildNodes()) {
+                initializeSelectors('graves');
+            }
+            if ((tabName === 'advertisers' || tabName === 'targeted') && !document.getElementById('selectors-container-advertisers').hasChildNodes()) {
+                initializeSelectors('advertisers');
+            }
+
+            // Setup search and score listeners for evaluation features
+            if (tabName === 'graves') {
+                setupSearchListeners();
+                setupScoreSync();
+            }
+
+            // Setup distribution logic and toggles for marketing features
+            if (tabName === 'advertisers' || tabName === 'targeted') {
+                try {
+                    setupDistributionLogic();
+                } catch (error) {
+                    console.warn('Distribution logic setup encountered an error:', error.message);
+                }
+                initializeDistributionToggles();
+                initializeTargetedAdsTab();
+            }
+        }
+    }
+
     function switchTab(tabName) {
         currentTab = tabName;
+
+        // Lazy-initialize tab if not yet initialized
+        if (!initializedTabs.has(tabName)) {
+            initializeTabContext(tabName);
+            initializedTabs.add(tabName);
+        }
+
         const primaryTab = PRIMARY_TAB_BY_FEATURE[tabName] || tabName;
         const activeElement = document.activeElement;
         const nextPrimaryButton = document.querySelector(`.tab-btn[data-tab="${primaryTab}"]`);
