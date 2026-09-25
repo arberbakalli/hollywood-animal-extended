@@ -197,18 +197,25 @@
             .sort((a, b) => a.name.localeCompare(b.name));
 
         selects.forEach(select => {
+            // Ensure options are populated before querying them
+            if (select.dataset.optionsPopulated === 'false') {
+                ensureOptionsPopulated(select, category, context);
+            }
+
             const existingIds = new Set(Array.from(select.querySelectorAll('option:not(:first-child)')).map(opt => opt.value));
 
             // Add options for any usable tags that are missing
+            const fragment = document.createDocumentFragment();
             allCategoryTags.forEach(tag => {
                 if (!existingIds.has(tag.id) && canUseTagInContext(tag.id, context)) {
                     const opt = document.createElement('option');
                     opt.value = tag.id;
                     opt.innerText = tag.name;
                     opt.dataset.searchText = tag.name.toLowerCase();
-                    select.appendChild(opt);
+                    fragment.appendChild(opt);
                 }
             });
+            select.appendChild(fragment);
         });
 
         // Update each dropdown: disable options that are selected elsewhere or excluded
@@ -329,6 +336,99 @@
         refreshScriptBuilderAvailability();
     }
 
+    /**
+     * Populates option elements into a select element with tags for a given category.
+     * Extracted to support lazy-loading: the select is created empty, options added on demand.
+     */
+    function populateSelectOptions(selectElement, category, tags) {
+        // Bail if already populated
+        if (selectElement.dataset.optionsPopulated === 'true') return;
+
+        const fragment = document.createDocumentFragment();
+        tags.forEach(tag => {
+            const opt = document.createElement('option');
+            opt.value = tag.id;
+            opt.innerText = tag.name;
+            opt.dataset.searchText = tag.name.toLowerCase();
+            if (category === 'Genre') {
+                opt.className = `genre-${toDomId(tag.id)}`;
+            } else {
+                const categorySlug = category
+                    .toLowerCase()
+                    .replace(/[&\s]+/g, '-')
+                    .replace(/-+$/, '');
+                opt.className = categorySlug;
+            }
+            fragment.appendChild(opt);
+        });
+
+        selectElement.appendChild(fragment);
+        selectElement.dataset.optionsPopulated = 'true';
+    }
+
+    /**
+     * Triggers lazy-load of options if not already populated, then marks visual hints.
+     * Called on first focus of a select element to defer DOM creation.
+     */
+    function ensureOptionsPopulated(selectElement, category, context) {
+        if (selectElement.dataset.optionsPopulated === 'true') return;
+
+        // Gather tags for this category
+        let tags = Object.values(GAME_DATA.tags).filter(t => t.category === category);
+
+        // In Starting Tags profile for script builders (not excluded), filter to starter whitelist
+        if (currentGenProfile === 'starting' && context !== 'excluded') {
+            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
+            tags = tags.filter(t => whitelist.has(t.id));
+        }
+
+        tags = filterTagsForContext(tags, context).sort((a, b) => a.name.localeCompare(b.name));
+
+        populateSelectOptions(selectElement, category, tags);
+
+        // Defer visual hints marking until after options are visible
+        // Use setTimeout to avoid layout thrashing
+        setTimeout(() => {
+            const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
+            const container = document.getElementById(containerSelector);
+            if (container && document.body.contains(selectElement)) {
+                // Mark hints for this specific select's row
+                const row = selectElement.closest('.select-row');
+                if (row) {
+                    const selectedTags = selectedTagsForVisualHints(context);
+                    const canScore = selectedTags.length > 0 &&
+                        typeof HACCompatibilityEngine?.getRawCompatibilityScore === 'function';
+
+                    const hasSelection = Boolean(selectElement.value);
+                    row.classList.toggle('has-selected-tag', hasSelection);
+                    selectElement.classList.toggle('has-selected-tag', hasSelection);
+
+                    if (canScore) {
+                        selectElement.querySelectorAll('option').forEach(option => {
+                            option.classList.remove('strong-fit-option');
+                            delete option.dataset.synergy;
+
+                            if (!option.value || option.value === selectElement.value) return;
+
+                            const optionTag = GAME_DATA.tags[option.value];
+                            if (!optionTag) return;
+
+                            const isStrongFit = selectedTags.some(selectedTag =>
+                                selectedTag.id !== optionTag.id &&
+                                HACCompatibilityEngine.getRawCompatibilityScore(optionTag, selectedTag, GAME_DATA) >= 4
+                            );
+
+                            if (isStrongFit) {
+                                option.dataset.synergy = 'high';
+                                option.classList.add('strong-fit-option');
+                            }
+                        });
+                    }
+                }
+            }
+        }, 0);
+    }
+
     function addDropdown(category, selectedId = null, context = currentTab) {
         if (selectedId && !canUseTagInContext(selectedId, context)) {
             selectedId = null;
@@ -374,27 +474,22 @@
         select.id = `${row.id}-select`;
         select.dataset.category = category;
         select.dataset.context = context;
+        select.dataset.optionsPopulated = 'false';  // Mark for lazy-load
         const defOpt = document.createElement('option');
         defOpt.value = "";
         defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
         select.appendChild(defOpt);
 
-        tags.forEach(tag => {
-            const opt = document.createElement('option');
-            opt.value = tag.id;
-            opt.innerText = tag.name;
-            opt.dataset.searchText = tag.name.toLowerCase();
-            if (category === 'Genre') {
-                opt.className = `genre-${toDomId(tag.id)}`;
-            } else {
-                const categorySlug = category
-                    .toLowerCase()
-                    .replace(/[&\s]+/g, '-')
-                    .replace(/-+$/, '');
-                opt.className = categorySlug;
-            }
-            select.appendChild(opt);
+        // Lazy-load options on first focus
+        select.addEventListener('focus', () => {
+            ensureOptionsPopulated(select, category, context);
         });
+
+        // If initializing with a selected value or for excluded context, populate immediately
+        // so that value assignment and option visibility work correctly
+        if (selectedId || context === 'excluded') {
+            populateSelectOptions(select, category, tags);
+        }
 
         if (selectedId) select.value = selectedId;
         row.appendChild(select);
@@ -714,6 +809,8 @@
         addTagToSelectorContext,
         collectTagInputs,
         resetSelectors,
-        getSelectedTags
+        getSelectedTags,
+        populateSelectOptions,
+        ensureOptionsPopulated
     };
 })(globalThis);
