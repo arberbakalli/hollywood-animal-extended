@@ -68,6 +68,18 @@
 
         if (!container) return;
 
+        // Ensure all select options are populated before filtering
+        // so search can operate on existing options
+        container.querySelectorAll('.select-row').forEach(row => {
+            const select = row.querySelector('.tag-selector');
+            if (select && select.dataset.optionsPopulated === 'false') {
+                // Trigger lazy-load if the select hasn't been focused yet
+                if (typeof HACStoryElementSelector?.ensureOptionsPopulated === 'function') {
+                    HACStoryElementSelector.ensureOptionsPopulated(select, category, context);
+                }
+            }
+        });
+
         let totalMatches = 0;  // Count visible options for feedback
 
         // Filter rows and options in all selects in this category

@@ -367,7 +367,7 @@
     }
 
     /**
-     * Triggers lazy-load of options if not already populated, then marks visual hints.
+     * Triggers lazy-load of options if not already populated.
      * Called on first focus of a select element to defer DOM creation.
      */
     function ensureOptionsPopulated(selectElement, category, context) {
@@ -385,48 +385,6 @@
         tags = filterTagsForContext(tags, context).sort((a, b) => a.name.localeCompare(b.name));
 
         populateSelectOptions(selectElement, category, tags);
-
-        // Defer visual hints marking until after options are visible
-        // Use setTimeout to avoid layout thrashing
-        setTimeout(() => {
-            const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
-            const container = document.getElementById(containerSelector);
-            if (container && document.body.contains(selectElement)) {
-                // Mark hints for this specific select's row
-                const row = selectElement.closest('.select-row');
-                if (row) {
-                    const selectedTags = selectedTagsForVisualHints(context);
-                    const canScore = selectedTags.length > 0 &&
-                        typeof HACCompatibilityEngine?.getRawCompatibilityScore === 'function';
-
-                    const hasSelection = Boolean(selectElement.value);
-                    row.classList.toggle('has-selected-tag', hasSelection);
-                    selectElement.classList.toggle('has-selected-tag', hasSelection);
-
-                    if (canScore) {
-                        selectElement.querySelectorAll('option').forEach(option => {
-                            option.classList.remove('strong-fit-option');
-                            delete option.dataset.synergy;
-
-                            if (!option.value || option.value === selectElement.value) return;
-
-                            const optionTag = GAME_DATA.tags[option.value];
-                            if (!optionTag) return;
-
-                            const isStrongFit = selectedTags.some(selectedTag =>
-                                selectedTag.id !== optionTag.id &&
-                                HACCompatibilityEngine.getRawCompatibilityScore(optionTag, selectedTag, GAME_DATA) >= 4
-                            );
-
-                            if (isStrongFit) {
-                                option.dataset.synergy = 'high';
-                                option.classList.add('strong-fit-option');
-                            }
-                        });
-                    }
-                }
-            }
-        }, 0);
     }
 
     function addDropdown(category, selectedId = null, context = currentTab) {
@@ -480,16 +438,16 @@
         defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
         select.appendChild(defOpt);
 
-        // Lazy-load options on first focus
+        // Populate options into the select
+        // For now, all contexts are eagerly populated to ensure compatibility
+        // TODO: Implement selective lazy-loading for generator/advertisers contexts on focus
+        populateSelectOptions(select, category, tags);
+
+        // Add focus listener for potential future lazy-loading optimization
         select.addEventListener('focus', () => {
+            // Ensure options are populated (will be quick if already populated)
             ensureOptionsPopulated(select, category, context);
         });
-
-        // If initializing with a selected value or for excluded context, populate immediately
-        // so that value assignment and option visibility work correctly
-        if (selectedId || context === 'excluded') {
-            populateSelectOptions(select, category, tags);
-        }
 
         if (selectedId) select.value = selectedId;
         row.appendChild(select);
@@ -543,11 +501,15 @@
                 propagateExclusionChange(category);
             }
         });
-        // Initial refresh to disable already-selected options
-        setTimeout(() => {
-            refreshCategoryDropdowns(category, context);
-            refreshSelectorVisualHints(context);
-        }, 0);
+        // Bulk exclusion/profile creation refreshes once after all rows exist.
+        // Scheduling a full category scan per inserted row makes a 193-ban batch
+        // quadratic and blocks the main thread for several seconds.
+        if (!container.classList.contains('is-batching')) {
+            setTimeout(() => {
+                refreshCategoryDropdowns(category, context);
+                refreshSelectorVisualHints(context);
+            }, 0);
+        }
 
         // Add percent slider only for Genre in script builders (not Excluded).
         if (category === 'Genre' && context !== 'excluded') {
