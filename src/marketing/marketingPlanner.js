@@ -150,8 +150,6 @@
             else leanDisplay.classList.add('lean-balanced');
         }
 
-        await renderAgencyCompatibilityMatrix(validTargetIds, movieLean);
-
         // --- HOLIDAY LOGIC ---
         const holidayContainer = document.getElementById('holidayDisplay');
         holidayContainer.innerHTML = '';
@@ -318,63 +316,6 @@
             .map(target => scoreKindLabel(target.scoreKind));
 
         return kinds.length > 0 ? kinds.join(' / ') : '-';
-    }
-
-    async function renderAgencyCompatibilityMatrix(targetAudienceIds = [], movieLean = 0) {
-        const container = document.getElementById('agencyCompatibilityMatrix');
-        const summary = document.getElementById('agencyCompatibilitySummary');
-        if (!container) return;
-
-        try {
-            const agencies = await loadSourceAgencies();
-            const audienceIds = Object.keys(GAME_DATA.demographics);
-            const activeScoreKind = scoreKindForMovieLean(movieLean);
-            const targetIds = targetAudienceIds.length > 0 ? targetAudienceIds : audienceIds;
-
-            if (summary) {
-                summary.textContent = `${agencies.length} source agencies - ${scoreKindLabel(activeScoreKind)} lean`;
-            }
-
-            if (agencies.length === 0) {
-                container.innerHTML = '<div class="empty-state">Source agency data is unavailable.</div>';
-                return;
-            }
-
-            const rows = agencies.map(agency => {
-                const cells = audienceIds.map(audienceId => `
-                    <td class="${agencyCellClass(agency, audienceId, activeScoreKind, targetIds)}"
-                        data-audience="${audienceId}"
-                        data-active-score-kind="${activeScoreKind}">
-                        ${agencyCellText(agency, audienceId)}
-                    </td>
-                `).join('');
-
-                return `
-                    <tr id="agency-matrix-row-${toDomId(agency.id)}" data-agency-id="${agency.id}">
-                        <th scope="row">
-                            <span class="agency-matrix-id">${agency.id}</span>
-                            <span class="agency-matrix-meta">Q${agency.quality} - x${agency.budgetFactor.toFixed(1)}</span>
-                        </th>
-                        ${cells}
-                    </tr>
-                `;
-            }).join('');
-
-            container.innerHTML = `
-                <table class="agency-matrix-table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Agency</th>
-                            ${audienceIds.map(id => `<th scope="col">${audienceLabel(id)}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            `;
-        } catch (error) {
-            if (summary) summary.textContent = 'Source data unavailable';
-            container.innerHTML = `<div class="empty-state">Could not load source agency matrix: ${error.message}</div>`;
-        }
     }
 
     // Picking a release window feeds the distribution grid, so the rows are
@@ -559,7 +500,6 @@
     global.HACMarketingPlanner = {
         analyzeMovie,
         displayAdvertiserRecommendations,
-        renderAgencyCompatibilityMatrix,
         holidayBonusFor,
         syncHolidayRowStates,
         setupFactoryPolicyListener,

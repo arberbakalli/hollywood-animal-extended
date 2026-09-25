@@ -35,6 +35,10 @@ body {
     line-height: 1.6;
 }
 
+/* Remove default focus styling to prevent neon color regressions */
+*:focus { outline: none; }
+input:focus, select:focus, textarea:focus { outline: none; }
+
 .main-wrapper {
     max-width: 900px;
     margin: 0 auto;
