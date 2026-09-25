@@ -48,6 +48,134 @@ Feature: Script Lab
     When the user locks a Protagonist
     Then the panel lists exactly that Protagonist
 
+  # [unverified] Starting Tags exclusion list baseline. 57 elements in
+  # GAME_DATA.starterWhitelist, so exactly 193 of 250 are banned on first run.
+  Scenario: First-run exclusion list contains exactly 193 bans
+    Given a fresh browser with no saved exclusions
+    When the user opens the Script Lab Excluded Elements panel
+    Then the exclusion counter reads 193
+    And all bans are from outside the Starting Tags whitelist
+
+  # [unverified] The Age & Gender Appeal panel depends on locked roles to show
+  # appeal ratings. If 193 bans are applied and no roles are locked, the panel
+  # is empty because there are no roles to analyze.
+  Scenario: Locked nothing + 193 bans renders Age panel empty
+    Given the Starting Tags bans are applied
+    And no role is locked
+    Then the Age & Gender Appeal panel appears but lists no roles
+
+  # [unverified] Banning a locked element should remove it from the script
+  # immediately, reflecting the exclusion.
+  Scenario: Banning a locked role clears it from the script
+    Given the user has locked a Protagonist
+    When the user bans that same Protagonist
+    Then the locked Protagonist is removed
+    And the selection field is empty
+
+  # [unverified] The Graves evaluator refuses scripts with fewer than 5 or more
+  # than 10 story elements. Genre and Setting do not count (they are context).
+  # A script with 4 elements + Genre + Setting is refused for 4, not 6.
+  Scenario: Script with 4 story elements is refused with element count
+    Given the user is on the Evaluate tab
+    When the user selects Genre, Setting, and 4 story elements
+    And submits for evaluation
+    Then the evaluator refuses it
+    And the message names the exact count: "You selected 4"
+
+  # [unverified] The Max Element Pool is set to 5 by default, and a script with
+  # exactly 5 story elements is valid for evaluation (plus any Genre and Setting).
+  Scenario: 10 story elements within 5-element pool is valid
+    Given the Max Element Pool is set to 10
+    And the user is on the Evaluate tab
+    When the user selects 10 story elements (Genre and Setting not counted)
+    And submits for evaluation
+    Then the evaluation succeeds
+
+  # [unverified] Swap Suggestions show one row per selected element, narrowed to
+  # elements that fit within the Max Element Pool budget, with non-selected
+  # elements of the same category offered as swaps.
+  Scenario: Swap suggestions respect the Max Element Pool budget
+    Given the Max Element Pool is set to 5
+    And the user has evaluated a valid script
+    When the user generates Swap Suggestions
+    Then each suggestion respects the element budget
+    And the list is limited to category-matching candidates
+
+  # [unverified] Pairwise analysis shows element pairs at budget, and Add buttons
+  # for free additions are disabled when the script would exceed the budget.
+  Scenario: Pairwise analysis disables Add when budget is full
+    Given a script at the Max Element Pool limit
+    When the user opens Pairwise Analysis
+    Then suggested pairs stay within budget
+    And Add buttons for story-element candidates are disabled
+
+  # [unverified] Targeted Ads search should exclude banned elements from results,
+  # respecting the Starting Tags profile when active.
+  Scenario: Starting Tags + audience search excludes bans from results
+    Given the Starting Tags profile is active
+    When the user searches Targeted Ads by audience
+    Then no banned elements appear in the results
+
+  # [unverified] Build for Target uses the Max Element Pool to constrain
+  # suggestions. At pool 5, generated scripts should carry no more than 5 story
+  # elements (Genre and Setting outside the budget).
+  Scenario: Build for Target at pool 5 respects element width
+    Given the Max Element Pool is set to 5
+    When the user generates results in Build for Target
+    Then each result uses at most 5 story elements
+    And Genre and Setting count separately
+
+  # [unverified] Commercial score affects distribution. Week 3 shows a particular
+  # decay curve when Behemoth toggle is on; exact threshold confirmed in GAME_RULES.
+  Scenario: Week 3 decay applies correctly at commercial 9.0 with Behemoth
+    Given Behemoth toggle is on
+    And commercial score is set to 9.0
+    When the user generates distribution
+    Then Week 3 shows the expected decay from Week 1
+
+  # [unverified] Week 8 shows a +25% boost when Behemoth is off and commercial
+  # score is within range (e.g., 5.0).
+  Scenario: Week 8 shows +25% boost without Behemoth at commercial 5.0
+    Given Behemoth toggle is off
+    And commercial score is set to 5.0
+    When the user generates distribution
+    Then Week 8 value is +25% above Week 1
+
+  # [unverified] Genre is uncapped in row count but each row must represent at
+  # least 5% of appeal. With 11 rows, percentages must sum to 100% and each
+  # row shows >= 5%.
+  Scenario: Genre supports 11 rows totaling 100%, each at least 5%
+    When the user adds 11 Genre rows
+    And distributes appeal across all rows
+    Then the sum is exactly 100%
+    And no row shows less than 5%
+
+  # [unverified] The Max Element Pool slider and input field stay in sync. At
+  # slider value 11, the input should read 11, and vice versa.
+  Scenario: Pool slider and input field match at value 11
+    When the user sets the Max Element Pool slider to 11
+    Then the input field reads 11
+    When the user sets the input field to 7
+    Then the slider moves to 7
+
+  # [unverified] After restoring a saved exclusion list that contains a Setting,
+  # that Setting should be immediately unavailable in Graves (disabled), without
+  # requiring a page reload.
+  Scenario: Banned Setting is disabled in Graves immediately after restore
+    Given the user has saved an exclusion with a banned Setting
+    When the user opens Graves
+    Then that Setting is disabled in the dropdown
+    And the exclusion notice explains why
+
+  # [unverified] Best Matches should exclude banned elements from suggestions,
+  # even if they were previously used in a script. After evaluation, the Best
+  # Matches list filters out any element in the exclusion list.
+  Scenario: Evaluated script Best Matches exclude banned elements
+    Given the user has evaluated a script with locked elements
+    And one locked element is then banned
+    When the user regenerates Best Matches
+    Then that banned element is not offered as a suggestion
+
   # [automated] TC01-000032. Best Artistic uses the shared generation engine but
   # ranks by artistic movie score and shows commercial score as context.
   Scenario: Generating best artistic scripts ranks artistic score first
