@@ -109,25 +109,19 @@
         return elements;
     }
 
-    function updateCompatibilityButtonVisibility() {
-        const button = document.getElementById('showAudienceCompatibilityButton');
-        const elements = getCompatibilityElements();
-
-        if (elements.length > 0) {
-            button.classList.remove('hidden');
-        } else {
-            button.classList.add('hidden');
-        }
-    }
-
     function showCompatibilityPanel() {
         const panel = document.getElementById('audience-compatibility-panel');
         const elements = getCompatibilityElements();
 
-        if (elements.length > 0) {
-            renderCompatibilityTable(elements);
+        if (elements.length === 0) {
+            const container = document.getElementById('compatibilityTableContainer');
+            container.innerHTML = '<div class="empty-state padded-empty">Select a Protagonist or Antagonist to see audience compatibility.</div>';
             panel.classList.remove('hidden');
+            return;
         }
+
+        renderCompatibilityTable(elements);
+        panel.classList.remove('hidden');
     }
 
     function hideCompatibilityPanel() {
@@ -146,19 +140,10 @@
         if (closeButton) {
             closeButton.addEventListener('click', hideCompatibilityPanel);
         }
-
-        // Watch for Protagonist/Antagonist selection changes
-        document.addEventListener('change', function(e) {
-            if (e.target.dataset?.category === 'Protagonist' ||
-                e.target.dataset?.category === 'Antagonist') {
-                updateCompatibilityButtonVisibility();
-            }
-        });
     }
 
     global.HACOudienceCompatibility = {
         setupCompatibilityListeners,
-        updateCompatibilityButtonVisibility,
         showCompatibilityPanel,
         hideCompatibilityPanel
     };
