@@ -17,10 +17,10 @@
         const maxElements = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
             ? HACScriptGenerator.getMaxElementPoolSize()
             : 10;
-        const storyElementTags = tagInputs.filter(tag => {
-            const t = GAME_DATA.tags[tag.id];
-            return t && t.category !== 'Genre' && t.category !== 'Setting';
-        });
+        // Delegate to canonical story-element filter
+        const storyElementTags = typeof HACGravesAnalysis !== 'undefined' && HACGravesAnalysis.storyElementsOf
+            ? HACGravesAnalysis.storyElementsOf(tagInputs)
+            : tagInputs;
         if (storyElementTags.length > maxElements) {
             showFeedbackMessage('advertisersFeedbackMessage', `Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`, 'accent');
             return;
