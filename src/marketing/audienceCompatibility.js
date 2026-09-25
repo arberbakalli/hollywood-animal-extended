@@ -60,8 +60,15 @@
     }
 
     function getCompatibilityElements() {
-        const selectedProtagTag = document.querySelector('[data-category="Protagonist"][value]');
-        const selectedAntagonistTag = document.querySelector('[data-category="Antagonist"][value]');
+        // Select only from the targeted context (Build for Target)
+        const container = document.getElementById('selectors-container-targeted');
+        if (!container) return [];
+
+        // Select elements store value as a property, not an attribute
+        const selectedProtagTag = Array.from(container.querySelectorAll('[data-category="Protagonist"]'))
+            .find(el => el.value);
+        const selectedAntagonistTag = Array.from(container.querySelectorAll('[data-category="Antagonist"]'))
+            .find(el => el.value);
 
         const elements = [];
 
