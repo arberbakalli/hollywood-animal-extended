@@ -611,8 +611,6 @@ select:focus { outline: none; border-color: var(--accent); }
 
 .select-row.has-selected-tag > select.tag-selector,
 select.tag-selector.has-selected-tag {
-    color: #4cd964;
-    border-color: #4cd964;
     background: var(--input-bg);
 }
 
