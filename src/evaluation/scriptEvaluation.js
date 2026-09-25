@@ -16,7 +16,7 @@
     }
 
     function setMarketingScoreControl(inputId, sliderId, value) {
-        const normalized = Math.min(10, Math.max(0, Number(value) || 0)).toFixed(1);
+        const normalized = HACScoreFormatting.formatMovieScore(Math.min(10, Math.max(0, Number(value) || 0)));
         const input = document.getElementById(inputId);
         const slider = document.getElementById(sliderId);
 
