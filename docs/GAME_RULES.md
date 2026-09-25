@@ -228,6 +228,37 @@ place to go stale.
 > `src/selectors/selectorExclusions.js`. Pinned by
 > `tests/e2e/exclusion-dropdown-refresh.spec.js`.
 
+### Starting Tags: a new game starts with a limited pool
+
+A new game in Hollywood Animal does not give you every story element. You start
+with a small pool and unlock the rest as you play. The app models that as bans.
+
+- **250** elements in total, **57** in the starting pool
+  (`GAME_DATA.starterWhitelist`, `data.js`), so **193 bans**. Not 192, not 194.
+- On a player's first visit the app applies Starting Tags itself, so a fresh
+  exclusion list reads **193**. After that it restores the player's saved list
+  and never re-seeds it.
+- A count other than 193 on a fresh browser is a bug. On a browser that has
+  used the app before, it is that player's saved list; Apply Starting Tags
+  resets it to 193 and replaces any custom bans.
+
+Per category, starting / total: Genre 8/11, Setting 5/29, Protagonist 8/43,
+Antagonist 7/34, Supporting Character 8/22, Theme & Event 12/81, Finale 9/30.
+
+**Bans are not script content.** A feature that reads "the selected roles" reads
+the script (Locked Elements, the `generator` context), never the excluded list.
+Age & Gender Appeal read both and listed 16 banned characters as script roles in
+production (2026-09-25).
+
+**Test against the first-run state.** The Playwright fixture
+(`tests/fixtures/base.js`) marks Starting Tags as already seeded, so most specs
+run with zero bans, a state no real player starts in. A feature that reads any
+selector list needs at least one spec that clicks Apply Starting Tags first.
+
+> Stated by the owner 2026-09-25. Enforced in `applyStartingTagsExclusions`
+> (`src/app/appShell.js`) and the first-run gate in `src/library/exclusionStore.js`.
+> Pinned by `tests/e2e/age-gender-appeal-exclusions.spec.js`.
+
 ---
 
 ### Holiday bonuses

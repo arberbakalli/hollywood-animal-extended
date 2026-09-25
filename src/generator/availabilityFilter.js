@@ -88,7 +88,7 @@
         const badge = document.getElementById('excluded-count');
 
         // A mutation observer calls this on every insertion, and the Starting Tags
-        // profile inserts ~194 rows in one pass. Skip until the batch closes; that
+        // profile inserts 193 rows in one pass. Skip until the batch closes; that
         // path calls this once itself afterwards.
         if (excludedContainer && excludedContainer.classList.contains('is-batching')) return;
 
