@@ -57,11 +57,11 @@
 
         <!-- PRODUCT AREA NAVIGATION -->
         <nav id="primary-tabs" class="tab-nav product-area-nav" aria-label="Product areas">
-            <button id="tab-generator-button" class="tab-btn product-area-btn" type="button" aria-pressed="false" data-tab="generator">
+            <button id="tab-generator-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="generator">
                 <span class="product-area-kicker">Build</span>
                 <span class="product-area-label">Script Lab</span>
             </button>
-            <button id="tab-evaluate-button" class="tab-btn product-area-btn active" type="button" aria-pressed="true" data-tab="graves">
+            <button id="tab-evaluate-button" class="tab-btn product-area-btn" type="button" aria-pressed="false" data-tab="graves">
                 <span class="product-area-kicker">Evaluate</span>
                 <span class="product-area-label">Script Evaluation</span>
             </button>
@@ -74,7 +74,7 @@
         <main id="app-content" class="container">
 
             <!-- PRODUCT AREA 1: SCRIPT LAB -->
-            <section id="tab-generator" class="tab-content app-tab-panel hidden" aria-labelledby="tab-generator-button" aria-hidden="true" hidden>
+            <section id="tab-generator" class="tab-content app-tab-panel active" aria-labelledby="tab-generator-button" aria-hidden="false">
 
                 <div id="generator-settings-panel" class="card builder-card">
                     <div id="generator-settings-header" class="card-header">
@@ -208,7 +208,7 @@
             </section>
 
             <!-- PRODUCT AREA 2: SCRIPT EVALUATION / COLMAN GRAVES -->
-            <section id="tab-graves" class="tab-content app-tab-panel active" aria-labelledby="tab-evaluate-button" aria-hidden="false">
+            <section id="tab-graves" class="tab-content app-tab-panel hidden" aria-labelledby="tab-evaluate-button" aria-hidden="true" hidden>
 
                 <div id="graves-intro-panel" class="card graves-case-card">
                     <div id="graves-heading-block" class="graves-heading-block">
