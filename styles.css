@@ -2897,9 +2897,8 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .compatibility-table th {
-    background: rgba(212, 175, 55, 0.08);
     font-weight: 600;
-    color: var(--accent);
+    color: var(--text-default);
     position: sticky;
     top: 0;
 }
@@ -2916,7 +2915,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 .compatibility-category-header-row {
-    background: rgba(212, 175, 55, 0.06);
     height: auto;
 }
 
@@ -2927,7 +2925,6 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     letter-spacing: 0.5px;
     padding: 12px 8px;
     color: var(--text-muted);
-    border-block: 1px solid rgba(212, 175, 55, 0.26);
     text-transform: uppercase;
 }
 
