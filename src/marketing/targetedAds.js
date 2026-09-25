@@ -59,6 +59,11 @@
         // Attach event listeners
         document.getElementById('findCombinationsButton')?.addEventListener('click', findTargetedCombinations);
         document.getElementById('resetTargetedButton')?.addEventListener('click', resetTargetedTab);
+
+        // Initialize audience compatibility
+        if (global.HACOudienceCompatibility?.setupCompatibilityListeners) {
+            global.HACOudienceCompatibility.setupCompatibilityListeners();
+        }
     }
 
     function resetTargetedTab() {

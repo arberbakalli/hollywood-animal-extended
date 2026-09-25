@@ -601,11 +601,32 @@
                         <div id="selectors-container-targeted" class="tag-selector-grid"></div>
                     </div>
 
+                    <!-- Audience Compatibility Button -->
+                    <div class="targeted-action-row">
+                        <button id="showAudienceCompatibilityButton" class="analyze-btn targeted-compatibility-btn hidden" type="button">📊 Audience Compatibility</button>
+                    </div>
+
                     <!-- Search Button -->
                     <div class="targeted-action-row">
                         <div id="targetedFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
                         <button id="findCombinationsButton" class="analyze-btn targeted-find-btn" type="button">Find Top Combinations</button>
                     </div>
+                </div>
+
+                <!-- Audience Compatibility Panel -->
+                <div id="audience-compatibility-panel" class="card result-card hidden">
+                    <div class="card-header-row">
+                        <h3>Audience Compatibility</h3>
+                        <button id="closeCompatibilityButton" class="close-panel-btn" type="button" title="Close">×</button>
+                    </div>
+                    <div class="compatibility-legend">
+                        <span class="legend-item"><span class="legend-swatch excellent"></span> Excellent (+4.0 to +5.0)</span>
+                        <span class="legend-item"><span class="legend-swatch good"></span> Good (+1.0 to +3.9)</span>
+                        <span class="legend-item"><span class="legend-swatch neutral"></span> Neutral (0.0)</span>
+                        <span class="legend-item"><span class="legend-swatch bad"></span> Bad (-1.0 to -3.9)</span>
+                        <span class="legend-item"><span class="legend-swatch disastrous"></span> Disastrous (-4.0 to -5.0)</span>
+                    </div>
+                    <div id="compatibilityTableContainer" class="compatibility-table-scroll"></div>
                 </div>
 
                 <!-- Results Section -->
@@ -652,6 +673,7 @@
     <script src="src/marketing/agencySourceMapper.js"></script>
     <script src="src/marketing/marketingPlanner.js"></script>
     <script src="src/marketing/targetedAds.js"></script>
+    <script src="src/marketing/audienceCompatibility.js"></script>
     <script src="src/analysis/ageRoleBreakdown.js"></script>
     <script src="src/ui/collapsibleSections.js"></script>
     <script src="src/app/appShell.js"></script>

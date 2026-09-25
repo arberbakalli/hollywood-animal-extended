@@ -697,9 +697,9 @@
         }
 
         if (context === 'generator' || context === 'excluded') {
-            document.getElementById(`results-generator`).classList.add('hidden');
+            document.getElementById(`results-generator`)?.classList.add('hidden');
         } else if (context !== 'targeted') {
-            document.getElementById(`results-${context}`).classList.add('hidden');
+            document.getElementById(`results-${context}`)?.classList.add('hidden');
         }
 
         if (context === 'graves') {
