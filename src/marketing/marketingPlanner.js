@@ -13,6 +13,19 @@
             return;
         }
 
+        // Validate max element pool (matching Build for Target validation)
+        const maxElements = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
+            ? HACScriptGenerator.getMaxElementPoolSize()
+            : 10;
+        const storyElementTags = tagInputs.filter(tag => {
+            const t = GAME_DATA.tags[tag.id];
+            return t && t.category !== 'Genre' && t.category !== 'Setting';
+        });
+        if (storyElementTags.length > maxElements) {
+            showFeedbackMessage('advertisersFeedbackMessage', `Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`, 'accent');
+            return;
+        }
+
         const inputCom = parseFloat(document.getElementById('comScoreInput').value) || 0;
         const inputArt = parseFloat(document.getElementById('artScoreInput').value) || 0;
 
