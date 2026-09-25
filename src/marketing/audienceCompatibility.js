@@ -34,6 +34,11 @@
         return `category-${category.toLowerCase().replace(/\s+&\s+/g, '-').replace(/\s+/g, '-')}`;
     }
 
+    function getGenreClass(tagId) {
+        if (!tagId.startsWith('GENRE_')) return '';
+        return tagId.toLowerCase().replace(/_/g, '-');
+    }
+
     function renderCompatibilityTable(elements) {
         const container = document.getElementById('compatibilityTableContainer');
         if (!container) return;
@@ -80,7 +85,9 @@
                 }
 
                 const catClass = getCategoryClass(tag.category);
-                html += `<tr><td class="element-name ${catClass}">${tag.name || tag.id}</td>`;
+                const genreClass = tag.category === 'Genre' ? getGenreClass(tag.id) : '';
+                const allClasses = `element-name ${catClass} ${genreClass}`.trim();
+                html += `<tr><td class="${allClasses}">${tag.name || tag.id}</td>`;
                 DEMOGRAPHICS.forEach(demo => {
                     const score = parseFloat(tag.weights[demo] || 0);
                     const label = getScoreLabel(score);

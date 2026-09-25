@@ -2956,11 +2956,69 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     padding-left: 9px;
 }
 .element-name.category-genre {
-    color: #d4af37;
-    background: rgba(212, 175, 55, 0.12);
-    border-left: 3px solid #d4af37;
+    border-left: 3px solid;
     padding-left: 9px;
 }
+
+/* Genre-specific colors */
+.element-name.genre-action {
+    color: var(--cat-genre-action);
+    background: rgba(128, 72, 48, 0.12);
+    border-left-color: var(--cat-genre-action);
+}
+.element-name.genre-adventure {
+    color: var(--cat-genre-adventure);
+    background: rgba(72, 96, 48, 0.12);
+    border-left-color: var(--cat-genre-adventure);
+}
+.element-name.genre-comedy {
+    color: var(--cat-genre-comedy);
+    background: rgba(48, 88, 96, 0.12);
+    border-left-color: var(--cat-genre-comedy);
+}
+.element-name.genre-detective {
+    color: var(--cat-genre-detective);
+    background: rgba(88, 48, 80, 0.12);
+    border-left-color: var(--cat-genre-detective);
+}
+.element-name.genre-drama {
+    color: var(--cat-genre-drama);
+    background: rgba(48, 56, 96, 0.12);
+    border-left-color: var(--cat-genre-drama);
+}
+.element-name.genre-historical {
+    color: var(--cat-genre-historical);
+    background: rgba(144, 96, 56, 0.12);
+    border-left-color: var(--cat-genre-historical);
+}
+.element-name.genre-horror {
+    color: var(--cat-genre-horror);
+    background: rgba(96, 64, 56, 0.12);
+    border-left-color: var(--cat-genre-horror);
+}
+.element-name.genre-romance {
+    color: var(--cat-genre-romance);
+    background: rgba(80, 128, 88, 0.12);
+    border-left-color: var(--cat-genre-romance);
+}
+.element-name.genre-science-fiction,
+.element-name.genre-science_fiction {
+    color: var(--cat-genre-science-fiction);
+    background: rgba(64, 72, 96, 0.12);
+    border-left-color: var(--cat-genre-science-fiction);
+}
+.element-name.genre-slapstick-comedy,
+.element-name.genre-slapstick_comedy {
+    color: var(--cat-genre-slapstick-comedy);
+    background: rgba(72, 80, 48, 0.12);
+    border-left-color: var(--cat-genre-slapstick-comedy);
+}
+.element-name.genre-thriller {
+    color: var(--cat-genre-thriller);
+    background: rgba(120, 64, 48, 0.12);
+    border-left-color: var(--cat-genre-thriller);
+}
+
 .element-name.category-setting {
     color: #a8a8a8;
     background: rgba(168, 168, 168, 0.12);
