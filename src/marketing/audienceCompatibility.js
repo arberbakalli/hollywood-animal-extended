@@ -39,11 +39,15 @@
         if (!container) return;
 
         if (!elements || elements.length === 0) {
-            // Show all available elements grouped by category
+            // Show all available elements grouped by category in game order
+            const CATEGORY_ORDER = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Supporting Character', 'Theme & Event', 'Finale'];
+
             const allElements = Object.values(GAME_DATA.tags)
                 .filter(tag => tag && tag.weights && tag.category)
                 .sort((a, b) => {
-                    if (a.category !== b.category) return a.category.localeCompare(b.category);
+                    const aIdx = CATEGORY_ORDER.indexOf(a.category);
+                    const bIdx = CATEGORY_ORDER.indexOf(b.category);
+                    if (aIdx !== bIdx) return aIdx - bIdx;
                     return (a.name || a.id).localeCompare(b.name || b.id);
                 });
 
@@ -58,7 +62,15 @@
             });
             html += '</tr></thead><tbody>';
 
+            let currentCategory = null;
             allElements.forEach(tag => {
+                // Add category header when category changes
+                if (tag.category !== currentCategory) {
+                    currentCategory = tag.category;
+                    const headerClass = getCategoryClass(tag.category);
+                    html += `<tr class="category-header-row"><td colspan="7" class="category-header ${headerClass}">━━━ ${currentCategory.toUpperCase()} ━━━</td></tr>`;
+                }
+
                 const catClass = getCategoryClass(tag.category);
                 html += `<tr><td class="element-name ${catClass}">${tag.name || tag.id}</td>`;
                 DEMOGRAPHICS.forEach(demo => {

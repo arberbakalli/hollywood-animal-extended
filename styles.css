@@ -2875,16 +2875,20 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 
 .compatibility-table {
     width: 100%;
-    min-width: 800px;
+    min-width: auto;
     border-collapse: collapse;
     font-size: 0.84rem;
 }
 
 .compatibility-table th,
 .compatibility-table td {
-    padding: 10px 8px;
+    padding: 8px 6px;
     text-align: center;
     border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+#audience-compatibility-panel {
+    padding: 20px !important;
 }
 
 .compatibility-table th {
@@ -2904,6 +2908,19 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     font-weight: 500;
     padding-left: 12px;
     min-width: 140px;
+}
+
+.category-header-row {
+    background: rgba(212, 175, 55, 0.12) !important;
+}
+
+.category-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 10px 8px !important;
+    color: var(--text-muted);
 }
 
 .element-name.category-protagonist {
