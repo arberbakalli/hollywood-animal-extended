@@ -1,8 +1,8 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
 
 /**
- * Regression tests: Age & Gender Appeal must read role selections from every
- * Script Lab selector context, not only the generated-script controls.
+ * Regression tests: Age & Gender Appeal lists the script's roles (Locked
+ * Elements) and never the excluded list, whose entries are bans.
  */
 
 test.describe('Age & Gender Appeal - selector context regression', () => {
@@ -38,13 +38,15 @@ test.describe('Age & Gender Appeal - selector context regression', () => {
         await expectProtagonistRow(page, 'Cowboy');
     });
 
-    test('TC-AGEAPL-RG-003 [automated] protagonist selection in excluded context updates panel', async ({ page }) => {
+    test('TC-AGEAPL-RG-003 [automated] protagonist banned in excluded context is not listed', async ({ page }) => {
         await selectRole(page, 'excluded', 'protagonist', 'PROTAGONIST_COWBOY');
+        await page.evaluate(() => window.HACAnalysisAgeRoleBreakdown.update());
 
-        await expectProtagonistRow(page, 'Cowboy');
+        await expect(page.locator('.age-role-row')).toHaveCount(0);
+        await expect(page.locator('.age-role-empty-state')).toBeVisible();
     });
 
-    test('TC-AGEAPL-RG-004 [automated] selected roles are refreshed across selector contexts', async ({ page }) => {
+    test('TC-AGEAPL-RG-004 [automated] selected roles refresh, and a later ban does not add a row', async ({ page }) => {
         const generatorSelect = await selectRole(page, 'generator', 'protagonist', 'PROTAGONIST_COWBOY');
         await expectProtagonistRow(page, 'Cowboy');
 
@@ -52,7 +54,8 @@ test.describe('Age & Gender Appeal - selector context regression', () => {
         await expect(page.locator('.age-role-row--protagonist').filter({ hasText: 'Cowboy' })).toHaveCount(0);
 
         await selectRole(page, 'excluded', 'protagonist', 'PROTAGONIST_HOPELESS_ROMANTIC');
-        await expectProtagonistRow(page, 'Hopeless Romantic');
+        await page.evaluate(() => window.HACAnalysisAgeRoleBreakdown.update());
+        await expect(page.locator('.age-role-row--protagonist').filter({ hasText: 'Hopeless Romantic' })).toHaveCount(0);
     });
 
     test('TC-AGEAPL-RG-005 [automated] empty state renders when nothing is selected', async ({ page }) => {

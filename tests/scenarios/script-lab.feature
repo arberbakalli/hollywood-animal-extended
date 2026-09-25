@@ -38,6 +38,16 @@ Feature: Script Lab
     And appeal ratings are displayed on the -5.0 to +5.0 scale
     And a peak appeal insight is shown
 
+  # [automated] TC-AGEAPL-EX-001, TC-AGEAPL-EX-002, TC-AGEAPL-RG-003.
+  # Bans are not in the script, so they are never listed as roles. Confirmed by
+  # the owner 2026-09-25 after Starting Tags bans filled the panel in production.
+  Scenario: Age & Gender Appeal lists only locked roles, never banned ones
+    Given the Starting Tags bans are applied
+    And no role is locked
+    Then the Age & Gender Appeal panel lists no roles
+    When the user locks a Protagonist
+    Then the panel lists exactly that Protagonist
+
   # [automated] TC01-000032. Best Artistic uses the shared generation engine but
   # ranks by artistic movie score and shows commercial score as context.
   Scenario: Generating best artistic scripts ranks artistic score first

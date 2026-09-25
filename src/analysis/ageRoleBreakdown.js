@@ -41,11 +41,12 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
     function getSelectedRoles() {
         const roles = [];
 
-        // Check all contexts: generator, locked, excluded
+        // Only the script's own roles. The excluded list holds bans, which are by
+        // definition not in the script; there is no separate "locked" context.
         const contextSelectors = {
-            protagonist: ['#inputs-protagonist-generator', '#inputs-protagonist-locked', '#inputs-protagonist-excluded'],
-            antagonist: ['#inputs-antagonist-generator', '#inputs-antagonist-locked', '#inputs-antagonist-excluded'],
-            supporting: ['#inputs-supporting-character-generator', '#inputs-supporting-character-locked', '#inputs-supporting-character-excluded']
+            protagonist: ['#inputs-protagonist-generator'],
+            antagonist: ['#inputs-antagonist-generator'],
+            supporting: ['#inputs-supporting-character-generator']
         };
 
         // Check protagonist across all contexts
