@@ -1,6 +1,7 @@
 (function(global) {
     "use strict";
 
+
     const DEMOGRAPHICS = ['TF', 'TM', 'YF', 'YM', 'AF', 'AM'];
     const DEMOGRAPHIC_LABELS = {
         'TF': 'Teen Female',
@@ -35,8 +36,7 @@
     }
 
     function getGenreClass(tagId) {
-        if (!tagId.startsWith('GENRE_')) return '';
-        return tagId.toLowerCase().replace(/_/g, '-');
+        return `genre-${tagId.toLowerCase().replace(/_/g, '-')}`;
     }
 
     function renderCompatibilityTable(elements) {
