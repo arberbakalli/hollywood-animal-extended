@@ -208,10 +208,12 @@ Feature: Script Lab
 
   # [automated] TC01-000031. Improvement A: selected tags should get positive
   # visual feedback, and available strong-fit options should be hinted without
-  # using red/negative styling for weak fits.
+  # using red/negative styling for weak fits. Owner ruling 2026-09-25: the
+  # selected dropdown is never neon green (#4cd964); that styling was removed.
   Scenario: Selected tags and strong-fit options get positive visual feedback
     When the user locks a Protagonist
-    Then the selected dropdown uses success styling
+    Then the selected dropdown is marked as selected
+    And the selected dropdown is not neon green
     And high-synergy available options are marked as strong fits
 
   # [automated] TC01-000020. Reset Locks clears user picks rather than only repainting the panel.

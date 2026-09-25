@@ -139,7 +139,9 @@ test.describe('Script Lab — generator', () => {
       page.locator(`#selectors-container-generator option[value="${fixture.strongPartnerId}"]`).first()
         .getAttribute('data-synergy')
     ).toBe('high');
-    await expect(select).toHaveCSS('color', 'rgb(76, 217, 100)');
+    // Owner ruling 2026-09-25: no neon green (#4cd964) on selected elements.
+    await expect(select).not.toHaveCSS('color', 'rgb(76, 217, 100)');
+    await expect(select).not.toHaveCSS('border-color', 'rgb(76, 217, 100)');
   });
 
   test('TC01-000020 Reset Locks clears locked selections', async ({ steps }) => {
