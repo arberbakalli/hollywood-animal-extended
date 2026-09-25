@@ -95,7 +95,7 @@ function getSelectedTagsInCategory(category, context) {
 function refreshCategoryDropdowns(category, context) {
     return HACStoryElementSelector.refreshCategoryDropdowns(category, context);
 }
-
+
 
 function refreshLockedElementAvailability() {
     return HACStoryElementSelector.refreshLockedElementAvailability();
@@ -363,6 +363,42 @@ function getRecommendations(scriptConfig) {
 
 function renderAdvertiserCard(entry, extraClass) {
     return HACAdvertiserMatcher.renderAdvertiserCard(entry, extraClass);
+}
+
+function score_artistic_appeal(scriptElements) {
+    return HACScriptScoringEngine.score_artistic_appeal(scriptElements);
+}
+
+function score_commercial_appeal(scriptElements) {
+    return HACScriptScoringEngine.score_commercial_appeal(scriptElements);
+}
+
+function getCompatibilityElements(tagIds) {
+    return HACScriptScoringEngine.getCompatibilityElements(tagIds);
+}
+
+function formatScoreForDisplay(score) {
+    return HACScriptScoringEngine.formatScoreForDisplay(score);
+}
+
+function rankScripts(scripts, appealType) {
+    return HACScriptScoringEngine.rankScripts(scripts, appealType);
+}
+
+function getTopScripts(scripts, appealType, limit) {
+    return HACScriptScoringEngine.getTopScripts(scripts, appealType, limit);
+}
+
+function identifyDemographicGaps(tagIds) {
+    return HACScriptScoringEngine.identifyDemographicGaps(tagIds);
+}
+
+function recommendSupportingCharacters(tagIds, limit) {
+    return HACScriptScoringEngine.recommendSupportingCharacters(tagIds, limit);
+}
+
+function calculateAgencyCompatibility(tagIds) {
+    return HACScriptScoringEngine.calculateAgencyCompatibility(tagIds);
 }
 
 async function analyzeMovie() {

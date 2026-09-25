@@ -186,6 +186,7 @@ describe('HTML structure', () => {
             'src/marketing/advertiserMatcher.js',
             'src/marketing/distributionPlanner.js',
             'src/marketing/agencySourceMapper.js',
+            'src/marketing/scriptScoringEngine.js',
             'src/marketing/marketingPlanner.js',
             'src/marketing/targetedAds.js',
             'src/marketing/audienceCompatibility.js',
