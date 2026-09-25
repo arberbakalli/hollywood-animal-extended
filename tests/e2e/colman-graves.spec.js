@@ -12,9 +12,9 @@ const VALID_GRAVES_SCRIPT = [
   ['genreSelect', 'THRILLER'],
   ['settingSelect', 'MODERN_AMERICAN_CITY'],
   ['protagonistSelect', 'PROTAGONIST_DETECTIVE'],
-  ['antagonistSelect', 'ANTAGONIST_OLD_FRIEND_ENEMY'],
-  ['supportingCharacterSelect', 'SUPPORTINGCHARACTER_KEY_WITNESS'],
-  ['themeEventSelect', 'THEME_WRONGFULLY_ACCUSED'],
+  ['antagonistSelect', 'ANTAGONIST_TRIBAL_CHIEF'],
+  ['supportingCharacterSelect', 'SUPPORTINGCHARACTER_LOVE_INTEREST'],
+  ['themeEventSelect', 'THEME_TREASURE_HUNT'],
   ['finaleSelect', 'FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM'],
 ];
 
@@ -52,12 +52,12 @@ const buildMultiSupportingScript = async (steps) => {
   });
   await steps.selectDropdown('antagonistSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'ANTAGONIST_OLD_FRIEND_ENEMY',
+    value: 'ANTAGONIST_TRIBAL_CHIEF',
   });
   // Add first Supporting Character
   await steps.selectDropdown('supportingCharacterSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'SUPPORTINGCHARACTER_KEY_WITNESS',
+    value: 'SUPPORTINGCHARACTER_LOVE_INTEREST',
   });
   // Add second Supporting Character via the "+" button
   await steps.on('supportingCharacterAddButton', 'ColmanGraves').click();
@@ -89,7 +89,7 @@ const buildCardinalityLimitScript = async (steps) => {
   });
   await steps.selectDropdown('antagonistSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'ANTAGONIST_OLD_FRIEND_ENEMY',
+    value: 'ANTAGONIST_TRIBAL_CHIEF',
   });
   await steps.selectDropdown('finaleSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
@@ -108,11 +108,11 @@ const buildCardinalityLimitScript = async (steps) => {
   // Supporting Character and Theme & Event: 1 each (not at limit)
   await steps.selectDropdown('supportingCharacterSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'SUPPORTINGCHARACTER_KEY_WITNESS',
+    value: 'SUPPORTINGCHARACTER_LOVE_INTEREST',
   });
   await steps.selectDropdown('themeEventSelect', 'ColmanGraves', {
     type: DropdownSelectType.VALUE,
-    value: 'THEME_WRONGFULLY_ACCUSED',
+    value: 'THEME_TREASURE_HUNT',
   });
 };
 
@@ -146,20 +146,20 @@ test.describe('Script Evaluation — Colman Graves', () => {
   test('TC03-000034 banning an element removes it from the Graves script and says so', async ({ steps }) => {
     await steps.selectDropdown('supportingCharacterSelect', 'ColmanGraves', {
       type: DropdownSelectType.VALUE,
-      value: 'SUPPORTINGCHARACTER_SIDEKICK',
+      value: 'SUPPORTINGCHARACTER_RIVAL',
     });
-    await steps.expect('supportingCharacterSelect', 'ColmanGraves').value.toBe('SUPPORTINGCHARACTER_SIDEKICK');
+    await steps.expect('supportingCharacterSelect', 'ColmanGraves').value.toBe('SUPPORTINGCHARACTER_RIVAL');
 
     await steps.on('buildTab', 'Navigation').click();
     await steps.selectDropdown('excludedSupportingCharacterSelect', 'ScriptLab', {
       type: DropdownSelectType.VALUE,
-      value: 'SUPPORTINGCHARACTER_SIDEKICK',
+      value: 'SUPPORTINGCHARACTER_RIVAL',
     });
     await steps.on('evaluateTab', 'Navigation').click();
 
     await steps.expect('supportingCharacterSelect', 'ColmanGraves').value.toBe('');
     await steps.on('feedbackMessage', 'ColmanGraves')
-      .verifyTextContains('Removed from this script because they are now excluded: Sidekick.');
+      .verifyTextContains('Removed from this script because they are now excluded: Rival.');
   });
 
   // The starting-tags-only checkbox was removed from this panel: exclusions are
@@ -608,7 +608,7 @@ test.describe('Script Evaluation — Colman Graves', () => {
     for (const [select, value] of [
       ['genreSelect', 'THRILLER'],
       ['settingSelect', 'MODERN_AMERICAN_CITY'],
-      ['protagonistSelect', 'PROTAGONIST_OUTCAST'],
+      ['protagonistSelect', 'PROTAGONIST_COWBOY'],
       ['antagonistSelect', 'ANTAGONIST_HEARTLESS_BUREAUCRAT'],
       ['supportingCharacterSelect', 'SUPPORTINGCHARACTER_PARENT_FIGURE'],
       ['finaleSelect', 'FINALE_ANTAGONIST_GETS_PUNISHED'],
