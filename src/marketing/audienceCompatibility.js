@@ -12,22 +12,26 @@
     };
     const CATEGORY_ORDER = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Supporting Character', 'Theme & Event', 'Finale'];
 
+    // Single shared table for the 5 bands shown in the visible legend
+    // (index.html #audience-compatibility-panel .compatibility-legend).
+    // getScoreLabel and getScoreClass both read from this so they can never
+    // disagree again — see docs/GAME_RULES.md "Audience compatibility score
+    // scale" for why this is 5 bands rather than the full 11-point reference
+    // scale.
+    function getScoreBand(score) {
+        if (score >= 4.0) return { label: 'Excellent', className: 'excellent' };
+        if (score >= 1.0) return { label: 'Good', className: 'good' };
+        if (score > -1.0) return { label: 'Neutral', className: 'neutral' };
+        if (score >= -3.0) return { label: 'Bad', className: 'bad' };
+        return { label: 'Disastrous', className: 'disastrous' };
+    }
+
     function getScoreLabel(score) {
-        if (score >= 4.0) return 'Excellent';
-        if (score >= 3.0) return 'Very Good';
-        if (score >= 1.0) return 'Good';
-        if (score > -1.0) return 'Neutral';
-        if (score >= -3.0) return 'Bad';
-        if (score >= -4.0) return 'Very Bad';
-        return 'Disastrous';
+        return getScoreBand(score).label;
     }
 
     function getScoreClass(score) {
-        if (score >= 4.0) return 'excellent';
-        if (score >= 1.0) return 'good';
-        if (score > -1.0) return 'neutral';
-        if (score >= -3.0) return 'bad';
-        return 'disastrous';
+        return getScoreBand(score).className;
     }
 
     function getCategoryClass(category) {
@@ -177,6 +181,8 @@
 
     global.HACOudienceCompatibility = {
         setupCompatibilityListeners,
-        updateCompatibilityDisplay
+        updateCompatibilityDisplay,
+        getScoreLabel,
+        getScoreClass
     };
 })(globalThis);

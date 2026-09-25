@@ -289,3 +289,68 @@ Do not encode these as rules. They need evidence, not a decision.
   demand in screenings and assumes it is met; the game reports occupancy against
   400 seats per show. Deriving it needs a viewers model that exists nowhere in
   `src/` and must not be guessed.
+
+---
+
+## 7. Audience compatibility score scale
+
+Demographic appeal (`GAME_DATA.tags[*].weights.{TF,TM,YF,YM,AF,AM}`) is a raw
+score from **-5.0 to +5.0**. Every weight in `data/TagsAudienceWeights.json` is
+a whole integer in that range (~1500 weights).
+
+The owner has confirmed the canonical, per-integer label scale below as the
+source of truth for what each score means:
+
+| Score | Label |
+|---|---|
+| +5.0 | Excellent |
+| +4.0 | Extremely Good |
+| +3.0 | Very Good |
+| +2.0 | Good |
+| +1.0 | Slightly Good |
+| 0.0 | Neutral |
+| -1.0 | Slightly Bad |
+| -2.0 | Bad |
+| -3.0 | Very Bad |
+| -4.0 | Extremely Bad |
+| -5.0 | Disastrous |
+
+> Confirmed by the owner 2026-09-26. Reference implementation:
+> `docs/audience-compatibility-reference.html` (score legend and per-tag
+> tables, one label per integer). That page is a standalone reference in a
+> light theme; it is not wired into the live app.
+
+### The live app currently shows 5 bands, not 11
+
+The Audience Compatibility panel (`index.html`, `#audience-compatibility-panel`)
+groups scores into **5** visible bands, matching its legend exactly:
+
+| Band | Range | CSS class |
+|---|---|---|
+| Excellent | +4.0 to +5.0 | `excellent` |
+| Good | +1.0 to +3.9 | `good` |
+| Neutral | 0.0 | `neutral` |
+| Bad | -1.0 to -3.9 | `bad` |
+| Disastrous | -4.0 to -5.0 | `disastrous` |
+
+`getScoreLabel` and `getScoreClass` (`src/marketing/audienceCompatibility.js`)
+both derive from one shared `getScoreBand` function using these exact 5
+bands, so the hover title and the cell color can never disagree with each
+other or with the legend again. Neither function ever returns a label from
+the 11-point scale that has no matching band here (e.g. "Very Good", "Very
+Bad") — those collapse into their nearest visible band ("Good", "Disastrous").
+
+**This 5-band grouping is a coarser view of the 11-point scale above, not a
+contradiction of it.** The legend and CSS only define 5 colors today.
+
+> Expanding the live UI to a full 11-color treatment (one distinct color per
+> integer) is a separate, undecided visual design question. Per Rule (c) in
+> `docs/QA_FRAMEWORK.md` ("Exact Visuals Only When Owner-Specified"), colors
+> are never invented or expanded by an agent without an explicit owner
+> ruling — see `.arber/LESSONS_LEARNED.md` lesson 18 for what happened last
+> time a color was guessed and then locked in by a test. Do not add the
+> other 6 colors without asking first.
+
+> Enforced in: `src/marketing/audienceCompatibility.js` (`getScoreBand`,
+> `getScoreLabel`, `getScoreClass`). Legend: `index.html` lines ~611-615.
+> Pinned by `tests/audience-compatibility-score-bands.test.js`.
