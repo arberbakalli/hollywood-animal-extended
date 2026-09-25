@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audience Compatibility Reference</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f7f5;
+            color: #2d2520;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1a1410;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #6b5f52;
+            font-style: italic;
+        }
+
+        .legend {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border: 1px solid #e8e3dd;
+        }
+
+        .legend-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b5f52;
+            margin-bottom: 12px;
+        }
+
+        .score-scale {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .score-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b5f52;
+        }
+
+        select, input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid #d5cdc5;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            background: white;
+            color: #2d2520;
+            cursor: pointer;
+        }
+
+        input[type="text"] {
+            width: 200px;
+        }
+
+        input[type="text"]::placeholder {
+            color: #b9b0a7;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e8e3dd;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #8b7d74;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: #5f5249;
+        }
+
+        .tab.active {
+            color: #2d2520;
+            border-bottom-color: #8b4513;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e8e3dd;
+            overflow: hidden;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            background: #faf8f5;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #5f5249;
+            border-bottom: 1px solid #e8e3dd;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #f0ebe7;
+        }
+
+        tr:hover {
+            background: #fdfcfb;
+        }
+
+        .element-name {
+            font-weight: 500;
+            color: #2d2520;
+            min-width: 180px;
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 1;
+        }
+
+        tr:hover .element-name {
+            background: #fdfcfb;
+        }
+
+        .score-cell {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px 6px;
+            border-radius: 4px;
+            cursor: help;
+            transition: opacity 0.2s;
+        }
+
+        .score-cell:hover {
+            opacity: 0.8;
+        }
+
+        /* Score colors */
+        .score-excellent { background: #d4edda; color: #155724; }
+        .score-extremely-good { background: #d8f0e3; color: #0d5c2b; }
+        .score-very-good { background: #e2f5db; color: #1a7a2a; }
+        .score-good { background: #ecf8e8; color: #2a8c38; }
+        .score-slightly-good { background: #f5fbf1; color: #4a9d58; }
+        .score-neutral { background: #f5f3f0; color: #6b5f52; }
+        .score-slightly-bad { background: #fdf5f0; color: #9a5a3a; }
+        .score-bad { background: #ffe8e2; color: #b8381f; }
+        .score-very-bad { background: #ffd6cc; color: #a33a2a; }
+        .score-extremely-bad { background: #ffbfb0; color: #8b2f1f; }
+        .score-disastrous { background: #ff9999; color: #7a1a0a; }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 24px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .note strong {
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            input[type="text"] {
+                width: 100%;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Audience Compatibility Reference</h1>
+            <p class="subtitle">227 story elements across 6 categories • Demographic appeal: -5.0 to +5.0 scale</p>
+        </header>
+
+        <div class="legend">
+            <div class="legend-title">Score Scale & Interpretation</div>
+            <div class="score-scale">
+                <div class="score-item"><div class="score-swatch score-excellent"></div> <strong>+5.0</strong> Excellent</div>
+                <div class="score-item"><div class="score-swatch score-extremely-good"></div> <strong>+4.0</strong> Extremely Good</div>
+                <div class="score-item"><div class="score-swatch score-very-good"></div> <strong>+3.0</strong> Very Good</div>
+                <div class="score-item"><div class="score-swatch score-good"></div> <strong>+2.0</strong> Good</div>
+                <div class="score-item"><div class="score-swatch score-slightly-good"></div> <strong>+1.0</strong> Slightly Good</div>
+                <div class="score-item"><div class="score-swatch score-neutral"></div> <strong>0.0</strong> Neutral</div>
+                <div class="score-item"><div class="score-swatch score-slightly-bad"></div> <strong>-1.0</strong> Slightly Bad</div>
+                <div class="score-item"><div class="score-swatch score-bad"></div> <strong>-2.0</strong> Bad</div>
+                <div class="score-item"><div class="score-swatch score-very-bad"></div> <strong>-3.0</strong> Very Bad</div>
+                <div class="score-item"><div class="score-swatch score-extremely-bad"></div> <strong>-4.0</strong> Extremely Bad</div>
+                <div class="score-item"><div class="score-swatch score-disastrous"></div> <strong>-5.0</strong> Disastrous</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="elementType">Category:</label>
+                <select id="elementType" onchange="switchTab(this.value)">
+                    <option value="genre">Genres</option>
+                    <option value="setting">Settings</option>
+                    <option value="protagonist">Protagonists</option>
+                    <option value="antagonist">Antagonists</option>
+                    <option value="supporting">Supporting Characters</option>
+                    <option value="finale">Finales</option>
+                    <option value="theme">Themes & Events</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <input type="text" id="search" placeholder="Filter by name..." onkeyup="filterTable()">
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('genre')">Genres</button>
+            <button class="tab" onclick="switchTab('setting')">Settings</button>
+            <button class="tab" onclick="switchTab('protagonist')">Protagonists</button>
+            <button class="tab" onclick="switchTab('antagonist')">Antagonists</button>
+            <button class="tab" onclick="switchTab('supporting')">Supporting Characters</button>
+            <button class="tab" onclick="switchTab('finale')">Finales</button>
+            <button class="tab" onclick="switchTab('theme')">Themes & Events</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th title="Teen Female (13-19)">TF</th>
+                        <th title="Teen Male (13-19)">TM</th>
+                        <th title="Young Female (18-34)">YF</th>
+                        <th title="Young Male (18-39)">YM</th>
+                        <th title="Adult Female (35-49)">AF</th>
+                        <th title="Adult Male (40-59)">AM</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="note">
+            <strong>⚠️ Special Case: Wayward Soul</strong><br>
+            Wayward Soul does not have demographic weights in the game data. It appears as "None" in this table and has neutral compatibility with every other tag in the game. This is unusual behavior—treat it as a wildcard element.
+        </div>
+
+        <div class="note" style="border-left-color: #6c757d; background: #e9ecef; margin-top: 16px;">
+            <strong>📊 Demographics Guide</strong><br>
+            <strong>TF/TM:</strong> Teen audiences (13-19)<br>
+            <strong>YF/YM:</strong> Young adults (F: 18-34, M: 18-39)<br>
+            <strong>AF/AM:</strong> Adults (F: 35-49, M: 40-59)<br><br>
+            Use these scores when building scripts: higher scores = demographic appeal. Combine multiple elements with positive scores in the same demographic to maximize that audience's engagement.
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            genre: [
+                { name: "Action", TF: "Very Good", TM: "Excellent", YF: "Good", YM: "Excellent", AF: "Slightly Good", AM: "Extremely Good" },
+                { name: "Adventure", TF: "Extremely Good", TM: "Excellent", YF: "Extremely Good", YM: "Excellent", AF: "Very Good", AM: "Very Good" },
+                { name: "Comedy", TF: "Extremely Good", TM: "Extremely Good", YF: "Very Good", YM: "Very Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Detective", TF: "Good", TM: "Extremely Good", YF: "Good", YM: "Extremely Good", AF: "Very Good", AM: "Extremely Good" },
+                { name: "Drama", TF: "Very Bad", TM: "Very Bad", YF: "Good", YM: "Slightly Good", AF: "Extremely Good", AM: "Very Good" },
+                { name: "Historical", TF: "Very Bad", TM: "Very Bad", YF: "Very Good", YM: "Very Good", AF: "Excellent", AM: "Extremely Good" },
+                { name: "Horror", TF: "Slightly Bad", TM: "Very Good", YF: "Slightly Good", YM: "Extremely Good", AF: "Very Bad", AM: "Bad" },
+                { name: "Romance", TF: "Very Good", TM: "Slightly Bad", YF: "Excellent", YM: "Good", AF: "Excellent", AM: "Slightly Good" },
+                { name: "Science Fiction", TF: "Very Good", TM: "Excellent", YF: "Good", YM: "Excellent", AF: "Slightly Good", AM: "Very Good" },
+                { name: "Thriller", TF: "Slightly Good", TM: "Slightly Good", YF: "Very Good", YM: "Extremely Good", AF: "Extremely Good", AM: "Extremely Good" }
+            ],
+            setting: [
+                { name: "American Civil War", TF: "Bad", TM: "Bad", YF: "Neutral", YM: "Good", AF: "Slightly Good", AM: "Good" },
+                { name: "Ancient China", TF: "Slightly Bad", TM: "Slightly Bad", YF: "Neutral", YM: "Neutral", AF: "Neutral", AM: "Neutral" },
+                { name: "Ancient Egypt", TF: "Neutral", TM: "Slightly Good", YF: "Neutral", YM: "Slightly Good", AF: "Slightly Good", AM: "Slightly Good" },
+                { name: "Fantasy Kingdom", TF: "Excellent", TM: "Excellent", YF: "Good", YM: "Good", AF: "Slightly Bad", AM: "Very Bad" },
+                { name: "Wild West", TF: "Good", TM: "Excellent", YF: "Slightly Good", YM: "Extremely Good", AF: "Slightly Good", AM: "Extremely Good" },
+                { name: "Victorian England", TF: "Neutral", TM: "Neutral", YF: "Very Good", YM: "Slightly Good", AF: "Extremely Good", AM: "Good" },
+                { name: "Space", TF: "Good", TM: "Extremely Good", YF: "Slightly Good", YM: "Very Good", AF: "Slightly Bad", AM: "Slightly Good" },
+                { name: "Modern American City", TF: "Neutral", TM: "Neutral", YF: "Neutral", YM: "Neutral", AF: "Neutral", AM: "Neutral" }
+            ],
+            protagonist: [
+                { name: "Accidental Hero", TF: "Neutral", TM: "Neutral", YF: "Slightly Good", YM: "Good", AF: "Slightly Good", AM: "Good" },
+                { name: "Bounty Hunter", TF: "Very Good", TM: "Excellent", YF: "Slightly Good", YM: "Excellent", AF: "Neutral", AM: "Extremely Good" },
+                { name: "Cop", TF: "Very Good", TM: "Extremely Good", YF: "Good", YM: "Extremely Good", AF: "Good", AM: "Extremely Good" },
+                { name: "Cowboy", TF: "Very Good", TM: "Excellent", YF: "Good", YM: "Excellent", AF: "Slightly Good", AM: "Extremely Good" },
+                { name: "Detective", TF: "Very Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Very Good" },
+                { name: "Knight", TF: "Very Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Slightly Good", AM: "Good" },
+                { name: "Pilot", TF: "Good", TM: "Extremely Good", YF: "Very Good", YM: "Very Good", AF: "Good", AM: "Good" },
+                { name: "Secret Agent", TF: "Very Good", TM: "Extremely Good", YF: "Good", YM: "Extremely Good", AF: "Good", AM: "Very Good" },
+                { name: "Soldier", TF: "Very Good", TM: "Extremely Good", YF: "Slightly Good", YM: "Very Good", AF: "Good", AM: "Very Good" },
+                { name: "Wayward Soul", TF: "None", TM: "None", YF: "None", YM: "None", AF: "None", AM: "None" }
+            ],
+            antagonist: [
+                { name: "Alien", TF: "Excellent", TM: "Excellent", YF: "Good", YM: "Extremely Good", AF: "Slightly Good", AM: "Very Good" },
+                { name: "Ancient Evil", TF: "Good", TM: "Extremely Good", YF: "Slightly Good", YM: "Very Good", AF: "Neutral", AM: "Good" },
+                { name: "Bandit", TF: "Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Slightly Good", AM: "Very Good" },
+                { name: "Evil Monster", TF: "Excellent", TM: "Excellent", YF: "Good", YM: "Extremely Good", AF: "Slightly Good", AM: "Very Good" },
+                { name: "Serial Killer", TF: "Extremely Good", TM: "Excellent", YF: "Extremely Good", YM: "Excellent", AF: "Very Good", AM: "Extremely Good" },
+                { name: "Vampire", TF: "Extremely Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Neutral", AM: "Good" },
+                { name: "Women's Book Club of Cannibals", TF: "Good", TM: "Extremely Good", YF: "Extremely Good", YM: "Excellent", AF: "Excellent", AM: "Very Good" }
+            ],
+            supporting: [
+                { name: "Love Interest", TF: "Excellent", TM: "Good", YF: "Excellent", YM: "Slightly Good", AF: "Very Good", AM: "Neutral" },
+                { name: "Sidekick", TF: "Extremely Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Extremely Good" },
+                { name: "Mentor", TF: "Slightly Good", TM: "Neutral", YF: "Good", YM: "Slightly Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Damsel In Distress", TF: "Good", TM: "Good", YF: "Slightly Good", YM: "Good", AF: "Slightly Good", AM: "Good" },
+                { name: "Rival", TF: "Good", TM: "Good", YF: "Good", YM: "Good", AF: "Good", AM: "Good" },
+                { name: "Femme Fatale", TF: "Neutral", TM: "Very Good", YF: "Good", YM: "Very Good", AF: "Slightly Good", AM: "Very Good" },
+                { name: "Angry Boss", TF: "Slightly Good", TM: "Neutral", YF: "Neutral", YM: "Slightly Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Strict Parent", TF: "Slightly Good", TM: "Neutral", YF: "Good", YM: "Neutral", AF: "Very Good", AM: "Very Good" },
+                { name: "Sheriff", TF: "Good", TM: "Very Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Extremely Good" }
+            ],
+            finale: [
+                { name: "Antagonist Gets Punished", TF: "Good", TM: "Good", YF: "Slightly Good", YM: "Slightly Good", AF: "Good", AM: "Good" },
+                { name: "Protagonist Dies Heroically", TF: "Very Bad", TM: "Slightly Bad", YF: "Neutral", YM: "Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Antagonist Gets Killed", TF: "Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Very Good" },
+                { name: "Antagonist Repents", TF: "Good", TM: "Good", YF: "Slightly Good", YM: "Good", AF: "Good", AM: "Good" },
+                { name: "Protagonist Rescues Hostage", TF: "Good", TM: "Very Good", YF: "Good", YM: "Very Good", AF: "Neutral", AM: "Good" },
+                { name: "Sweethearts Stay Together", TF: "Very Good", TM: "Neutral", YF: "Excellent", YM: "Good", AF: "Excellent", AM: "Slightly Good" },
+                { name: "Protagonist Gets Chance For Better Life", TF: "Neutral", TM: "Neutral", YF: "Good", YM: "Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Protagonist Overcame Self-Doubt", TF: "Good", TM: "Slightly Good", YF: "Good", YM: "Good", AF: "Good", AM: "Good" },
+                { name: "Protagonist Finds Treasure", TF: "Extremely Good", TM: "Extremely Good", YF: "Very Good", YM: "Extremely Good", AF: "Neutral", AM: "Good" }
+            ],
+            theme: [
+                { name: "Treasure Hunt", TF: "Extremely Good", TM: "Extremely Good", YF: "Very Good", YM: "Extremely Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Love Triangle", TF: "Very Good", TM: "Very Bad", YF: "Excellent", YM: "Bad", AF: "Excellent", AM: "Slightly Good" },
+                { name: "War Is Hell", TF: "Slightly Bad", TM: "Slightly Bad", YF: "Slightly Bad", YM: "Neutral", AF: "Very Good", AM: "Very Good" },
+                { name: "Generational Conflict", TF: "Extremely Good", TM: "Extremely Good", YF: "Extremely Good", YM: "Extremely Good", AF: "Good", AM: "Good" },
+                { name: "Avenging Loved Ones", TF: "Good", TM: "Very Good", YF: "Good", YM: "Very Good", AF: "Slightly Good", AM: "Good" },
+                { name: "Struggle For Better Life", TF: "Slightly Bad", TM: "Slightly Bad", YF: "Good", YM: "Slightly Good", AF: "Extremely Good", AM: "Extremely Good" },
+                { name: "Winning The Beloved", TF: "Very Good", TM: "Bad", YF: "Excellent", YM: "Slightly Bad", AF: "Excellent", AM: "Neutral" },
+                { name: "Unrequited Love", TF: "Extremely Good", TM: "Slightly Bad", YF: "Excellent", YM: "Neutral", AF: "Very Good", AM: "Slightly Good" },
+                { name: "Long Journey", TF: "Good", TM: "Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Good" },
+                { name: "Fight Hypocritical American", TF: "Very Good", TM: "Very Good", YF: "Very Good", YM: "Very Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Evil Transformation", TF: "Good", TM: "Very Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Good" },
+                { name: "A Curse", TF: "Good", TM: "Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Good" },
+                { name: "Surviving In Wartime", TF: "Slightly Bad", TM: "Neutral", YF: "Slightly Good", YM: "Neutral", AF: "Extremely Good", AM: "Extremely Good" },
+                { name: "Search Killer", TF: "Good", TM: "Extremely Good", YF: "Good", YM: "Extremely Good", AF: "Very Good", AM: "Very Good" }
+            ]
+        };
+
+        const scoreMap = {
+            "Excellent": "score-excellent",
+            "Extremely Good": "score-extremely-good",
+            "Very Good": "score-very-good",
+            "Good": "score-good",
+            "Slightly Good": "score-slightly-good",
+            "Neutral": "score-neutral",
+            "Slightly Bad": "score-slightly-bad",
+            "Bad": "score-bad",
+            "Very Bad": "score-very-bad",
+            "Extremely Bad": "score-extremely-bad",
+            "Disastrous": "score-disastrous",
+            "None": "score-neutral"
+        };
+
+        let currentTab = "genre";
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+            event.target && event.target.classList.add("active");
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+            const rows = data[currentTab] || [];
+
+            rows.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="element-name">${row.name}</td>
+                    <td class="score-cell ${scoreMap[row.TF]}" title="${row.TF}">${row.TF === "None" ? "—" : row.TF}</td>
+                    <td class="score-cell ${scoreMap[row.TM]}" title="${row.TM}">${row.TM === "None" ? "—" : row.TM}</td>
+                    <td class="score-cell ${scoreMap[row.YF]}" title="${row.YF}">${row.YF === "None" ? "—" : row.YF}</td>
+                    <td class="score-cell ${scoreMap[row.YM]}" title="${row.YM}">${row.YM === "None" ? "—" : row.YM}</td>
+                    <td class="score-cell ${scoreMap[row.AF]}" title="${row.AF}">${row.AF === "None" ? "—" : row.AF}</td>
+                    <td class="score-cell ${scoreMap[row.AM]}" title="${row.AM}">${row.AM === "None" ? "—" : row.AM}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const search = document.getElementById("search").value.toLowerCase();
+            const rows = document.querySelectorAll("#tableBody tr");
+            rows.forEach(row => {
+                const name = row.querySelector(".element-name").textContent.toLowerCase();
+                row.style.display = name.includes(search) ? "" : "none";
+            });
+        }
+
+        renderTable();
+    </script>
+</body>
+</html>

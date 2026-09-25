@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audience Compatibility Reference</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8f7f5; padding: 20px; }
+        h1 { font-size: 28px; margin-bottom: 8px; }
+        .subtitle { font-size: 14px; color: #666; font-style: italic; }
+        .legend { background: white; padding: 20px; border-radius: 8px; margin-bottom: 24px; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+        .tab { padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 14px; color: #8b7d74; }
+        .tab.active { color: #2d2520; border-bottom: 2px solid #8b4513; font-weight: 600; }
+        .table-wrapper { background: white; border-radius: 8px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #faf8f5; padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #e8e3dd; }
+        td { padding: 10px; border-bottom: 1px solid #f0ebe7; }
+        .element-name { font-weight: 500; min-width: 180px; }
+        .score-cell { text-align: center; padding: 8px; border-radius: 4px; }
+        .score-excellent { background: #d4edda; }
+        .score-very-good { background: #e2f5db; }
+        .score-good { background: #ecf8e8; }
+        .score-neutral { background: #f5f3f0; }
+        .score-bad { background: #ffe8e2; }
+        .score-very-bad { background: #ffd6cc; }
+    </style>
+</head>
+<body>
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <h1>Audience Compatibility Reference</h1>
+        <p class="subtitle">227 story elements across 6 categories • Demographic appeal: -5.0 to +5.0</p>
+        
+        <div class="legend">
+            <strong>Score Scale:</strong> +5.0 (Excellent) → 0.0 (Neutral) → -5.0 (Disastrous)
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('genre')">Genres</button>
+            <button class="tab" onclick="switchTab('setting')">Settings</button>
+            <button class="tab" onclick="switchTab('protagonist')">Protagonists</button>
+            <button class="tab" onclick="switchTab('antagonist')">Antagonists</button>
+            <button class="tab" onclick="switchTab('supporting')">Supporting Characters</button>
+            <button class="tab" onclick="switchTab('finale')">Finales</button>
+            <button class="tab" onclick="switchTab('theme')">Themes & Events</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th title="Teen Female">TF</th>
+                        <th title="Teen Male">TM</th>
+                        <th title="Young Female">YF</th>
+                        <th title="Young Male">YM</th>
+                        <th title="Adult Female">AF</th>
+                        <th title="Adult Male">AM</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            genre: [
+                { name: "Action", TF: "Very Good", TM: "Excellent", YF: "Good", YM: "Excellent", AF: "Slightly Good", AM: "Extremely Good" },
+                { name: "Adventure", TF: "Extremely Good", TM: "Excellent", YF: "Extremely Good", YM: "Excellent", AF: "Very Good", AM: "Very Good" },
+                { name: "Comedy", TF: "Extremely Good", TM: "Extremely Good", YF: "Very Good", YM: "Very Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Detective", TF: "Good", TM: "Extremely Good", YF: "Good", YM: "Extremely Good", AF: "Very Good", AM: "Extremely Good" },
+                { name: "Drama", TF: "Very Bad", TM: "Very Bad", YF: "Good", YM: "Slightly Good", AF: "Extremely Good", AM: "Very Good" },
+                { name: "Historical", TF: "Very Bad", TM: "Very Bad", YF: "Very Good", YM: "Very Good", AF: "Excellent", AM: "Extremely Good" },
+                { name: "Horror", TF: "Slightly Bad", TM: "Very Good", YF: "Slightly Good", YM: "Extremely Good", AF: "Very Bad", AM: "Bad" },
+                { name: "Romance", TF: "Very Good", TM: "Slightly Bad", YF: "Excellent", YM: "Good", AF: "Excellent", AM: "Slightly Good" },
+                { name: "Science Fiction", TF: "Very Good", TM: "Excellent", YF: "Good", YM: "Excellent", AF: "Slightly Good", AM: "Very Good" },
+                { name: "Thriller", TF: "Slightly Good", TM: "Slightly Good", YF: "Very Good", YM: "Extremely Good", AF: "Extremely Good", AM: "Extremely Good" }
+            ],
+            setting: [
+                { name: "Wild West", TF: "Good", TM: "Excellent", YF: "Slightly Good", YM: "Extremely Good", AF: "Slightly Good", AM: "Extremely Good" },
+                { name: "Victorian England", TF: "Neutral", TM: "Neutral", YF: "Very Good", YM: "Slightly Good", AF: "Extremely Good", AM: "Good" },
+                { name: "Fantasy Kingdom", TF: "Excellent", TM: "Excellent", YF: "Good", YM: "Good", AF: "Slightly Bad", AM: "Very Bad" },
+                { name: "Space", TF: "Good", TM: "Extremely Good", YF: "Slightly Good", YM: "Very Good", AF: "Slightly Bad", AM: "Slightly Good" },
+                { name: "Modern American City", TF: "Neutral", TM: "Neutral", YF: "Neutral", YM: "Neutral", AF: "Neutral", AM: "Neutral" }
+            ],
+            protagonist: [
+                { name: "Cowboy", TF: "Very Good", TM: "Excellent", YF: "Good", YM: "Excellent", AF: "Slightly Good", AM: "Extremely Good" },
+                { name: "Detective", TF: "Very Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Very Good" },
+                { name: "Soldier", TF: "Very Good", TM: "Extremely Good", YF: "Slightly Good", YM: "Very Good", AF: "Good", AM: "Very Good" },
+                { name: "Bounty Hunter", TF: "Very Good", TM: "Excellent", YF: "Slightly Good", YM: "Excellent", AF: "Neutral", AM: "Extremely Good" },
+                { name: "Secret Agent", TF: "Very Good", TM: "Extremely Good", YF: "Good", YM: "Extremely Good", AF: "Good", AM: "Very Good" },
+                { name: "Wayward Soul", TF: "None", TM: "None", YF: "None", YM: "None", AF: "None", AM: "None" }
+            ],
+            antagonist: [
+                { name: "Alien", TF: "Excellent", TM: "Excellent", YF: "Good", YM: "Extremely Good", AF: "Slightly Good", AM: "Very Good" },
+                { name: "Serial Killer", TF: "Extremely Good", TM: "Excellent", YF: "Extremely Good", YM: "Excellent", AF: "Very Good", AM: "Extremely Good" },
+                { name: "Vampire", TF: "Extremely Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Neutral", AM: "Good" },
+                { name: "Bandit", TF: "Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Slightly Good", AM: "Very Good" }
+            ],
+            supporting: [
+                { name: "Love Interest", TF: "Excellent", TM: "Good", YF: "Excellent", YM: "Slightly Good", AF: "Very Good", AM: "Neutral" },
+                { name: "Sidekick", TF: "Extremely Good", TM: "Extremely Good", YF: "Good", YM: "Very Good", AF: "Good", AM: "Extremely Good" },
+                { name: "Mentor", TF: "Slightly Good", TM: "Neutral", YF: "Good", YM: "Slightly Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Femme Fatale", TF: "Neutral", TM: "Very Good", YF: "Good", YM: "Very Good", AF: "Slightly Good", AM: "Very Good" }
+            ],
+            finale: [
+                { name: "Antagonist Gets Punished", TF: "Good", TM: "Good", YF: "Slightly Good", YM: "Slightly Good", AF: "Good", AM: "Good" },
+                { name: "Protagonist Dies Heroically", TF: "Very Bad", TM: "Slightly Bad", YF: "Neutral", YM: "Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Sweethearts Stay Together", TF: "Very Good", TM: "Neutral", YF: "Excellent", YM: "Good", AF: "Excellent", AM: "Slightly Good" },
+                { name: "Protagonist Finds Treasure", TF: "Extremely Good", TM: "Extremely Good", YF: "Very Good", YM: "Extremely Good", AF: "Neutral", AM: "Good" }
+            ],
+            theme: [
+                { name: "Treasure Hunt", TF: "Extremely Good", TM: "Extremely Good", YF: "Very Good", YM: "Extremely Good", AF: "Very Good", AM: "Very Good" },
+                { name: "Love Triangle", TF: "Very Good", TM: "Very Bad", YF: "Excellent", YM: "Bad", AF: "Excellent", AM: "Slightly Good" },
+                { name: "War Is Hell", TF: "Slightly Bad", TM: "Slightly Bad", YF: "Slightly Bad", YM: "Neutral", AF: "Very Good", AM: "Very Good" },
+                { name: "Generational Conflict", TF: "Extremely Good", TM: "Extremely Good", YF: "Extremely Good", YM: "Extremely Good", AF: "Good", AM: "Good" },
+                { name: "Avenging Loved Ones", TF: "Good", TM: "Very Good", YF: "Good", YM: "Very Good", AF: "Slightly Good", AM: "Good" },
+                { name: "Struggle For Better Life", TF: "Slightly Bad", TM: "Slightly Bad", YF: "Good", YM: "Slightly Good", AF: "Extremely Good", AM: "Extremely Good" },
+                { name: "Fight Hypocritical American", TF: "Very Good", TM: "Very Good", YF: "Very Good", YM: "Very Good", AF: "Very Good", AM: "Very Good" }
+            ]
+        };
+
+        const scoreMap = {
+            "Excellent": "score-excellent", "Extremely Good": "score-excellent",
+            "Very Good": "score-very-good", "Good": "score-good",
+            "Slightly Good": "score-good", "Neutral": "score-neutral",
+            "Slightly Bad": "score-bad", "Bad": "score-bad",
+            "Very Bad": "score-very-bad", "None": "score-neutral"
+        };
+
+        let currentTab = "genre";
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+            event.target && event.target.classList.add("active");
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+            const rows = data[currentTab] || [];
+            rows.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="element-name">${row.name}</td>
+                    <td class="score-cell ${scoreMap[row.TF]}">${row.TF === "None" ? "—" : row.TF}</td>
+                    <td class="score-cell ${scoreMap[row.TM]}">${row.TM === "None" ? "—" : row.TM}</td>
+                    <td class="score-cell ${scoreMap[row.YF]}">${row.YF === "None" ? "—" : row.YF}</td>
+                    <td class="score-cell ${scoreMap[row.YM]}">${row.YM === "None" ? "—" : row.YM}</td>
+                    <td class="score-cell ${scoreMap[row.AF]}">${row.AF === "None" ? "—" : row.AF}</td>
+                    <td class="score-cell ${scoreMap[row.AM]}">${row.AM === "None" ? "—" : row.AM}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        renderTable();
+    </script>
+</body>
+</html>
