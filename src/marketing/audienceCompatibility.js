@@ -30,13 +30,47 @@
     }
 
     function renderCompatibilityTable(elements) {
-        if (!elements || elements.length === 0) return '';
-
         const container = document.getElementById('compatibilityTableContainer');
         if (!container) return;
 
-        let html = '<table class="compatibility-table"><thead><tr><th scope="col">Element</th>';
+        if (!elements || elements.length === 0) {
+            // Show all available elements grouped by category
+            const allElements = Object.values(GAME_DATA.tags)
+                .filter(tag => tag && tag.weights && tag.category)
+                .sort((a, b) => {
+                    if (a.category !== b.category) return a.category.localeCompare(b.category);
+                    return (a.name || a.id).localeCompare(b.name || b.id);
+                });
 
+            if (allElements.length === 0) {
+                container.innerHTML = '<div class="empty-state padded-empty">No elements available.</div>';
+                return;
+            }
+
+            let html = '<table class="compatibility-table"><thead><tr><th scope="col">Element</th>';
+            DEMOGRAPHICS.forEach(demo => {
+                html += `<th scope="col" title="${DEMOGRAPHIC_LABELS[demo]}">${demo}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            allElements.forEach(tag => {
+                html += `<tr><td class="element-name">${tag.name || tag.id}</td>`;
+                DEMOGRAPHICS.forEach(demo => {
+                    const score = parseFloat(tag.weights[demo] || 0);
+                    const label = getScoreLabel(score);
+                    const scoreClass = getScoreClass(score);
+                    html += `<td class="score-cell ${scoreClass}" title="${label}">${score.toFixed(1)}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            return;
+        }
+
+        // Show only selected elements
+        let html = '<table class="compatibility-table"><thead><tr><th scope="col">Element</th>';
         DEMOGRAPHICS.forEach(demo => {
             html += `<th scope="col" title="${DEMOGRAPHIC_LABELS[demo]}">${demo}</th>`;
         });
@@ -44,14 +78,12 @@
 
         elements.forEach(element => {
             html += `<tr><td class="element-name">${element.name || element.id}</td>`;
-
             DEMOGRAPHICS.forEach(demo => {
                 const score = element.scores?.[demo] ?? 0;
                 const label = getScoreLabel(score);
                 const scoreClass = getScoreClass(score);
                 html += `<td class="score-cell ${scoreClass}" title="${label}">${score.toFixed(1)}</td>`;
             });
-
             html += '</tr>';
         });
 
@@ -60,91 +92,62 @@
     }
 
     function getCompatibilityElements() {
-        // Select only from the targeted context (Build for Target)
         const container = document.getElementById('selectors-container-targeted');
         if (!container) return [];
 
-        // Select elements store value as a property, not an attribute
-        const selectedProtagTag = Array.from(container.querySelectorAll('[data-category="Protagonist"]'))
-            .find(el => el.value);
-        const selectedAntagonistTag = Array.from(container.querySelectorAll('[data-category="Antagonist"]'))
-            .find(el => el.value);
-
         const elements = [];
+        const categories = ['Protagonist', 'Antagonist', 'Supporting Character', 'Theme & Event', 'Genre', 'Setting', 'Finale'];
 
-        if (selectedProtagTag?.value) {
-            const tagId = selectedProtagTag.value;
-            const tag = GAME_DATA.tags[tagId];
-            if (tag && tag.weights) {
-                const scores = {};
-                DEMOGRAPHICS.forEach(demo => {
-                    scores[demo] = parseFloat(tag.weights[demo] || 0);
-                });
-                elements.push({
-                    id: tagId,
-                    name: tag.name || tag.id,
-                    category: 'Protagonist',
-                    scores: scores
-                });
-            }
-        }
-
-        if (selectedAntagonistTag?.value) {
-            const tagId = selectedAntagonistTag.value;
-            const tag = GAME_DATA.tags[tagId];
-            if (tag && tag.weights) {
-                const scores = {};
-                DEMOGRAPHICS.forEach(demo => {
-                    scores[demo] = parseFloat(tag.weights[demo] || 0);
-                });
-                elements.push({
-                    id: tagId,
-                    name: tag.name || tag.id,
-                    category: 'Antagonist',
-                    scores: scores
-                });
-            }
-        }
+        categories.forEach(category => {
+            const selectors = Array.from(container.querySelectorAll(`[data-category="${category}"]`));
+            selectors.forEach(selector => {
+                if (selector.value) {
+                    const tagId = selector.value;
+                    const tag = GAME_DATA.tags[tagId];
+                    if (tag && tag.weights) {
+                        const scores = {};
+                        DEMOGRAPHICS.forEach(demo => {
+                            scores[demo] = parseFloat(tag.weights[demo] || 0);
+                        });
+                        elements.push({
+                            id: tagId,
+                            name: tag.name || tag.id,
+                            category: category,
+                            scores: scores
+                        });
+                    }
+                }
+            });
+        });
 
         return elements;
     }
 
-    function showCompatibilityPanel() {
+    function updateCompatibilityDisplay() {
         const panel = document.getElementById('audience-compatibility-panel');
+        if (!panel) return;
+
         const elements = getCompatibilityElements();
-
-        if (elements.length === 0) {
-            const container = document.getElementById('compatibilityTableContainer');
-            container.innerHTML = '<div class="empty-state padded-empty">Select a Protagonist or Antagonist to see audience compatibility.</div>';
-            panel.classList.remove('hidden');
-            return;
-        }
-
         renderCompatibilityTable(elements);
         panel.classList.remove('hidden');
     }
 
-    function hideCompatibilityPanel() {
-        const panel = document.getElementById('audience-compatibility-panel');
-        panel.classList.add('hidden');
-    }
-
     function setupCompatibilityListeners() {
         const showButton = document.getElementById('showAudienceCompatibilityButton');
-        const closeButton = document.getElementById('closeCompatibilityButton');
 
         if (showButton) {
-            showButton.addEventListener('click', showCompatibilityPanel);
+            showButton.addEventListener('click', updateCompatibilityDisplay);
         }
 
-        if (closeButton) {
-            closeButton.addEventListener('click', hideCompatibilityPanel);
+        // Listen for changes on all selectors in targeted context
+        const container = document.getElementById('selectors-container-targeted');
+        if (container) {
+            container.addEventListener('change', updateCompatibilityDisplay);
         }
     }
 
     global.HACOudienceCompatibility = {
         setupCompatibilityListeners,
-        showCompatibilityPanel,
-        hideCompatibilityPanel
+        updateCompatibilityDisplay
     };
 })(globalThis);
