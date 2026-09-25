@@ -2906,13 +2906,48 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
     min-width: 140px;
 }
 
-.element-name.category-protagonist { color: var(--ha-category-protagonist); }
-.element-name.category-antagonist { color: var(--ha-category-antagonist); }
-.element-name.category-supporting-character { color: var(--ha-category-supporting-character); }
-.element-name.category-theme-event { color: var(--ha-category-theme-event); }
-.element-name.category-finale { color: var(--ha-category-finale); }
-.element-name.category-genre { color: #d4af37; }
-.element-name.category-setting { color: #a8a8a8; }
+.element-name.category-protagonist {
+    color: var(--ha-category-protagonist);
+    background: rgba(80, 128, 88, 0.12);
+    border-left: 3px solid var(--ha-category-protagonist);
+    padding-left: 9px;
+}
+.element-name.category-antagonist {
+    color: var(--ha-category-antagonist);
+    background: rgba(88, 64, 144, 0.12);
+    border-left: 3px solid var(--ha-category-antagonist);
+    padding-left: 9px;
+}
+.element-name.category-supporting-character {
+    color: var(--ha-category-supporting-character);
+    background: rgba(88, 128, 152, 0.12);
+    border-left: 3px solid var(--ha-category-supporting-character);
+    padding-left: 9px;
+}
+.element-name.category-theme-event {
+    color: var(--ha-category-theme-event);
+    background: rgba(144, 80, 64, 0.12);
+    border-left: 3px solid var(--ha-category-theme-event);
+    padding-left: 9px;
+}
+.element-name.category-finale {
+    color: var(--ha-category-finale);
+    background: rgba(144, 72, 112, 0.12);
+    border-left: 3px solid var(--ha-category-finale);
+    padding-left: 9px;
+}
+.element-name.category-genre {
+    color: #d4af37;
+    background: rgba(212, 175, 55, 0.12);
+    border-left: 3px solid #d4af37;
+    padding-left: 9px;
+}
+.element-name.category-setting {
+    color: #a8a8a8;
+    background: rgba(168, 168, 168, 0.12);
+    border-left: 3px solid #a8a8a8;
+    padding-left: 9px;
+}
 
 .score-cell {
     font-weight: 500;
