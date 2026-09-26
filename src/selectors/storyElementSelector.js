@@ -1,6 +1,29 @@
 (function(global) {
     "use strict";
 
+    let sortedTagsByCategory = null;
+    let indexedTags = null;
+    let indexedLanguage = null;
+
+    function getSortedTagsByCategory(category) {
+        if (sortedTagsByCategory && indexedTags === GAME_DATA.tags && indexedLanguage === currentLanguage) {
+            return sortedTagsByCategory.get(category) || [];
+        }
+
+        const index = new Map();
+        Object.values(GAME_DATA.tags || {}).forEach(tag => {
+            if (!tag || !tag.category) return;
+            if (!index.has(tag.category)) index.set(tag.category, []);
+            index.get(tag.category).push(tag);
+        });
+        index.forEach(tags => tags.sort((a, b) => a.name.localeCompare(b.name)));
+
+        sortedTagsByCategory = index;
+        indexedTags = GAME_DATA.tags;
+        indexedLanguage = currentLanguage;
+        return index.get(category) || [];
+    }
+
 
     function contextUsesGlobalExclusions(context) {
         return HACSelectorExclusions.contextUsesGlobalExclusions(context);
@@ -36,33 +59,39 @@
 
     function restoreSelection(context, savedInputs) {
         if(!savedInputs || savedInputs.length === 0) return;
-        savedInputs.forEach(input => {
-            if (isTagExcludedForContext(input.id, context)) return;
+        const selectorsContainer = document.getElementById(`selectors-container-${context}`);
+        selectorsContainer?.classList.add('is-batching');
+        try {
+            savedInputs.forEach(input => {
+                if (isTagExcludedForContext(input.id, context)) return;
 
-            const category = input.category;
-            const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
-            const container = document.getElementById(containerId);
-            if(!container) return;
-            const selects = container.querySelectorAll('select');
-            let placed = false;
-            for(let sel of selects) {
-                if(sel.value === "") {
-                    sel.value = input.id;
-                    placed = true;
-                    break;
+                const category = input.category;
+                const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
+                const container = document.getElementById(containerId);
+                if(!container) return;
+                const selects = container.querySelectorAll('select');
+                let placed = false;
+                for(let sel of selects) {
+                    if(sel.value === "") {
+                        selectTagOption(sel, category, input.id);
+                        placed = true;
+                        break;
+                    }
                 }
-            }
-            // The ban list carries no cardinality limit — a player may ban every
-            // Setting in the game — so the excluded context always gets a fresh
-            // row. Applying the script builder's single-select rule here silently
-            // dropped every ban past the first in Setting, Protagonist,
-            // Antagonist and Finale, and the observer then saved that short list
-            // back over the stored one.
-            if(!placed && (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category))) {
-                addDropdown(category, input.id, context);
-                placed = true;
-            }
-        });
+                // The ban list has no cardinality limit, so excluded tags always
+                // need a fresh row when restoring more than one pick per category.
+                if(!placed && (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category))) {
+                    addDropdown(category, input.id, context);
+                }
+            });
+        } finally {
+            selectorsContainer?.classList.remove('is-batching');
+        }
+
+        new Set(savedInputs.map(input => input.category))
+            .forEach(category => refreshCategoryDropdowns(category, context));
+        refreshSelectorVisualHints(context);
+
         if(savedInputs.some(i => i.category === 'Genre')) {
             updateGenreControls(context);
             const genreRows = document.querySelectorAll(`#inputs-${categoryToElementSlug('Genre')}-${context} .genre-row`);
@@ -78,7 +107,7 @@
         }
     }
 
-    function initializeSelectors(context) {
+    function initializeSelectors(context, deferOptions = false) {
         const container = document.getElementById(`selectors-container-${context}`);
         container.innerHTML = '';
 
@@ -87,9 +116,7 @@
         const sortedCategories = GAME_DATA.categories;
 
         sortedCategories.forEach(category => {
-            const tagsInCategory = Object.values(GAME_DATA.tags).filter(t =>
-                t.category === category
-            ).sort((a, b) => a.name.localeCompare(b.name));
+            const tagsInCategory = getSortedTagsByCategory(category);
             if (tagsInCategory.length === 0) return;
 
             const groupDiv = document.createElement('div');
@@ -145,7 +172,15 @@
             groupDiv.appendChild(inputsContainer);
 
             container.appendChild(groupDiv);
-            addDropdown(category, null, context);
+            addDropdown(category, null, context, deferOptions);
+        });
+    }
+
+    function populateContextOptions(context) {
+        const container = document.getElementById(`selectors-container-${context}`);
+        if (!container) return;
+        container.querySelectorAll('select.tag-selector').forEach(select => {
+            ensureOptionsPopulated(select, select.dataset.category, context);
         });
     }
 
@@ -190,17 +225,12 @@
             }
         });
 
-        // When an exclusion is removed, un-excluded tags may not exist in the options
-        // (they were filtered out when the dropdown was created). Add them back if they're now usable.
-        const allCategoryTags = Object.values(GAME_DATA.tags)
-            .filter(t => t.category === category)
-            .sort((a, b) => a.name.localeCompare(b.name));
+        // Restore options that were unavailable when a selector row was first
+        // created; exclusion state is applied separately by disabling/hiding them.
+        const allCategoryTags = getSortedTagsByCategory(category);
 
         selects.forEach(select => {
-            // Ensure options are populated before querying them
-            if (select.dataset.optionsPopulated === 'false') {
-                ensureOptionsPopulated(select, category, context);
-            }
+            if (select.dataset.optionsPopulated !== 'true') return;
 
             const existingIds = new Set(Array.from(select.querySelectorAll('option:not(:first-child)')).map(opt => opt.value));
 
@@ -340,26 +370,38 @@
      * Populates option elements into a select element with tags for a given category.
      * Extracted to support lazy-loading: the select is created empty, options added on demand.
      */
+    function createTagOption(category, tag) {
+        const opt = document.createElement('option');
+        opt.value = tag.id;
+        opt.innerText = tag.name;
+        opt.dataset.searchText = tag.name.toLowerCase();
+        if (category === 'Genre') {
+            opt.className = `genre-${toDomId(tag.id)}`;
+        } else {
+            opt.className = categoryToElementSlug(category);
+        }
+        return opt;
+    }
+
+    function selectTagOption(selectElement, category, tagId) {
+        const tag = GAME_DATA.tags[tagId];
+        if (!tag) return;
+
+        let option = Array.from(selectElement.options).find(existing => existing.value === tagId);
+        if (!option) {
+            option = createTagOption(category, tag);
+            selectElement.appendChild(option);
+        }
+        selectElement.value = tagId;
+    }
+
     function populateSelectOptions(selectElement, category, tags) {
-        // Bail if already populated
         if (selectElement.dataset.optionsPopulated === 'true') return;
 
+        const existingIds = new Set(Array.from(selectElement.options).map(option => option.value));
         const fragment = document.createDocumentFragment();
         tags.forEach(tag => {
-            const opt = document.createElement('option');
-            opt.value = tag.id;
-            opt.innerText = tag.name;
-            opt.dataset.searchText = tag.name.toLowerCase();
-            if (category === 'Genre') {
-                opt.className = `genre-${toDomId(tag.id)}`;
-            } else {
-                const categorySlug = category
-                    .toLowerCase()
-                    .replace(/[&\s]+/g, '-')
-                    .replace(/-+$/, '');
-                opt.className = categorySlug;
-            }
-            fragment.appendChild(opt);
+            if (!existingIds.has(tag.id)) fragment.appendChild(createTagOption(category, tag));
         });
 
         selectElement.appendChild(fragment);
@@ -374,20 +416,11 @@
         if (selectElement.dataset.optionsPopulated === 'true') return;
 
         // Gather tags for this category
-        let tags = Object.values(GAME_DATA.tags).filter(t => t.category === category);
-
-        // In Starting Tags profile for script builders (not excluded), filter to starter whitelist
-        if (currentGenProfile === 'starting' && context !== 'excluded') {
-            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
-            tags = tags.filter(t => whitelist.has(t.id));
-        }
-
-        tags = filterTagsForContext(tags, context).sort((a, b) => a.name.localeCompare(b.name));
-
-        populateSelectOptions(selectElement, category, tags);
+        populateSelectOptions(selectElement, category, getSortedTagsByCategory(category));
+        refreshCategoryDropdowns(category, context);
     }
 
-    function addDropdown(category, selectedId = null, context = currentTab) {
+    function addDropdown(category, selectedId = null, context = currentTab, deferOptions = false) {
         if (selectedId && !canUseTagInContext(selectedId, context)) {
             selectedId = null;
         }
@@ -400,19 +433,10 @@
         // Logic for single-select categories in script-building contexts.
         if (context !== 'excluded' && !MULTI_SELECT_CATEGORIES.includes(category) && container.children.length > 0) {
             const select = container.querySelector('select');
-            if (selectedId) select.value = selectedId;
+            if (selectedId) selectTagOption(select, category, selectedId);
             return;
         }
 
-        let tags = Object.values(GAME_DATA.tags).filter(t => t.category === category);
-
-        // In Starting Tags profile for script builders (not excluded), filter to starter whitelist
-        if (currentGenProfile === 'starting' && context !== 'excluded') {
-            const whitelist = new Set(GAME_DATA.starterWhitelist || []);
-            tags = tags.filter(t => whitelist.has(t.id));
-        }
-
-        tags = filterTagsForContext(tags, context).sort((a, b) => a.name.localeCompare(b.name));
         const row = document.createElement('div');
         row.className = 'select-row';
         // Numbered within this category+context. A shared counter made row ids shift
@@ -438,18 +462,14 @@
         defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
         select.appendChild(defOpt);
 
-        // Populate options into the select
-        // For now, all contexts are eagerly populated to ensure compatibility
-        // TODO: Implement selective lazy-loading for generator/advertisers contexts on focus
-        populateSelectOptions(select, category, tags);
+        if (selectedId) selectTagOption(select, category, selectedId);
+        if (!deferOptions && !(context === 'excluded' && selectedId)) {
+            populateSelectOptions(select, category, getSortedTagsByCategory(category));
+        }
 
-        // Add focus listener for potential future lazy-loading optimization
         select.addEventListener('focus', () => {
-            // Ensure options are populated (will be quick if already populated)
             ensureOptionsPopulated(select, category, context);
         });
-
-        if (selectedId) select.value = selectedId;
         row.appendChild(select);
 
         // Set genre color immediately if this is a genre select with a value
@@ -504,7 +524,8 @@
         // Bulk exclusion/profile creation refreshes once after all rows exist.
         // Scheduling a full category scan per inserted row makes a 193-ban batch
         // quadratic and blocks the main thread for several seconds.
-        if (!container.classList.contains('is-batching')) {
+        const selectorsContainer = document.getElementById(`selectors-container-${context}`);
+        if (!selectorsContainer?.classList.contains('is-batching')) {
             setTimeout(() => {
                 refreshCategoryDropdowns(category, context);
                 refreshSelectorVisualHints(context);
@@ -752,6 +773,7 @@
     global.HACStoryElementSelector = {
         restoreSelection,
         initializeSelectors,
+        populateContextOptions,
         contextUsesGlobalExclusions,
         isTagExcludedForContext,
         canUseTagInContext,

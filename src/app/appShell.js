@@ -2,6 +2,7 @@
     "use strict";
 
     let bootRetryBound = false;
+    let scoreSyncInitialized = false;
     const initializedTabs = new Set(['generator', 'excluded']);
 
     // Bound outside the start-up sequence: the retry control has to work precisely
@@ -37,8 +38,15 @@
         // Only this stretch reaches the network, so it is the only part that can
         // fail in a way the user can act on.
         try {
+            performance.mark('startup:localization:start');
             await changeLanguage('English', false);
+            performance.mark('startup:localization:end');
+            performance.measure('startup:localization', 'startup:localization:start', 'startup:localization:end');
+
+            performance.mark('startup:essential-data:start');
             await loadExternalData();
+            performance.mark('startup:essential-data:end');
+            performance.measure('startup:essential-data', 'startup:essential-data:start', 'startup:essential-data:end');
             performance.mark('data:loaded');
         } catch (error) {
             failBoot(error);
@@ -58,9 +66,18 @@
 
         // Graves selector IDs are part of the ready-state DOM contract even
         // though its interactions and analysis listeners remain tab-lazy.
-        initializeSelectors('generator');
-        initializeSelectors('excluded');
-        initializeSelectors('graves');
+        [
+            ['generator', false],
+            ['excluded', false],
+            ['graves', true]
+        ].forEach(([context, deferOptions]) => {
+            const startMark = `startup:selectors:${context}:start`;
+            const endMark = `startup:selectors:${context}:end`;
+            performance.mark(startMark);
+            initializeSelectors(context, deferOptions);
+            performance.mark(endMark);
+            performance.measure(`startup:selectors:${context}`, startMark, endMark);
+        });
         performance.mark('selectors:initialized');
 
         setupGlobalCategorySearch();
@@ -89,7 +106,16 @@
         // which is exactly how a returning player's list was destroyed before.
         if (needsStartingTags) {
             const applyButton = document.getElementById('applyStartingTagsButton');
-            if (applyButton) applyButton.click();
+            if (applyButton) {
+                performance.mark('startup:first-run-exclusions:start');
+                applyButton.click();
+                performance.mark('startup:first-run-exclusions:end');
+                performance.measure(
+                    'startup:first-run-exclusions',
+                    'startup:first-run-exclusions:start',
+                    'startup:first-run-exclusions:end'
+                );
+            }
             HACExclusionStore.markStartingTagsSeeded();
         }
 
@@ -183,17 +209,29 @@
         // Lazy-initialize deferred tab setup when user switches to that tab
         if (tabName === 'graves' || tabName === 'advertisers' || tabName === 'targeted') {
             // Initialize DOM selectors for graves and advertisers if needed
-            if (tabName === 'graves' && !document.getElementById('selectors-container-graves').hasChildNodes()) {
-                initializeSelectors('graves');
+            const gravesSelectors = document.getElementById('selectors-container-graves');
+            const advertiserSelectors = document.getElementById('selectors-container-advertisers');
+            if (tabName === 'graves' && !gravesSelectors.querySelector('.category-group')) {
+                initializeSelectors('graves', true);
             }
-            if ((tabName === 'advertisers' || tabName === 'targeted') && !document.getElementById('selectors-container-advertisers').hasChildNodes()) {
-                initializeSelectors('advertisers');
+            if ((tabName === 'advertisers' || tabName === 'targeted') && !advertiserSelectors.querySelector('.category-group')) {
+                initializeSelectors('advertisers', true);
+            }
+            if (tabName === 'graves') {
+                HACStoryElementSelector.populateContextOptions('graves');
+            }
+            if (tabName === 'advertisers' || tabName === 'targeted') {
+                HACStoryElementSelector.populateContextOptions('advertisers');
             }
 
             // Setup search and score listeners for evaluation features
             if (tabName === 'graves') {
                 setupSearchListeners();
+            }
+
+            if (!scoreSyncInitialized) {
                 setupScoreSync();
+                scoreSyncInitialized = true;
             }
 
             // Setup distribution logic and toggles for marketing features
