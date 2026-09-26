@@ -24,6 +24,68 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   scope without owner-supplied source data; do not fabricate them.
   Pinned by `tests/age-role-breakdown.test.js`'s two `KNOWN_MISSING_ENTRIES`
   tests, which fail if this list grows without being updated deliberately.
+
+  > **2026-09-27 investigation, dead end — do not retry this exact approach.**
+  > The Steam install's own
+  > `StreamingAssets\Data\Configs\TagsToAgeCompatibilityData.json` does have
+  > all 18 tags, each as an 8-value `"ageCompatibility"` array
+  > (`"3.000"`-style strings, whole numbers only, no schema/legend file
+  > anywhere in the game files). It looked promising because our repo's
+  > `data/TagsToAgeCompatibilityData.json` shares that exact filename and
+  > already has 6-value (`YOUNG_M`/`YOUNG_F`/`MID_M`/`MID_F`/`OLD_M`/`OLD_F`)
+  > entries for other tags — a same-source, finer-granularity dataset was a
+  > reasonable hypothesis. Tested it by pulling the raw 8-value array for 3
+  > tags we already have correct 6-value data for
+  > (`PROTAGONIST_COWBOY`, `PROTAGONIST_WHITE_COLLAR`, `PROTAGONIST_SHERIFF`)
+  > and exhaustively checking every single-index copy and every 2-index
+  > average against all 3 simultaneously: **zero exact matches**, and even
+  > loosened to best-fit-with-error, the best-fit index pairs were
+  > incoherent across fields (no consistent age/gender partition of the 8
+  > slots emerged). Conclusion: this raw file and our repo's file of the
+  > same name are very likely two independent datasets, not the same data
+  > at different granularity. Nothing was written to either data file
+  > based on this — fabricating a transform that doesn't hold would put
+  > fake numbers in front of a `data_source` field that claims
+  > `"verified"`/`"estimated"` provenance.
+  >
+  > **Re-tested 2026-09-27 with 19 tags instead of 3 — conclusively
+  > unrelated, not just a weak fit.** `AgeSubGroups.json` defines 5 age
+  > tiers by real age range (`YOUNG_1` 18-25, `YOUNG_2` 25-35, `MID_1`
+  > 35-45, `MID_2` 45-55, `OLD` 55+) with marriage/divorce/birthrate
+  > probabilities per tier — this is a **character life-simulation system**
+  > (actor aging, marrying, having children), a different game mechanic
+  > entirely from audience demographic appeal, and has no gender field at
+  > all. The 19-tag re-test still found no exact match and no tight
+  > best-fit (0.37-0.87 average error per field on a 1-5 scale — too loose
+  > to be a real relationship). The decisive proof: `ANTAGONIST_EVIL_MONSTER`,
+  > `ANTAGONIST_ALIEN`, `ANTAGONIST_ENEMY_ARMY`, and
+  > `ANTAGONIST_BARBARIAN_TRIBE` all have the **identical** flat raw array
+  > `[3,3,3,3,3,3,3,3]` in the game file, yet our repo's 6-value data for
+  > all four is different from each of the others. Any consistent formula
+  > (copy, average, weighted sum — anything) applied to identical input
+  > must produce identical output; it doesn't here. These two datasets are
+  > not the same data at different granularity — they are independently
+  > authored. The raw file's flat array for these four looks like an
+  > unused default in the game's own data.
+  >
+  > **Also tested: maybe the 8 values are audience-shaped (TF/TM/YF/YM/AF/AM,
+  > like `data/TagsAudienceWeights.json`), not age-shaped.** Same result. Even
+  > setting aside the scale mismatch (weights run -5 to +5, the raw array
+  > runs 1 to 5), the same four flat-`[3,3,3,3,3,3,3,3]` tags have four
+  > different sets of values in `TagsAudienceWeights.json` too — the
+  > identical-input-must-give-identical-output proof holds regardless of
+  > which of our two existing per-tag datasets you compare the raw array
+  > against. Whatever those 8 numbers mean in the game's own terms, they are
+  > not the source of either `age-role-compatibility.json` or
+  > `TagsAudienceWeights.json`.
+  >
+  > **Do not attempt to derive these 18 tags' ratings from
+  > `TagsToAgeCompatibilityData.json` in the game files again — this door
+  > is closed, under every interpretation tried so far.** Filling this gap
+  > needs real in-game observation (playing and testing appeal per
+  > demographic), matching how the rest of
+  > `age-role-compatibility.json`'s `"verified"`/`"estimated"` values were
+  > evidently produced in the first place, not file extraction.
 - **Distribution formula is game-file sourced, not inferred.** Week 1 = commercial score Ã— 2 Ã— 1,000;
   Week 2 = commercial score Ã— 1 Ã— 1,000; weeks 3-8 = previous week Ã— 0.8 (20% decay). Extracted
   from the game files and documented in `GAME_RULES.md`. Capacity (owned theatres) is
