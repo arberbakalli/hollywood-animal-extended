@@ -346,5 +346,52 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
             expect(validGendersFor('ANTAGONIST_EVIL_WITCH')).toEqual(['F']);
             expect(validGendersFor('ANTAGONIST_CRIMINAL_MASTERMIND')).toEqual(['M']);
         });
+
+        // --- Exhaustive sweep, not a sample ---
+        // The tests above are named examples for readability, each covering one
+        // case by hand. This test is the actual safety net: every real
+        // Protagonist, Antagonist, and Supporting Character tag in
+        // TagData.json -- not a handful picked by the author -- run through
+        // the real getValidGenders() and checked against what TagData.json's
+        // `gender` field says it should be. A tag with a typo'd or otherwise
+        // malformed gender value, or one whose behaviour silently regresses,
+        // fails here even if nobody happened to pick it as a named example.
+        test('every Protagonist, Antagonist, and Supporting Character tag resolves correctly through getValidGenders (full sweep, not a sample)', async () => {
+            const tagData = JSON.parse(await readFile('data/TagData.json', 'utf8'));
+            const bucketForCategory = { Protagonist: 1, Antagonist: 1, SupportingCharacter: 1 };
+            const characterIds = Object.keys(tagData).filter(id => bucketForCategory[tagData[id].CategoryID]);
+
+            // One evaluate call for all ids, instead of one round trip per tag.
+            const results = h.evaluate(`
+                (() => {
+                    const ids = ${JSON.stringify(characterIds)};
+                    const out = {};
+                    ids.forEach(id => { out[id] = window.HACAnalysisAgeRoleBreakdown.getValidGenders(id); });
+                    return out;
+                })()
+            `);
+
+            expect(characterIds.length).toBeGreaterThan(90); // guards against an empty/broken filter passing vacuously
+
+            const malformed = [];
+            const wrong = [];
+            characterIds.forEach(id => {
+                const gender = tagData[id].gender;
+                const actual = results[id];
+
+                if (gender !== undefined && gender !== 'M' && gender !== 'F' && gender !== 'U') {
+                    malformed.push({ id, gender });
+                    return;
+                }
+
+                const expected = gender === 'M' ? ['M'] : gender === 'F' ? ['F'] : ['M', 'F'];
+                if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                    wrong.push({ id, gender, expected, actual });
+                }
+            });
+
+            expect(malformed).toEqual([]);
+            expect(wrong).toEqual([]);
+        });
     });
 });
