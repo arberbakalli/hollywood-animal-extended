@@ -215,3 +215,25 @@ selector, and exclusion E2E **35/35 passed**. Jest excluding hidden worktrees:
 **429/430 tests passed**; the sole failure is the unchanged stale BDD marker
 allowlist expecting one unverified scenario instead of the 16 currently found.
 See `.arber/APP_LOAD_PERFORMANCE_PLAN.md` for details and the release boundary.
+
+### Post-Deployment - 2026-09-26
+
+Commit `548d7ae` was pushed to `main`; GitHub Pages served the new selector code
+with HTML Last-Modified `Sat, 26 Sep 2026 18:29:52 GMT`. Production now has the
+same measured footprint as optimized local: 2,389 DOM nodes, 1,157 options,
+200 exclusion rows, and 193 selected bans.
+
+| Metric | Hosted samples (ms) | Median |
+| --- | --- | ---: |
+| Cold ready | 857, 366, 309, 298, 349 | **349** |
+| Warm ready | 85, 95, 83, 91, 114 | **91** |
+| Manual Apply Starting Tags | 126, 135, 130, 129, 205 | **130** |
+| First-run exclusions build | 19, 20, 16, 18, 17 | **18** |
+| Exclusions available after ready | 3, 14, 3, 3, 2 | **3** |
+
+No browser page or console errors. Maximum long tasks were 0 / 0 / 0 / 57 / 77
+ms. Against the immediately pre-deployment hosted median of 9,665 ms, this is
+about 74x faster (98.7% less elapsed time). The production before/after uses the
+same harness but remains subject to machine/run variation. Full Playwright:
+201/201 passed. Jest: 430/431 passed; the existing BDD marker allowlist is the
+sole failure, left unchanged.
