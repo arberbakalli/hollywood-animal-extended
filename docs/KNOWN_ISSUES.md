@@ -7,6 +7,23 @@ output, or in the source. Completed work and handoff notes are intentionally exc
 
 ## Data Correctness
 
+- **18 character tags have no Age & Gender Appeal rating data at all.**
+  `data/age-role-compatibility.json` is missing an entry entirely (not a
+  drifted one — see the gender-lock entry below for that) for:
+  `PROTAGONIST_CHARISMATIC_CRIMINAL`, `PROTAGONIST_CYNIC`,
+  `PROTAGONIST_DIS_IDEALIST`, `PROTAGONIST_LAST_SURVIVOR`,
+  `PROTAGONIST_RETIRED_LEGEND`, `ANTAGONIST_ENEMY_FROM_THE_PAST`,
+  `ANTAGONIST_OLD_FRIEND_ENEMY`, `ANTAGONIST_PATRIARCH`,
+  `ANTAGONIST_ROBBER_WITH_A_HUNDRED_DICKS`, `ANTAGONIST_RULE_ENFORCER`,
+  `ANTAGONIST_TYRANT`, `ANTAGONIST_UNDEAD`, `ANTAGONIST_VENGEFUL_SPIRIT`,
+  `SUPPORTINGCHARACTER_CONCERNED_WIFE`, `SUPPORTINGCHARACTER_FIRST_VICTIM`,
+  `SUPPORTINGCHARACTER_KEY_WITNESS`, `SUPPORTINGCHARACTER_MYSTERIOUS_GUIDE`,
+  `SUPPORTINGCHARACTER_VILLAINS_RIGHT_HAND`. Selecting any of these in Script
+  Lab shows `-` for all three age columns in the panel — expected given no
+  data, not a rendering bug. Inventing ratings for these is explicitly out of
+  scope without owner-supplied source data; do not fabricate them.
+  Pinned by `tests/age-role-breakdown.test.js`'s two `KNOWN_MISSING_ENTRIES`
+  tests, which fail if this list grows without being updated deliberately.
 - **Distribution formula is game-file sourced, not inferred.** Week 1 = commercial score Ã— 2 Ã— 1,000;
   Week 2 = commercial score Ã— 1 Ã— 1,000; weeks 3-8 = previous week Ã— 0.8 (20% decay). Extracted
   from the game files and documented in `GAME_RULES.md`. Capacity (owned theatres) is

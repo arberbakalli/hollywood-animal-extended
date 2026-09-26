@@ -32,6 +32,7 @@ const CLASSIC_MODULES = [
     'src/marketing/scriptScoringEngine.js',
     'src/marketing/marketingPlanner.js',
     'src/marketing/targetedAds.js',
+    'src/analysis/ageRoleBreakdown.js',
     'src/ui/collapsibleSections.js',
     'src/app/appShell.js',
 ];

@@ -1,5 +1,6 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, test, beforeAll } from '@jest/globals';
 import { readFile } from 'node:fs/promises';
+import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 describe('Age-to-Role Breakdown (Feature 3a)', () => {
     test('loads age/role compatibility data', async () => {
@@ -285,5 +286,65 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         });
 
         expect(mismatches).toEqual([]);
+    });
+
+    // --- getValidGenders reads TagData.json's `gender` directly (docs/GAME_RULES.md #8) ---
+    // This is the actual UI-facing consumer of the gender field: it decides
+    // which gender button(s) render for a role in the Age & Gender Appeal
+    // panel. It must read GAME_DATA.tags[rawId].gender (sourced from
+    // TagData.json), not data/age-role-compatibility.json's locked_gender copy,
+    // so a role missing from that second file (or a future drift in it) can
+    // never wrongly show both buttons for a role the game actually locks.
+    describe('getValidGenders (gender-button source of truth)', () => {
+        let h;
+
+        beforeAll(async () => {
+            h = await loadInstrumentedApp();
+        });
+
+        const validGendersFor = (rawId) =>
+            h.evaluate(`window.HACAnalysisAgeRoleBreakdown.getValidGenders(${JSON.stringify(rawId)})`);
+
+        test('male-locked role shows only the male button', () => {
+            expect(validGendersFor('SUPPORTINGCHARACTER_PATRIARCH')).toEqual(['M']);
+        });
+
+        test('female-locked role shows only the female button', () => {
+            expect(validGendersFor('SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS')).toEqual(['F']);
+        });
+
+        test('unisex role shows both buttons', () => {
+            expect(validGendersFor('SUPPORTINGCHARACTER_ANGRY_BOSS')).toEqual(['M', 'F']);
+        });
+
+        test('a role absent from age-role-compatibility.json still resolves its real lock from TagData.json', () => {
+            // PROTAGONIST_LAST_SURVIVOR has no entry at all in
+            // age-role-compatibility.json's protagonists bucket (see the
+            // "unresolved" test above) -- the old locked_gender-based lookup
+            // silently fell back to ['M', 'F'] for any missing entry,
+            // regardless of the role's real lock. TagData.json says this one
+            // is genuinely unisex, so both answers agree here, but the lookup
+            // path no longer depends on presence in the second file to get
+            // that answer right.
+            expect(validGendersFor('PROTAGONIST_LAST_SURVIVOR')).toEqual(['M', 'F']);
+        });
+
+        test('a collective antagonist with no individual gender slot shows both buttons', () => {
+            // ANTAGONIST_CRIMINAL_GANG has no SlotsMale/Female/Unisex at all in
+            // the source game file -- a gang isn't a single gendered character.
+            // TagData.json carries no `gender` field for it; getValidGenders
+            // must treat "no gender field" the same as unisex, not throw or
+            // wrongly lock it.
+            expect(validGendersFor('ANTAGONIST_CRIMINAL_GANG')).toEqual(['M', 'F']);
+        });
+
+        test('every currently-fixed drifted entry now resolves its correct single-gender lock', () => {
+            // Spot-check a handful of the 37 entries fixed in the drift
+            // regression test above, through the actual UI-facing function.
+            expect(validGendersFor('PROTAGONIST_COWBOY')).toEqual(['M']);
+            expect(validGendersFor('PROTAGONIST_FARM_GIRL')).toEqual(['F']);
+            expect(validGendersFor('ANTAGONIST_EVIL_WITCH')).toEqual(['F']);
+            expect(validGendersFor('ANTAGONIST_CRIMINAL_MASTERMIND')).toEqual(['M']);
+        });
     });
 });

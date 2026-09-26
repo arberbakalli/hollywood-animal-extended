@@ -63,6 +63,7 @@
                     category: category,
                     art: parseFloat(data.artValue || 0),
                     com: parseFloat(data.commercialValue || 0),
+                    gender: data.gender,
                     weights: parseWeights(weightDataRaw[tagId])
                 };
             }

@@ -56,6 +56,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
                 roles.push({
                     type: 'protagonist',
                     id: select.value,
+                    rawId: select.value,
                     displayName: select.options[select.selectedIndex].text
                 });
             }
@@ -68,6 +69,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
                 roles.push({
                     type: 'antagonist',
                     id: select.value,
+                    rawId: select.value,
                     displayName: select.options[select.selectedIndex].text
                 });
             }
@@ -79,7 +81,13 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
                 if (!select.value) return;
                 roles.push({
                     type: 'supporting',
+                    // age-role-compatibility.json's supportingCharacters bucket uses
+                    // SUPPORTING_CHARACTER_ (with underscore); GAME_DATA.tags and
+                    // TagData.json use the real in-game id, SUPPORTINGCHARACTER_
+                    // (without). rawId keeps the real id for gender-lock lookups;
+                    // id keeps the shimmed form for the ratings lookup below.
                     id: select.value.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_'),
+                    rawId: select.value,
                     displayName: select.options[select.selectedIndex].text
                 });
             });
@@ -105,20 +113,16 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
         return String(rating || 'unknown').toLowerCase().replace(/[^a-z0-9]+/g, '-');
     }
 
-    function getValidGenders(roleId, data) {
-        if (!data?.ageRoleData) return ['M', 'F'];
-
-        const bucket = roleId.includes('PROTAGONIST')
-            ? 'protagonists'
-            : roleId.includes('ANTAGONIST')
-                ? 'antagonists'
-                : 'supportingCharacters';
-        const roleData = data.ageRoleData[bucket]?.[roleId];
-
-        if (roleData?.locked_gender) {
-            return [roleData.locked_gender];
-        }
-        return ['M', 'F'];
+    // Source of truth for gender lock: TagData.json's `gender` field (M/F/U),
+    // surfaced on GAME_DATA.tags[rawId].gender by dataLoaders.js. See
+    // docs/GAME_RULES.md #8. Not age-role-compatibility.json's locked_gender --
+    // that is a copy kept in sync with this one, and can drift (37 entries did,
+    // fixed 2026-09-26); reading the original avoids relying on the copy.
+    function getValidGenders(rawId) {
+        const gender = (typeof GAME_DATA !== 'undefined' ? GAME_DATA.tags?.[rawId]?.gender : undefined);
+        if (gender === 'M') return ['M'];
+        if (gender === 'F') return ['F'];
+        return ['M', 'F']; // 'U' (unisex), or no slot data at all (e.g. collective antagonists)
     }
 
     function createGenderButton(roleId, gender, currentGender, validGenders) {
@@ -138,8 +142,8 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
         return button;
     }
 
-    function createGenderToggle(roleId, data) {
-        const validGenders = getValidGenders(roleId, data);
+    function createGenderToggle(roleId, rawId) {
+        const validGenders = getValidGenders(rawId);
         const currentGender = genderState[roleId] || validGenders[0] || 'M';
         const container = document.createElement('div');
         container.className = 'gender-toggle';
@@ -191,7 +195,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
         html += '</div>';
 
         roles.forEach(role => {
-            const validGenders = getValidGenders(role.id, data);
+            const validGenders = getValidGenders(role.rawId);
             const gender = genderState[role.id] || validGenders[0] || 'M';
 
             html += `<div class="age-role-row age-role-row--${role.type}" role="row">`;
@@ -279,7 +283,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
         roles.forEach(role => {
             const toggleContainer = document.getElementById(`gender-toggle-${role.type}-${role.id}`);
             if (toggleContainer) {
-                toggleContainer.appendChild(createGenderToggle(role.id, data));
+                toggleContainer.appendChild(createGenderToggle(role.id, role.rawId));
             }
         });
     }
@@ -318,6 +322,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
         setupAgeRoleBreakdownListeners,
         update: updateAgeRoleBreakdown,
         hidePanel: hideAgeRolePanel,
-        loadAgeRoleData
+        loadAgeRoleData,
+        getValidGenders
     };
 })();

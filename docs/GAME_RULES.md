@@ -372,13 +372,32 @@ fact, not a design choice: it comes from the game's own slot allocation.
 Non-character tags (Genre, Setting, Theme & Event, Finale) carry no `gender`
 field at all — the concept does not apply to them.
 
+**`TagData.json`'s `gender` field is the sole runtime source for which
+gender button(s) render in the Age & Gender Appeal panel.**
+`getValidGenders()` in `src/analysis/ageRoleBreakdown.js` reads
+`GAME_DATA.tags[rawId].gender` directly (surfaced there by
+`src/data/dataLoaders.js`) and nowhere else — it does not read
+`data/age-role-compatibility.json`'s `locked_gender` at all. That field
+still exists as a second, independently-displayed copy (used for nothing but
+its own presence in that file) and is kept in sync only as a courtesy: a
+regression test cross-checks it against `TagData.json` and fails if the two
+disagree, but the UI's actual button logic no longer depends on it. This
+was a deliberate change 2026-09-26, made *because* `locked_gender` had
+already drifted silently once (37 entries, see below) — reading the
+original rather than a copy that requires manual upkeep removes the
+possibility of that recurring.
+
+Swept all 99 Protagonist/Antagonist/SupportingCharacter tags after this
+change: every `gender` value is exactly `"M"`, `"F"`, `"U"`, or absent
+(4 collective-antagonist tags with no individual slot, e.g.
+`ANTAGONIST_CRIMINAL_GANG`) — no malformed values, no case that falls
+through `getValidGenders()`'s three-way branch unhandled.
+
 `data/age-role-compatibility.json`'s `locked_gender` field (`"M"`, `"F"`, or
-`null` for unisex) must agree with `TagData.json`'s `gender` field for every
-character tag. It did not: **37 entries carried `locked_gender: null` while
-`TagData.json` said they were locked**, silently under-reporting the lock in
-the Age & Gender Appeal panel. Fixed 2026-09-26 — see commit for the full
-list. A regression test now cross-checks the two files so this cannot drift
-back silently.
+`null` for unisex) previously disagreed with `TagData.json`'s `gender` field
+on 37 entries — all `locked_gender: null` while `TagData.json` said they
+were locked, silently under-reporting the lock back when the panel still
+read from that file. Fixed 2026-09-26 — see commit for the full list.
 
 > Two tags disagree between `gender` and their own `Slots*` parameter:
 > `ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS` and
@@ -387,7 +406,10 @@ back silently.
 > per owner request 2026-09-26 pending firsthand confirmation in-game — see
 > `docs/KNOWN_ISSUES.md`. Do not resolve the ambiguity by guessing.
 
-> Enforced in: `data/TagData.json` (`gender`), `data/age-role-compatibility.json`
-> (`locked_gender`), consumed by `src/analysis/ageRoleBreakdown.js`. Pinned by
-> `tests/age-role-breakdown.test.js` ("gender lock matches TagData.json's
-> Slots-derived source of truth").
+> Enforced in: `data/TagData.json` (`gender`), consumed by
+> `src/data/dataLoaders.js` → `GAME_DATA.tags[id].gender` →
+> `src/analysis/ageRoleBreakdown.js`'s `getValidGenders()`. Pinned by
+> `tests/age-role-breakdown.test.js` — the drift-detection test ("gender
+> lock matches TagData.json's Slots-derived source of truth") and the
+> `getValidGenders` describe block (male-locked/female-locked/unisex/missing
+> entry/collective-antagonist cases, teeth-verified).
