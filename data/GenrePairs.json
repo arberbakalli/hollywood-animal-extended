@@ -1,464 +1,464 @@
 {
   "DRAMA": {
     "COMEDY": {
-      "Item1": "0.250",
-      "Item2": "0.100"
+      "primary": 0.25,
+      "secondary": 0.1
     },
     "ACTION": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "HISTORICAL": {
-      "Item1": "0.100",
-      "Item2": "0.200"
+      "primary": 0.1,
+      "secondary": 0.2
     },
     "ROMANCE": {
-      "Item1": "0.250",
-      "Item2": "0.150"
+      "primary": 0.25,
+      "secondary": 0.15
     },
     "DETECTIVE": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "ADVENTURE": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "HORROR": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "SCIENCE_FICTION": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "THRILLER": {
-      "Item1": "0.200",
-      "Item2": "0.150"
+      "primary": 0.2,
+      "secondary": 0.15
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "-0.100",
-      "Item2": "-0.350"
+      "primary": -0.1,
+      "secondary": -0.35
     }
   },
   "COMEDY": {
     "DRAMA": {
-      "Item1": "0.250",
-      "Item2": "0.100"
+      "primary": 0.25,
+      "secondary": 0.1
     },
     "ACTION": {
-      "Item1": "0.250",
-      "Item2": "0.050"
+      "primary": 0.25,
+      "secondary": 0.05
     },
     "HISTORICAL": {
-      "Item1": "-0.100",
-      "Item2": "-0.300"
+      "primary": -0.1,
+      "secondary": -0.3
     },
     "ROMANCE": {
-      "Item1": "0.350",
-      "Item2": "0.150"
+      "primary": 0.35,
+      "secondary": 0.15
     },
     "DETECTIVE": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "ADVENTURE": {
-      "Item1": "0.200",
-      "Item2": "0.100"
+      "primary": 0.2,
+      "secondary": 0.1
     },
     "HORROR": {
-      "Item1": "-0.250",
-      "Item2": "-0.400"
+      "primary": -0.25,
+      "secondary": -0.4
     },
     "SCIENCE_FICTION": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "THRILLER": {
-      "Item1": "-0.350",
-      "Item2": "-0.300"
+      "primary": -0.35,
+      "secondary": -0.3
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "0.200",
-      "Item2": "0.125"
+      "primary": 0.2,
+      "secondary": 0.125
     }
   },
   "ACTION": {
     "DRAMA": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "COMEDY": {
-      "Item1": "0.250",
-      "Item2": "0.050"
+      "primary": 0.25,
+      "secondary": 0.05
     },
     "HISTORICAL": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "ROMANCE": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "DETECTIVE": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "ADVENTURE": {
-      "Item1": "0.350",
-      "Item2": "0.300"
+      "primary": 0.35,
+      "secondary": 0.3
     },
     "HORROR": {
-      "Item1": "0.200",
-      "Item2": "0.100"
+      "primary": 0.2,
+      "secondary": 0.1
     },
     "SCIENCE_FICTION": {
-      "Item1": "0.300",
-      "Item2": "0.200"
+      "primary": 0.3,
+      "secondary": 0.2
     },
     "THRILLER": {
-      "Item1": "0.200",
-      "Item2": "0.150"
+      "primary": 0.2,
+      "secondary": 0.15
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "-0.200",
-      "Item2": "-0.100"
+      "primary": -0.2,
+      "secondary": -0.1
     }
   },
   "HISTORICAL": {
     "DRAMA": {
-      "Item1": "0.100",
-      "Item2": "0.200"
+      "primary": 0.1,
+      "secondary": 0.2
     },
     "COMEDY": {
-      "Item1": "-0.100",
-      "Item2": "-0.300"
+      "primary": -0.1,
+      "secondary": -0.3
     },
     "ACTION": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "ROMANCE": {
-      "Item1": "0.100",
-      "Item2": "0.200"
+      "primary": 0.1,
+      "secondary": 0.2
     },
     "DETECTIVE": {
-      "Item1": "-0.100",
-      "Item2": "0.100"
+      "primary": -0.1,
+      "secondary": 0.1
     },
     "ADVENTURE": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "HORROR": {
-      "Item1": "-0.350",
-      "Item2": "-0.250"
+      "primary": -0.35,
+      "secondary": -0.25
     },
     "SCIENCE_FICTION": {
-      "Item1": "-0.750",
-      "Item2": "-0.750"
+      "primary": -0.75,
+      "secondary": -0.75
     },
     "THRILLER": {
-      "Item1": "-0.100",
-      "Item2": "0.100"
+      "primary": -0.1,
+      "secondary": 0.1
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "0.250",
-      "Item2": "-0.450"
+      "primary": 0.25,
+      "secondary": -0.45
     }
   },
   "ROMANCE": {
     "DRAMA": {
-      "Item1": "0.250",
-      "Item2": "0.150"
+      "primary": 0.25,
+      "secondary": 0.15
     },
     "COMEDY": {
-      "Item1": "0.350",
-      "Item2": "0.150"
+      "primary": 0.35,
+      "secondary": 0.15
     },
     "ACTION": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "HISTORICAL": {
-      "Item1": "0.100",
-      "Item2": "0.200"
+      "primary": 0.1,
+      "secondary": 0.2
     },
     "DETECTIVE": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "ADVENTURE": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "HORROR": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "SCIENCE_FICTION": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "THRILLER": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "0.200",
-      "Item2": "0.100"
+      "primary": 0.2,
+      "secondary": 0.1
     }
   },
   "DETECTIVE": {
     "DRAMA": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "COMEDY": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "ACTION": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "HISTORICAL": {
-      "Item1": "-0.100",
-      "Item2": "0.100"
+      "primary": -0.1,
+      "secondary": 0.1
     },
     "ROMANCE": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "ADVENTURE": {
-      "Item1": "-0.150",
-      "Item2": "-0.200"
+      "primary": -0.15,
+      "secondary": -0.2
     },
     "HORROR": {
-      "Item1": "-0.150",
-      "Item2": "-0.300"
+      "primary": -0.15,
+      "secondary": -0.3
     },
     "SCIENCE_FICTION": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "THRILLER": {
-      "Item1": "0.200",
-      "Item2": "0.300"
+      "primary": 0.2,
+      "secondary": 0.3
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "0.000",
-      "Item2": "-0.200"
+      "primary": 0,
+      "secondary": -0.2
     }
   },
   "ADVENTURE": {
     "DRAMA": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "COMEDY": {
-      "Item1": "0.200",
-      "Item2": "0.100"
+      "primary": 0.2,
+      "secondary": 0.1
     },
     "ACTION": {
-      "Item1": "0.350",
-      "Item2": "0.300"
+      "primary": 0.35,
+      "secondary": 0.3
     },
     "HISTORICAL": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "ROMANCE": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "DETECTIVE": {
-      "Item1": "-0.150",
-      "Item2": "-0.200"
+      "primary": -0.15,
+      "secondary": -0.2
     },
     "HORROR": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "SCIENCE_FICTION": {
-      "Item1": "0.250",
-      "Item2": "0.250"
+      "primary": 0.25,
+      "secondary": 0.25
     },
     "THRILLER": {
-      "Item1": "-0.100",
-      "Item2": "0.100"
+      "primary": -0.1,
+      "secondary": 0.1
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "0.150",
-      "Item2": "0.150"
+      "primary": 0.15,
+      "secondary": 0.15
     }
   },
   "HORROR": {
     "DRAMA": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "COMEDY": {
-      "Item1": "-0.250",
-      "Item2": "-0.400"
+      "primary": -0.25,
+      "secondary": -0.4
     },
     "ACTION": {
-      "Item1": "0.200",
-      "Item2": "0.100"
+      "primary": 0.2,
+      "secondary": 0.1
     },
     "HISTORICAL": {
-      "Item1": "-0.350",
-      "Item2": "-0.250"
+      "primary": -0.35,
+      "secondary": -0.25
     },
     "ROMANCE": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "DETECTIVE": {
-      "Item1": "-0.150",
-      "Item2": "-0.300"
+      "primary": -0.15,
+      "secondary": -0.3
     },
     "ADVENTURE": {
-      "Item1": "0.150",
-      "Item2": "-0.150"
+      "primary": 0.15,
+      "secondary": -0.15
     },
     "SCIENCE_FICTION": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "THRILLER": {
-      "Item1": "0.250",
-      "Item2": "0.150"
+      "primary": 0.25,
+      "secondary": 0.15
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "0.150",
-      "Item2": "0.150"
+      "primary": 0.15,
+      "secondary": 0.15
     }
   },
   "SCIENCE_FICTION": {
     "DRAMA": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "COMEDY": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "ACTION": {
-      "Item1": "0.300",
-      "Item2": "0.200"
+      "primary": 0.3,
+      "secondary": 0.2
     },
     "HISTORICAL": {
-      "Item1": "-0.750",
-      "Item2": "-0.750"
+      "primary": -0.75,
+      "secondary": -0.75
     },
     "ROMANCE": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "DETECTIVE": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "ADVENTURE": {
-      "Item1": "0.250",
-      "Item2": "0.250"
+      "primary": 0.25,
+      "secondary": 0.25
     },
     "HORROR": {
-      "Item1": "0.100",
-      "Item2": "-0.100"
+      "primary": 0.1,
+      "secondary": -0.1
     },
     "THRILLER": {
-      "Item1": "0.200",
-      "Item2": "0.150"
+      "primary": 0.2,
+      "secondary": 0.15
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "-0.150",
-      "Item2": "-0.250"
+      "primary": -0.15,
+      "secondary": -0.25
     }
   },
   "THRILLER": {
     "DRAMA": {
-      "Item1": "0.200",
-      "Item2": "0.150"
+      "primary": 0.2,
+      "secondary": 0.15
     },
     "COMEDY": {
-      "Item1": "-0.350",
-      "Item2": "-0.300"
+      "primary": -0.35,
+      "secondary": -0.3
     },
     "ACTION": {
-      "Item1": "0.200",
-      "Item2": "0.150"
+      "primary": 0.2,
+      "secondary": 0.15
     },
     "HISTORICAL": {
-      "Item1": "-0.100",
-      "Item2": "0.100"
+      "primary": -0.1,
+      "secondary": 0.1
     },
     "ROMANCE": {
-      "Item1": "0.000",
-      "Item2": "0.000"
+      "primary": 0,
+      "secondary": 0
     },
     "DETECTIVE": {
-      "Item1": "0.200",
-      "Item2": "0.300"
+      "primary": 0.2,
+      "secondary": 0.3
     },
     "ADVENTURE": {
-      "Item1": "-0.100",
-      "Item2": "0.100"
+      "primary": -0.1,
+      "secondary": 0.1
     },
     "HORROR": {
-      "Item1": "0.250",
-      "Item2": "0.150"
+      "primary": 0.25,
+      "secondary": 0.15
     },
     "SCIENCE_FICTION": {
-      "Item1": "0.200",
-      "Item2": "0.150"
+      "primary": 0.2,
+      "secondary": 0.15
     },
     "SLAPSTICK_COMEDY": {
-      "Item1": "0.100",
-      "Item2": "-0.150"
+      "primary": 0.1,
+      "secondary": -0.15
     }
   },
   "SLAPSTICK_COMEDY": {
     "DRAMA": {
-      "Item1": "-0.100",
-      "Item2": "-0.350"
+      "primary": -0.1,
+      "secondary": -0.35
     },
     "COMEDY": {
-      "Item1": "0.200",
-      "Item2": "0.125"
+      "primary": 0.2,
+      "secondary": 0.125
     },
     "ACTION": {
-      "Item1": "-0.200",
-      "Item2": "-0.100"
+      "primary": -0.2,
+      "secondary": -0.1
     },
     "HISTORICAL": {
-      "Item1": "0.250",
-      "Item2": "-0.450"
+      "primary": 0.25,
+      "secondary": -0.45
     },
     "ROMANCE": {
-      "Item1": "0.200",
-      "Item2": "0.100"
+      "primary": 0.2,
+      "secondary": 0.1
     },
     "DETECTIVE": {
-      "Item1": "0.000",
-      "Item2": "-0.200"
+      "primary": 0,
+      "secondary": -0.2
     },
     "ADVENTURE": {
-      "Item1": "0.150",
-      "Item2": "0.150"
+      "primary": 0.15,
+      "secondary": 0.15
     },
     "HORROR": {
-      "Item1": "0.150",
-      "Item2": "0.150"
+      "primary": 0.15,
+      "secondary": 0.15
     },
     "SCIENCE_FICTION": {
-      "Item1": "-0.150",
-      "Item2": "-0.250"
+      "primary": -0.15,
+      "secondary": -0.25
     },
     "THRILLER": {
-      "Item1": "0.100",
-      "Item2": "-0.150"
+      "primary": 0.1,
+      "secondary": -0.15
     }
   }
 }

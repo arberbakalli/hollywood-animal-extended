@@ -243,4 +243,47 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
 
         expect(unresolved.sort()).toEqual(KNOWN_MISSING_ENTRIES);
     });
+
+    // --- Regression guard for the gender-lock drift bug (docs/GAME_RULES.md §8) ---
+    // data/TagData.json carries a `gender` field (M/F/U) sourced from the
+    // extracted game file's SlotsMale/SlotsFemale/SlotsUnisex parameters -- the
+    // actual runtime gating mechanism. age-role-compatibility.json's
+    // `locked_gender` must agree with it for every character tag, or the Age &
+    // Gender Appeal panel silently shows a role as gender-flexible when the
+    // game itself locks it. 37 entries carried this exact drift (all
+    // locked_gender: null where TagData.json said M or F) until fixed
+    // 2026-09-26; this test pins the fix and catches any future regeneration
+    // of either file from re-drifting.
+    test('gender lock matches TagData.json\'s Slots-derived source of truth', async () => {
+        const tagData = JSON.parse(await readFile('data/TagData.json', 'utf8'));
+        const ageRole = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const bucketForCategory = { Protagonist: 'protagonists', Antagonist: 'antagonists', SupportingCharacter: 'supportingCharacters' };
+
+        // Both TRASH/UNETHICAL, RECIPE-gated, and unconfirmed in-game -- parked
+        // per docs/KNOWN_ISSUES.md, not resolved here.
+        const PARKED_CONFLICTS = new Set([
+            'ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS',
+            'ANTAGONIST_WOMENS_BOOK_CLUB_OF_CANNIBALS',
+        ]);
+
+        const mismatches = [];
+        Object.entries(tagData).forEach(([id, entry]) => {
+            if (PARKED_CONFLICTS.has(id)) return;
+            if (entry.gender === undefined || entry.gender === 'U') return; // unisex/non-character: locked_gender stays null
+
+            const bucketName = bucketForCategory[entry.CategoryID];
+            if (!bucketName) return;
+
+            const shimmedId = id.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_');
+            const bucket = ageRole[bucketName] || {};
+            const roleData = bucket[id] || bucket[shimmedId];
+            if (!roleData) return; // covered by the "unresolved" tests above
+
+            if (roleData.locked_gender !== entry.gender) {
+                mismatches.push({ id, tagDataGender: entry.gender, lockedGender: roleData.locked_gender });
+            }
+        });
+
+        expect(mismatches).toEqual([]);
+    });
 });

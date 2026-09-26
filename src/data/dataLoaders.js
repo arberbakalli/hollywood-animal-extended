@@ -63,7 +63,7 @@
                     category: category,
                     art: parseFloat(data.artValue || 0),
                     com: parseFloat(data.commercialValue || 0),
-                    weights: parseWeights(weightDataRaw[tagId].weights)
+                    weights: parseWeights(weightDataRaw[tagId])
                 };
             }
         } catch (e) {

@@ -355,3 +355,39 @@ contradiction of it.** The legend and CSS only define 5 colors today.
 > Enforced in: `src/marketing/audienceCompatibility.js` (`getScoreBand`,
 > `getScoreLabel`, `getScoreClass`). Legend: `index.html` lines ~611-615.
 > Pinned by `tests/audience-compatibility-score-bands.test.js`.
+
+---
+
+## 8. Character gender lock
+
+A character tag (Protagonist / Antagonist / Supporting Character) is either
+**locked** to one gender or **unisex** (playable as either). This is a game
+fact, not a design choice: it comes from the game's own slot allocation.
+
+`data/TagData.json` carries a `gender` field per character tag, one of:
+- `"M"` — locked male (source: `parameters.SlotsMale` in the extracted game file)
+- `"F"` — locked female (source: `parameters.SlotsFemale`)
+- `"U"` — unisex, playable as either (source: `parameters.SlotsUnisex`)
+
+Non-character tags (Genre, Setting, Theme & Event, Finale) carry no `gender`
+field at all — the concept does not apply to them.
+
+`data/age-role-compatibility.json`'s `locked_gender` field (`"M"`, `"F"`, or
+`null` for unisex) must agree with `TagData.json`'s `gender` field for every
+character tag. It did not: **37 entries carried `locked_gender: null` while
+`TagData.json` said they were locked**, silently under-reporting the lock in
+the Age & Gender Appeal panel. Fixed 2026-09-26 — see commit for the full
+list. A regression test now cross-checks the two files so this cannot drift
+back silently.
+
+> Two tags disagree between `gender` and their own `Slots*` parameter:
+> `ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS` and
+> `ANTAGONIST_WOMENS_BOOK_CLUB_OF_CANNIBALS`. Both are `RECIPE`-gated,
+> marked `"Rules": "TRASH, UNETHICAL"` in the extracted game file. Parked
+> per owner request 2026-09-26 pending firsthand confirmation in-game — see
+> `docs/KNOWN_ISSUES.md`. Do not resolve the ambiguity by guessing.
+
+> Enforced in: `data/TagData.json` (`gender`), `data/age-role-compatibility.json`
+> (`locked_gender`), consumed by `src/analysis/ageRoleBreakdown.js`. Pinned by
+> `tests/age-role-breakdown.test.js` ("gender lock matches TagData.json's
+> Slots-derived source of truth").

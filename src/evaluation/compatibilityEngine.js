@@ -130,8 +130,8 @@
 
         if (!pairData) return null;
         return {
-            com: parseFloat(pairData.Item1),
-            art: parseFloat(pairData.Item2),
+            com: parseFloat(pairData.primary),
+            art: parseFloat(pairData.secondary),
             names: `${gameData.tags[g1.id].name} + ${gameData.tags[g2.id].name}`
         };
     }

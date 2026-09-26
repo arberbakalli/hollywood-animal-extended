@@ -30,6 +30,15 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   `RELEASE_RESULTS_OCCUPANCY` column. Deriving it needs a viewers model, which exists nowhere in
   `src/` and must not be guessed â€” see Lesson 7 in `.arber/LESSONS_LEARNED.md`.
 
+- **Two TRASH/UNETHICAL tags disagree on gender between `gender` and their own
+  `Slots*` parameter.** `ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS` and
+  `ANTAGONIST_WOMENS_BOOK_CLUB_OF_CANNIBALS` are both `RECIPE`-gated joke
+  content. `data/TagData.json`'s `gender` field currently carries the
+  `Slots*`-derived value (`M` for both) as the more mechanically authoritative
+  source, but this is unconfirmed against the running game. Parked per owner
+  request 2026-09-26 — owner has not played/encountered this trash content
+  in-game yet. Do not resolve by guessing; see `docs/GAME_RULES.md` §8.
+
 ## Behaviour
 
 - A single tag conflict produces two spoiler messages, one from each side â€” for example
