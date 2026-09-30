@@ -418,6 +418,24 @@
         refreshCategoryDropdowns(category, context);
     }
 
+    // A script holds at most 11 genres: 10 at the 5% floor plus one taking the
+    // rest (owner ruling 2026-09-30, GAME_RULES.md section 1). There are exactly
+    // 11 genres, so no context, the ban list included, needs a twelfth row.
+    const MAX_GENRE_ROWS = 11;
+
+    function genreRowCount(container) {
+        return container ? container.querySelectorAll('.select-row').length : 0;
+    }
+
+    function syncGenreAddButton(context) {
+        const container = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
+        const button = document.getElementById(`add-${categoryToElementSlug('Genre')}-${context}-button`);
+        if (!container || !button) return;
+        const full = genreRowCount(container) >= MAX_GENRE_ROWS;
+        button.disabled = full;
+        button.title = full ? `A script holds at most ${MAX_GENRE_ROWS} genres.` : '';
+    }
+
     function addDropdown(category, selectedId = null, context = currentTab, deferOptions = false) {
         if (selectedId && !canUseTagInContext(selectedId, context)) {
             selectedId = null;
@@ -427,6 +445,11 @@
         const containerId = `inputs-${categorySlug}-${context}`;
         const container = document.getElementById(containerId);
         if (!container) return;
+
+        if (category === 'Genre' && genreRowCount(container) >= MAX_GENRE_ROWS) {
+            syncGenreAddButton(context);
+            return;
+        }
 
         // Logic for single-select categories in script-building contexts.
         if (context !== 'excluded' && !MULTI_SELECT_CATEGORIES.includes(category) && container.children.length > 0) {
@@ -572,6 +595,7 @@
                 row.remove();
                 refreshCategoryDropdowns(category, context);
                 refreshSelectorVisualHints(context);
+                if (category === 'Genre') syncGenreAddButton(context);
                 if (category === 'Genre' && context !== 'excluded') updateGenreControls(context);
                 if (context === 'excluded') {
                     updateExcludedCount();
@@ -582,6 +606,7 @@
         }
         // Add new rows to the TOP (prepend) instead of bottom
         container.insertBefore(row, container.firstChild);
+        if (category === 'Genre') syncGenreAddButton(context);
         if (category === 'Genre' && context !== 'excluded') {
             updateGenreControls(context);
         }
