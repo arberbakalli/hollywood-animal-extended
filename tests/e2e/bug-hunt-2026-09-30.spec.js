@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { DropdownSelectType } from '@civitas-cerebrum/element-interactions';
 
 // The owner's script from the 2026-09-30 report, with Max Element Pool 8.
 // Rulings: docs/GAME_RULES.md sections 1 and 2. Unit coverage of the same
@@ -267,6 +268,42 @@ test.describe('Bug hunt 2026-09-30', () => {
     await steps.on('evaluateTab', 'Navigation').click();
     await expect(page.locator('#graves-best-matches-panel')).toBeVisible();
     await expect(swapList(page).locator(`[data-role="graves-best-match"][data-tag-id="${suggested}"]`)).toHaveCount(0);
+  });
+
+  // Audit 2026-09-30: Swap's Show more counted every row minus 10, but each
+  // slot already shows up to 10 of its own. At 3.5+ it offered "18 more"
+  // with every row on screen, and a click showed nothing.
+  test('TC03-000056 Swap Show more offers exactly the rows that are hidden', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    const rowsShown = () => swapList(page).locator('[data-role="graves-best-match"]').count();
+    const hiddenBySlot = () => page.evaluate(() => {
+      const tags = collectTagInputs('graves');
+      const ids = new Set(tags.map(t => t.id));
+      const banned = getManuallyExcludedIds('excluded');
+      const filter = document.getElementById('gravesBestCategoryFilter').value;
+      const candidates = Object.values(GAME_DATA.tags).filter(t => !ids.has(t.id) && !banned.has(t.id) && (!filter || t.category === filter));
+      const fit = parseFloat(document.getElementById('gravesBestScoreFilter').value);
+      const result = HACGravesBestMatchesEngine.buildSwaps(tags, candidates, fit, {
+        calculateMatrixScore, getRawCompatibilityScore, multiSelectCategories: MULTI_SELECT_CATEGORIES,
+        displayName: t => GAME_DATA.tags[t.id]?.name || t.id,
+      });
+      return Object.values(result.rowsBySlot).reduce((n, group) => n + Math.max(0, group.rows.length - 10), 0);
+    });
+
+    for (const fit of ['3.5', '0']) {
+      await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', { type: DropdownSelectType.VALUE, value: fit });
+      await openSwapSuggestions(steps);
+      const hidden = await hiddenBySlot();
+      const button = page.locator('#graves-show-more-btn');
+      if (hidden === 0) {
+        await expect(button, `fit ${fit}`).toHaveCount(0);
+      } else {
+        await expect(button, `fit ${fit}`).toHaveText(`Show more suggestions (${hidden} more available)`);
+        const before = await rowsShown();
+        await button.click();
+        expect(await rowsShown(), `fit ${fit}`).toBeGreaterThan(before);
+      }
+    }
   });
 
   // Audit 2026-09-30: Save to Script Library counted tags, not story elements

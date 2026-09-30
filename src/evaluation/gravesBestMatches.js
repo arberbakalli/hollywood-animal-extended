@@ -314,8 +314,10 @@
      * name the control that shows more, or a short list reads as "this is all
      * the script can take" (owner report 2026-09-30).
      */
-    function additionsShortfallNote(selectedTags, rows, fit) {
+    function additionsShortfallNote(selectedTags, rows, fit, categoryFilter = '') {
         if (!(fit > 0)) return '';
+        // A Genre or Setting filter can never list a story element, at any fit.
+        if (categoryFilter && !HACGravesAnalysis.isStoryElement({ category: categoryFilter })) return '';
         const room = maxElementPool() - HACGravesAnalysis.storyElementsOf(selectedTags).length;
         if (room <= 0) return '';
         const storyRows = rows.filter(row => HACGravesAnalysis.isStoryElement(row.candidate)).length;
@@ -324,11 +326,11 @@
             + `but only ${storyRows} clear${storyRows === 1 ? 's' : ''} the ${fit.toFixed(1)}+ Minimum Fit. Lower Minimum Fit to see more.`;
     }
 
-    function showMoreButton() {
-        return visibleRowCount < totalRowCount
+    function showMoreButton(hiddenCount = totalRowCount - visibleRowCount) {
+        return hiddenCount > 0
             ? `<div class="best-match-show-more-wrapper">
                    <button id="graves-show-more-btn" class="best-match-show-more-btn">
-                       Show more suggestions (${totalRowCount - visibleRowCount} more available)
+                       Show more suggestions (${hiddenCount} more available)
                    </button>
                </div>`
             : '';
@@ -398,7 +400,8 @@
             list.innerHTML = emptyMarkup(additionsEmptyReason(selectedTags));
             return;
         }
-        const shortfall = additionsShortfallNote(selectedTags, rows, minimumFit());
+        const shortfall = additionsShortfallNote(selectedTags, rows, minimumFit(),
+            document.getElementById('gravesBestCategoryFilter')?.value || '');
         const lower = shortfall ? nextLowerFit(document.getElementById('gravesBestScoreFilter')?.value) : null;
         const lowerButton = lower === null
             ? ''
@@ -454,7 +457,12 @@
         }).join('');
 
         totalRowCount = result.allRows.length;
-        list.innerHTML = clashNotes + slotMarkup + showMoreButton();
+        // Each slot pages on its own, so the hidden rows are counted per slot.
+        // Counting every row minus one page offered rows that were all on
+        // screen already (audit 2026-09-30).
+        const hiddenCount = Object.values(result.rowsBySlot)
+            .reduce((sum, group) => sum + Math.max(0, group.rows.length - visibleRowCount), 0);
+        list.innerHTML = clashNotes + slotMarkup + showMoreButton(hiddenCount);
         bindShowMoreButton(list);
     }
 

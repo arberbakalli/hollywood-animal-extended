@@ -177,6 +177,17 @@ describe('bug hunt 2026-09-30', () => {
             expect(note(themes(10), [], 4.0)).toBe('');
         });
 
+        // Audit 2026-09-30: with Match Category on Genre or Setting no fit can
+        // ever list a story element, so the note gave advice that cannot help.
+        test.each(['Genre', 'Setting'])('says nothing when Match Category is %p', (category) => {
+            expect(h.call('HACGravesBestMatches.additionsShortfallNote', themes(6), [genreRow], 4.0, category)).toBe('');
+        });
+
+        test('still speaks when Match Category is a story category', () => {
+            expect(h.call('HACGravesBestMatches.additionsShortfallNote', themes(6), [], 4.0, 'Theme & Event'))
+                .toContain('room for 4 more story elements');
+        });
+
         // The note carries a one-click button that lowers Minimum Fit by one
         // step (owner request 2026-09-30).
         test.each([
