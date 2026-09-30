@@ -1,0 +1,812 @@
+(function(global) {
+    "use strict";
+
+    let sortedTagsByCategory = null;
+    let indexedTags = null;
+    let indexedLanguage = null;
+
+    function getSortedTagsByCategory(category) {
+        if (sortedTagsByCategory && indexedTags === GAME_DATA.tags && indexedLanguage === currentLanguage) {
+            return sortedTagsByCategory.get(category) || [];
+        }
+
+        const index = new Map();
+        Object.values(GAME_DATA.tags || {}).forEach(tag => {
+            if (!tag || !tag.category) return;
+            if (!index.has(tag.category)) index.set(tag.category, []);
+            index.get(tag.category).push(tag);
+        });
+        index.forEach(tags => tags.sort((a, b) => a.name.localeCompare(b.name)));
+
+        sortedTagsByCategory = index;
+        indexedTags = GAME_DATA.tags;
+        indexedLanguage = currentLanguage;
+        return index.get(category) || [];
+    }
+
+
+    function contextUsesGlobalExclusions(context) {
+        return HACSelectorExclusions.contextUsesGlobalExclusions(context);
+    }
+
+    function getExcludedIdsForContext(context) {
+        return HACSelectorExclusions.getExcludedIdsForContext(context);
+    }
+
+    function isTagExcludedForContext(tagId, context) {
+        return HACSelectorExclusions.isTagExcludedForContext(tagId, context);
+    }
+
+    function canUseTagInContext(tagId, context) {
+        return HACSelectorExclusions.canUseTagInContext(tagId, context);
+    }
+
+    function excludedTagFeedbackMessage(tagId) {
+        return HACSelectorExclusions.excludedTagFeedbackMessage(tagId);
+    }
+
+    function showExcludedTagFeedback(tagId, context) {
+        showFeedbackMessage(`${context}FeedbackMessage`, excludedTagFeedbackMessage(tagId), 'accent');
+    }
+
+    function filterTagsForContext(tags, context) {
+        return HACSelectorExclusions.filterTagsForContext(tags, context);
+    }
+
+    function clearExcludedSelectionsInCategory(category, context, excludedIds = getExcludedIdsForContext(context)) {
+        return HACSelectorExclusions.clearExcludedSelectionsInCategory(category, context, excludedIds);
+    }
+
+    function restoreSelection(context, savedInputs) {
+        if(!savedInputs || savedInputs.length === 0) return;
+        const selectorsContainer = document.getElementById(`selectors-container-${context}`);
+        selectorsContainer?.classList.add('is-batching');
+        try {
+            savedInputs.forEach(input => {
+                if (isTagExcludedForContext(input.id, context)) return;
+
+                const category = input.category;
+                const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
+                const container = document.getElementById(containerId);
+                if(!container) return;
+                const selects = container.querySelectorAll('select');
+                let placed = false;
+                for(let sel of selects) {
+                    if(sel.value === "") {
+                        selectTagOption(sel, category, input.id);
+                        placed = true;
+                        break;
+                    }
+                }
+                // The ban list has no cardinality limit, so excluded tags always
+                // need a fresh row when restoring more than one pick per category.
+                if(!placed && (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category))) {
+                    addDropdown(category, input.id, context);
+                }
+            });
+        } finally {
+            selectorsContainer?.classList.remove('is-batching');
+        }
+
+        new Set(savedInputs.map(input => input.category))
+            .forEach(category => refreshCategoryDropdowns(category, context));
+        refreshSelectorVisualHints(context);
+
+        if(context !== 'excluded' && savedInputs.some(i => i.category === 'Genre')) {
+            updateGenreControls(context);
+            HACGenreMix.restoreGenrePercents(context, savedInputs);
+        }
+    }
+
+    function initializeSelectors(context, deferOptions = false) {
+        const container = document.getElementById(`selectors-container-${context}`);
+        container.innerHTML = '';
+
+        // Every category the data defines, in its canonical order. MULTI_SELECT_CATEGORIES
+        // only decides which ones may add extra rows — it must not decide which ones render.
+        const sortedCategories = GAME_DATA.categories;
+
+        sortedCategories.forEach(category => {
+            const tagsInCategory = getSortedTagsByCategory(category);
+            if (tagsInCategory.length === 0) return;
+
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'category-group';
+            const categorySlug = categoryToElementSlug(category);
+            groupDiv.id = `group-${categorySlug}-${context}`;
+            groupDiv.dataset.category = category;
+            groupDiv.dataset.context = context;
+
+            const header = document.createElement('div');
+            header.className = 'category-header';
+            const label = document.createElement('div');
+            label.className = 'category-label';
+            label.innerText = category;
+            header.appendChild(label);
+
+            // Add search input for large categories (>5 items) in script-building contexts.
+            if (tagsInCategory.length > 5) {
+                const searchWrapper = document.createElement('div');
+                searchWrapper.className = 'category-search-wrapper';
+                searchWrapper.id = `search-${categorySlug}-${context}-wrapper`;
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.className = 'category-search-input';
+                searchInput.id = `search-${categorySlug}-${context}-input`;
+                searchInput.placeholder = `Search ${category}...`;
+                searchInput.dataset.category = category;
+                searchInput.dataset.context = context;
+                searchWrapper.appendChild(searchInput);
+                header.appendChild(searchWrapper);
+            }
+
+            // Excluded list is always multi-select for all categories
+            if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.className = 'add-btn';
+                addBtn.id = `add-${categorySlug}-${context}-button`;
+                addBtn.dataset.action = 'add-tag-row';
+                addBtn.dataset.category = category;
+                addBtn.dataset.context = context;
+                addBtn.innerHTML = '+';
+                addBtn.addEventListener('click', () => addDropdown(category, null, context));
+                header.appendChild(addBtn);
+            }
+            groupDiv.appendChild(header);
+
+            const inputsContainer = document.createElement('div');
+            inputsContainer.className = 'inputs-container';
+            inputsContainer.id = `inputs-${categorySlug}-${context}`;
+            inputsContainer.dataset.category = category;
+            inputsContainer.dataset.context = context;
+            groupDiv.appendChild(inputsContainer);
+
+            container.appendChild(groupDiv);
+            addDropdown(category, null, context, deferOptions);
+        });
+    }
+
+    function populateContextOptions(context) {
+        const container = document.getElementById(`selectors-container-${context}`);
+        if (!container) return;
+        container.querySelectorAll('select.tag-selector').forEach(select => {
+            ensureOptionsPopulated(select, select.dataset.category, context);
+        });
+    }
+
+    function getSelectedTagsInCategory(category, context) {
+        const selected = new Set();
+        const containerSelector = `#inputs-${categoryToElementSlug(category)}-${context}`;
+        const container = document.querySelector(containerSelector);
+        if (!container) return selected;
+
+        container.querySelectorAll('.tag-selector').forEach(select => {
+            if (select.value) {
+                selected.add(select.value);
+            }
+        });
+        return selected;
+    }
+
+    // Called whenever a ban is added or lifted. Single-select categories --
+    // Setting, Protagonist, Antagonist, Finale -- had no other path to a redraw,
+    // so a banned Setting kept appearing in Script Lab until an unrelated
+    // interaction happened to refresh it.
+    function propagateExclusionChange(category) {
+        HACSelectorExclusions.exclusionConsumerContexts().forEach(consumer =>
+            refreshCategoryDropdowns(category, consumer));
+    }
+
+    function refreshCategoryDropdowns(category, context) {
+        const categoryContainerId = `inputs-${categoryToElementSlug(category)}-${context}`;
+        const categoryContainer = document.getElementById(categoryContainerId);
+        if (!categoryContainer) return;
+
+        const selects = categoryContainer.querySelectorAll('.tag-selector');
+
+        const excludedIds = getExcludedIdsForContext(context);
+        const clearedIds = clearExcludedSelectionsInCategory(category, context, excludedIds);
+
+        // Get all currently selected values in this category
+        const selectedValues = new Set();
+        selects.forEach(select => {
+            if (select.value) {
+                selectedValues.add(select.value);
+            }
+        });
+
+        // Restore options that were unavailable when a selector row was first
+        // created; exclusion state is applied separately by disabling/hiding them.
+        const allCategoryTags = getSortedTagsByCategory(category);
+
+        selects.forEach(select => {
+            if (select.dataset.optionsPopulated !== 'true') return;
+
+            const existingIds = new Set(Array.from(select.querySelectorAll('option:not(:first-child)')).map(opt => opt.value));
+
+            // Add options for any usable tags that are missing
+            const fragment = document.createDocumentFragment();
+            allCategoryTags.forEach(tag => {
+                if (!existingIds.has(tag.id) && canUseTagInContext(tag.id, context)) {
+                    const opt = document.createElement('option');
+                    opt.value = tag.id;
+                    opt.innerText = tag.name;
+                    opt.dataset.searchText = tag.name.toLowerCase();
+                    fragment.appendChild(opt);
+                }
+            });
+            select.appendChild(fragment);
+        });
+
+        // Update each dropdown: disable options that are selected elsewhere or excluded
+        selects.forEach(select => {
+            select.querySelectorAll('option:not(:first-child)').forEach(opt => {
+                const isSelectedInThisDropdown = (opt.value === select.value);
+                const isSelectedElsewhere = selectedValues.has(opt.value) && !isSelectedInThisDropdown;
+                const isExcluded = Boolean(excludedIds && excludedIds.has(opt.value));
+
+                opt.disabled = isSelectedElsewhere || isExcluded;
+                opt.hidden = isExcluded;
+                opt.dataset.selectedElsewhere = String(isSelectedElsewhere);
+                opt.dataset.excluded = String(isExcluded);
+            });
+        });
+
+        if (clearedIds.length > 0 && category === 'Genre' && context !== 'excluded') {
+            updateGenreControls(context);
+        }
+
+        return clearedIds;
+    }
+
+    function selectedTagsForVisualHints(context) {
+        const container = document.getElementById(`selectors-container-${context}`);
+        if (!container) return [];
+
+        return Array.from(container.querySelectorAll('select.tag-selector'))
+            .filter(select => select.value)
+            .map(select => {
+                const known = GAME_DATA.tags[select.value];
+                return known || {
+                    id: select.value,
+                    name: select.value,
+                    category: select.dataset.category
+                };
+            });
+    }
+
+    function markSelectorVisualHints(context) {
+        const container = document.getElementById(`selectors-container-${context}`);
+        if (!container) return;
+
+        const selectedTags = selectedTagsForVisualHints(context);
+        const canScore = selectedTags.length > 0 &&
+            typeof HACCompatibilityEngine?.getRawCompatibilityScore === 'function';
+
+        container.querySelectorAll('.select-row').forEach(row => {
+            const select = row.querySelector('select.tag-selector');
+            if (!select) return;
+
+            const hasSelection = Boolean(select.value);
+            row.classList.toggle('has-selected-tag', hasSelection);
+            select.classList.toggle('has-selected-tag', hasSelection);
+            if (select.dataset.category === 'Genre') {
+                select.dataset.genre = hasSelection ? HACDomIds.toDomId(select.value) : '';
+            }
+            const freshnessPill = row.querySelector(':scope > .freshness-pill');
+            if (freshnessPill) HACFreshness.renderPill(freshnessPill, select.value);
+
+            select.querySelectorAll('option').forEach(option => {
+                option.classList.remove('strong-fit-option');
+                delete option.dataset.synergy;
+
+                if (!canScore || !option.value || option.value === select.value) return;
+
+                const optionTag = GAME_DATA.tags[option.value];
+                if (!optionTag) return;
+
+                const isStrongFit = selectedTags.some(selectedTag =>
+                    selectedTag.id !== optionTag.id &&
+                    HACCompatibilityEngine.getRawCompatibilityScore(optionTag, selectedTag, GAME_DATA) >= 4
+                );
+
+                if (isStrongFit) {
+                    option.dataset.synergy = 'high';
+                    option.classList.add('strong-fit-option');
+                }
+            });
+        });
+    }
+
+    function refreshSelectorVisualHints(context) {
+        markSelectorVisualHints(context);
+    }
+
+    /**
+     * Every category the selectors can render, taken from the data rather than
+     * a second hand-kept list. This used to iterate MULTI_SELECT_CATEGORIES,
+     * which silently skipped Setting, Protagonist, Antagonist and Finale: a ban
+     * lifted on a Setting left the old list in place until some unrelated click
+     * happened to redraw that one category.
+     */
+    function allSelectorCategories() {
+        return [...new Set(Object.values(GAME_DATA.tags || {}).map(tag => tag.category))];
+    }
+
+    /** Re-applies exclusion availability to every script-building dropdown. */
+    function refreshScriptBuilderAvailability() {
+        HACSelectorExclusions.scriptBuilderContexts().forEach(context => {
+            const cleared = allSelectorCategories()
+                .flatMap(category => refreshCategoryDropdowns(category, context) || []);
+
+            // Excluding a tag drops it from any script already using it. Saying so
+            // matters: otherwise a selection the user built just disappears, which
+            // reads as the app losing their work rather than obeying their ban.
+            if (cleared.length === 0) return;
+
+            const names = [...new Set(cleared)]
+                .map(id => (GAME_DATA.tags[id] ? GAME_DATA.tags[id].name : id))
+                .join(', ');
+
+            showFeedbackMessage(
+                `${context}FeedbackMessage`,
+                `Removed from this script because they are now excluded: ${names}.`,
+                'accent'
+            );
+        });
+    }
+
+    /** Legacy name kept for script.js wrappers and old tests. */
+    function refreshLockedElementAvailability() {
+        refreshScriptBuilderAvailability();
+    }
+
+    /**
+     * Populates option elements into a select element with tags for a given category.
+     * Extracted to support lazy-loading: the select is created empty, options added on demand.
+     */
+    function createTagOption(category, tag) {
+        const opt = document.createElement('option');
+        opt.value = tag.id;
+        opt.innerText = tag.name;
+        opt.dataset.searchText = tag.name.toLowerCase();
+        if (category === 'Genre') {
+            opt.className = `genre-${toDomId(tag.id)}`;
+        } else {
+            opt.className = categoryToElementSlug(category);
+        }
+        return opt;
+    }
+
+    function selectTagOption(selectElement, category, tagId) {
+        const tag = GAME_DATA.tags[tagId];
+        if (!tag) return;
+
+        let option = Array.from(selectElement.options).find(existing => existing.value === tagId);
+        if (!option) {
+            option = createTagOption(category, tag);
+            selectElement.appendChild(option);
+        }
+        selectElement.value = tagId;
+        const freshnessPill = selectElement.parentElement?.querySelector(':scope > .freshness-pill');
+        if (freshnessPill) HACFreshness.renderPill(freshnessPill, tagId);
+    }
+
+    function populateSelectOptions(selectElement, category, tags) {
+        if (selectElement.dataset.optionsPopulated === 'true') return;
+
+        const existingIds = new Set(Array.from(selectElement.options).map(option => option.value));
+        const fragment = document.createDocumentFragment();
+        tags.forEach(tag => {
+            if (!existingIds.has(tag.id)) fragment.appendChild(createTagOption(category, tag));
+        });
+
+        selectElement.appendChild(fragment);
+        selectElement.dataset.optionsPopulated = 'true';
+    }
+
+    /**
+     * Triggers lazy-load of options if not already populated.
+     * Called on first focus of a select element to defer DOM creation.
+     */
+    function ensureOptionsPopulated(selectElement, category, context) {
+        if (selectElement.dataset.optionsPopulated === 'true') return;
+
+        // Gather tags for this category
+        populateSelectOptions(selectElement, category, getSortedTagsByCategory(category));
+        refreshCategoryDropdowns(category, context);
+    }
+
+    function addDropdown(category, selectedId = null, context = currentTab, deferOptions = false) {
+        if (selectedId && !canUseTagInContext(selectedId, context)) {
+            selectedId = null;
+        }
+
+        const categorySlug = categoryToElementSlug(category);
+        const containerId = `inputs-${categorySlug}-${context}`;
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Logic for single-select categories in script-building contexts.
+        if (context !== 'excluded' && !MULTI_SELECT_CATEGORIES.includes(category) && container.children.length > 0) {
+            const select = container.querySelector('select');
+            if (selectedId) selectTagOption(select, category, selectedId);
+            return;
+        }
+
+        const row = document.createElement('div');
+        row.className = 'select-row';
+        // Numbered within this category+context. A shared counter made row ids shift
+        // whenever any other panel added a row, so they could not be relied on.
+        const usedIndices = Array.from(container.querySelectorAll('.select-row'))
+            .map(existing => Number(existing.id.slice(existing.id.lastIndexOf('-') + 1)))
+            .filter(Number.isFinite);
+        const rowIndex = usedIndices.length ? Math.max(...usedIndices) + 1 : 1;
+        row.id = `tag-selector-row-${context}-${categorySlug}-${rowIndex}`;
+        row.dataset.role = 'tag-selector-row';
+        row.dataset.category = category;
+        row.dataset.context = context;
+        if (category === 'Genre' && context !== 'excluded') row.classList.add('genre-row');
+
+        const select = document.createElement('select');
+        select.className = 'tag-selector';
+        select.id = `${row.id}-select`;
+        select.dataset.category = category;
+        select.dataset.context = context;
+        select.dataset.optionsPopulated = 'false';  // Mark for lazy-load
+        const defOpt = document.createElement('option');
+        defOpt.value = "";
+        defOpt.innerText = selectedId ? "-- Select --" : `-- Select ${category} --`;
+        select.appendChild(defOpt);
+
+        if (selectedId) selectTagOption(select, category, selectedId);
+        if (!deferOptions && !(context === 'excluded' && selectedId)) {
+            populateSelectOptions(select, category, getSortedTagsByCategory(category));
+        }
+
+        select.addEventListener('focus', () => {
+            ensureOptionsPopulated(select, category, context);
+        });
+        row.appendChild(select);
+
+        // Freshness (GAME_RULES section 9): the locked story elements in Script
+        // Lab only, never Genre, Setting or an excluded row. The pill overlays
+        // the right end of the select, so clicking it cycles the state and
+        // clicking anywhere else on the box opens the dropdown as before. It
+        // follows the element, not the row: pick another element and the pill
+        // shows that element's own state.
+        const freshnessPill = context === 'generator' && HACFreshness.hasFreshness(category)
+            ? HACFreshness.createPill()
+            : null;
+        if (freshnessPill) {
+            row.classList.add('has-freshness');
+            row.appendChild(freshnessPill);
+            HACFreshness.renderPill(freshnessPill, select.value);
+        }
+
+        function updateGenreColor() {
+            if (category === 'Genre') {
+                select.dataset.genre = select.value ? HACDomIds.toDomId(select.value) : '';
+            }
+        }
+        updateGenreColor();
+
+        // When selection changes, refresh all dropdowns in this category to enforce deduplication
+        select.addEventListener('change', () => {
+            if (select.value && isTagExcludedForContext(select.value, context)) {
+                showExcludedTagFeedback(select.value, context);
+                select.value = "";
+            }
+            refreshCategoryDropdowns(category, context);
+            refreshSelectorVisualHints(context);
+            updateGenreColor();
+            if (freshnessPill) HACFreshness.renderPill(freshnessPill, select.value);
+
+            if (context === 'excluded') {
+                updateExcludedCount();
+                propagateExclusionChange(category);
+            }
+        });
+        // Bulk exclusion/profile creation refreshes once after all rows exist.
+        // Scheduling a full category scan per inserted row makes a 193-ban batch
+        // quadratic and blocks the main thread for several seconds.
+        const selectorsContainer = document.getElementById(`selectors-container-${context}`);
+        if (!selectorsContainer?.classList.contains('is-batching')) {
+            setTimeout(() => {
+                refreshCategoryDropdowns(category, context);
+                refreshSelectorVisualHints(context);
+            }, 0);
+        }
+
+        // Add percent slider only for Genre in script builders (not Excluded).
+        if (category === 'Genre' && context !== 'excluded') {
+            const percentWrapper = document.createElement('div');
+            percentWrapper.className = 'genre-percent-wrapper hidden';
+            percentWrapper.id = `${row.id}-genre-percent`;
+            const numInput = document.createElement('input');
+            numInput.type = 'number';
+            numInput.className = 'percent-input';
+            numInput.id = `${row.id}-percent-input`;
+            numInput.min = HACGenreMix.GENRE_PERCENT_MIN;
+            numInput.max = 100;
+            numInput.step = HACGenreMix.GENRE_PERCENT_STEP;
+            numInput.value = 100;
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.className = 'styled-slider percent-slider';
+            slider.id = `${row.id}-percent-slider`;
+            slider.min = HACGenreMix.GENRE_PERCENT_MIN;
+            slider.max = 100;
+            slider.step = HACGenreMix.GENRE_PERCENT_STEP;
+            slider.value = 100;
+            const label = document.createElement('span');
+            label.id = `${row.id}-percent-unit`;
+            label.innerText = '%';
+            label.className = 'percent-unit';
+            // 'change' rather than 'input' on the number field, so rebalancing
+            // does not fire on every keystroke while a two-digit value is typed.
+            numInput.addEventListener('change', (e) => {
+                HACGenreMix.applyGenrePercent(context, row, parseFloat(e.target.value));
+            });
+            slider.addEventListener('input', (e) => {
+                HACGenreMix.applyGenrePercent(context, row, parseFloat(e.target.value));
+            });
+            updatePercentSliderTrack(slider);
+            percentWrapper.appendChild(slider);
+            percentWrapper.appendChild(numInput);
+            percentWrapper.appendChild(label);
+            row.appendChild(percentWrapper);
+        }
+
+        if (context === 'excluded' || MULTI_SELECT_CATEGORIES.includes(category)) {
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-btn';
+            removeBtn.id = `${row.id}-remove-button`;
+            removeBtn.dataset.action = 'remove-tag-row';
+            removeBtn.dataset.category = category;
+            removeBtn.dataset.context = context;
+            removeBtn.innerHTML = '×';
+            removeBtn.addEventListener('click', () => {
+                row.remove();
+                refreshCategoryDropdowns(category, context);
+                refreshSelectorVisualHints(context);
+                if (category === 'Genre' && context !== 'excluded') updateGenreControls(context);
+                if (context === 'excluded') {
+                    updateExcludedCount();
+                    propagateExclusionChange(category);
+                }
+            });
+            row.appendChild(removeBtn);
+        }
+        // Add new rows to the TOP (prepend) instead of bottom
+        container.insertBefore(row, container.firstChild);
+        if (category === 'Genre' && context !== 'excluded') {
+            updateGenreControls(context);
+        }
+    }
+
+    function updateGenreControls(context) {
+        HACGenreMix.updateGenreControls(context);
+    }
+
+    function selectTagFromSearch(tagObj, context) {
+        if (isTagExcludedForContext(tagObj.id, context)) {
+            showExcludedTagFeedback(tagObj.id, context);
+            return;
+        }
+
+        const category = tagObj.category;
+        const containerId = `inputs-${categoryToElementSlug(category)}-${context}`;
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const selects = container.querySelectorAll('select.tag-selector');
+        let filled = false;
+        for (let select of selects) {
+            if (select.value === "") {
+                select.value = tagObj.id;
+                filled = true;
+                break;
+            }
+        }
+        if (!filled) {
+            if (MULTI_SELECT_CATEGORIES.includes(category)) {
+                addDropdown(category, tagObj.id, context);
+            } else {
+                if (selects.length > 0) selects[0].value = tagObj.id;
+            }
+        }
+        refreshCategoryDropdowns(category, context);
+        refreshSelectorVisualHints(context);
+        if (category === 'Genre') updateGenreControls(context);
+        const group = document.getElementById(`group-${categoryToElementSlug(category)}-${context}`);
+        if (group) {
+            group.classList.add('is-highlighted');
+            setTimeout(() => group.classList.remove('is-highlighted'), 500);
+            group.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function addTagToSelectorContext(tagObj, context) {
+        if (isTagExcludedForContext(tagObj.id, context)) {
+            showExcludedTagFeedback(tagObj.id, context);
+            return false;
+        }
+
+        const category = tagObj.category;
+        const categorySlug = categoryToElementSlug(category);
+        const container = document.getElementById(`inputs-${categorySlug}-${context}`);
+        if (!container) return false;
+
+        const selects = Array.from(container.querySelectorAll('select.tag-selector'));
+        if (selects.some(select => select.value === tagObj.id)) {
+            showFeedbackMessage(`${context}FeedbackMessage`, `${tagObj.name} is already in this script.`, 'accent');
+            return false;
+        }
+
+        const emptySelect = selects.find(select => select.value === "");
+        if (emptySelect) {
+            emptySelect.value = tagObj.id;
+            refreshCategoryDropdowns(category, context);
+            refreshSelectorVisualHints(context);
+            if (category === 'Genre') updateGenreControls(context);
+            return true;
+        }
+
+        if (MULTI_SELECT_CATEGORIES.includes(category)) {
+            addDropdown(category, tagObj.id, context);
+            refreshCategoryDropdowns(category, context);
+            refreshSelectorVisualHints(context);
+            return true;
+        }
+
+        showFeedbackMessage(`${context}FeedbackMessage`, `${category} already has a pick. Reset or change that slot first.`, 'accent');
+        return false;
+    }
+
+    // A swap trades one pick for another in that pick's own row, so the other
+    // picks in a multi-select category stay and a Genre keeps its share.
+    function replaceTagInSelectorContext(replacedTagId, tagObj, context) {
+        if (isTagExcludedForContext(tagObj.id, context)) {
+            showExcludedTagFeedback(tagObj.id, context);
+            return false;
+        }
+
+        const category = tagObj.category;
+        const container = document.getElementById(`inputs-${categoryToElementSlug(category)}-${context}`);
+        if (!container) return false;
+
+        const selects = Array.from(container.querySelectorAll('select.tag-selector'));
+        if (selects.some(select => select.value === tagObj.id)) {
+            showFeedbackMessage(`${context}FeedbackMessage`, `${tagObj.name} is already in this script.`, 'accent');
+            return false;
+        }
+
+        const target = selects.find(select => select.value === replacedTagId);
+        if (!target) return false;
+
+        selectTagOption(target, category, tagObj.id);
+        target.dispatchEvent(new Event('change', { bubbles: true }));
+        if (category === 'Genre') updateGenreControls(context);
+        return true;
+    }
+
+    function collectTagInputs(context) {
+        const tagInputs = [];
+
+        const excludedIds = getExcludedIdsForContext(context);
+        if (excludedIds) {
+            GAME_DATA.categories.forEach(category => refreshCategoryDropdowns(category, context));
+        }
+
+        // BLOCK 1: Handling Genres (usually with percentages)
+        const genreContainer = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
+        const genreRows = genreContainer ? genreContainer.querySelectorAll('.genre-row') : [];
+        let totalGenreInput = 0;
+        const genreData = [];
+        genreRows.forEach(row => {
+            const select = row.querySelector('select');
+            const input = row.querySelector('.percent-input');
+            if (select.value && !excludedIds?.has(select.value)) {
+                let val = parseFloat(input ? input.value : 100);
+                if (isNaN(val) || val < 0) val = 0;
+                totalGenreInput += val;
+                genreData.push({
+                    id: select.value,
+                    inputVal: val
+                });
+            }
+        });
+        if (totalGenreInput === 0 && genreData.length > 0) totalGenreInput = 1;
+        genreData.forEach(g => {
+            tagInputs.push({
+                id: g.id,
+                percent: g.inputVal / totalGenreInput,
+                category: "Genre"
+            });
+        });
+
+        // BLOCK 2: Handling Everything Else (and Genres for exclusions)
+        const container = document.getElementById(`selectors-container-${context}`);
+        container.querySelectorAll('.tag-selector').forEach(sel => {
+            // Skip genres here if they were handled in Block 1
+            if (sel.dataset.category === "Genre" && context !== 'excluded') return;
+
+            if (sel.value && !excludedIds?.has(sel.value)) {
+                tagInputs.push({
+                    id: sel.value,
+                    percent: 1.0,
+                    category: sel.dataset.category
+                });
+            }
+        });
+        return tagInputs;
+    }
+
+    function resetSelectors(context) {
+        initializeSelectors(context);
+        clearFeedbackMessage(`${context}FeedbackMessage`);
+
+        // Resetting the bans only rebuilds the excluded list's own dropdowns.
+        // Without this the script builders keep hiding tags that are no longer
+        // banned, until an unrelated interaction redraws one category.
+        if (context === 'excluded') refreshScriptBuilderAvailability();
+
+        // If resetting Advertisers, move the calculator back to its initial position
+        if (context === 'advertisers') {
+            const distCard = document.getElementById('dist-wrapper');
+            const anchor = document.getElementById('dist-calc-anchor');
+            if(distCard && anchor) {
+                anchor.appendChild(distCard);
+                distCard.classList.remove('distribution-card--in-results');
+            }
+        }
+
+        if (context === 'generator' || context === 'excluded') {
+            document.getElementById(`results-generator`)?.classList.add('hidden');
+        } else if (context !== 'targeted') {
+            document.getElementById(`results-${context}`)?.classList.add('hidden');
+        }
+
+        if (context === 'graves') {
+            const bestMatchesPanel = document.getElementById('graves-best-matches-panel');
+            if (bestMatchesPanel) bestMatchesPanel.classList.add('hidden');
+        }
+    }
+
+    function getSelectedTags(context) {
+        const container = document.getElementById(`selectors-container-${context}`);
+        if (!container) return [];
+        return collectTagInputs(context).map(tag => tag.id);
+    }
+
+    global.HACStoryElementSelector = {
+        restoreSelection,
+        initializeSelectors,
+        populateContextOptions,
+        contextUsesGlobalExclusions,
+        isTagExcludedForContext,
+        canUseTagInContext,
+        excludedTagFeedbackMessage,
+        filterTagsForContext,
+        clearExcludedSelectionsInCategory,
+        getSelectedTagsInCategory,
+        refreshCategoryDropdowns,
+        markSelectorVisualHints,
+        refreshSelectorVisualHints,
+        propagateExclusionChange,
+        refreshScriptBuilderAvailability,
+        refreshLockedElementAvailability,
+        addDropdown,
+        updateGenreControls,
+        selectTagFromSearch,
+        addTagToSelectorContext,
+        replaceTagInSelectorContext,
+        collectTagInputs,
+        resetSelectors,
+        getSelectedTags,
+        populateSelectOptions,
+        ensureOptionsPopulated
+    };
+})(globalThis);

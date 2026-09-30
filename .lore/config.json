@@ -1,0 +1,15 @@
+{
+  "ai": {
+    "embedding": {
+      "model": "qwen3-embedding:0.6b",
+      "dim": 1024,
+      "code": {
+        "model": "qwen3-embedding:0.6b",
+        "dim": "1024"
+      }
+    },
+    "generation": {
+      "model": "ibm/granite3.3:2b"
+    }
+  }
+}

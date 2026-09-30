@@ -1,0 +1,234 @@
+{
+  "PROTAGONIST_COWBOY": {
+    "YOUNG_M": 2.5,
+    "YOUNG_F": 1.5,
+    "MID_M": 3.5,
+    "MID_F": 1.0,
+    "OLD_M": 4.5,
+    "OLD_F": 0.5
+  },
+  "PROTAGONIST_BOUNTY_HUNTER": {
+    "YOUNG_M": 3.0,
+    "YOUNG_F": 2.0,
+    "MID_M": 4.0,
+    "MID_F": 2.5,
+    "OLD_M": 4.5,
+    "OLD_F": 2.0
+  },
+  "PROTAGONIST_WHITE_COLLAR": {
+    "YOUNG_M": 2.0,
+    "YOUNG_F": 2.0,
+    "MID_M": 4.5,
+    "MID_F": 4.5,
+    "OLD_M": 4.0,
+    "OLD_F": 3.5
+  },
+  "PROTAGONIST_WORKING_MAN": {
+    "YOUNG_M": 2.5,
+    "YOUNG_F": 1.5,
+    "MID_M": 4.0,
+    "MID_F": 2.5,
+    "OLD_M": 4.5,
+    "OLD_F": 2.0
+  },
+  "PROTAGONIST_SOLDIER": {
+    "YOUNG_M": 4.0,
+    "YOUNG_F": 2.5,
+    "MID_M": 3.5,
+    "MID_F": 2.0,
+    "OLD_M": 3.0,
+    "OLD_F": 1.5
+  },
+  "PROTAGONIST_DETECTIVE": {
+    "YOUNG_M": 3.0,
+    "YOUNG_F": 2.5,
+    "MID_M": 4.5,
+    "MID_F": 4.0,
+    "OLD_M": 4.0,
+    "OLD_F": 3.5
+  },
+  "PROTAGONIST_COP": {
+    "YOUNG_M": 3.0,
+    "YOUNG_F": 2.5,
+    "MID_M": 4.5,
+    "MID_F": 4.0,
+    "OLD_M": 4.0,
+    "OLD_F": 3.0
+  },
+  "PROTAGONIST_SHERIFF": {
+    "YOUNG_M": 2.5,
+    "YOUNG_F": 1.5,
+    "MID_M": 4.0,
+    "MID_F": 2.5,
+    "OLD_M": 5.0,
+    "OLD_F": 3.5
+  },
+  "PROTAGONIST_KNIGHT": {
+    "YOUNG_M": 4.5,
+    "YOUNG_F": 3.0,
+    "MID_M": 4.0,
+    "MID_F": 2.5,
+    "OLD_M": 3.5,
+    "OLD_F": 2.0
+  },
+  "PROTAGONIST_CLUMSY_OAF": {
+    "YOUNG_M": 3.5,
+    "YOUNG_F": 3.5,
+    "MID_M": 3.0,
+    "MID_F": 3.0,
+    "OLD_M": 3.5,
+    "OLD_F": 3.5
+  },
+  "PROTAGONIST_DARING_ADVENTURER": {
+    "YOUNG_M": 4.5,
+    "YOUNG_F": 4.0,
+    "MID_M": 4.0,
+    "MID_F": 4.5,
+    "OLD_M": 3.0,
+    "OLD_F": 2.5
+  },
+  "PROTAGONIST_FEMINIST_ACTIVIST": {
+    "YOUNG_M": 1.5,
+    "YOUNG_F": 4.5,
+    "MID_M": 2.0,
+    "MID_F": 5.0,
+    "OLD_M": 1.5,
+    "OLD_F": 4.5
+  },
+  "PROTAGONIST_HOUSEWIFE": {
+    "YOUNG_M": 1.0,
+    "YOUNG_F": 3.5,
+    "MID_M": 1.5,
+    "MID_F": 4.5,
+    "OLD_M": 2.0,
+    "OLD_F": 4.0
+  },
+  "PROTAGONIST_SCHOOLGIRL": {
+    "YOUNG_M": 2.5,
+    "YOUNG_F": 4.5,
+    "MID_M": 2.0,
+    "MID_F": 2.5,
+    "OLD_M": 0.5,
+    "OLD_F": 1.0
+  },
+  "PROTAGONIST_WEALTHY_WIDOW": {
+    "YOUNG_M": 0.5,
+    "YOUNG_F": 3.5,
+    "MID_M": 2.0,
+    "MID_F": 4.0,
+    "OLD_M": 2.5,
+    "OLD_F": 4.5
+  },
+  "PROTAGONIST_STREET_URCHIN": {
+    "YOUNG_M": 4.0,
+    "YOUNG_F": 4.0,
+    "MID_M": 2.0,
+    "MID_F": 2.0,
+    "OLD_M": 0.5,
+    "OLD_F": 0.5
+  },
+  "PROTAGONIST_RIGHTEOUS_ZEALOT": {
+    "YOUNG_M": 3.0,
+    "YOUNG_F": 3.0,
+    "MID_M": 4.0,
+    "MID_F": 4.0,
+    "OLD_M": 4.5,
+    "OLD_F": 4.5
+  },
+  "ANTAGONIST_CRIMINAL_MASTERMIND": {
+    "YOUNG_M": 2.5,
+    "YOUNG_F": 1.5,
+    "MID_M": 4.5,
+    "MID_F": 3.5,
+    "OLD_M": 5.0,
+    "OLD_F": 4.0
+  },
+  "ANTAGONIST_MURDERER": {
+    "YOUNG_M": 3.0,
+    "YOUNG_F": 2.0,
+    "MID_M": 4.0,
+    "MID_F": 3.5,
+    "OLD_M": 4.5,
+    "OLD_F": 4.0
+  },
+  "ANTAGONIST_EVIL_MONSTER": {
+    "YOUNG_M": 4.5,
+    "YOUNG_F": 4.0,
+    "MID_M": 3.5,
+    "MID_F": 3.0,
+    "OLD_M": 2.5,
+    "OLD_F": 2.0
+  },
+  "ANTAGONIST_ALIEN": {
+    "YOUNG_M": 4.5,
+    "YOUNG_F": 4.0,
+    "MID_M": 3.5,
+    "MID_F": 3.5,
+    "OLD_M": 2.5,
+    "OLD_F": 2.0
+  },
+  "ANTAGONIST_ENEMY_ARMY": {
+    "YOUNG_M": 3.5,
+    "YOUNG_F": 2.5,
+    "MID_M": 3.5,
+    "MID_F": 2.0,
+    "OLD_M": 4.0,
+    "OLD_F": 2.5
+  },
+  "ANTAGONIST_CRIMINAL_GANG": {
+    "YOUNG_M": 4.0,
+    "YOUNG_F": 3.0,
+    "MID_M": 3.5,
+    "MID_F": 2.5,
+    "OLD_M": 3.0,
+    "OLD_F": 1.5
+  },
+  "ANTAGONIST_BARBARIAN_TRIBE": {
+    "YOUNG_M": 4.5,
+    "YOUNG_F": 3.0,
+    "MID_M": 4.0,
+    "MID_F": 2.5,
+    "OLD_M": 3.5,
+    "OLD_F": 2.0
+  },
+  "ANTAGONIST_MYSTERIOUS_STRANGER": {
+    "YOUNG_M": 3.5,
+    "YOUNG_F": 3.5,
+    "MID_M": 4.0,
+    "MID_F": 4.0,
+    "OLD_M": 3.5,
+    "OLD_F": 3.5
+  },
+  "ANTAGONIST_SEDUCTRESS": {
+    "YOUNG_M": 3.5,
+    "YOUNG_F": 2.5,
+    "MID_M": 4.0,
+    "MID_F": 3.0,
+    "OLD_M": 2.5,
+    "OLD_F": 1.5
+  },
+  "ANTAGONIST_CORRUPT_OFFICIAL": {
+    "YOUNG_M": 2.0,
+    "YOUNG_F": 2.0,
+    "MID_M": 4.5,
+    "MID_F": 4.0,
+    "OLD_M": 5.0,
+    "OLD_F": 4.5
+  },
+  "ANTAGONIST_JILTED_LOVER": {
+    "YOUNG_M": 3.0,
+    "YOUNG_F": 3.0,
+    "MID_M": 4.0,
+    "MID_F": 4.0,
+    "OLD_M": 3.0,
+    "OLD_F": 3.0
+  },
+  "ANTAGONIST_STALKER": {
+    "YOUNG_M": 2.5,
+    "YOUNG_F": 2.5,
+    "MID_M": 3.5,
+    "MID_F": 3.5,
+    "OLD_M": 2.5,
+    "OLD_F": 2.5
+  }
+}

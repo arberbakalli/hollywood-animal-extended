@@ -1,0 +1,464 @@
+{
+  "DRAMA": {
+    "COMEDY": {
+      "primary": 0.25,
+      "secondary": 0.1
+    },
+    "ACTION": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "HISTORICAL": {
+      "primary": 0.1,
+      "secondary": 0.2
+    },
+    "ROMANCE": {
+      "primary": 0.25,
+      "secondary": 0.15
+    },
+    "DETECTIVE": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "ADVENTURE": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "HORROR": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "SCIENCE_FICTION": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "THRILLER": {
+      "primary": 0.2,
+      "secondary": 0.15
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": -0.1,
+      "secondary": -0.35
+    }
+  },
+  "COMEDY": {
+    "DRAMA": {
+      "primary": 0.25,
+      "secondary": 0.1
+    },
+    "ACTION": {
+      "primary": 0.25,
+      "secondary": 0.05
+    },
+    "HISTORICAL": {
+      "primary": -0.1,
+      "secondary": -0.3
+    },
+    "ROMANCE": {
+      "primary": 0.35,
+      "secondary": 0.15
+    },
+    "DETECTIVE": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "ADVENTURE": {
+      "primary": 0.2,
+      "secondary": 0.1
+    },
+    "HORROR": {
+      "primary": -0.25,
+      "secondary": -0.4
+    },
+    "SCIENCE_FICTION": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "THRILLER": {
+      "primary": -0.35,
+      "secondary": -0.3
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": 0.2,
+      "secondary": 0.125
+    }
+  },
+  "ACTION": {
+    "DRAMA": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "COMEDY": {
+      "primary": 0.25,
+      "secondary": 0.05
+    },
+    "HISTORICAL": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "ROMANCE": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "DETECTIVE": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "ADVENTURE": {
+      "primary": 0.35,
+      "secondary": 0.3
+    },
+    "HORROR": {
+      "primary": 0.2,
+      "secondary": 0.1
+    },
+    "SCIENCE_FICTION": {
+      "primary": 0.3,
+      "secondary": 0.2
+    },
+    "THRILLER": {
+      "primary": 0.2,
+      "secondary": 0.15
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": -0.2,
+      "secondary": -0.1
+    }
+  },
+  "HISTORICAL": {
+    "DRAMA": {
+      "primary": 0.1,
+      "secondary": 0.2
+    },
+    "COMEDY": {
+      "primary": -0.1,
+      "secondary": -0.3
+    },
+    "ACTION": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "ROMANCE": {
+      "primary": 0.1,
+      "secondary": 0.2
+    },
+    "DETECTIVE": {
+      "primary": -0.1,
+      "secondary": 0.1
+    },
+    "ADVENTURE": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "HORROR": {
+      "primary": -0.35,
+      "secondary": -0.25
+    },
+    "SCIENCE_FICTION": {
+      "primary": -0.75,
+      "secondary": -0.75
+    },
+    "THRILLER": {
+      "primary": -0.1,
+      "secondary": 0.1
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": 0.25,
+      "secondary": -0.45
+    }
+  },
+  "ROMANCE": {
+    "DRAMA": {
+      "primary": 0.25,
+      "secondary": 0.15
+    },
+    "COMEDY": {
+      "primary": 0.35,
+      "secondary": 0.15
+    },
+    "ACTION": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "HISTORICAL": {
+      "primary": 0.1,
+      "secondary": 0.2
+    },
+    "DETECTIVE": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "ADVENTURE": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "HORROR": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "SCIENCE_FICTION": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "THRILLER": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": 0.2,
+      "secondary": 0.1
+    }
+  },
+  "DETECTIVE": {
+    "DRAMA": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "COMEDY": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "ACTION": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "HISTORICAL": {
+      "primary": -0.1,
+      "secondary": 0.1
+    },
+    "ROMANCE": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "ADVENTURE": {
+      "primary": -0.15,
+      "secondary": -0.2
+    },
+    "HORROR": {
+      "primary": -0.15,
+      "secondary": -0.3
+    },
+    "SCIENCE_FICTION": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "THRILLER": {
+      "primary": 0.2,
+      "secondary": 0.3
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": 0,
+      "secondary": -0.2
+    }
+  },
+  "ADVENTURE": {
+    "DRAMA": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "COMEDY": {
+      "primary": 0.2,
+      "secondary": 0.1
+    },
+    "ACTION": {
+      "primary": 0.35,
+      "secondary": 0.3
+    },
+    "HISTORICAL": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "ROMANCE": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "DETECTIVE": {
+      "primary": -0.15,
+      "secondary": -0.2
+    },
+    "HORROR": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "SCIENCE_FICTION": {
+      "primary": 0.25,
+      "secondary": 0.25
+    },
+    "THRILLER": {
+      "primary": -0.1,
+      "secondary": 0.1
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": 0.15,
+      "secondary": 0.15
+    }
+  },
+  "HORROR": {
+    "DRAMA": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "COMEDY": {
+      "primary": -0.25,
+      "secondary": -0.4
+    },
+    "ACTION": {
+      "primary": 0.2,
+      "secondary": 0.1
+    },
+    "HISTORICAL": {
+      "primary": -0.35,
+      "secondary": -0.25
+    },
+    "ROMANCE": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "DETECTIVE": {
+      "primary": -0.15,
+      "secondary": -0.3
+    },
+    "ADVENTURE": {
+      "primary": 0.15,
+      "secondary": -0.15
+    },
+    "SCIENCE_FICTION": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "THRILLER": {
+      "primary": 0.25,
+      "secondary": 0.15
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": 0.15,
+      "secondary": 0.15
+    }
+  },
+  "SCIENCE_FICTION": {
+    "DRAMA": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "COMEDY": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "ACTION": {
+      "primary": 0.3,
+      "secondary": 0.2
+    },
+    "HISTORICAL": {
+      "primary": -0.75,
+      "secondary": -0.75
+    },
+    "ROMANCE": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "DETECTIVE": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "ADVENTURE": {
+      "primary": 0.25,
+      "secondary": 0.25
+    },
+    "HORROR": {
+      "primary": 0.1,
+      "secondary": -0.1
+    },
+    "THRILLER": {
+      "primary": 0.2,
+      "secondary": 0.15
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": -0.15,
+      "secondary": -0.25
+    }
+  },
+  "THRILLER": {
+    "DRAMA": {
+      "primary": 0.2,
+      "secondary": 0.15
+    },
+    "COMEDY": {
+      "primary": -0.35,
+      "secondary": -0.3
+    },
+    "ACTION": {
+      "primary": 0.2,
+      "secondary": 0.15
+    },
+    "HISTORICAL": {
+      "primary": -0.1,
+      "secondary": 0.1
+    },
+    "ROMANCE": {
+      "primary": 0,
+      "secondary": 0
+    },
+    "DETECTIVE": {
+      "primary": 0.2,
+      "secondary": 0.3
+    },
+    "ADVENTURE": {
+      "primary": -0.1,
+      "secondary": 0.1
+    },
+    "HORROR": {
+      "primary": 0.25,
+      "secondary": 0.15
+    },
+    "SCIENCE_FICTION": {
+      "primary": 0.2,
+      "secondary": 0.15
+    },
+    "SLAPSTICK_COMEDY": {
+      "primary": 0.1,
+      "secondary": -0.15
+    }
+  },
+  "SLAPSTICK_COMEDY": {
+    "DRAMA": {
+      "primary": -0.1,
+      "secondary": -0.35
+    },
+    "COMEDY": {
+      "primary": 0.2,
+      "secondary": 0.125
+    },
+    "ACTION": {
+      "primary": -0.2,
+      "secondary": -0.1
+    },
+    "HISTORICAL": {
+      "primary": 0.25,
+      "secondary": -0.45
+    },
+    "ROMANCE": {
+      "primary": 0.2,
+      "secondary": 0.1
+    },
+    "DETECTIVE": {
+      "primary": 0,
+      "secondary": -0.2
+    },
+    "ADVENTURE": {
+      "primary": 0.15,
+      "secondary": 0.15
+    },
+    "HORROR": {
+      "primary": 0.15,
+      "secondary": 0.15
+    },
+    "SCIENCE_FICTION": {
+      "primary": -0.15,
+      "secondary": -0.25
+    },
+    "THRILLER": {
+      "primary": 0.1,
+      "secondary": -0.15
+    }
+  }
+}

@@ -1,0 +1,1597 @@
+{
+  "PROTAGONIST_COWBOY": {
+    "type": 2,
+    "artValue": -0.1,
+    "commercialValue": 0.2,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_WORKING_MAN": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_DETECTIVE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_COP": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_KNIGHT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_CLUMSY_OAF": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_DARING_ADVENTURER": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_HOPELESS_ROMANTIC": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_SOLDIER": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_SHERIFF": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_OUTCAST": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_BOUNTY_HUNTER": {
+    "type": 2,
+    "artValue": -0.05,
+    "commercialValue": 0.2,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_FARM_GIRL": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "F"
+  },
+  "PROTAGONIST_WARRIOR": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_SPIRITED_YOUNG_LADY": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "F"
+  },
+  "PROTAGONIST_LOVEABLE_ROGUE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.2,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_ACCIDENTAL_HERO": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_LAST_SURVIVOR": {
+    "type": 2,
+    "artValue": -0.2,
+    "commercialValue": 0.3,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_BROTHERS_IN_ARMS": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.2,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_WAR_VETERAN": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": -0.1,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_WAR_WIDOW": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": -0.1,
+    "CategoryID": "Protagonist",
+    "gender": "F"
+  },
+  "PROTAGONIST_WHITE_COLLAR": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_SECRET_AGENT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_CITY_MOUSE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "F"
+  },
+  "PROTAGONIST_JOURNALIST": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_SOUTHERN_BELLE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "F"
+  },
+  "PROTAGONIST_ATTORNEY": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_PILOT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_SAILOR": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_PIRATE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_TOXIC_VIGILANTE": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.3,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_SHERIFFS_CONJOINED_TWINS": {
+    "type": 2,
+    "artValue": -0.3,
+    "commercialValue": 0.5,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_СORNLIMBED_ROMANTIC": {
+    "type": 2,
+    "artValue": -0.2,
+    "commercialValue": 0.2,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_PARENT_IN_INVISIBLE_CLOTHES": {
+    "type": 2,
+    "artValue": -0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_VAMPIRE_SHIT-SUCKER": {
+    "type": 2,
+    "artValue": -0.8,
+    "commercialValue": 0.4,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_GIRL_WITH_A_SWEARING_VAGINA_WITH_TURRET_SYNDROME": {
+    "type": 2,
+    "artValue": -0.7,
+    "commercialValue": 0.2,
+    "CategoryID": "Protagonist",
+    "gender": "F"
+  },
+  "PROTAGONIST_LOVELACE_WITH_POISONOUS_BALLS": {
+    "type": 2,
+    "artValue": -0.3,
+    "commercialValue": 0.2,
+    "CategoryID": "Protagonist",
+    "gender": "M"
+  },
+  "PROTAGONIST_WAYWARD_SOUL": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_RETIRED_LEGEND": {
+    "type": 2,
+    "artValue": 0.04,
+    "commercialValue": 0.08,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_CHARISMATIC_CRIMINAL": {
+    "type": 2,
+    "artValue": 0.5,
+    "commercialValue": 0.15,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_AMBITIOUS_WOMAN": {
+    "type": 2,
+    "artValue": 0.15,
+    "commercialValue": 0,
+    "CategoryID": "Protagonist",
+    "gender": "F"
+  },
+  "PROTAGONIST_DIS_IDEALIST": {
+    "type": 2,
+    "artValue": 0.25,
+    "commercialValue": 0.05,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "PROTAGONIST_CYNIC": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": 0.1,
+    "CategoryID": "Protagonist",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_LOVE_INTEREST": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_SIDEKICK": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_ANGRY_BOSS": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_FEMME_FATALE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "F"
+  },
+  "SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "F"
+  },
+  "SUPPORTINGCHARACTER_RIVAL": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_STRICT_PARENT": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_MENTOR": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_SHERIFF": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "M"
+  },
+  "SUPPORTINGCHARACTER_PARENT_FIGURE": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_WIZARD": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "M"
+  },
+  "SUPPORTINGCHARACTER_FIRST_VICTIM": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_MYSTERIOUS_GUIDE": {
+    "type": 2,
+    "artValue": -0.2,
+    "commercialValue": 0.2,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_BROTHER_IN_ARMS": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "M"
+  },
+  "SUPPORTINGCHARACTER_ANNOYING_SUITOR": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_BUTLER": {
+    "type": 2,
+    "artValue": 0.01,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "M"
+  },
+  "SUPPORTINGCHARACTER_STEPPARENT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_STEPCHILD": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_CONCERNED_WIFE": {
+    "type": 2,
+    "artValue": 0.04,
+    "commercialValue": 0.02,
+    "CategoryID": "SupportingCharacter",
+    "gender": "F"
+  },
+  "SUPPORTINGCHARACTER_KEY_WITNESS": {
+    "type": 2,
+    "artValue": 0.02,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_VILLAINS_RIGHT_HAND": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "SupportingCharacter",
+    "gender": "U"
+  },
+  "SUPPORTINGCHARACTER_PATRIARCH": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "SupportingCharacter",
+    "gender": "M"
+  },
+  "ANTAGONIST_CRIMINAL_MASTERMIND": {
+    "type": 2,
+    "artValue": -0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_MURDERER": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_SERIAL_KILLER": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_EVIL_MONSTER": {
+    "type": 2,
+    "artValue": -0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_EVIL_WITCH": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "F"
+  },
+  "ANTAGONIST_BANDIT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_TRIBAL_CHIEF": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_CRIMINAL_GANG": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist"
+  },
+  "ANTAGONIST_EVIL_SORCERER": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_PIRATE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_HEARTLESS_BUREAUCRAT": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_MAD_SCIENTIST": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_ANCIENT_EVIL": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_VAMPIRE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_ALIEN": {
+    "type": 2,
+    "artValue": -0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_ROBOT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_VENGEFUL_SPIRIT": {
+    "type": 2,
+    "artValue": -0.15,
+    "commercialValue": 0.2,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_UNDEAD": {
+    "type": 2,
+    "artValue": -0.3,
+    "commercialValue": 0.3,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_WAR_CRIMINAL": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_CORRUPT_OFFICIAL": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": 0,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_REBELS": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Antagonist"
+  },
+  "ANTAGONIST_ENEMY_ARMY": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist"
+  },
+  "ANTAGONIST_BARBARIAN_TRIBE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Antagonist"
+  },
+  "ANTAGONIST_TOASTER_KILLER": {
+    "type": 2,
+    "artValue": -0.2,
+    "commercialValue": 0.3,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_ROBOT_RAPIST": {
+    "type": 2,
+    "artValue": -0.7,
+    "commercialValue": 0.2,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_ROBBER_WITH_A_HUNDRED_DICKS": {
+    "type": 2,
+    "artValue": -0.9,
+    "commercialValue": 0.3,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_SCHOOLGIRL_POSSESSED_DEMON": {
+    "type": 2,
+    "artValue": -0.5,
+    "commercialValue": 0.2,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS": {
+    "type": 2,
+    "artValue": -0.3,
+    "commercialValue": 0.2,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_WOMENS_BOOK_CLUB_OF_CANNIBALS": {
+    "type": 2,
+    "artValue": -0.3,
+    "commercialValue": 0.4,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "ANTAGONIST_OLD_FRIEND_ENEMY": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_ENEMY_FROM_THE_PAST": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_RULE_ENFORCER": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_TYRANT": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "U"
+  },
+  "ANTAGONIST_PATRIARCH": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Antagonist",
+    "gender": "M"
+  },
+  "THEME_TREASURE_HUNT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_WINNING_THE_BELOVED": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_LOVE_TRIANGLE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_AVENGING_LOVED_ONES": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_STRUGGLE_FOR_BETTER_LIFE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_UNREQUITED_LOVE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_SEARCH_KILLER": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_EVIL_TRANSFORMATION": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_LONG_JOURNEY": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_A_CURSE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_WAR_IS_HELL": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": -0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_SURVIVING_IN_WARTIME": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_GENERATIONAL_CONFLICT": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_READJUSTING_TO_LIFE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_FIGHT_HYPOCRITICAL_AMERICAN": {
+    "type": 2,
+    "artValue": 0.15,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_DESTRUCTIVE_ROMANCE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_WRONGFULLY_ACCUSED": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_SPY_GAMES": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_FIGHT_FOR_FREEDOM": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_GOLD_FEVER": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_GREED": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_STRUGGLE_FOR_POWER": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "THEME_UNIFORM_HEROISM": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_ALCOHOL_FREEDOM": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": -0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_WHITE_SUPREMACY": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_WAR_WITH_SORCERERS": {
+    "type": 2,
+    "artValue": -0.4,
+    "commercialValue": 0.3,
+    "CategoryID": "Theme"
+  },
+  "THEME_PROTECTING_THE_WITNESS": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_PROTAGONIST_ROPED_BACK_IN": {
+    "type": 2,
+    "artValue": 0.01,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_PROTAGONIST_PASSES_THE_TORCH": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_ONE_LAST_JOB": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_SLAPSTICK_MAYHEM": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_LOVERS_TAKE_A_BREAK": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_HIGHBROW_HUMOR": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": -0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_LOWBROW_HUMOR": {
+    "type": 2,
+    "artValue": -0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_FRAGMENTED_NARRATIVE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": -0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_CATCHY_ONE_LINERS": {
+    "type": 2,
+    "artValue": -0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_MOB_WAR": {
+    "type": 2,
+    "artValue": 0.01,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_SOCIAL_REJECTION": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.02,
+    "CategoryID": "Theme"
+  },
+  "THEME_FROM_SMALL_TOWN_TO_BIG_TIME": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "THEME_CHRISTMAS_CAT": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_MAGICAL_LESSON": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "THEME_FESTIVE_ATM": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.2,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_PRISON_BREAK": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_BANK_ROBBERY": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_JOUSTING_TOURNAMENT": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_SHOOTOUT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_BETRAYAL": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_STAGECOACH_ROBBERY": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_BIG_BATTLE_SCENES": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENT_CURSED_DEAL": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_PROTAGONISTS_CLOSE_ONE_DIES": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_ESCAPE_CAPTIVITY": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_RESCUE_MISSION": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_CAPTURED_AND_TORTURED": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_ACE_COMBAT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_TANK_COMBAT": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_RAPE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_DIVORCE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_TRAIN_JOB": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_SAVING_BELOVED": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_RUNAWAY": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_CRIME_OF_NECESSITY": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_CITY_SIEGE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_PROMISCUITY": {
+    "type": 2,
+    "artValue": 0.15,
+    "commercialValue": 0.2,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_ABUNDANT_PROFANITY": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.125,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_NUDITY": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.15,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_EXCESSIVE_VIOLENCE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.2,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_CHEATING_SPOUSE": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_BLACKMAIL": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_ACCIDENTAL_MURDER": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_SELFSACRIFICE": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_WORLDWIDE_TRAVELING": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_WEDDING": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_BAR_BRAWL": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_FRAME_UP": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_PROT_FRIEND_DIES": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_SURVIVAL_TOURNAMENT": {
+    "type": 2,
+    "artValue": -0.3,
+    "commercialValue": 0.5,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_THRILLING_CHASE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_AMBUSH": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_FINAL_SHOWDOWN": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Theme"
+  },
+  "EVENTS_ANCIENT_PUZZLE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Theme"
+  },
+  "FINALE_ANTAGONIST_GETS_PUNISHED": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_DIES_HEROICALLY": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": -0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_ANTAGONIST_GETS_KILLED": {
+    "type": 2,
+    "artValue": -0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_ANTAGONIST_REPENTS": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_RESCUES_HOSTAGE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_SWEETHEARTS_STAY_TOGETHER": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_GETS_CHANCE_FOR_BETTER_LIFE": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_OVERCAME_SELFDOUBT": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_FINDS_TREASURE": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_GETS_PUNISHED_FOR_A_CRIME": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_COUPLE_GETS_MARRIED": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.2,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_FINDS_LOVE": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_STARCROSSED_LOVERS": {
+    "type": 2,
+    "artValue": 0.15,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_FAMILY_REUNION": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": "Finale"
+  },
+  "FINALE_ANTAGONIST_ESCAPES_JUSTICE": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_EVIL_EXPOSED": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_TAKES_ANTAGONIST_WITH_THEM": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": 0.2,
+    "CategoryID": "Finale"
+  },
+  "FINALE_ANTAGONIST_DEFEATED_EVIL_PERSISTS": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.2,
+    "CategoryID": "Finale"
+  },
+  "FINALE_BOY_BECOMES_MAN": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_RETURNS_HOME": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_COMMITS_SUICIDE": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": -0.3,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_AVOIDS_PUNISHMENT": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": -0.3,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_GETS_PUNISHED_FOR_CRIME": {
+    "type": 2,
+    "artValue": 0.2,
+    "commercialValue": -0.3,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_RETIRES_FOR_GOOD": {
+    "type": 2,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": "Finale"
+  },
+  "FINALE_TREASURE_LOST_FOREVER": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_EVERYONE_LEARNS_A_LESSON": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONISTS_DREAMS_CRUSHED": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_RESTORED_FAITH": {
+    "type": 2,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": "Finale"
+  },
+  "FINALE_PROTAGONIST_REFORMED": {
+    "type": 2,
+    "artValue": 0.1,
+    "commercialValue": 0.1,
+    "CategoryID": "Finale"
+  },
+  "FINALE_HAPPY_ENDING": {
+    "type": 2,
+    "artValue": -0.3,
+    "commercialValue": 0.2,
+    "CategoryID": "Finale"
+  },
+  "DRAMA": {
+    "type": 0,
+    "artValue": 0.2,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "COMEDY": {
+    "type": 0,
+    "artValue": -0.1,
+    "commercialValue": 0.3,
+    "CategoryID": null
+  },
+  "ACTION": {
+    "type": 0,
+    "artValue": -0.05,
+    "commercialValue": 0.3,
+    "CategoryID": null
+  },
+  "ROMANCE": {
+    "type": 0,
+    "artValue": 0.2,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "DETECTIVE": {
+    "type": 0,
+    "artValue": -0.1,
+    "commercialValue": 0.2,
+    "CategoryID": null
+  },
+  "ADVENTURE": {
+    "type": 0,
+    "artValue": -0.05,
+    "commercialValue": 0.2,
+    "CategoryID": null
+  },
+  "THRILLER": {
+    "type": 0,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "HISTORICAL": {
+    "type": 0,
+    "artValue": 0.3,
+    "commercialValue": -0.1,
+    "CategoryID": null
+  },
+  "HORROR": {
+    "type": 0,
+    "artValue": -0.1,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "SCIENCE_FICTION": {
+    "type": 0,
+    "artValue": 0.1,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "SLAPSTICK_COMEDY": {
+    "type": 0,
+    "artValue": -0.175,
+    "commercialValue": 0.125,
+    "CategoryID": null
+  },
+  "WILD_WEST": {
+    "type": 1,
+    "artValue": 0,
+    "commercialValue": 0.2,
+    "CategoryID": null
+  },
+  "MODERN_AMERICAN_CITY": {
+    "type": 1,
+    "artValue": 0,
+    "commercialValue": 0.2,
+    "CategoryID": null
+  },
+  "MODERN_AMERICAN_TOWN": {
+    "type": 1,
+    "artValue": 0,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "FANTASY_KINGDOM": {
+    "type": 1,
+    "artValue": 0,
+    "commercialValue": 0.2,
+    "CategoryID": null
+  },
+  "TROPICAL_ISLAND": {
+    "type": 1,
+    "artValue": 0,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "MODERN_AMERICAN_COUNTRYSIDE": {
+    "type": 1,
+    "artValue": 0.2,
+    "commercialValue": -0.2,
+    "CategoryID": null
+  },
+  "ARTHURIAN_LEGENDS": {
+    "type": 1,
+    "artValue": -0.1,
+    "commercialValue": 0.2,
+    "CategoryID": null
+  },
+  "AMERICAN_CIVIL_WAR": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "CARIBBEAN": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0.2,
+    "CategoryID": null
+  },
+  "GREAT_WAR": {
+    "type": 1,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "MIDDLE_AGES": {
+    "type": 1,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "SPACE": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "UTOPIAN_FUTURISTIC_CITY": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": null
+  },
+  "DYSTOPIAN_FUTURISTIC_CITY": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "VICTORIAN_ENGLAND": {
+    "type": 1,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "MODERN_EUROPEAN_CITY": {
+    "type": 1,
+    "artValue": 0.2,
+    "commercialValue": -0.1,
+    "CategoryID": null
+  },
+  "MODERN_EUROPEAN_TOWN": {
+    "type": 1,
+    "artValue": 0.2,
+    "commercialValue": -0.2,
+    "CategoryID": null
+  },
+  "WW2_EUROPE": {
+    "type": 1,
+    "artValue": 0.2,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "WW2_PACIFIC": {
+    "type": 1,
+    "artValue": 0.2,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "WW2_AFRICA": {
+    "type": 1,
+    "artValue": 0.2,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "MODERN_EUROPEAN_COUNTRYSIDE": {
+    "type": 1,
+    "artValue": 0.3,
+    "commercialValue": -0.3,
+    "CategoryID": null
+  },
+  "FREE_STATES_IN_SLAVERY-ERA": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0.1,
+    "CategoryID": null
+  },
+  "SLAVE_STATES_IN_SLAVERY-ERA": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": null
+  },
+  "ANCIENT_GREECE": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "ANCIENT_ROME": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "ANCIENT_EGYPT": {
+    "type": 1,
+    "artValue": 0,
+    "commercialValue": 0.05,
+    "CategoryID": null
+  },
+  "ANCIENT_CHINA": {
+    "type": 1,
+    "artValue": 0.2,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "FEUDAL_JAPAN": {
+    "type": 1,
+    "artValue": 0.1,
+    "commercialValue": 0,
+    "CategoryID": null
+  },
+  "RENAISSANCE": {
+    "type": 1,
+    "artValue": 0.05,
+    "commercialValue": 0.05,
+    "CategoryID": null
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "VALENTINE": {
+    "name": "Valentine's Day",
+    "date": "2025-02-14",
+    "dateType": "FIXED",
+    "month": 2,
+    "day": 14,
+    "strategicProfile": "Romance-focused, female audiences",
+    "peakDemographic": "YF (Young Women)",
+    "peakBonus": 0.30,
+    "audiences": {
+      "TM": 0.07,
+      "TF": 0.15,
+      "YM": 0.12,
+      "YF": 0.30,
+      "AM": 0.15,
+      "AF": 0.00
+    }
+  },
+  "INDEPENDENCE_DAY": {
+    "name": "Independence Day",
+    "date": "2025-07-04",
+    "dateType": "FIXED",
+    "month": 7,
+    "day": 4,
+    "strategicProfile": "Patriotic, male-centric audiences",
+    "peakDemographic": "AM (Adult Men)",
+    "peakBonus": 0.18,
+    "audiences": {
+      "TM": 0.09,
+      "TF": 0.00,
+      "YM": 0.13,
+      "YF": 0.05,
+      "AM": 0.18,
+      "AF": 0.07
+    }
+  },
+  "THANKSGIVING": {
+    "name": "Thanksgiving",
+    "date": "2025-11-27",
+    "dateType": "NTH_OCCURRENCE",
+    "month": 11,
+    "dayOfWeek": 4,
+    "occurrence": 4,
+    "strategicProfile": "Family-focused, balanced across ages",
+    "peakDemographic": "AM/AF (Adults)",
+    "peakBonus": 0.22,
+    "audiences": {
+      "TM": 0.07,
+      "TF": 0.07,
+      "YM": 0.15,
+      "YF": 0.15,
+      "AM": 0.22,
+      "AF": 0.22
+    }
+  },
+  "HALLOWEEN": {
+    "name": "Halloween",
+    "date": "2025-10-31",
+    "dateType": "FIXED",
+    "month": 10,
+    "day": 31,
+    "strategicProfile": "Youth-dominant, spooky content",
+    "peakDemographic": "TM/TF (Children)",
+    "peakBonus": 0.22,
+    "audiences": {
+      "TM": 0.22,
+      "TF": 0.22,
+      "YM": 0.18,
+      "YF": 0.18,
+      "AM": 0.15,
+      "AF": 0.15
+    }
+  },
+  "MEMORIAL_DAY": {
+    "name": "Memorial Day",
+    "date": "2025-05-26",
+    "dateType": "NTH_OCCURRENCE",
+    "month": 5,
+    "dayOfWeek": 1,
+    "occurrence": 5,
+    "strategicProfile": "Patriotic, male-centric audiences",
+    "peakDemographic": "AM (Adult Men)",
+    "peakBonus": 0.18,
+    "audiences": {
+      "TM": 0.09,
+      "TF": 0.00,
+      "YM": 0.16,
+      "YF": 0.05,
+      "AM": 0.18,
+      "AF": 0.07
+    }
+  },
+  "CHRISTMAS": {
+    "name": "Christmas",
+    "date": "2025-12-25",
+    "dateType": "FIXED",
+    "month": 12,
+    "day": 25,
+    "strategicProfile": "Universal, youth-preferred",
+    "peakDemographic": "All Youth (TM/TF/YM/YF)",
+    "peakBonus": 0.15,
+    "audiences": {
+      "TM": 0.15,
+      "TF": 0.15,
+      "YM": 0.15,
+      "YF": 0.15,
+      "AM": 0.10,
+      "AF": 0.10
+    }
+  }
+}

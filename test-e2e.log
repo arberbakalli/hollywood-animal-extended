@@ -1,0 +1,844 @@
+﻿
+> hollywood-animal-extended@0.1.0 test:e2e
+> playwright test
+
+
+Running 165 tests using 4 workers
+
+node.exe : (node:45444) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\testUser\AppData\Roami ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:45444) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:33240) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:10060) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38356) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  tester:navigate  Navigating to URL: "/" +0ms
+  tester:navigate  Navigating to URL: "/" +0ms
+  tester:navigate  Navigating to URL: "/" +0ms
+  tester:navigate  Navigating to URL: "/" +0ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +0ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +0ms
+  tester:verify    Verifying window.__hollywoodReady is falsy +0ms
+  ok   1 [chromium] › tests\e2e\boot-failure.spec.js:10:3 › Start-up failure › TC07-000001 a failed data load is reported instead of an empty app (640ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +0ms
+  tester:navigate  Navigating to URL: "/" +493ms
+  tester:interact  Selecting dropdown option for "languageSelector" in "Navigation" +0ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +259ms
+  ok   2 [chromium] › tests\e2e\boot-failure.spec.js:22:3 › Start-up failure › TC07-000002 retrying after a failure recovers the app (1.1s)
+  ok   5 [chromium] › tests\e2e\boot-failure.spec.js:36:3 › Start-up failure › TC07-000003 a healthy load shows no failure banner (470ms)
+  ok   4 [chromium] › tests\e2e\app-shell.spec.js:20:3 › App Shell › TC00-000002 language selector updates story element names without changing ids (1.1s)
+  tester:navigate  Navigating to URL: "/" +956ms
+  tester:navigate  Navigating to URL: "/" +533ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +696ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +559ms
+  ok   3 [chromium] › tests\e2e\app-shell.spec.js:9:3 › App Shell › TC00-000001 primary product tabs switch visible panels (1.4s)
+  tester:verify    Verifying window.__hollywoodReady is truthy +991ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +962ms
+  ok   6 [chromium] › tests\e2e\colman-graves.spec.js:126:3 › Script Evaluation — Colman Graves › TC03-000001 all seven story element categories are offered (679ms)
+  tester:verify    Building matcher tree for "supportingCharacterSelect" in "ColmanGraves" +431ms
+  tester:navigate  Navigating to URL: "/" +677ms
+  tester:interact  Selecting dropdown option for "excludedSettingSelect" in "ScriptLab" +0ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +654ms
+  tester:interact  Selecting dropdown option for "excludedSupportingCharacterSelect" in "ScriptLab" +295ms
+  ok   9 [chromium] › tests\e2e\colman-graves.spec.js:168:3 › Script Evaluation — Colman Graves › TC03-000007 best-match filters expose category and fit controls (814ms)
+  tester:verify    Building matcher tree for "supportingCharacterSelect" in "ColmanGraves" +476ms
+  tester:navigate  Navigating to URL: "/" +817ms
+  ok   7 [chromium] › tests\e2e\colman-graves.spec.js:130:3 › Script Evaluation — Colman Graves › TC03-000033 Graves explains that Script Lab exclusions hide unavailable Settings (1.2s)
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +0ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +814ms
+  ok   8 [chromium] › tests\e2e\colman-graves.spec.js:146:3 › Script Evaluation — Colman Graves › TC03-000034 banning an element removes it from the Graves script and says so (1.3s)
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +117ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +106ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +386ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +102ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +0ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +91ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +95ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +1s
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +95ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +96ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 10 +1s
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +102ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +115ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +118ms
+  ok  11 [chromium] › tests\e2e\colman-graves.spec.js:210:3 › Script Evaluation — Colman Graves › TC03-000003 a script missing required categories names what is missing (1.1s)
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +126ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +119ms
+  tester:verify    Building matcher tree for "verdict" in "ColmanGraves" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +117ms
+  ok  12 [chromium] › tests\e2e\colman-graves.spec.js:222:3 › Script Evaluation — Colman Graves › TC03-000004 fewer than five elements is refused with the count (1.4s)
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +104ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +92ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +1s
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +84ms
+  ok  10 [chromium] › tests\e2e\colman-graves.spec.js:184:3 › Script Evaluation — Colman Graves › TC03-000002 submitting a valid script produces a verdict and scores (2.4s)
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +453ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +1s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +137ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +934ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +124ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +126ms
+  ok  14 [chromium] › tests\e2e\colman-graves.spec.js:268:3 › Script Evaluation — Colman Graves › TC03-000011 best matches can start from one seed element (1.3s)
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +97ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +2s
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +116ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +103ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +103ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +88ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +101ms
+  tester:verify    Building matcher tree for "swapSuggestionsTab" in "ColmanGraves" +3s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +96ms
+  tester:verify    Building matcher tree for "bestAdditionsTab" in "ColmanGraves" +60ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +1s
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +86ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +95ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +101ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +91ms
+  tester:verify    Building matcher tree for "elementPoolInput" in "Navigation" +2s
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +85ms
+  tester:verify    Building matcher tree for "pairwiseTab" in "ColmanGraves" +280ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +101ms
+  ok  13 [chromium] › tests\e2e\colman-graves.spec.js:234:3 › Script Evaluation — Colman Graves › TC03-000005 best matches open and the analysis modes switch (3.3s)
+  tester:navigate  Navigating to URL: "/" +3s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelectRow2" in "ColmanGraves" +213ms
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +457ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +128ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +479ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +139ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 10 +2s
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +94ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +101ms
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +438ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +80ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +69ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +67ms
+  tester:interact  Selecting dropdown option for "genreSelectRow2" in "ColmanGraves" +142ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +68ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +81ms
+  tester:verify    Building matcher tree for "swapSuggestionsTab" in "ColmanGraves" +2s
+  ok  17 [chromium] › tests\e2e\colman-graves.spec.js:333:3 › Script Evaluation — Colman Graves › TC03-000027 every Swap Suggestion matches the category of the slot it replaces (2.6s)
+  tester:navigate  Navigating to URL: "/" +3s
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +419ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +389ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 10 +1s
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +70ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +70ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +68ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +79ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +66ms
+  ok  15 [chromium] › tests\e2e\colman-graves.spec.js:287:3 › Script Evaluation — Colman Graves › TC03-000029 Best Additions explains when the element budget is full (4.4s)
+  tester:navigate  Navigating to URL: "/" +4s
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +79ms
+  tester:verify    Building matcher tree for "minimumFitFilter" in "ColmanGraves" +4s
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +89ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  tester:verify    Building matcher tree for "bestAdditionsTab" in "ColmanGraves" +2s
+  ok  16 [chromium] › tests\e2e\colman-graves.spec.js:311:3 › Script Evaluation — Colman Graves › TC03-000030 a failed search restores the minimum fit the user chose (4.2s)
+  tester:navigate  Navigating to URL: "/" +4s
+  ok  18 [chromium] › tests\e2e\colman-graves.spec.js:375:3 › Script Evaluation — Colman Graves › TC03-000028 Best Additions respects per-category selection limits (2.8s)
+  tester:verify    Verifying window.__hollywoodReady is truthy +278ms
+  tester:navigate  Navigating to URL: "/" +3s
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +4s
+  tester:interact  Selecting dropdown option for "matchCategoryFilter" in "ColmanGraves" +465ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +114ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +485ms
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +107ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +112ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +3s
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +96ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +94ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +87ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +81ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 10 +2s
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +86ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +88ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +91ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +85ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +79ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +78ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +77ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +73ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +76ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +82ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +80ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +105ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +96ms
+  tester:interact  Selecting dropdown option for "matchCategoryFilter" in "ColmanGraves" +87ms
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +71ms
+  tester:verify    Building matcher tree for "themeEventSelect" in "ColmanGraves" +3s
+  ok  19 [chromium] › tests\e2e\colman-graves.spec.js:413:3 › Script Evaluation — Colman Graves › TC03-000008 adding a suggested Theme & Event joins the Graves script (2.9s)
+  ok  20 [chromium] › tests\e2e\colman-graves.spec.js:433:3 › Script Evaluation — Colman Graves › TC03-000015 saving an evaluated script adds it to Script Library (2.2s)
+  tester:navigate  Navigating to URL: "/" +3s
+  ok  22 [chromium] › tests\e2e\colman-graves.spec.js:460:3 › Script Evaluation — Colman Graves › TC03-000012 best-match category filter restricts suggestions (1.8s)
+  tester:verify    Building matcher tree for "genreSelect" in "MarketingRelease" +2s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +401ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok  21 [chromium] › tests\e2e\colman-graves.spec.js:447:3 › Script Evaluation — Colman Graves › TC03-000016 transferring a Graves script opens Marketing with analysis (2.3s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +446ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +2s
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +2s
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +1s
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +85ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +87ms
+  tester:interact  Selecting dropdown option for "minimumFitFilter" in "ColmanGraves" +88ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +83ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +2s
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +85ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +94ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +99ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +110ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +97ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +96ms
+  ok  23 [chromium] › tests\e2e\colman-graves.spec.js:480:3 › Script Evaluation — Colman Graves › TC03-000013 best-match minimum fit filter restricts scores (1.2s)
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +92ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +93ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "ColmanGraves" +97ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +93ms
+  ok  24 [chromium] › tests\e2e\colman-graves.spec.js:495:3 › Script Evaluation — Colman Graves › TC03-000031 Show more states remaining suggestions and preserves existing rows (1.6s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok  27 [chromium] › tests\e2e\colman-graves.spec.js:562:3 › Script Evaluation — Colman Graves › TC03-000010 switching away from Graves does not hide focused controls from accessibility (806ms)
+  tester:navigate  Navigating to URL: "/" +822ms
+  ok  25 [chromium] › tests\e2e\colman-graves.spec.js:528:3 › Script Evaluation — Colman Graves › TC03-000032 Pair Analysis groups pairs by band and collapses counts (2.1s)
+  tester:verify    Verifying window.__hollywoodReady is truthy +816ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +1s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +95ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +77ms
+  tester:verify    Building matcher tree for "genreSelect" in "ColmanGraves" +2s
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +83ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "ColmanGraves" +2s
+  ok  26 [chromium] › tests\e2e\colman-graves.spec.js:551:3 › Script Evaluation — Colman Graves › TC03-000006 resetting clears the submission and hides the verdict (2.2s)
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +86ms
+  tester:interact  Selecting dropdown option for "settingSelect" in "ColmanGraves" +93ms
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +95ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "ColmanGraves" +89ms
+  ok  30 [chromium] › tests\e2e\distribution-behemoth.spec.js:9:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth toggle visibility and interaction › TC-BEH-001: Behemoth toggle appears in Distribution Calculator (518ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +281ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "ColmanGraves" +91ms
+  tester:navigate  Navigating to URL: "/" +534ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "ColmanGraves" +95ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +541ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "ColmanGraves" +91ms
+  ok  31 [chromium] › tests\e2e\distribution-behemoth.spec.js:16:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth toggle visibility and interaction › TC-BEH-002: Behemoth label shows budget requirement ($1M) (524ms)
+  tester:navigate  Navigating to URL: "/" +527ms
+  ok  32 [chromium] › tests\e2e\distribution-behemoth.spec.js:23:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth toggle visibility and interaction › TC-BEH-003: Tooltip explains Behemoth effect (526ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +541ms
+  tester:navigate  Navigating to URL: "/" +557ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +558ms
+  ok  28 [chromium] › tests\e2e\colman-graves.spec.js:637:3 › Script Evaluation — Colman Graves › TC03-000035 a nine-element script is evaluated, not refused for its tag count (2.3s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok  29 [chromium] › tests\e2e\colman-graves.spec.js:655:3 › Script Evaluation — Colman Graves › TC03-000036 eleven story elements is refused with the story-element count (2.5s)
+  ok  33 [chromium] › tests\e2e\distribution-behemoth.spec.js:34:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth effect on distribution › TC-BEH-004: Week 1 increases 25% when Behemoth active and score >= 9 (1.5s)
+  tester:navigate  Navigating to URL: "/" +3s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok  34 [chromium] › tests\e2e\distribution-behemoth.spec.js:56:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth effect on distribution › TC-BEH-005: Decay rate improves (0.85 vs 0.8) when score > 9 and Behemoth active (1.6s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok  35 [chromium] › tests\e2e\distribution-behemoth.spec.js:81:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth effect on distribution › TC-BEH-006: below score 9, Behemoth boosts every week but not the decay (1.5s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +3s
+  ok  37 [chromium] › tests\e2e\distribution-behemoth.spec.js:132:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth persistence › TC-BEH-008: Behemoth state persists when changing commercial score (1.4s)
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +0ms
+  tester:navigate  Navigating to URL: "/" +1s
+  ok  36 [chromium] › tests\e2e\distribution-behemoth.spec.js:110:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth effect on distribution › TC-BEH-007: Behemoth stacks with Striking Image and Artistic Ability (1.6s)
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:navigate  Navigating to URL: "/" +2s
+  ok  39 [chromium] › tests\e2e\distribution-max-score.spec.js:21:3 › Marketing Release — maximum score distribution (score 10) › TC04-MAX-001 commercial score 10 produces high demand across all weeks (850ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok  38 [chromium] › tests\e2e\distribution-behemoth.spec.js:146:5 › Distribution Calculator — Behemoth Policy Feature › Behemoth persistence › TC-BEH-009: Toggling Behemoth off removes bonus immediately (1.6s)
+  tester:navigate  Navigating to URL: "/" +904ms
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +934ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +5s
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +4s
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +0ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +906ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +6s
+  ok  40 [chromium] › tests\e2e\distribution-max-score.spec.js:38:3 › Marketing Release — maximum score distribution (score 10) › TC04-MAX-002 week one at score 10 shows 20,000 screenings (923ms)
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +917ms
+  tester:navigate  Navigating to URL: "/" +948ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +214ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +0ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +948ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +213ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +194ms
+  ok  43 [chromium] › tests\e2e\distribution-max-score.spec.js:84:3 › Marketing Release — maximum score distribution (score 10) › TC04-MAX-005 decay rate is consistent at score 10 (891ms)
+  tester:navigate  Navigating to URL: "/" +896ms
+  ok  41 [chromium] › tests\e2e\distribution-max-score.spec.js:46:3 › Marketing Release — maximum score distribution (score 10) › TC04-MAX-003 week one at score 10 splits into owned and rented demand (1.3s)
+  tester:verify    Verifying window.__hollywoodReady is truthy +873ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +274ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +792ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +200ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +871ms
+  ok  42 [chromium] › tests\e2e\distribution-max-score.spec.js:65:3 › Marketing Release — maximum score distribution (score 10) › TC04-MAX-004 increasing owned capacity at score 10 shifts rental load but keeps total demand constant (1.5s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +1s
+  tester:interact  Setting slider "artisticScoreSlider" in "MarketingRelease" to value: 5 +123ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok  44 [chromium] › tests\e2e\distribution-max-score.spec.js:103:3 › Marketing Release — maximum score distribution (score 10) › TC04-MAX-006 Striking Image bonus applies at score 10 (1.2s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  45 [chromium] › tests\e2e\distribution-max-score.spec.js:114:3 › Marketing Release — maximum score distribution (score 10) › TC04-MAX-007 Artistic Ability bonus applies at score 10 (1.2s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  46 [chromium] › tests\e2e\distribution-max-score.spec.js:125:3 › Marketing Release — maximum score distribution (score 10) › TC04-MAX-008 combined bonuses and genre mix interact at max score (1.3s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  49 [chromium] › tests\e2e\empty-state-navigation.spec.js:25:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › Empty State Rendering › TC08-000003 results section hidden when no scripts generated (600ms)
+  ok  48 [chromium] › tests\e2e\empty-state-navigation.spec.js:16:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › Empty State Rendering › TC08-000002 generating with no tags produces script cards (992ms)
+  tester:navigate  Navigating to URL: "/" +612ms
+  tester:navigate  Navigating to URL: "/" +1s
+  ok  50 [chromium] › tests\e2e\empty-state-navigation.spec.js:31:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › Empty State Rendering › TC08-000004 evaluate tab shows Colman Graves (528ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +607ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:navigate  Navigating to URL: "/" +542ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +541ms
+  ok  53 [chromium] › tests\e2e\empty-state-navigation.spec.js:65:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › State Across Tab Navigation › TC08-000007 marketing tab remains accessible (724ms)
+  ok  51 [chromium] › tests\e2e\empty-state-navigation.spec.js:40:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › State Across Tab Navigation › TC08-000005 can switch between Build and Evaluate tabs (926ms)
+  tester:navigate  Navigating to URL: "/" +726ms
+  ok  52 [chromium] › tests\e2e\empty-state-navigation.spec.js:52:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › State Across Tab Navigation › TC08-000006 locked section remains expandable after tab switch (976ms)
+  tester:navigate  Navigating to URL: "/" +937ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +730ms
+  tester:navigate  Navigating to URL: "/" +996ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +941ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  47 [chromium] › tests\e2e\empty-state-navigation.spec.js:10:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › Empty State Rendering › TC08-000001 generator shows empty state initially (2.6s)
+  tester:navigate  Navigating to URL: "/" +3s
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +350ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  ok  54 [chromium] › tests\e2e\empty-state-navigation.spec.js:74:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › Recovery and Reset Workflows › TC08-000008 reset button clears the generator state (795ms)
+  tester:navigate  Navigating to URL: "/" +834ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +492ms
+  ok  55 [chromium] › tests\e2e\empty-state-navigation.spec.js:90:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › Recovery and Reset Workflows › TC08-000009 generate button produces output or feedback (1.0s)
+  ok  56 [chromium] › tests\e2e\empty-state-navigation.spec.js:101:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › UI Responsiveness › TC08-000010 empty generation shows generated options (1.1s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  57 [chromium] › tests\e2e\empty-state-navigation.spec.js:110:5 › Generator — Empty States, Navigation, Persistence (Phase 3) › UI Responsiveness › TC08-000011 rapid tab switching remains responsive (1.2s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  58 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:34:3 › Exclusion Dropdown Refresh › TC09-000001 Script Lab dropdowns filter after applying starting tags (3.5s)
+  tester:navigate  Navigating to URL: "/" +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  tester:interact  Selecting dropdown option for "excludedSettingSelect" in "ScriptLab" +7s
+  ok  62 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:87:3 › Exclusion Dropdown Refresh › TC09-000005 banning a Setting disables it in Script Lab immediately (728ms)
+  tester:navigate  Navigating to URL: "/" +767ms
+  ok  59 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:45:3 › Exclusion Dropdown Refresh › TC09-000002 Colman Graves dropdowns filter after applying starting tags (4.1s)
+  tester:navigate  Navigating to URL: "/" +4s
+  tester:verify    Verifying window.__hollywoodReady is truthy +772ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +4s
+  tester:interact  Selecting dropdown option for "excludedSettingSelect" in "ScriptLab" +739ms
+  tester:interact  Selecting dropdown option for "excludedSettingSelect" in "ScriptLab" +180ms
+  ok  61 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:68:3 › Exclusion Dropdown Refresh › TC09-000004 the same exclusions reach Script Lab and Colman Graves (4.1s)
+  ok  60 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:57:3 › Exclusion Dropdown Refresh › TC09-000003 Build for Target dropdowns filter after applying starting tags (4.6s)
+  ok  64 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:148:3 › Exclusion Dropdown Refresh › TC09-000007 banning a Genre disables it in Script Lab immediately (720ms)
+  tester:navigate  Navigating to URL: "/" +4s
+  tester:navigate  Navigating to URL: "/" +5s
+  ok  63 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:101:3 › Exclusion Dropdown Refresh › TC09-000006 lifting a Setting ban re-enables it in Script Lab immediately (927ms)
+  tester:navigate  Navigating to URL: "/" +744ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +4s
+  tester:navigate  Navigating to URL: "/" +932ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +5s
+  tester:verify    Verifying window.__hollywoodReady is truthy +755ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +926ms
+  ok  65 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:152:3 › Exclusion Dropdown Refresh › TC09-000008 banning a Protagonist disables it in Script Lab immediately (744ms)
+  ok  66 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:156:3 › Exclusion Dropdown Refresh › TC09-000009 banning an Antagonist disables it in Script Lab immediately (774ms)
+  tester:navigate  Navigating to URL: "/" +748ms
+  ok  67 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:160:3 › Exclusion Dropdown Refresh › TC09-000010 banning a Supporting Character disables it in Script Lab immediately (759ms)
+  ok  68 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:164:3 › Exclusion Dropdown Refresh › TC09-000011 banning a Theme & Event disables it in Script Lab immediately (717ms)
+  tester:navigate  Navigating to URL: "/" +790ms
+  tester:navigate  Navigating to URL: "/" +766ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +742ms
+  tester:navigate  Navigating to URL: "/" +760ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +773ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +765ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +773ms
+  tester:interact  Selecting dropdown option for "excludedSettingSelect" in "ScriptLab" +10s
+  ok  69 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:168:3 › Exclusion Dropdown Refresh › TC09-000012 banning a Finale disables it in Script Lab immediately (739ms)
+  tester:navigate  Navigating to URL: "/" +769ms
+  ok  70 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:175:3 › Exclusion Dropdown Refresh › TC09-000013 un-banning an excluded element makes it immediately selectable (886ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +757ms
+  tester:navigate  Navigating to URL: "/" +913ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +916ms
+  tester:navigate  Refreshing the current page +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  tester:navigate  Refreshing the current page +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  tester:navigate  Refreshing the current page +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  ok  71 [chromium] › tests\e2e\exclusion-dropdown-refresh.spec.js:218:3 › Exclusion Dropdown Refresh › TC09-000018 Reset Bans clears the old list from Colman Graves (4.8s)
+  tester:navigate  Navigating to URL: "/" +5s
+  tester:verify    Verifying window.__hollywoodReady is truthy +5s
+  tester:interact  Selecting dropdown option for "excludedSettingSelect" in "ScriptLab" +14s
+  tester:interact  Selecting dropdown option for "excludedSettingSelect" in "ScriptLab" +126ms
+  ok  75 [chromium] › tests\e2e\exclusion-select-story.spec.js:12:3 › Exclusion and Story Selection › TC09-000014 can select element in Story after removing exclusion (798ms)
+  tester:navigate  Navigating to URL: "/" +827ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +808ms
+  ok  72 [chromium] › tests\e2e\exclusion-persistence.spec.js:55:3 › Exclusion persistence › TC09-000015 every stored exclusion is restored after a reload (6.0s)
+  tester:navigate  Navigating to URL: "/" +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  ok  74 [chromium] › tests\e2e\exclusion-persistence.spec.js:87:3 › Exclusion persistence › TC09-000017 bans in single-select categories survive a reload (5.8s)
+  ok  77 [chromium] › tests\e2e\genre-mix.spec.js:34:3 › Colman Graves — genre mix › TC06-000002 a single genre holds the whole mix and hides the control (553ms)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:navigate  Navigating to URL: "/" +558ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +558ms
+  ok  78 [chromium] › tests\e2e\genre-mix.spec.js:41:3 › Colman Graves — genre mix › TC06-000003 adding a second genre splits the mix evenly and reveals the control (769ms)
+  tester:navigate  Navigating to URL: "/" +802ms
+  ok  79 [chromium] › tests\e2e\genre-mix.spec.js:51:3 › Colman Graves — genre mix › TC06-000004 a third genre still totals 100 in whole steps of five (882ms)
+  tester:navigate  Navigating to URL: "/" +892ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +815ms
+  ok  73 [chromium] › tests\e2e\exclusion-persistence.spec.js:71:3 › Exclusion persistence › TC09-000016 a reload does not shrink the stored list (7.0s)
+  tester:navigate  Navigating to URL: "/" +4s
+  tester:verify    Verifying window.__hollywoodReady is truthy +898ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +4s
+  tester:verify    Building matcher tree for "genreRow1Slider" in "ColmanGraves" +373ms
+  tester:verify    Building matcher tree for "genreRow1Slider" in "ColmanGraves" +44ms
+  tester:verify    Building matcher tree for "genreRow1Percent" in "ColmanGraves" +43ms
+  tester:verify    Building matcher tree for "genreRow1Percent" in "ColmanGraves" +42ms
+  tester:interact  Setting slider "genreRow1Slider" in "ColmanGraves" to value: 70 +9s
+  tester:interact  Setting slider "genreRow1Slider" in "ColmanGraves" to value: 100 +18s
+  ok  80 [chromium] › tests\e2e\genre-mix.spec.js:69:3 › Colman Graves — genre mix › TC06-000005 the slider is constrained to five-point steps from a floor of five (787ms)
+  tester:navigate  Navigating to URL: "/" +786ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +294ms
+  ok  81 [chromium] › tests\e2e\genre-mix.spec.js:79:3 › Colman Graves — genre mix › TC06-000006 raising one genre lowers the other so the mix still totals 100 (854ms)
+  ok  82 [chromium] › tests\e2e\genre-mix.spec.js:90:3 › Colman Graves — genre mix › TC06-000007 a genre cannot squeeze the others below five percent (812ms)
+  tester:navigate  Navigating to URL: "/" +884ms
+  tester:navigate  Navigating to URL: "/" +849ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +877ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +854ms
+  ok  84 [chromium] › tests\e2e\marketing-release.spec.js:28:3 › Marketing and Release — distribution calculator › TC04-000001 the distribution calculator is shown before any analysis (628ms)
+  tester:verify    Building matcher tree for "weekOneCard" in "MarketingRelease" +436ms
+  tester:verify    Building matcher tree for "weekEightCard" in "MarketingRelease" +46ms
+  tester:navigate  Navigating to URL: "/" +648ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +645ms
+  ok  85 [chromium] › tests\e2e\marketing-release.spec.js:35:3 › Marketing and Release — distribution calculator › TC04-000002 week cards expose stable ids and their week number (784ms)
+  tester:navigate  Navigating to URL: "/" +790ms
+  ok  83 [chromium] › tests\e2e\genre-mix.spec.js:99:3 › Colman Graves — genre mix › TC06-000008 removing genre rows re-enables those genre options (1.2s)
+  tester:verify    Verifying window.__hollywoodReady is truthy +311ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  86 [chromium] › tests\e2e\marketing-release.spec.js:48:3 › Marketing and Release — distribution calculator › TC04-000003 screening projections decline across the run (652ms)
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +19s
+  tester:navigate  Navigating to URL: "/" +659ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +651ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 8 +10s
+  ok  87 [chromium] › tests\e2e\marketing-release.spec.js:55:3 › Marketing and Release — distribution calculator › TC04-000004 screening projections follow the extracted commercial-only grid (702ms)
+  tester:navigate  Navigating to URL: "/" +725ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +734ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 8 +2s
+  tester:interact  Setting slider "artisticScoreSlider" in "MarketingRelease" to value: 3 +89ms
+  tester:verify    Building matcher tree for "commercialScoreInput" in "MarketingRelease" +466ms
+  tester:verify    Building matcher tree for "artisticScoreInput" in "MarketingRelease" +33ms
+  ok  89 [chromium] › tests\e2e\marketing-release.spec.js:93:3 › Marketing and Release — distribution calculator › TC04-000006 setting the movie scores updates their paired inputs (718ms)
+  tester:navigate  Navigating to URL: "/" +733ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +243ms
+  ok  88 [chromium] › tests\e2e\marketing-release.spec.js:72:3 › Marketing and Release — distribution calculator › TC04-000005 the calculator follows the commercial score (1.2s)
+  tester:verify    Building matcher tree for "commercialScoreSlider" in "MarketingRelease" +511ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Building matcher tree for "artisticScoreSlider" in "MarketingRelease" +38ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +0ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +1ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +0ms
+  ok  90 [chromium] › tests\e2e\marketing-release.spec.js:101:3 › Marketing and Release — distribution calculator › TC04-000016 typing movie scores updates sliders and distribution (1.1s)
+  tester:navigate  Navigating to URL: "/" +1s
+  ok  91 [chromium] › tests\e2e\marketing-release.spec.js:123:3 › Marketing and Release — distribution calculator › TC04-000007 owning more theatres shifts the split without moving demand (830ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +591ms
+  tester:navigate  Navigating to URL: "/" +839ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +840ms
+  ok  92 [chromium] › tests\e2e\marketing-release.spec.js:139:3 › Marketing and Release — distribution calculator › TC04-000011 every week splits its demand between owned and rented screenings (936ms)
+  tester:navigate  Navigating to URL: "/" +947ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +960ms
+  ok  93 [chromium] › tests\e2e\marketing-release.spec.js:153:3 › Marketing and Release — distribution calculator › TC04-000012 a late week inside owned capacity reports spare screens, not a rental (705ms)
+  tester:navigate  Navigating to URL: "/" +718ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +702ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 8.5 +4s
+  ok  94 [chromium] › tests\e2e\marketing-release.spec.js:164:3 › Marketing and Release — distribution calculator › TC04-000008 the Striking Image bonus raises the week one projection (1.1s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  95 [chromium] › tests\e2e\marketing-release.spec.js:174:3 › Marketing and Release — distribution calculator › TC04-000009 the Artistic Ability bonus raises the week one projection (1.1s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:interact  Setting slider "artisticScoreSlider" in "MarketingRelease" to value: 10 +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +452ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +23s
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +3s
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +875ms
+  tester:interact  Setting slider "artisticScoreSlider" in "MarketingRelease" to value: 10 +97ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +372ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +364ms
+  tester:interact  Setting slider "artisticScoreSlider" in "MarketingRelease" to value: 9 +721ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +284ms
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +260ms
+  ok  96 [chromium] › tests\e2e\marketing-release.spec.js:186:3 › Marketing and Release — distribution calculator › TC04-000013 the Behemoth policy boosts every week and gates decay on commercial score (2.1s)
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +3s
+  ok  97 [chromium] › tests\e2e\marketing-release.spec.js:215:3 › Marketing and Release — distribution calculator › TC04-000014 the Boutique policy slows later weeks only above artistic score 9 (1.5s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok  98 [chromium] › tests\e2e\marketing-release.spec.js:242:3 › Marketing and Release — distribution calculator › TC04-000015 Behemoth and Boutique stack their slower decay when both gates qualify (1.4s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok  76 [chromium] › tests\e2e\genre-mix.spec.js:20:3 › Colman Graves — genre mix › TC06-000001 only Genre, Supporting Character and Theme & Event accept multiples (8.8s)
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +1s
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +826ms
+  tester:navigate  Navigating to URL: "/" +9s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +96ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +110ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +107ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +9s
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +1s
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +106ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +100ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +85ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +10s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +143ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +159ms
+  ok  99 [chromium] › tests\e2e\marketing-release.spec.js:267:3 › Marketing and Release — distribution calculator › TC04-000021 Factory Policy halves the pre-release run and the total (1.7s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok 100 [chromium] › tests\e2e\marketing-release.spec.js:278:3 › Marketing and Release — distribution calculator › TC04-000022 switching Factory Policy back off restores the six-week run (2.0s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok 101 [chromium] › tests\e2e\marketing-release.spec.js:291:3 › Marketing and Release — distribution calculator › TC04-000023 Factory Policy leaves release and post-release untouched (2.0s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +2s
+  ok 102 [chromium] › tests\e2e\marketing-release.spec.js:302:3 › Marketing and Release — distribution calculator › TC04-000024 toggling Factory Policy does not scroll the page away (2.0s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +2s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +127ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +110ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +120ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +100ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 8 +2s
+  tester:interact  Setting slider "artisticScoreSlider" in "MarketingRelease" to value: 3 +94ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +99ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +2s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +137ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +137ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +124ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +120ms
+  ok 103 [chromium] › tests\e2e\marketing-release.spec.js:321:3 › Marketing and Release — distribution calculator › TC04-000025 the Factory Policy switch sits on the heading row (1.6s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 104 [chromium] › tests\e2e\marketing-release.spec.js:334:3 › Marketing and Release — distribution calculator › TC04-000026 the Factory Policy switch changes colour when it is on (1.8s)
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 8 +1s
+  tester:navigate  Navigating to URL: "/" +2s
+  ok 106 [chromium] › tests\e2e\marketing-release.spec.js:361:3 › Marketing and Release — distribution calculator › TC04-000027 target audience legend distinguishes interest levels (1.4s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok 105 [chromium] › tests\e2e\marketing-release.spec.js:346:3 › Marketing and Release — distribution calculator › TC04-000010 analysing a script produces a marketing profile (1.8s)
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 8 +2s
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +91ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 8 +1s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +92ms
+  tester:interact  Setting slider "commercialScoreSlider" in "MarketingRelease" to value: 10 +668ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +1s
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +106ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +114ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +112ms
+  tester:interact  Setting slider "artisticScoreSlider" in "MarketingRelease" to value: 8 +135ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +110ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +98ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +97ms
+  tester:interact  Setting slider "artisticScoreSlider" in "MarketingRelease" to value: 10 +234ms
+  ok 107 [chromium] › tests\e2e\marketing-release.spec.js:373:3 › Marketing and Release — distribution calculator › TC04-000028 studio policy status names active gates (1.9s)
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +5s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:extract   Extracting all from "weekCards" in "MarketingRelease" +429ms
+  tester:interact  Selecting dropdown option for "genreSelect" in "MarketingRelease" +955ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "MarketingRelease" +116ms
+  ok 108 [chromium] › tests\e2e\marketing-release.spec.js:405:3 › Marketing and Release — distribution calculator › TC04-000019 selecting a holiday lifts week one by the bonus it advertises (2.2s)
+  ok 110 [chromium] › tests\e2e\marketing-release.spec.js:450:3 › Marketing and Release — distribution calculator › TC04-000017 saving an analysed script adds it to Script Library (1.9s)
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "MarketingRelease" +99ms
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:navigate  Navigating to URL: "/" +2s
+  ok 109 [chromium] › tests\e2e\marketing-release.spec.js:432:3 › Marketing and Release — distribution calculator › TC04-000020 selecting the active holiday again restores the base curve (2.2s)
+  tester:verify    Building matcher tree for "genreSelect" in "MarketingRelease" +657ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:verify    Building matcher tree for "genreSelect" in "MarketingRelease" +199ms
+  ok 111 [chromium] › tests\e2e\marketing-release.spec.js:464:3 › Marketing and Release — distribution calculator › TC04-000018 resetting clears the marketing selection (1.3s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +319ms
+  ok 112 [chromium] › tests\e2e\marketing-release.spec.js:483:3 › Marketing and Release — Build for Target › TC05-000001 Build for Target offers audiences, advertisers and tag pickers (962ms)
+  tester:navigate  Navigating to URL: "/" +973ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +986ms
+  ok 113 [chromium] › tests\e2e\marketing-release.spec.js:495:3 › Marketing and Release — Build for Target › TC05-000002 searching with no audience or advertiser ranks against every agency (1.2s)
+  ok 114 [chromium] › tests\e2e\marketing-release.spec.js:514:3 › Marketing and Release — Build for Target › TC05-000015 Build for Target spends the global Max Element Pool (1.1s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 115 [chromium] › tests\e2e\marketing-release.spec.js:533:3 › Marketing and Release — Build for Target › TC05-000003 choosing an audience produces top combinations (1.3s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "BuildForTarget" +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:interact  Selecting dropdown option for "genreSelect" in "BuildForTarget" +3s
+  tester:interact  Selecting dropdown option for "settingSelect" in "BuildForTarget" +97ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "BuildForTarget" +83ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "BuildForTarget" +102ms
+  tester:interact  Selecting dropdown option for "supportingCharacterSelect" in "BuildForTarget" +115ms
+  ok 116 [chromium] › tests\e2e\marketing-release.spec.js:542:3 › Marketing and Release — Build for Target › TC05-000004 narrowing the search with an optional tag keeps that tag in results (1.5s)
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "BuildForTarget" +95ms
+  tester:navigate  Navigating to URL: "/" +2s
+  ok 118 [chromium] › tests\e2e\marketing-release.spec.js:578:3 › Marketing and Release — Build for Target › TC05-000006 selecting an advertiser targets that agency directly (1.4s)
+  tester:interact  Selecting dropdown option for "finaleSelect" in "BuildForTarget" +100ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 119 [chromium] › tests\e2e\marketing-release.spec.js:592:3 › Marketing and Release — Build for Target › TC05-000016 an advertiser selection overrides a selected audience (1.4s)
+  ok 117 [chromium] › tests\e2e\marketing-release.spec.js:558:3 › Marketing and Release — Build for Target › TC05-000005 one pick per category is accepted, not refused (1.9s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok 120 [chromium] › tests\e2e\marketing-release.spec.js:624:3 › Marketing and Release — Build for Target › TC05-000007 switching back to Analyze Script shows the marketing panel (953ms)
+  tester:navigate  Navigating to URL: "/" +961ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +948ms
+  ok 123 [chromium] › tests\e2e\marketing-release.spec.js:679:3 › Marketing and Release — Build for Target › TC05-000018 the audience list says it is ignored while an advertiser is selected (1.1s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 124 [chromium] › tests\e2e\marketing-release.spec.js:709:3 › Marketing and Release — Build for Target › TC05-000014 combinations are ranked by descending advertiser fit (1.3s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:interact  Selecting dropdown option for "genreSelect" in "BuildForTarget" +3s
+  tester:interact  Selecting dropdown option for "settingSelect" in "BuildForTarget" +78ms
+  tester:interact  Selecting dropdown option for "protagonistSelect" in "BuildForTarget" +67ms
+  tester:interact  Selecting dropdown option for "antagonistSelect" in "BuildForTarget" +68ms
+  tester:interact  Selecting dropdown option for "themeEventSelect" in "BuildForTarget" +64ms
+  tester:interact  Selecting dropdown option for "finaleSelect" in "BuildForTarget" +81ms
+  ok 121 [chromium] › tests\e2e\marketing-release.spec.js:634:3 › Marketing and Release — Build for Target › TC05-000008 resetting clears audiences and hides results (3.5s)
+  ok 125 [chromium] › tests\e2e\marketing-release.spec.js:730:3 › Marketing and Release — Build for Target › TC05-000019 more story elements than the budget is refused, counting story elements only (1.9s)
+  tester:navigate  Navigating to URL: "/" +4s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +4s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:verify    Building matcher tree for "lockedSectionToggle" in "ScriptLab" +342ms
+  ok 127 [chromium] › tests\e2e\script-lab.spec.js:15:3 › Script Lab — generator › TC01-000001 Build tab reveals the Script Lab panel (659ms)
+  tester:verify    Building matcher tree for "lockedSectionToggle" in "ScriptLab" +159ms
+  tester:navigate  Navigating to URL: "/" +674ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +657ms
+  ok 128 [chromium] › tests\e2e\script-lab.spec.js:23:3 › Script Lab — generator › TC01-000002 collapsing Locked Elements hides its selectors (849ms)
+  tester:navigate  Navigating to URL: "/" +863ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +324ms
+  ok 126 [chromium] › tests\e2e\marketing-release.spec.js:780:3 › Marketing and Release — Build for Target › TC05-000020 an element banned in Script Lab never appears in a combination (2.5s)
+  tester:verify    Building matcher tree for "excludedSectionToggle" in "ScriptLab" +367ms
+  tester:navigate  Navigating to URL: "/" +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +3s
+  tester:verify    Building matcher tree for "excludedSectionToggle" in "ScriptLab" +176ms
+  ok 129 [chromium] › tests\e2e\script-lab.spec.js:33:3 › Script Lab — generator › TC01-000019 collapsing Excluded Elements hides its selectors (899ms)
+  tester:navigate  Navigating to URL: "/" +918ms
+  tester:interact  Selecting dropdown option for "lockedSupportingCharacterSelect" in "ScriptLab" +6s
+  tester:verify    Verifying window.__hollywoodReady is truthy +389ms
+  ok 130 [chromium] › tests\e2e\script-lab.spec.js:46:3 › Script Lab — generator › TC01-000003 generating with default targets produces script cards (1.2s)
+  tester:interact  Selecting dropdown option for "lockedSupportingCharacterSelect" in "ScriptLab" +10s
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Building matcher tree for "lockedSupportingCharacterSelect" in "ScriptLab" +442ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 131 [chromium] › tests\e2e\script-lab.spec.js:59:3 › Script Lab — generator › TC01-000004 locking Sidekick constrains generated scripts (1.1s)
+  tester:verify    Building matcher tree for "lockedSupportingCharacterSelect" in "ScriptLab" +165ms
+  tester:navigate  Navigating to URL: "/" +1s
+  ok 132 [chromium] › tests\e2e\script-lab.spec.js:76:3 › Script Lab — generator › TC01-000020 Reset Locks clears locked selections (921ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:navigate  Navigating to URL: "/" +926ms
+  tester:interact  Selecting dropdown option for "lockedSupportingCharacterSelect" in "ScriptLab" +3s
+  tester:verify    Verifying window.__hollywoodReady is truthy +293ms
+  tester:verify    Building matcher tree for "lockedSupportingCharacterSelect" in "ScriptLab" +418ms
+  tester:interact  Selecting dropdown option for "excludedSupportingCharacterSelect" in "ScriptLab" +136ms
+  tester:interact  Setting slider "compatibilitySlider" in "ScriptLab" to value: 5 +1s
+  tester:verify    Building matcher tree for "lockedSupportingCharacterSelect" in "ScriptLab" +149ms
+  tester:verify    Building matcher tree for "compatibilityInput" in "ScriptLab" +386ms
+  ok 133 [chromium] › tests\e2e\script-lab.spec.js:89:3 › Script Lab — generator › TC01-000030 excluding a locked element drops the lock and names it (887ms)
+  ok 134 [chromium] › tests\e2e\script-lab.spec.js:109:3 › Script Lab — generator › TC01-000005 compatibility slider drives the paired number input (666ms)
+  tester:interact  Setting slider "movieScoreSlider" in "ScriptLab" to value: 9 +918ms
+  tester:navigate  Navigating to URL: "/" +902ms
+  tester:navigate  Navigating to URL: "/" +712ms
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +467ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +335ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +336ms
+  ok 135 [chromium] › tests\e2e\script-lab.spec.js:118:3 › Script Lab — generator › TC01-000006 raising the target movie score updates the required-elements hint (758ms)
+  tester:navigate  Navigating to URL: "/" +771ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +309ms
+  tester:interact  Setting slider "movieScoreSlider" in "ScriptLab" to value: 6 +763ms
+  ok 122 [chromium] › tests\e2e\marketing-release.spec.js:647:3 › Marketing and Release — Build for Target › TC05-000017 an empty state is shown when exclusions leave too few story elements (6.5s)
+  tester:interact  Selecting dropdown option for "excludedSupportingCharacterSelect" in "ScriptLab" +769ms
+  tester:navigate  Navigating to URL: "/" +7s
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +421ms
+  tester:interact  Setting slider "movieScoreSlider" in "ScriptLab" to value: 7 +205ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +7s
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +190ms
+  ok 137 [chromium] › tests\e2e\script-lab.spec.js:146:3 › Script Lab — generator › TC01-000007 banning a tag increments the excluded counter (784ms)
+  tester:interact  Setting slider "movieScoreSlider" in "ScriptLab" to value: 8 +167ms
+  tester:navigate  Navigating to URL: "/" +764ms
+  ok 138 [chromium] › tests\e2e\script-lab.spec.js:157:3 › Script Lab — generator › TC01-000017 excluded counter uses readable black text on the danger badge (620ms)
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +168ms
+  tester:navigate  Navigating to URL: "/" +634ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +761ms
+  tester:interact  Setting slider "movieScoreSlider" in "ScriptLab" to value: 9 +173ms
+  tester:interact  Selecting dropdown option for "excludedSupportingCharacterSelect" in "ScriptLab" +10s
+  tester:verify    Verifying window.__hollywoodReady is truthy +647ms
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +178ms
+  tester:interact  Setting slider "movieScoreSlider" in "ScriptLab" to value: 10 +170ms
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +163ms
+  tester:interact  Selecting dropdown option for "excludedSupportingCharacterSelect" in "ScriptLab" +736ms
+  tester:interact  Selecting dropdown option for "excludedSupportingCharacterSelect" in "ScriptLab" +1s
+  ok 136 [chromium] › tests\e2e\script-lab.spec.js:127:3 › Script Lab — generator › TC01-000016 target movie score maps to the correct story-element hint (1.5s)
+  ok 139 [chromium] › tests\e2e\script-lab.spec.js:168:3 › Script Lab — generator › TC01-000008 Reset Bans clears the excluded counter (912ms)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:navigate  Navigating to URL: "/" +951ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +585ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +356ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +969ms
+  tester:verify    Building matcher tree for "excludedSupportingCharacterSelect" in "ScriptLab" +798ms
+  tester:verify    Building matcher tree for "excludedSupportingCharacterSelect" in "ScriptLab" +349ms
+  ok 141 [chromium] › tests\e2e\script-lab.spec.js:198:3 › Script Lab — generator › TC01-000026 exclusion state stays consistent across tab switches (1.1s)
+  ok 140 [chromium] › tests\e2e\script-lab.spec.js:180:3 › Script Lab — generator › TC01-000018 Excluded Elements persist after reload (1.2s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +308ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +331ms
+  ok 143 [chromium] › tests\e2e\script-lab.spec.js:228:3 › Script Lab — generator › TC01-000023 Save Library refuses an empty script library (833ms)
+  tester:navigate  Navigating to URL: "/" +814ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +784ms
+  ok 142 [chromium] › tests\e2e\script-lab.spec.js:216:3 › Script Lab — generator › TC01-000010 pinning a generated script populates the Script Library (1.4s)
+  ok 144 [chromium] › tests\e2e\script-lab.spec.js:235:3 › Script Lab — generator › TC01-000024 Load Library explains invalid JSON shape (839ms)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:navigate  Navigating to URL: "/" +866ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +873ms
+  ok 148 [chromium] › tests\e2e\script-lab.spec.js:289:3 › Script Lab — generator › TC01-000012 adding a second Supporting Character row creates another picker (887ms)
+  ok 147 [chromium] › tests\e2e\script-lab.spec.js:276:3 › Script Lab — generator › TC01-000011 every story element category offers a picker (908ms)
+  ok 145 [chromium] › tests\e2e\script-lab.spec.js:250:3 › Script Lab — generator › TC01-000025 transferring a generated script opens Graves evaluation (1.7s)
+  tester:navigate  Navigating to URL: "/" +890ms
+  tester:navigate  Navigating to URL: "/" +926ms
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +944ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +906ms
+  ok 146 [chromium] › tests\e2e\script-lab.spec.js:262:3 › Script Lab — generator › TC01-000027 transferring a generated script opens Marketing analysis (1.7s)
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  tester:navigate  Navigating to URL: "/" +2s
+  tester:verify    Verifying window.__hollywoodReady is truthy +2s
+  ok 150 [chromium] › tests\e2e\script-lab.spec.js:314:3 › Script Lab — generator › TC01-000021 adding a second excluded row creates another ban picker (968ms)
+  tester:navigate  Navigating to URL: "/" +956ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +922ms
+  ok 149 [chromium] › tests\e2e\script-lab.spec.js:300:3 › Script Lab — generator › TC01-000013 filtering a category search narrows selectable options (1.2s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 152 [chromium] › tests\e2e\script-lab.spec.js:361:3 › Script Lab — generator › TC01-000022 filtering excluded category search narrows banned options (1.1s)
+  tester:verify    Building matcher tree for "lockedSupportingCharacterSelect" in "ScriptLab" +300ms
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Building matcher tree for "lockedGenreSelect" in "ScriptLab" +51ms
+  tester:verify    Building matcher tree for "supportingCharacterSelect" in "ColmanGraves" +45ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 153 [chromium] › tests\e2e\script-lab.spec.js:377:3 › Script Lab — generator › TC01-000014 tag selector row ids are numbered per category and context (686ms)
+  tester:navigate  Navigating to URL: "/" +752ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +386ms
+  ok 154 [chromium] › tests\e2e\script-lab.spec.js:391:3 › Script Lab — generator › TC01-000015 results locator observes suppressed rendered state (1.0s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 156 [chromium] › tests\e2e\search-field-persistence.spec.js:9:3 › Search Field Persistence Bug › BUG-001: Search field in Finale stays visible while typing (should not hide) (1.3s)
+  tester:navigate  Navigating to URL: "/" +1s
+  tester:verify    Verifying window.__hollywoodReady is truthy +1s
+  ok 157 [chromium] › tests\e2e\search-field-persistence.spec.js:51:3 › Search Field Persistence Bug › BUG-002: Search fields visible in all multi-select categories (907ms)
+  tester:navigate  Navigating to URL: "/" +926ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +925ms
+  tester:verify    Building matcher tree for "elementPoolInput" in "Navigation" +268ms
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +38ms
+  ok 159 [chromium] › tests\e2e\slider-syncing.spec.js:18:3 › Slider syncing — Max Element Pool and Target Movie Score › TC10-000001 the shipped defaults open already in sync (566ms)
+  ok 158 [chromium] › tests\e2e\search-field-persistence.spec.js:80:3 › Search Field Persistence Bug › BUG-003: Search wrapper does not hide when search has no matches (780ms)
+  tester:navigate  Navigating to URL: "/" +580ms
+  tester:navigate  Navigating to URL: "/" +803ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +281ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +817ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 8 +7s
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 10 +7s
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +359ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 6 +92ms
+  tester:verify    Building matcher tree for "movieScoreSlider" in "ScriptLab" +41ms
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +446ms
+  ok 160 [chromium] › tests\e2e\slider-syncing.spec.js:23:3 › Slider syncing — Max Element Pool and Target Movie Score › TC10-000002 raising the pool raises the target score (675ms)
+  tester:navigate  Navigating to URL: "/" +685ms
+  ok 161 [chromium] › tests\e2e\slider-syncing.spec.js:32:3 › Slider syncing — Max Element Pool and Target Movie Score › TC10-000003 lowering the pool lowers the score and its fill follows (754ms)
+  tester:navigate  Navigating to URL: "/" +762ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +290ms
+  tester:verify    Verifying window.__hollywoodReady is truthy +324ms
+  tester:interact  Setting slider "movieScoreSlider" in "ScriptLab" to value: 9 +727ms
+  ok 151 [chromium] › tests\e2e\script-lab.spec.js:329:3 › Script Lab — generator › TC01-000028 Starting Tags seed once on a first run and never re-seed (5.0s)
+  tester:interact  Setting slider "movieScoreSlider" in "ScriptLab" to value: 10 +701ms
+  tester:verify    Building matcher tree for "elementPoolInput" in "Navigation" +407ms
+  tester:navigate  Navigating to URL: "/" +5s
+  tester:verify    Building matcher tree for "elementPoolInput" in "Navigation" +383ms
+  ok 162 [chromium] › tests\e2e\slider-syncing.spec.js:40:3 › Slider syncing — Max Element Pool and Target Movie Score › TC10-000004 raising the target score raises the pool (706ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +5s
+  tester:navigate  Navigating to URL: "/" +724ms
+  ok 163 [chromium] › tests\e2e\slider-syncing.spec.js:48:3 › Slider syncing — Max Element Pool and Target Movie Score › TC10-000005 the maximum score asks for nine elements, not ten (695ms)
+  tester:verify    Verifying window.__hollywoodReady is truthy +306ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 10 +8s
+  ok 155 [chromium] › tests\e2e\script-lab.spec.js:412:3 › Script Lab — generator › TC01-000029 a saved library file restores pinned scripts after a reload (4.2s)
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +416ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 7 +748ms
+  ok 164 [chromium] › tests\e2e\slider-syncing.spec.js:55:3 › Slider syncing — Max Element Pool and Target Movie Score › TC10-000006 a pool of ten still targets score ten (719ms)
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +424ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 10 +123ms
+  tester:interact  Setting slider "elementPoolSlider" in "Navigation" to value: 7 +79ms
+  tester:verify    Building matcher tree for "movieScoreInput" in "ScriptLab" +188ms
+  ok 165 [chromium] › tests\e2e\slider-syncing.spec.js:62:3 › Slider syncing — Max Element Pool and Target Movie Score › TC10-000007 returning to a pool size returns the same score (1.1s)
+
+  165 passed (1.1m)
+
+── achilles ────────────────────────────────────────────────────────────
+   165 passed   in 1m7s
+
+   slowest
+        8.8s  tests/e2e/genre-mix.spec.js › Colman Graves — genre mix › TC06-000001 only Genre, Supporting Character and Theme & Event accept multiples
+        7.0s  tests/e2e/exclusion-persistence.spec.js › Exclusion persistence › TC09-000016 a reload does not shrink the stored list
+        6.5s  tests/e2e/marketing-release.spec.js › Marketing and Release — Build for Target › TC05-000017 an empty state is shown when exclusions leave too few story elements

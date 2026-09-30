@@ -1,0 +1,121 @@
+{
+  "summary": {
+    "totalCount": 45,
+    "uniqueBehaviors": 10,
+    "extractionDate": "2026-09-22",
+    "status": "All 45 buildings catalogued, behavior formulas UNKNOWN"
+  },
+  "behaviorGroups": {
+    "116_PREMIUM_SPECIAL": {
+      "behavior": 116,
+      "category": "High-Impact Special Effects",
+      "count": 4,
+      "status": "🔴 CRITICAL - Formulas unknown",
+      "buildings": {
+        "BOUTIQUE_DOMINION": {
+          "cost": 700000,
+          "duration": 115,
+          "staff": 40,
+          "water": 20,
+          "electricity": 50,
+          "expectedEffect": "Reduces viewership decay ~5-10% when artistic >= 9",
+          "implementation": "BLOCKED - pending empirical testing"
+        },
+        "CONVEYOR_DOMINION": {
+          "cost": 850000,
+          "duration": 120,
+          "staff": 40,
+          "water": 30,
+          "electricity": 55,
+          "expectedEffect": "Increased production throughput or reduced build time",
+          "implementation": "UNKNOWN"
+        },
+        "MAJOR_DOMINION": {
+          "cost": "High",
+          "duration": "High",
+          "staff": "High",
+          "expectedEffect": "Unknown prestige/master facility bonus",
+          "implementation": "UNKNOWN"
+        },
+        "TRASH_DOMINION": {
+          "expectedEffect": "Risk/reward (opportunities or removes bad scripts)",
+          "implementation": "UNKNOWN"
+        }
+      }
+    },
+    "20_PRODUCTION_DEPT": {
+      "behavior": 20,
+      "category": "Department Dominions",
+      "count": 3,
+      "status": "⚠️ PARTIAL - Likely in calculator code",
+      "buildings": ["PREPRODUCTION_DOMINION", "PRODUCTION_DOMINION", "SCRIPT_DOMINION"]
+    },
+    "28_POSTPRODUCTION": {
+      "behavior": 28,
+      "category": "Post-Production & Distribution",
+      "count": 2,
+      "status": "🔴 UNKNOWN - affects decay rates",
+      "buildings": ["POSTPRODUCTION_DOMINION", "RELEASE_DOMINION"]
+    },
+    "4_HR_STAFF": {
+      "behavior": 4,
+      "category": "HR and Staff Enhancements",
+      "count": 4,
+      "status": "⚠️ HYPOTHESIS - likely staff efficiency boost",
+      "buildings": ["ESCORT_DOMINION", "MUSEUM", "PRODUCERS_DOMINION", "TECH_DOMINION"]
+    },
+    "16_INNOVATION": {
+      "behavior": 16,
+      "category": "Innovation & Bonuses",
+      "count": 3,
+      "status": "⚠️ HYPOTHESIS - creative/intelligence bonuses",
+      "buildings": ["FOCUS", "SHENANIGANS", "SPIES"]
+    },
+    "2_INFRASTRUCTURE": {
+      "behavior": 2,
+      "category": "Infrastructure Utility",
+      "count": 6,
+      "status": "⚠️ HYPOTHESIS - utility providers",
+      "buildings": ["PAVILION_I", "PAVILION_II", "PAVILION_III", "PAVILION_IV", "POWERPLANT_I", "RND_I", "WATER_TOWER_I"]
+    },
+    "12_ADMINISTRATION": {
+      "behavior": 12,
+      "category": "Core Administration",
+      "count": 2,
+      "status": "✅ KNOWN - essential, no special effect",
+      "buildings": ["MAIN_BUILDING", "INFRASTRUCTURE_DOMINION"]
+    },
+    "0_NO_EFFECT": {
+      "behavior": 0,
+      "category": "No Special Effect",
+      "count": 23,
+      "status": "✅ COMPLETE - infrastructure only",
+      "buildings": ["ANALYTICS", "AUTOMATION", "CASTING", "CONCERT", "COPYRIGHT", "DISTRIBUTION", "EVENTS_STAGE", "FREELANCE", "LAB", "LINE_PRODUCTION", "LOGISTICS", "MARKETING", "PRINT", "SCOUT", "SOUND", "SUPPLY", "WORKSHOP", "CONSTRUCTOR"]
+    },
+    "130_MONUMENT": {
+      "behavior": 130,
+      "category": "Monument/Prestige",
+      "count": 1,
+      "status": "🔴 UNKNOWN - likely prestige only",
+      "buildings": ["DUVAL_MONUMENT"]
+    }
+  },
+  "criticalBlockers": [
+    {
+      "issue": "Behavior 116 formulas unknown",
+      "impact": "Cannot implement BOUTIQUE_DOMINION decay reduction (Feature 3)",
+      "solutions": ["Empirical testing in-game", "Binary analysis (DLL)", "Community research"]
+    },
+    {
+      "issue": "Behavior 28 formulas unknown",
+      "impact": "Cannot verify post-release decay rate behavior",
+      "solutions": ["Empirical testing in-game", "Check existing calculator code"]
+    }
+  ],
+  "nextSteps": [
+    "Choose investigation method for behavior formulas",
+    "Start empirical testing or binary analysis",
+    "Integrate holidays system (easier, unblocked)",
+    "Extract perks system for building gating"
+  ]
+}

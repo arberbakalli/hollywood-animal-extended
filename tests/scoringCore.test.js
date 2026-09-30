@@ -1,0 +1,315 @@
+import { describe, test, expect, beforeAll, afterEach } from '@jest/globals';
+import { loadInstrumentedApp, loadScoringModules, round } from './helpers/legacyHarness.js';
+import { tag } from './helpers/gameTestBuilders.js';
+
+/**
+ * Golden-master characterisation of the scoring core in script.js.
+ *
+ * These tests do not assert that the numbers are *correct* — nobody has a
+ * specification to check them against. They assert that the numbers do not
+ * CHANGE. That is what makes the pending refactoring safe: extracting
+ * calculateMatrixScore & co. into modules must leave every value identical,
+ * and a snapshot diff is the proof.
+ *
+ * Fixtures are derived from the real on-disk data by sorting category members,
+ * so they stay deterministic without hardcoding IDs that may be renamed.
+ */
+
+let h;
+let cat;
+let scoringModules;
+
+beforeAll(async () => {
+    h = await loadInstrumentedApp();
+    // Load deferred data for tests
+    await h.ensureCompatibilityLoaded();
+    await h.ensureGenrePairsLoaded();
+    scoringModules = await loadScoringModules();
+    cat = {};
+    for (const t of Object.values(h.GAME_DATA.tags)) {
+        (cat[t.category] ||= []).push(t.id);
+    }
+    for (const ids of Object.values(cat)) ids.sort();
+});
+
+afterEach(() => {
+    h.resetBrowserState();
+});
+
+/** Normalise a matrix result so snapshots are stable across platforms. */
+const normalise = (r) => ({
+    totalScore: round(r.totalScore),
+    rawAverage: round(r.rawAverage),
+    spoilers: r.spoilers,
+});
+
+describe('data fixture', () => {
+    test('loads the full tag set from disk', () => {
+        const gd = h.GAME_DATA;
+        expect(Object.keys(gd.tags).length).toBe(250);
+        expect(Object.keys(gd.compatibility).length).toBeGreaterThan(0);
+        expect(Object.keys(gd.genrePairs).length).toBeGreaterThan(0);
+    });
+
+    test('every tag has the shape the scoring core expects', () => {
+        for (const t of Object.values(h.GAME_DATA.tags)) {
+            expect(typeof t.id).toBe('string');
+            expect(typeof t.category).toBe('string');
+            expect(Number.isFinite(t.art)).toBe(true);
+            expect(Number.isFinite(t.com)).toBe(true);
+        }
+    });
+});
+
+describe('calculateMatrixScore — golden master', () => {
+    test('two genres weighted 60/40', () => {
+        const combo = [
+            tag(cat.Genre[0], 'Genre', 0.6),
+            tag(cat.Genre[1], 'Genre', 0.4),
+            tag(cat.Protagonist[0], 'Protagonist'),
+        ];
+        expect(normalise(h.call('calculateMatrixScore', combo))).toMatchSnapshot();
+    });
+
+    test('single genre with a full supporting cast', () => {
+        const combo = [
+            tag(cat.Genre[0], 'Genre', 1),
+            tag(cat.Setting[0], 'Setting'),
+            tag(cat.Protagonist[0], 'Protagonist'),
+            tag(cat.Antagonist[0], 'Antagonist'),
+            tag(cat['Supporting Character'][0], 'Supporting Character'),
+            tag(cat['Theme & Event'][0], 'Theme & Event'),
+            tag(cat.Finale[0], 'Finale'),
+        ];
+        expect(normalise(h.call('calculateMatrixScore', combo))).toMatchSnapshot();
+    });
+
+    test('a known conflicting pair reports a spoiler and a negative score', () => {
+        // AMERICAN_CIVIL_WAR + ANTAGONIST_ALIEN has compatibility 1.0, which
+        // trips the worstVal <= 1.0 branch.
+        const combo = [
+            tag(cat.Genre[0], 'Genre', 1),
+            tag('AMERICAN_CIVIL_WAR', 'Setting'),
+            tag('ANTAGONIST_ALIEN', 'Antagonist'),
+        ];
+        const result = h.call('calculateMatrixScore', combo);
+        expect(result.spoilers.length).toBeGreaterThan(0);
+        expect(result.totalScore).toBeLessThan(0);
+        expect(normalise(result)).toMatchSnapshot();
+    });
+
+    test('degenerate inputs do not throw', () => {
+        expect(normalise(h.call('calculateMatrixScore', []))).toMatchSnapshot('empty');
+        expect(
+            normalise(h.call('calculateMatrixScore', [tag(cat.Genre[0], 'Genre', 1)]))
+        ).toMatchSnapshot('single tag');
+    });
+});
+
+describe('calculateTotalBonuses / calculateGenrePairScore — golden master', () => {
+    test('genre pair bonus applies when both genres clear the thresholds', () => {
+        const combo = [
+            tag(cat.Genre[0], 'Genre', 0.6),
+            tag(cat.Genre[1], 'Genre', 0.4),
+            tag(cat.Protagonist[0], 'Protagonist'),
+        ];
+        expect(h.call('calculateGenrePairScore', combo)).toMatchSnapshot('pair');
+        expect(h.call('calculateTotalBonuses', combo)).toMatchSnapshot('bonuses');
+    });
+
+    test('secondary genre below 0.35 forfeits the pair bonus', () => {
+        const combo = [
+            tag(cat.Genre[0], 'Genre', 0.7),
+            tag(cat.Genre[1], 'Genre', 0.3),
+        ];
+        expect(h.call('calculateGenrePairScore', combo)).toBeNull();
+    });
+
+    test('a single genre never yields a pair bonus', () => {
+        expect(h.call('calculateGenrePairScore', [tag(cat.Genre[0], 'Genre', 1)])).toBeNull();
+    });
+});
+
+describe('compatibility lookup is symmetric', () => {
+    test('argument order does not change the score', () => {
+        const a = tag('AMERICAN_CIVIL_WAR', 'Setting');
+        const b = tag('ANTAGONIST_ALIEN', 'Antagonist');
+        const forward = h.call('calculateMatrixScore', [a, b]);
+        const reverse = h.call('calculateMatrixScore', [b, a]);
+        expect(round(forward.totalScore)).toBe(round(reverse.totalScore));
+        expect(round(forward.rawAverage)).toBe(round(reverse.rawAverage));
+    });
+});
+
+describe('extracted scoring modules', () => {
+    test('compatibility engine matches legacy wrappers', () => {
+        const combo = [
+            tag(cat.Genre[0], 'Genre', 0.6),
+            tag(cat.Genre[1], 'Genre', 0.4),
+            tag(cat.Setting[0], 'Setting'),
+            tag(cat.Protagonist[0], 'Protagonist'),
+            tag(cat.Antagonist[0], 'Antagonist'),
+        ];
+
+        expect(normalise(scoringModules.compatibility.calculateMatrixScore(combo, h.GAME_DATA)))
+            .toEqual(normalise(h.call('calculateMatrixScore', combo)));
+        expect(scoringModules.compatibility.calculateTotalBonuses(combo, h.GAME_DATA))
+            .toEqual(h.call('calculateTotalBonuses', combo));
+        expect(scoringModules.compatibility.calculateGenrePairScore(combo, h.GAME_DATA))
+            .toEqual(h.call('calculateGenrePairScore', combo));
+        expect(scoringModules.compatibility.getRawCompatibilityScore(combo[0], combo[1], h.GAME_DATA))
+            .toBe(h.call('getRawCompatibilityScore', combo[0], combo[1]));
+    });
+
+    test('movie score estimator matches legacy wrappers', () => {
+        const tags = [
+            tag('A', 'Genre'),
+            tag('B', 'Setting'),
+            tag('C', 'Protagonist'),
+            tag('D', 'Antagonist'),
+            tag('E', 'Supporting Character'),
+            tag('F', 'Theme & Event'),
+            tag('G', 'Finale'),
+        ];
+        const matrix = { totalScore: 0.42 };
+        const bonuses = { art: 0.15, com: 0.25 };
+
+        expect(scoringModules.movieScores.getScoringElementCount(tags))
+            .toBe(h.call('getScoringElementCount', tags));
+        expect(scoringModules.movieScores.getMovieScoreCap(5))
+            .toBe(h.call('getMovieScoreCap', 5));
+        expect(scoringModules.movieScores.calculateMovieScores(matrix, bonuses, tags))
+            .toEqual(h.call('calculateMovieScores', matrix, bonuses, tags));
+    });
+});
+
+describe('getRequiredElementCount', () => {
+    // Regression guard: the help text and the generator previously kept
+    // separate tables that disagreed at scores 7, 9 and 10.
+    test('is the single source consumed by both the UI and the generator', () => {
+        const table = {};
+        for (let score = 6; score <= 10; score++) {
+            table[score] = h.call('getRequiredElementCount', score);
+        }
+        expect(table).toEqual({ 6: 5, 7: 6, 8: 7, 9: 9, 10: 10 });
+    });
+
+    test('is monotonic — a higher target never needs fewer elements', () => {
+        for (let score = 6; score < 10; score++) {
+            expect(h.call('getRequiredElementCount', score + 1))
+                .toBeGreaterThanOrEqual(h.call('getRequiredElementCount', score));
+        }
+    });
+});
+
+describe('generator availability', () => {
+    test('starter whitelist matches verified in-game starting deck', () => {
+        expect(h.GAME_DATA.starterWhitelist).toEqual([
+            'ACTION', 'COMEDY', 'DRAMA', 'ROMANCE', 'ADVENTURE', 'DETECTIVE', 'HISTORICAL', 'THRILLER',
+            'FANTASY_KINGDOM', 'MODERN_AMERICAN_CITY', 'MODERN_AMERICAN_TOWN', 'TROPICAL_ISLAND', 'WILD_WEST',
+            'PROTAGONIST_CLUMSY_OAF', 'PROTAGONIST_COP', 'PROTAGONIST_COWBOY', 'PROTAGONIST_DARING_ADVENTURER',
+            'PROTAGONIST_DETECTIVE', 'PROTAGONIST_HOPELESS_ROMANTIC', 'PROTAGONIST_KNIGHT', 'PROTAGONIST_WORKING_MAN',
+            'ANTAGONIST_BANDIT', 'ANTAGONIST_CRIMINAL_MASTERMIND', 'ANTAGONIST_EVIL_MONSTER',
+            'ANTAGONIST_EVIL_WITCH', 'ANTAGONIST_MURDERER', 'ANTAGONIST_SERIAL_KILLER', 'ANTAGONIST_TRIBAL_CHIEF',
+            'SUPPORTINGCHARACTER_ANGRY_BOSS', 'SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS', 'SUPPORTINGCHARACTER_FEMME_FATALE',
+            'SUPPORTINGCHARACTER_LOVE_INTEREST', 'SUPPORTINGCHARACTER_MENTOR', 'SUPPORTINGCHARACTER_RIVAL',
+            'SUPPORTINGCHARACTER_SIDEKICK', 'SUPPORTINGCHARACTER_STRICT_PARENT',
+            'EVENTS_ANCIENT_PUZZLE', 'THEME_AVENGING_LOVED_ONES', 'EVENTS_BANK_ROBBERY',
+            'THEME_LOVE_TRIANGLE', 'EVENTS_PRISON_BREAK', 'THEME_SEARCH_KILLER', 'EVENTS_SHOOTOUT',
+            'THEME_SLAPSTICK_MAYHEM', 'THEME_STRUGGLE_FOR_BETTER_LIFE', 'THEME_TREASURE_HUNT',
+            'THEME_UNREQUITED_LOVE', 'THEME_WINNING_THE_BELOVED',
+            'FINALE_ANTAGONIST_GETS_KILLED', 'FINALE_ANTAGONIST_GETS_PUNISHED', 'FINALE_ANTAGONIST_REPENTS',
+            'FINALE_PROTAGONIST_DIES_HEROICALLY', 'FINALE_PROTAGONIST_FINDS_TREASURE',
+            'FINALE_PROTAGONIST_GETS_CHANCE_FOR_BETTER_LIFE', 'FINALE_PROTAGONIST_OVERCAME_SELFDOUBT',
+            'FINALE_PROTAGONIST_RESCUES_HOSTAGE', 'FINALE_SWEETHEARTS_STAY_TOGETHER'
+        ]);
+    });
+
+test('excluded elements are the shared source of truth for every script builder', () => {
+        const contexts = ['generator', 'graves', 'advertisers', 'targeted'];
+
+        expect(
+            contexts.map(context =>
+                h.evaluate(`HACStoryElementSelector.contextUsesGlobalExclusions('${context}')`)
+            )
+        ).toEqual(contexts.map(() => true));
+        expect(h.evaluate("HACStoryElementSelector.contextUsesGlobalExclusions('excluded')"))
+            .toBe(false);
+    });
+
+    test('shared selector and targeted ads ignore tags selected in Excluded Elements', () => {
+        h.evaluate(`document = {
+            getElementById(id) {
+                if (id === 'inputs-genre-excluded') return null;
+                if (id === 'selectors-container-excluded') {
+                    return {
+                        querySelectorAll() {
+                            return [
+                                { value: 'ACTION', dataset: { category: 'Genre' } }
+                            ];
+                        }
+                    };
+                }
+                return null;
+            },
+            querySelectorAll() { return []; },
+            querySelector() { return null; }
+        }`);
+
+        expect(h.evaluate("HACStoryElementSelector.isTagExcludedForContext('ACTION', 'advertisers')"))
+            .toBe(true);
+
+        expect(h.evaluate(`HACStoryElementSelector.filterTagsForContext([
+            GAME_DATA.tags.ACTION,
+            GAME_DATA.tags.ADVENTURE
+        ], 'advertisers').map(tag => tag.id)`)).toEqual(['ADVENTURE']);
+
+        const result = h.evaluate(`HACTargetedAds.resolveTargetedTagInputs([
+            { id: 'ACTION' },
+            { id: 'ADVENTURE' }
+        ]).map(tag => tag.id)`);
+
+        expect(result).toEqual(['ADVENTURE']);
+    });
+});
+
+describe('Colman Graves evaluation helpers', () => {
+    test('verdict thresholds match the reverse-engineering notes', () => {
+        expect(h.call('getGravesVerdict', 4.0).label).toBe('Success');
+        expect(h.call('getGravesVerdict', 3.5).label).toBe('Common');
+        expect(h.call('getGravesVerdict', 3.2).label).toBe('Risky');
+        expect(h.call('getGravesVerdict', 2.9).label).toBe('Failed');
+    });
+
+    test('findGravesConflicts reports raw pair clashes below 2.0', () => {
+        const conflicts = h.call('findGravesConflicts', [
+            tag('AMERICAN_CIVIL_WAR', 'Setting'),
+            tag('ANTAGONIST_ALIEN', 'Antagonist'),
+        ]);
+
+        expect(conflicts).toHaveLength(1);
+        expect(conflicts[0].rawScore).toBeLessThan(2.0);
+    });
+});
+
+describe('pure helpers', () => {
+    test('parseWeights coerces every value to a float', () => {
+        expect(h.call('parseWeights', { a: '1.5', b: '0', c: '-2.25' }))
+            .toEqual({ a: 1.5, b: 0, c: -2.25 });
+    });
+
+    test('getScoringElementCount excludes Genre and Setting', () => {
+        const tags = [
+            tag('X', 'Genre'), tag('Y', 'Setting'),
+            tag('Z', 'Protagonist'), tag('W', 'Finale'),
+        ];
+        expect(h.call('getScoringElementCount', tags)).toBe(2);
+    });
+
+    test('formatScore and formatSimpleScore', () => {
+        expect(h.call('formatScore', 0)).toBe('0');
+        expect(h.call('formatScore', 1.234)).toMatchSnapshot('formatScore positive');
+        expect(h.call('formatScore', -1.234)).toMatchSnapshot('formatScore negative');
+        expect(h.call('formatSimpleScore', 2.5)).toMatchSnapshot('formatSimpleScore');
+    });
+});
