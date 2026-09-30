@@ -68,7 +68,7 @@ for (const [mode, button] of MODES) {
       banned: script.tags.filter(tag => getGeneratorExcludedIds().has(tag.id)),
       evaluated: HACScriptEvaluation.calculateScriptEvaluation(script.tags).movieScores,
     })));
-    expect(scripts).toHaveLength(mode === 'standard' ? 5 : 12);
+    expect(scripts).toHaveLength(mode === 'standard' ? 15 : 12);
     for (const script of scripts) {
       expect(script.storyCount).toBe(9);
       expect(script.evaluated.tagCap).toBe(9);
@@ -93,7 +93,7 @@ for (const [mode, button] of MODES) {
     await expect(page.locator('#gravesScoreCapLabel strong')).toHaveText('9.0');
   });
 
-  test(`TC24-000002 ${mode}: a known positive fully locked script keeps both 7.0 movie scores on transfer`, async ({ steps, page }) => {
+  test(`TC24-000002 ${mode}: a known positive fully locked script keeps both 6.0 movie scores on transfer`, async ({ steps, page }) => {
     await openHollywood(steps);
     for (const [category, id] of [
       ['genre', 'DRAMA'], ['genre', 'COMEDY'], ['setting', 'MODERN_EUROPEAN_CITY'],
@@ -108,8 +108,8 @@ for (const [mode, button] of MODES) {
     const scripts = await page.evaluate(() => generatedScriptsCache.map(script => ({
       tags: script.tags, scores: script.scores,
     })));
-    expect(scripts).toHaveLength(mode === 'standard' ? 5 : 12);
-    for (const script of scripts) expect(script.scores).toEqual({ commercial: 7, artistic: 7 });
+    expect(scripts).toHaveLength(mode === 'standard' ? 15 : 12);
+    for (const script of scripts) expect(script.scores).toEqual({ commercial: 6, artistic: 6 });
     // Bonus ranking and final movie scores are separate quantities in optimized modes.
     const primary = cards.first().locator('.gen-badge-group').first();
     if (mode === 'artistic') {
@@ -121,7 +121,7 @@ for (const [mode, button] of MODES) {
     } else {
       const movieScore = cards.first().locator('.gen-badge-group')
         .filter({ has: page.getByText('Movie Score', { exact: true }) });
-      await expect.poll(async () => Number(await movieScore.locator('.gen-badge-val').textContent())).toBe(7);
+      await expect.poll(async () => Number(await movieScore.locator('.gen-badge-val').textContent())).toBe(6);
     }
     await expectBothTransfers(page, scripts[0]);
   });

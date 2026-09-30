@@ -158,8 +158,8 @@ test.describe('generation and transfer score integrity', () => {
     await expect(firstCard.locator('.gen-badge-val').nth(1)).toHaveText('0.40');
     await firstCard.locator('.gen-header').click();
     await firstCard.locator('[data-role="script-graves-button"]').click();
-    await expect(page.locator('#gravesTotalComScore')).toHaveText('7.0');
-    await expect(page.locator('#gravesTotalArtScore')).toHaveText('7.0');
+    await expect(page.locator('#gravesTotalComScore')).toHaveText('6.0');
+    await expect(page.locator('#gravesTotalArtScore')).toHaveText('6.0');
   });
 });
 

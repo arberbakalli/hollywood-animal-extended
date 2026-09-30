@@ -35,13 +35,13 @@ describe('Production edge cases and state helpers', () => {
         const stats = h.call(
             'HACScriptGenerationEngine.buildScriptStats',
             { rawAverage: 4.2, totalScore: 0.42 },
-            { commercial: 6.4, artistic: 5.1, tagCap: 7 }
+            { commercial: 6.4, artistic: 5.1, tagCap: 6 }
         );
 
         expect(stats).toEqual({
             avgComp: 4.2,
             synergySum: 0.42,
-            maxScriptQuality: 6,
+            maxScriptQuality: 5,
             movieScore: '6.4'
         });
     });

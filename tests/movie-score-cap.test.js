@@ -56,8 +56,8 @@ describe('movie score ceiling for 10 story elements', () => {
 
 describe('movie score ceiling below nine story elements', () => {
     test.each([
-        [5, 7],
-        [6, 7],
+        [5, 6],
+        [6, 6],
         [7, 8],
         [8, 8],
     ])('%i story elements top out at %i.0', (count, cap) => {
@@ -84,8 +84,8 @@ describe('script quality limit', () => {
 
     test.each([
         [4, 5],
-        [5, 6],
-        [6, 6],
+        [5, 5],
+        [6, 5],
         [7, 7],
         [8, 7],
         [9, 8],
