@@ -446,6 +446,18 @@
         }
     }
 
+    // Redraws the current results without losing the page the user is on.
+    // Pinning used to call renderGeneratedScripts with no options, which
+    // showed all 15 and removed Show more (audit 2026-09-30).
+    function refreshGeneratedScripts() {
+        if (!generatorResultsState.scripts.length) return;
+        renderGeneratedScripts(generatorResultsState.scripts, {
+            mode: generatorResultsState.mode,
+            pageSize: generatorResultsState.pageSize,
+            visibleCount: generatorResultsState.visibleCount
+        });
+    }
+
     function showMoreGeneratedScripts() {
         renderGeneratedScripts(generatorResultsState.scripts, {
             mode: generatorResultsState.mode,
@@ -603,7 +615,9 @@
         div.querySelector('.pin-btn')?.addEventListener('click', event => togglePin(scriptObj.uniqueId, event));
         div.querySelector('[data-role="script-graves-button"]')?.addEventListener('click', () => transferScriptToContext(scriptObj.uniqueId, 'graves'));
         div.querySelector('[data-role="script-transfer-button"]')?.addEventListener('click', () => transferScriptToContext(scriptObj.uniqueId, 'advertisers'));
-        div.querySelector('.script-name-input')?.addEventListener('keyup', event => updateScriptName(scriptObj.uniqueId, event.target.value));
+        // input, not keyup: a paste, drag-drop or autofill fires no key event,
+        // and the name never reached the library file (audit 2026-09-30).
+        div.querySelector('.script-name-input')?.addEventListener('input', event => updateScriptName(scriptObj.uniqueId, event.target.value));
         div.querySelector('.script-name-input')?.addEventListener('click', event => event.stopPropagation());
 
         return div;
@@ -622,6 +636,7 @@
         getCompatibleGenres,
         getRandomTagByCategory,
         renderGeneratedScripts,
+        refreshGeneratedScripts,
         showMoreGeneratedScripts,
         createScriptId,
         buildScriptStats,

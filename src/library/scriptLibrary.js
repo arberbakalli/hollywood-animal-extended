@@ -64,9 +64,10 @@
             }
         }
 
-        // Refresh both views
+        // Refresh both views, keeping the results page the user is on.
         renderPinnedScripts();
-        renderGeneratedScripts(generatedScriptsCache);
+        if (global.HACScriptGenerator?.refreshGeneratedScripts) global.HACScriptGenerator.refreshGeneratedScripts();
+        else renderGeneratedScripts(generatedScriptsCache);
     }
 
     function renderPinnedScripts() {

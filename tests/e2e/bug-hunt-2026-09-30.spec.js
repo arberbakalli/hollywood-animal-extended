@@ -374,6 +374,37 @@ test.describe('Bug hunt 2026-09-30', () => {
     });
   }
 
+  // Audit 2026-09-30: pinning re-rendered all 15 results and removed Show
+  // more, which undid the 5-at-a-time paging ruled the same day.
+  test('TC01-000044 pinning a script keeps the results paged 5 at a time', async ({ page }) => {
+    const cards = page.locator('#generatorResultsList .gen-card');
+    await page.locator('#generateScriptsButton').click();
+    await expect(cards).toHaveCount(5, { timeout: 20000 });
+
+    const first = cards.first();
+    if (await first.locator('.pin-btn').isHidden()) await first.locator('.gen-header').click();
+    await first.locator('.pin-btn').click();
+    await expect.poll(() => page.evaluate(() => pinnedScripts.length)).toBe(1);
+
+    await expect(cards).toHaveCount(5);
+    await expect(page.locator('#showMoreGeneratedScriptsButton')).toHaveText('Show 5 More (5 remaining)');
+  });
+
+  // Audit 2026-09-30: a script name was stored only on keyup, so a paste or
+  // autofill never reached the library file.
+  test('TC01-000045 a pasted script name is kept', async ({ page }) => {
+    const cards = page.locator('#generatorResultsList .gen-card');
+    await page.locator('#generateScriptsButton').click();
+    await expect(cards).toHaveCount(5, { timeout: 20000 });
+    const first = cards.first();
+    if (await first.locator('.pin-btn').isHidden()) await first.locator('.gen-header').click();
+    await first.locator('.pin-btn').click();
+
+    // fill() sets the value and fires input, as a paste does; no key events.
+    await page.locator('#pinnedResultsList .script-name-input').first().fill('Treasure run');
+    await expect.poll(() => page.evaluate(() => pinnedScripts[0].name)).toBe('Treasure run');
+  });
+
   // Given Max Element Pool 8
   // When the user generates scripts in Script Lab
   // Then every script carries 8 story elements, not 7
