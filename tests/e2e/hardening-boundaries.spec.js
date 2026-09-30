@@ -109,7 +109,7 @@ for (const [mode, button] of [
         storyCount: HACGravesAnalysis.storyElementsOf(script.tags).length,
         bonuses: HACScriptEvaluation.calculateScriptEvaluation(script.tags).bonuses,
       })));
-      expect(scripts).toHaveLength(mode === 'standard' ? 5 : 12);
+      expect(scripts).toHaveLength(mode === 'standard' ? 15 : 12);
       for (const script of scripts) {
         expect(script.tags.some(tag => tag.id === 'PROTAGONIST_COWBOY')).toBe(true);
         expect(script.banned).toEqual([]);

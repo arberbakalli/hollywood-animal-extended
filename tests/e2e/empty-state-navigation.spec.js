@@ -78,7 +78,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       await steps.on('settingsPanel', 'ScriptLab').verifyState('visible');
 
       // The lowest legal movie score target is the default.
-      await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('6');
+      await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('5');
 
       await steps.on('resetLocksButton', 'ScriptLab').click();
 

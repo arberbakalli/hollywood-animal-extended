@@ -4,10 +4,9 @@ import { loadInstrumentedApp, readInputDefault } from './helpers/legacyHarness.j
 /**
  * Max Element Pool <-> Target Movie Score syncing.
  *
- * Per the game's Rating Limit table (docs/GAME_RULES.md section 1):
- * - Targets 6-8 need N-1 story elements; targets 9 and 10 need 9 and 10.
- * - Pool 8 targets 8, because 8 elements top out at 8.0 (owner, 2026-09-28).
- *   Pools 7 and 8 both target 8.
+ * One to one, 5 to 10 (owner ruling 2026-09-30, docs/GAME_RULES.md section 1):
+ * pool N targets N and target N needs a pool of N. Values changed with the
+ * owner's approval on 2026-09-30; they used to pin the N-1 mapping.
  *
  * These drive the real exported mappings out of src/app/appShell.js.
  */
@@ -24,9 +23,9 @@ describe('Slider syncing — pool and target score mappings', () => {
 
     describe('target score to pool size', () => {
         it.each([
-            [6, 5],
-            [7, 6],
-            [8, 7],
+            [6, 6],
+            [7, 7],
+            [8, 8],
             [9, 9],
             [10, 10],
         ])('score %p needs a pool of %p', (score, pool) => {
@@ -36,9 +35,9 @@ describe('Slider syncing — pool and target score mappings', () => {
 
     describe('pool size to target score', () => {
         it.each([
-            [5, 6],
-            [6, 7],
-            [7, 8],
+            [5, 5],
+            [6, 6],
+            [7, 7],
             [8, 8],
             [9, 9],
             [10, 10],
@@ -54,8 +53,8 @@ describe('Slider syncing — pool and target score mappings', () => {
 
     describe('visual track fill', () => {
         it.each([
-            [6, 0],
-            [8, 50],
+            [5, 0],
+            [8, 60],
             [10, 100],
         ])('score %p fills the score track %p%%', (score, percent) => {
             expect(scoreTrack(score)).toBe(percent);
@@ -72,7 +71,7 @@ describe('Slider syncing — pool and target score mappings', () => {
         // the control reads as out of sync even though the numbers are right.
         it('the score track fill tracks the mapped score, not the raw pool', () => {
             const pool = 7;
-            expect(scoreTrack(mapPoolToScore(pool))).toBe(50);
+            expect(scoreTrack(mapPoolToScore(pool))).toBe(40);
         });
     });
 

@@ -214,7 +214,13 @@ test.describe('Script Lab — element freshness', () => {
 
     await generate(steps, page);
 
-    expect(await cardProtagonists(page)).toEqual([fresh, fresh, fresh, fresh, stale]);
+    // One click makes 15 and shows 5 (owner ruling 2026-09-30, approved
+    // rewrite): the Stale script ranks 15th, behind two Show more clicks.
+    expect(await cardProtagonists(page)).toEqual(Array(5).fill(fresh));
+    await page.locator('#showMoreGeneratedScriptsButton').click();
+    await page.locator('#showMoreGeneratedScriptsButton').click();
+    await expect(cards(page)).toHaveCount(15);
+    expect(await cardProtagonists(page)).toEqual([...Array(14).fill(fresh), stale]);
     await expect(cards(page).last().locator('[data-role="script-freshness-status"]')).toHaveText('Stale elements · viewer interest ×0.5');
     await expect(cards(page).first().locator('[data-role="script-freshness-status"]')).toBeHidden();
   });

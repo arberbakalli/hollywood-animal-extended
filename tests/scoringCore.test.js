@@ -191,7 +191,7 @@ describe('getRequiredElementCount', () => {
         for (let score = 6; score <= 10; score++) {
             table[score] = h.call('getRequiredElementCount', score);
         }
-        expect(table).toEqual({ 6: 5, 7: 6, 8: 7, 9: 9, 10: 10 });
+        expect(table).toEqual({ 6: 6, 7: 7, 8: 8, 9: 9, 10: 10 });
     });
 
     test('is monotonic — a higher target never needs fewer elements', () => {

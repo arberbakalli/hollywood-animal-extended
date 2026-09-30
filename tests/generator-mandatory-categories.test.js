@@ -33,7 +33,7 @@ describe('generated scripts always carry Protagonist, Antagonist and Finale', ()
 
     // Same document double as tests/best-score-scripts.test.js, with the locked
     // picks and the exclusions supplied by the test and the feedback captured.
-    function installGeneratorDom({ locked = [], excluded = [], score = '6' } = {}) {
+    function installGeneratorDom({ locked = [], excluded = [], score = '5' } = {}) {
         feedback = { textContent: '', className: '', classList: { add() {}, remove() {}, contains: () => false } };
         const asSelects = (tags) => tags.map(tag => ({ value: tag.id, dataset: { category: tag.category } }));
         const container = (tags) => {

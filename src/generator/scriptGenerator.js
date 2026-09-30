@@ -3,6 +3,10 @@
 
     const OPTIMIZED_RESULT_COUNT = 12;
     const INITIAL_OPTIMIZED_VISIBLE_COUNT = 3;
+    // One click makes a list to page through, rather than a new random five
+    // per click (owner ruling 2026-09-30).
+    const STANDARD_RESULT_COUNT = 15;
+    const STANDARD_VISIBLE_COUNT = 5;
     let generatorResultsState = {
         scripts: [],
         visibleCount: 0,
@@ -37,10 +41,11 @@
 
     // Must agree with HACAppShell.targetScoreToPoolSize (GAME_RULES.md section 1).
     function getRequiredElementCount(targetScore) {
-        if (targetScore >= 10) return 10;
-        if (targetScore === 9) return 9;
-        if (targetScore >= 6) return targetScore - 1;
-        return 5;
+        return Math.min(10, Math.max(5, targetScore));
+    }
+
+    function getGenerationElementCount(targetScore) {
+        return Math.max(getRequiredElementCount(targetScore), getMaxElementPoolSize());
     }
 
     function updateRequiredElementDisplay(targetScore) {
@@ -85,7 +90,7 @@
         genScoreInput.addEventListener('input', (e) => {
             let val = parseInt(e.target.value);
             if(val > 10) val = 10;
-            if(val < 6) val = 6;
+            if(val < 5) val = 5;
             if(!isNaN(val)) {
                 genScoreSlider.value = val;
                 updateScoreDisplay(val);
@@ -187,7 +192,7 @@
 
         genScoreInput.addEventListener('input', () => {
             const scoreVal = parseInt(genScoreInput.value);
-            if (scoreVal >= 6 && scoreVal <= 10) {
+            if (scoreVal >= 5 && scoreVal <= 10) {
                 updatePoolFromScore(scoreVal);
             }
         });
@@ -211,8 +216,10 @@
         const targetComp = parseFloat(document.getElementById('genCompInput').value);
         const targetScoreInput = parseInt(document.getElementById('genScoreInput').value);
 
-        // Map Movie Score to Required Scoring Elements (Excluding Genre AND Setting)
-        const targetCount = getRequiredElementCount(targetScoreInput);
+        // Generate the Max Element Pool, never fewer than the target needs
+        // (GAME_RULES.md section 1). The two controls are synced, so they differ
+        // only at pool 8: its target of 8 needs 7, and 8 was unreachable.
+        const targetCount = getGenerationElementCount(targetScoreInput);
 
         // Get Fixed Tags
         const fixedTags = collectTagInputs('generator');
@@ -306,8 +313,7 @@
         // before a Fresh one had a chance.
         const freshnessFloor = HACFreshness.freshnessRank(HACFreshness.scriptFreshness(fixedTags).state);
 
-        // Generate 5 Output Slots
-        for(let i=0; i<5; i++) {
+        for (let i = 0; i < STANDARD_RESULT_COUNT; i++) {
             let bestCandidate = null;
             const MAX_ATTEMPTS = 50;
 
@@ -336,7 +342,7 @@
 
         generatedScriptsCache = ranked;
         hideFreshnessNotice();
-        renderGeneratedScripts(ranked);
+        renderGeneratedScripts(ranked, { visibleCount: STANDARD_VISIBLE_COUNT, pageSize: STANDARD_VISIBLE_COUNT });
     }
 
     async function generateBestScoreScripts(scoreKind) {
@@ -415,6 +421,7 @@
         generatorResultsState = {
             scripts,
             visibleCount: options.visibleCount || scripts.length,
+            pageSize: options.pageSize || INITIAL_OPTIMIZED_VISIBLE_COUNT,
             mode: options.mode || 'standard'
         };
 
@@ -431,7 +438,7 @@
             button.type = 'button';
             button.className = 'analyze-btn secondary-btn generated-show-more-btn';
             button.dataset.role = 'generated-show-more-button';
-            const toShow = Math.min(INITIAL_OPTIMIZED_VISIBLE_COUNT, scripts.length - generatorResultsState.visibleCount);
+            const toShow = Math.min(generatorResultsState.pageSize, scripts.length - generatorResultsState.visibleCount);
             const remainingAfter = scripts.length - (generatorResultsState.visibleCount + toShow);
             button.textContent = `Show ${toShow} More (${remainingAfter} remaining)`;
             button.addEventListener('click', showMoreGeneratedScripts);
@@ -442,7 +449,8 @@
     function showMoreGeneratedScripts() {
         renderGeneratedScripts(generatorResultsState.scripts, {
             mode: generatorResultsState.mode,
-            visibleCount: Math.min(generatorResultsState.visibleCount + INITIAL_OPTIMIZED_VISIBLE_COUNT, generatorResultsState.scripts.length)
+            pageSize: generatorResultsState.pageSize,
+            visibleCount: Math.min(generatorResultsState.visibleCount + generatorResultsState.pageSize, generatorResultsState.scripts.length)
         });
     }
 
@@ -604,6 +612,7 @@
     global.HACScriptGenerator = {
         setupScoreSync,
         getRequiredElementCount,
+        getGenerationElementCount,
         updateRequiredElementDisplay,
         REQUIRED_SCRIPT_CATEGORIES,
         setupGeneratorControls,

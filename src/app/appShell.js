@@ -135,14 +135,12 @@
     }
 
     // The pool slider and the Target Movie Score slider are two views of one
-    // choice, per the game's Rating Limit table (GAME_RULES.md §1): targets 6-8
-    // need N-1 story elements, 9 and 10 need 9 and 10. Pool 8 targets 8, not 9,
-    // because 8 elements top out at 8.0.
+    // choice, one to one from 5 to 10 (GAME_RULES.md §1, owner 2026-09-30).
     //
     // Pure and exported so the mapping can be tested without a DOM.
     const POOL_MIN = 5;
     const POOL_MAX = 10;
-    const SCORE_MIN = 6;
+    const SCORE_MIN = 5;
     const SCORE_MAX = 10;
 
     // The one clamp for Max Element Pool (GAME_RULES.md §2). An unreadable value
@@ -154,15 +152,14 @@
         return Math.min(POOL_MAX, Math.max(POOL_MIN, size));
     }
 
+    // One to one, 5 to 10 (owner ruling 2026-09-30, GAME_RULES.md section 1):
+    // the pool is the story-element count and the target follows it.
     function poolSizeToTargetScore(poolSize) {
-        if (poolSize >= 8) return Math.min(poolSize, SCORE_MAX);
-        return poolSize + 1;
+        return Math.min(SCORE_MAX, Math.max(SCORE_MIN, poolSize));
     }
 
     function targetScoreToPoolSize(score) {
-        if (score === 9) return 9;
-        if (score === 10) return 10;
-        return Math.max(score - 1, POOL_MIN);
+        return Math.min(POOL_MAX, Math.max(POOL_MIN, score));
     }
 
     function targetScoreTrackPercent(score) {

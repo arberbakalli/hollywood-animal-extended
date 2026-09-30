@@ -15,10 +15,10 @@ async function expectControls(page, pool, target, required) {
 for (const control of ['slider', 'number input']) {
   test(`TC26-000001 pool ${control}: help follows the target without changing the chosen pool`, async ({ steps, page }) => {
     await openHollywood(steps);
-    await expectControls(page, 5, 6, 5);
+    await expectControls(page, 5, 5, 5);
     // Descend as well as ascend; pool 8 must not be round-tripped down to 7.
     for (const [pool, target, required] of [
-      [9, 9, 9], [10, 10, 10], [8, 8, 7], [7, 8, 7], [6, 7, 6], [5, 6, 5],
+      [9, 9, 9], [10, 10, 10], [8, 8, 8], [7, 7, 7], [6, 6, 6], [5, 5, 5],
     ]) {
       if (control === 'slider') {
         await steps.setSliderValue('elementPoolSlider', 'Navigation', pool);
@@ -33,7 +33,7 @@ for (const control of ['slider', 'number input']) {
   test(`TC26-000002 target ${control}: help and pool use the game rating-limit minimum`, async ({ steps, page }) => {
     await openHollywood(steps);
     for (const [target, pool, required] of [
-      [10, 10, 10], [9, 9, 9], [8, 7, 7], [7, 6, 6], [6, 5, 5],
+      [10, 10, 10], [9, 9, 9], [8, 8, 8], [7, 7, 7], [6, 6, 6], [5, 5, 5],
     ]) {
       if (control === 'slider') {
         await steps.setSliderValue('movieScoreSlider', 'ScriptLab', target);

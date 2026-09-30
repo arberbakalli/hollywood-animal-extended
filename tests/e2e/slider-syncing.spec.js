@@ -17,7 +17,7 @@ test.describe('Slider syncing — Max Element Pool and Target Movie Score', () =
 
   test('TC10-000001 the shipped defaults open already in sync', async ({ steps }) => {
     await steps.expect('elementPoolInput', 'Navigation').value.toBe('5');
-    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('6');
+    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('5');
   });
 
   test('TC10-000002 raising the pool raises the target score', async ({ steps }) => {
@@ -34,8 +34,8 @@ test.describe('Slider syncing — Max Element Pool and Target Movie Score', () =
     await steps.setSliderValue('elementPoolSlider', 'Navigation', 10);
     await steps.setSliderValue('elementPoolSlider', 'Navigation', 6);
 
-    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('7');
-    expect(await fillPercent(page, '#genScoreSlider')).toBe('25%');
+    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('6');
+    expect(await fillPercent(page, '#genScoreSlider')).toBe('20%');
   });
 
   test('TC10-000004 raising the target score raises the pool', async ({ steps }) => {
@@ -62,12 +62,12 @@ test.describe('Slider syncing — Max Element Pool and Target Movie Score', () =
 
   test('TC10-000007 returning to a pool size returns the same score', async ({ steps }) => {
     await steps.setSliderValue('elementPoolSlider', 'Navigation', 7);
-    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('8');
+    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('7');
 
     await steps.setSliderValue('elementPoolSlider', 'Navigation', 10);
     await steps.setSliderValue('elementPoolSlider', 'Navigation', 7);
 
-    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('8');
+    await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('7');
   });
 
   // The box accepted any number: 12 set a budget of 12 for every feature while

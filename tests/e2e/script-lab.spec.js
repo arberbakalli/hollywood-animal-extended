@@ -266,9 +266,10 @@ test.describe('Script Lab — generator', () => {
 
   test('TC01-000016 target movie score maps to the correct story-element hint', async ({ steps }) => {
     const expectedCounts = [
-      [6, '~5'],
-      [7, '~6'],
-      [8, '~7'],
+      [5, '~5'],
+      [6, '~6'],
+      [7, '~7'],
+      [8, '~8'],
       [9, '~9'],
       [10, '~10'],
     ];
