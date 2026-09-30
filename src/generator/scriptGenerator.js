@@ -312,7 +312,12 @@
 
     async function generateScripts() {
         const inputs = await prepareGenerationInputs();
-        if (!inputs) return;
+        if (!inputs) {
+            // A refusal never leaves the previous results beside its message,
+            // as Evaluate already does (audit 2026-09-30).
+            document.getElementById('results-generator')?.classList.add('hidden');
+            return;
+        }
 
         const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
 
@@ -356,7 +361,12 @@
 
     async function generateBestScoreScripts(scoreKind) {
         const inputs = await prepareGenerationInputs();
-        if (!inputs) return;
+        if (!inputs) {
+            // A refusal never leaves the previous results beside its message,
+            // as Evaluate already does (audit 2026-09-30).
+            document.getElementById('results-generator')?.classList.add('hidden');
+            return;
+        }
 
         const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
         const generatedBatch = [];

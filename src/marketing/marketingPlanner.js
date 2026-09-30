@@ -14,8 +14,14 @@
             return;
         }
         const tagInputs = collectTagInputs('advertisers');
+        // A refusal never leaves the previous analysis beside its message, as
+        // Evaluate already does (audit 2026-09-30).
+        const refuse = message => {
+            document.getElementById('results-advertisers')?.classList.add('hidden');
+            showFeedbackMessage('advertisersFeedbackMessage', message, 'accent');
+        };
         if(tagInputs.length === 0) {
-            showFeedbackMessage('advertisersFeedbackMessage', 'Please select at least one tag.', 'accent');
+            refuse('Please select at least one tag.');
             return;
         }
 
@@ -28,7 +34,7 @@
             ? HACGravesAnalysis.storyElementsOf(tagInputs)
             : tagInputs;
         if (storyElementTags.length > maxElements) {
-            showFeedbackMessage('advertisersFeedbackMessage', `Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`, 'accent');
+            refuse(`Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`);
             return;
         }
 

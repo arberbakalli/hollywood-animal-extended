@@ -278,7 +278,11 @@
             const names = skippedTags
                 .map(tag => GAME_DATA.tags[tag.id] ? GAME_DATA.tags[tag.id].name : tag.id)
                 .join(', ');
-            showFeedbackMessage(`${targetContext}FeedbackMessage`, `Skipped excluded elements: ${names}.`, 'accent');
+            // Keep any refusal the target showed: replacing it hid why nothing
+            // was analysed (audit 2026-09-30).
+            const feedback = document.getElementById(`${targetContext}FeedbackMessage`);
+            const earlier = feedback && !feedback.classList.contains('hidden') ? feedback.textContent.trim() : '';
+            showFeedbackMessage(`${targetContext}FeedbackMessage`, `Skipped excluded elements: ${names}.${earlier ? ` ${earlier}` : ''}`, 'accent');
         }
     }
 

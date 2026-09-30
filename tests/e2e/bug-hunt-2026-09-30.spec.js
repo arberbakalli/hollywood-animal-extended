@@ -270,6 +270,60 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(swapList(page).locator(`[data-role="graves-best-match"][data-tag-id="${suggested}"]`)).toHaveCount(0);
   });
 
+  // Audit 2026-09-30: a refused Generate or Analyze left the previous results
+  // on screen beside the refusal. Evaluate already clears them, so a rejected
+  // script never sits next to the last script's numbers.
+  test('TC01-000046 a refused Generate hides the previous results', async ({ page }) => {
+    await page.locator('#generateScriptsButton').click();
+    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
+
+    // Three locked Supporting Characters at pool 5 leave no room for the
+    // Protagonist, Antagonist and Finale, so Generate refuses (TC01-000034).
+    const rows = page.locator('#inputs-supporting-character-generator select.tag-selector');
+    const picks = ['SUPPORTINGCHARACTER_SIDEKICK', 'SUPPORTINGCHARACTER_LOVE_INTEREST', 'SUPPORTINGCHARACTER_ANGRY_BOSS'];
+    for (let i = 0; i < picks.length; i++) {
+      if (i > 0) await page.locator('#add-supporting-character-generator-button').click();
+      await rows.first().selectOption(picks[i]);
+    }
+    await page.locator('#generateScriptsButton').click();
+    await expect(page.locator('#generatorFeedbackMessage')).toContainText('Every script needs a Protagonist');
+    await expect(page.locator('#results-generator')).toBeHidden();
+  });
+
+  test('TC04-000037 a refused Analyze hides the previous results', async ({ steps, page }) => {
+    await steps.on('marketTab', 'Navigation').click();
+    await page.locator('#inputs-protagonist-advertisers select.tag-selector').first().selectOption('PROTAGONIST_CYNIC');
+    await page.locator('#analyzeMovieButton').click();
+    await expect(page.locator('#results-advertisers')).toBeVisible();
+
+    await page.locator('#inputs-protagonist-advertisers select.tag-selector').first().selectOption('');
+    await page.locator('#analyzeMovieButton').click();
+    await expect(page.locator('#advertisersFeedbackMessage')).toHaveText('Please select at least one tag.');
+    await expect(page.locator('#results-advertisers')).toBeHidden();
+  });
+
+  test('TC04-000038 a transfer that skips a banned element still shows why Analyze refused', async ({ steps, page }) => {
+    await steps.setSliderValue('elementPoolSlider', 'Navigation', 7);
+    await page.locator('#generateScriptsButton').click();
+    const card = page.locator('#generatorResultsList .gen-card').first();
+    await expect(card).toBeVisible({ timeout: 20000 });
+    const script = await page.evaluate(() => generatedScriptsCache[0].tags);
+    const banned = script.find(tag => tag.category === 'Theme & Event' || tag.category === 'Supporting Character');
+    const slug = banned.category === 'Theme & Event' ? 'theme-event' : 'supporting-character';
+
+    const content = page.locator('#excluded-content');
+    if (await content.evaluate(el => el.classList.contains('hidden'))) await page.locator('#toggleExcludedElementsButton').click();
+    await page.locator(`#add-${slug}-excluded-button`).click();
+    await page.locator(`#inputs-${slug}-excluded select.tag-selector`).first().selectOption(banned.id);
+    await steps.setSliderValue('elementPoolSlider', 'Navigation', 5);
+
+    if (await card.locator('.gen-details').isHidden()) await card.locator('.gen-header').click();
+    await card.locator('[data-role="script-transfer-button"]').click();
+    const feedback = page.locator('#advertisersFeedbackMessage');
+    await expect(feedback).toContainText('Skipped excluded elements');
+    await expect(feedback).toContainText('Max Element Pool is set to 5, but you selected 6');
+  });
+
   // Audit 2026-09-30: a movie score runs 0.0 to 10.0 (GAME_RULES.md section
   // 1). Typing 12 moved the slider to 10, but the grid read the box and showed
   // week 1 as 24,000. The box now settles on the limit when it is left, like
