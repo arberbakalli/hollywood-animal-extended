@@ -65,13 +65,38 @@
         else notice.classList.add('hidden');
     }
 
+    // Best Matches rows also depend on the ban list, which filters their
+    // candidates (audit 2026-09-30).
+    let bestMatchesSignature = null;
+
+    function bestMatchesInputSignature() {
+        const banned = typeof getManuallyExcludedIds === 'function'
+            ? [...getManuallyExcludedIds('excluded')].sort().join(',')
+            : '';
+        return `${gravesScriptSignature()}#${banned}`;
+    }
+
+    function markBestMatchesCurrent() {
+        bestMatchesSignature = bestMatchesInputSignature();
+    }
+
     function hideStaleGravesResults() {
         const summary = document.getElementById('graves-summary-row');
-        if (evaluatedSignature === null || !summary || summary.classList.contains('hidden')) return;
-        if (gravesScriptSignature() === evaluatedSignature) return;
-        evaluatedSignature = null;
-        hideGravesEvaluationResults();
-        setStaleNotice(true);
+        if (evaluatedSignature !== null && summary && !summary.classList.contains('hidden')
+            && gravesScriptSignature() !== evaluatedSignature) {
+            evaluatedSignature = null;
+            hideGravesEvaluationResults();
+            setStaleNotice(true);
+        }
+
+        // Best Matches redraws from the current script instead of hiding: its
+        // mode tabs live in the panel, and TC03-000038 pins that switching mode
+        // after a change still works and reads the script as it is now.
+        const panel = document.getElementById('graves-best-matches-panel');
+        if (bestMatchesSignature !== null && panel && !panel.classList.contains('hidden')
+            && bestMatchesInputSignature() !== bestMatchesSignature) {
+            global.HACGravesBestMatches?.renderBestMatches?.();
+        }
     }
 
     // Covers every way the builder changes: a dropdown or share (change,
@@ -88,6 +113,7 @@
         clearFeedbackMessage('gravesFeedbackMessage');
         setStaleNotice(false);
         evaluatedSignature = null;
+        bestMatchesSignature = null;
         hideGravesBestMatches();
         // Clear any previous verdict up front, so a rejected script never leaves
         // the last script's results sitting next to the error message.
@@ -367,6 +393,8 @@
         summarizeGravesConflicts,
         renderColmanGravesResults,
         gravesScriptSignature,
-        watchGravesBuilder
+        watchGravesBuilder,
+        markBestMatchesCurrent,
+        checkGravesResultsCurrent: hideStaleGravesResults
     };
 })(globalThis);

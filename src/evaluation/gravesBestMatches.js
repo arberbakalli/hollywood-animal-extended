@@ -573,6 +573,9 @@
         // the script as it is now: an element removed or banned since Generate
         // must not keep appearing as part of it.
         lastSelectedTags = collectTagInputs('graves');
+        // After collectTagInputs, which clears banned picks, so the snapshot
+        // is of the script this render reads.
+        global.HACGravesAudience?.markBestMatchesCurrent?.();
 
         if (lastSelectedTags.length === 0) {
             list.innerHTML = emptyMarkup('Select at least one element to find strong matches.');

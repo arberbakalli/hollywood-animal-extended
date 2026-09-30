@@ -169,6 +169,25 @@ test.describe('Bug hunt 2026-09-30', () => {
     });
   }
 
+  test('TC05-000024 banning a suggested element after Find hides the old cards', async ({ steps, page }) => {
+    await openBuildForTarget(steps, page);
+    await page.locator('#findCombinationsButton').click();
+    await expect(targetedCards(page).first()).toBeVisible();
+    const chip = targetedCards(page).first().locator('.targeted-tag-chip.theme-event, .targeted-tag-chip.supporting-character').first();
+    const id = await chip.getAttribute('data-tag-id');
+    const slug = (await chip.getAttribute('class')).includes('theme-event') ? 'theme-event' : 'supporting-character';
+
+    await page.locator('#tab-generator-button').click();
+    const content = page.locator('#excluded-content');
+    if (await content.evaluate(el => el.classList.contains('hidden'))) await page.locator('#toggleExcludedElementsButton').click();
+    await page.locator(`#add-${slug}-excluded-button`).click();
+    await page.locator(`#inputs-${slug}-excluded select.tag-selector`).first().selectOption(id);
+
+    await openBuildForTarget(steps, page);
+    await expect(page.locator('#targeted-results-panel')).toBeHidden();
+    await expect(targetedStale(page)).toHaveText('Inputs changed. Press Find Top Combinations to update.');
+  });
+
   // Owner ruling 2026-09-30: a script holds at most 11 genres (10 at the 5%
   // floor plus one taking the rest), so the Genre + button stops at 11 rows.
   // There are exactly 11 genres, so no context ever needs a twelfth row.
@@ -197,6 +216,58 @@ test.describe('Bug hunt 2026-09-30', () => {
       await expect(add).toBeEnabled();
     });
   }
+
+  // Audit 2026-09-30: Best Matches rows must not outlive the script or the
+  // ban list they were drawn from; a stale Swap button used to do nothing,
+  // without a message. The panel redraws itself rather than hiding, because
+  // its mode tabs live in it and TC03-000038 pins that they stay usable.
+  const banInScriptLab = async (page, slug, id) => {
+    await page.locator('#tab-generator-button').click();
+    const content = page.locator('#excluded-content');
+    if (await content.evaluate(el => el.classList.contains('hidden'))) await page.locator('#toggleExcludedElementsButton').click();
+    await page.locator(`#add-${slug}-excluded-button`).click();
+    await page.locator(`#inputs-${slug}-excluded select.tag-selector`).first().selectOption(id);
+  };
+
+  test('TC03-000052 changing the script after Generate Best Matches redraws the rows for the new script', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await openSwapSuggestions(steps);
+    const slotNames = () => swapList(page).locator('.best-match-slot-note strong').allTextContents();
+    await expect.poll(slotNames).toContain('Long Journey');
+
+    await themeRows(page).nth(1).selectOption('EVENTS_ANCIENT_PUZZLE');
+    await expect.poll(slotNames).not.toContain('Long Journey');
+    await expect(page.locator('#graves-best-matches-panel')).toBeVisible();
+    await expect(staleNotice(page)).toBeHidden();
+  });
+
+  test('TC03-000053 a Swap from Best Matches redraws the rows instead of hiding them', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await openSwapSuggestions(steps);
+    await swapList(page).locator('[data-action="swap-graves-best-match"]').first().click();
+    await expect(page.locator('#graves-best-matches-panel')).toBeVisible();
+    await expect(staleNotice(page)).toBeHidden();
+  });
+
+  test('TC03-000054 banning an element of the evaluated script hides the old results', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await evaluateAndSeeClash(steps, page);
+    await banInScriptLab(page, 'theme-event', 'THEME_LONG_JOURNEY');
+    await steps.on('evaluateTab', 'Navigation').click();
+    await expectStale(page);
+  });
+
+  test('TC03-000055 banning a suggested element removes it from the Best Matches rows', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await openSwapSuggestions(steps);
+    const suggested = await swapList(page).locator('[data-role="graves-best-match"]').first().getAttribute('data-tag-id');
+    const category = await swapList(page).locator('[data-role="graves-best-match"]').first().getAttribute('data-category');
+    const slug = category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+    await banInScriptLab(page, slug, suggested);
+    await steps.on('evaluateTab', 'Navigation').click();
+    await expect(page.locator('#graves-best-matches-panel')).toBeVisible();
+    await expect(swapList(page).locator(`[data-role="graves-best-match"][data-tag-id="${suggested}"]`)).toHaveCount(0);
+  });
 
   // Audit 2026-09-30: Save to Script Library counted tags, not story elements
   // (GAME_RULES.md section 1 names this as the recurring bug), so Genre plus

@@ -193,9 +193,18 @@
     // Setting, Protagonist, Antagonist, Finale -- had no other path to a redraw,
     // so a banned Setting kept appearing in Script Lab until an unrelated
     // interaction happened to refresh it.
+    // A ban can clear a pick without firing change, and it changes the
+    // candidates every suggestion list draws from, so the result watchers are
+    // told directly (audit 2026-09-30).
+    function notifyExclusionChange() {
+        global.HACGravesAudience?.checkGravesResultsCurrent?.();
+        global.HACTargetedAds?.checkTargetedResultsCurrent?.();
+    }
+
     function propagateExclusionChange(category) {
         HACSelectorExclusions.exclusionConsumerContexts().forEach(consumer =>
             refreshCategoryDropdowns(category, consumer));
+        notifyExclusionChange();
     }
 
     function refreshCategoryDropdowns(category, context) {
@@ -336,6 +345,14 @@
 
     /** Re-applies exclusion availability to every script-building dropdown. */
     function refreshScriptBuilderAvailability() {
+        try {
+            refreshScriptBuilderContexts();
+        } finally {
+            notifyExclusionChange();
+        }
+    }
+
+    function refreshScriptBuilderContexts() {
         HACSelectorExclusions.scriptBuilderContexts().forEach(context => {
             const cleared = allSelectorCategories()
                 .flatMap(category => refreshCategoryDropdowns(category, context) || []);
@@ -716,7 +733,12 @@
         }
 
         const target = selects.find(select => select.value === replacedTagId);
-        if (!target) return false;
+        if (!target) {
+            // A stale Swap row used to do nothing, without a word.
+            const replaced = GAME_DATA.tags[replacedTagId];
+            showFeedbackMessage(`${context}FeedbackMessage`, `${replaced ? replaced.name : replacedTagId} is no longer in this script.`, 'accent');
+            return false;
+        }
 
         selectTagOption(target, category, tagObj.id);
         target.dispatchEvent(new Event('change', { bubbles: true }));

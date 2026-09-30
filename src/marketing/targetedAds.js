@@ -147,7 +147,9 @@
             : [];
         const checked = Array.from(document.querySelectorAll('.targeted-audience-checkbox:checked, .targeted-advertiser-checkbox:checked'))
             .map(box => box.value).sort();
-        return [getTargetedElementBudget(), ...picks, '|', ...checked].join(',');
+        // Bans filter the candidates, so they are an input too.
+        const banned = [...getGeneratorExcludedIds()].sort();
+        return [getTargetedElementBudget(), ...picks, '|', ...checked, '|', ...banned].join(',');
     }
 
     function setTargetedStaleNotice(visible) {
@@ -509,6 +511,7 @@
         resetTargetedTab,
         syncAudienceAvailability,
         findTargetedCombinations,
+        checkTargetedResultsCurrent: hideStaleTargetedResults,
         searchForTargetCombinations,
         scoringElementsOf,
         searchReportNote,
