@@ -58,6 +58,55 @@ found on the old `main` at `375e90d`.
 | `fix/a12-a3-tenths` | gone | Existed only in the old repository |
 | `codex/hardening` | gone | Its worktree folder remains, detached from the repository |
 
+## Audit 2026-09-30: open findings
+
+Found by the invariant audit of Script Lab, Evaluate, Build for Target and
+Marketing & Release. Fixed items are in the commits of
+`claude/bug-hunt-2026-09-30`. These are still open. Each needs an owner ruling
+or an owner-approved edit to an existing test, so none was guessed.
+
+**Still to fix (rule is settled, work not done yet):**
+- Library import accepts duplicate elements or two Settings in one entry, does
+  not count a duplicate `uniqueId`, and keeps a Genre share that is not a 5% step
+  (0.37). `src/library/scriptLibrary.js` about line 139-177.
+- Transfer from Graves to Marketing can pick a different genre-pair bonus when
+  two genres tie and the pair has no bonus data: new rows are prepended, so the
+  genre order flips (`compatibilityEngine.js` about line 91). Verify first.
+- Generated Script Lab cards keep an element banned after Generate
+  (GAME_RULES section 5: no context holds a banned element); a transfer then
+  drops it with only "Skipped excluded elements".
+
+**Needs an owner ruling:**
+- Verdict vs Average Fit: 3.476 shows "3.5" next to "Risky" (bands read the
+  unrounded value). Band the shown tenth, or show two decimals?
+- Asymmetric pair data: `PROTAGONIST_CYNIC`'s own row is all 3s while the
+  reverse entries hold 4-5 (36 pairs). Best Additions and Pair Analysis read
+  different directions, so they disagree. Which direction is the game's?
+- Conflict severity: data is whole numbers 1-5, so "severe" (< 1.0) and "mild"
+  (1.5-2.0) never occur; every conflict reads "serious", and the engine treats
+  1.0 as a spoiler. Should the bands move?
+- A Genre share does not weight pair scores (a 5% genre counts like 95%).
+  Listed in GAME_RULES section 6 as unconfirmed.
+- Best Additions hides Genre candidates at the element budget, although Genre
+  does not count toward it; Pairwise keeps them live.
+- Graves "Likely Audience" and Marketing's target audiences use two models.
+- Script Lab Highest Artistic/Commercial return scripts with clashes (16 of 48
+  at pool 10 with Starting Tags) and ignore Target Average Compatibility. Apply
+  the no-clash rule that Swap and Build for Target now follow?
+- Marketing Analyze results stay on screen after the inputs change (the hide +
+  prompt rule applies to Evaluate and Build for Target).
+- Holidays are listed by score, not in calendar order (GAME_RULES section 5).
+- Holiday label shows +18.3% while the grid applies 18.333...%.
+
+**Needs an approved edit to an existing test:**
+- Advertiser grade is set from the raw score but two decimals are shown: 1.7%
+  of cards disagree ("1.94 D" where C starts at 1.94). GAME_RULES says one
+  decimal, graded on it (open tie-mode question Q3). TC23-000001 pins "3.00".
+- The studio-policy line says "9+" while the gate is strictly above 9 (the
+  tooltip and the rule say "above 9"). TC04-000028 and a Jest test pin "9+".
+- TC01-000020 (Reset Locks hides results) never generates first, so it passes
+  vacuously. A new, non-vacuous test can be added without approval.
+
 ## Data Correctness
 
 - **18 character tags have no Age & Gender Appeal rating data at all.**
