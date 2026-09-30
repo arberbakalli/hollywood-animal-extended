@@ -198,6 +198,28 @@ test.describe('Bug hunt 2026-09-30', () => {
     });
   }
 
+  // Audit 2026-09-30: Save to Script Library counted tags, not story elements
+  // (GAME_RULES.md section 1 names this as the recurring bug), so Genre plus
+  // Setting alone saved as a "script" although the message asks for 2 story
+  // elements.
+  test('TC03-000051 Save to Script Library counts story elements, not tags', async ({ steps, page }) => {
+    await steps.on('evaluateTab', 'Navigation').click();
+    const saved = () => page.evaluate(() => pinnedScripts.length);
+    const before = await saved();
+    await page.locator('#inputs-genre-graves select.tag-selector').first().selectOption('ADVENTURE');
+    await page.locator('#inputs-setting-graves select.tag-selector').first().selectOption('FANTASY_KINGDOM');
+
+    await page.locator('#saveGravesScriptButton').click();
+    await expect(page.locator('#gravesFeedbackMessage')).toHaveText('Select at least 2 story elements before saving.');
+    expect(await saved()).toBe(before);
+
+    await page.locator('#inputs-protagonist-graves select.tag-selector').first().selectOption('PROTAGONIST_CYNIC');
+    await page.locator('#inputs-antagonist-graves select.tag-selector').first().selectOption('ANTAGONIST_EVIL_MONSTER');
+    await page.locator('#saveGravesScriptButton').click();
+    await expect(page.locator('#gravesFeedbackMessage')).toHaveText('Saved to your script library in Script Lab.');
+    expect(await saved()).toBe(before + 1);
+  });
+
   // Audit 2026-09-30: the 11-row cap counted the empty row a reset leaves, so
   // restoring a ban list that holds all 11 genres dropped one without a word.
   // Given the ban list was reset (one empty Genre row)

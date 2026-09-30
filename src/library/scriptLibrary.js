@@ -17,7 +17,9 @@
         }
 
         const tags = collectTagInputs(context);
-        if (tags.length < 2) {
+        // Story elements, not tags: Genre and Setting are context
+        // (GAME_RULES.md section 1). Counting tags saved Genre + Setting alone.
+        if (HACGravesAnalysis.storyElementsOf(tags).length < 2) {
             showFeedbackMessage(feedbackId, 'Select at least 2 story elements before saving.', 'accent');
             return;
         }
