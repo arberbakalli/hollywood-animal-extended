@@ -296,6 +296,35 @@ describe('bug hunt 2026-09-30', () => {
         });
     });
 
+    // TC24-000001 failed about one run in 24: a generated script stored
+    // 8.910000000000002 while Graves showed 8.9, so the transfer check saw two
+    // different scores. Movie scores carry one decimal (GAME_RULES.md), so the
+    // stored score is the tenth the screen shows.
+    describe('a stored movie score is the score shown', () => {
+        const scores = (totalScore, com = 0, art = 0) => h.call(
+            'HACMovieScoreEstimator.calculateMovieScores',
+            { totalScore }, { com, art },
+            Array.from({ length: 10 }, (_, i) => ({ id: `E${i}`, category: 'Theme & Event' }))
+        );
+        const shown = value => Number(h.call('HACScoreFormatting.formatMovieScore', value));
+
+        test('0.9 x 9.9 is stored as 8.9, not 8.910000000000002', () => {
+            expect(scores(0.9).commercial).toBe(8.9);
+            expect(scores(0.9).artistic).toBe(8.9);
+        });
+
+        test('every stored score from 0 to the cap equals its display', () => {
+            const problems = [];
+            for (let total = 0; total <= 1.05; total += 0.0013) {
+                const { commercial, artistic } = scores(total, 0.013, -0.027);
+                [commercial, artistic].forEach(value => {
+                    if (value !== shown(value)) problems.push(`${total.toFixed(4)}: ${value} shows ${shown(value)}`);
+                });
+            }
+            expect(problems).toEqual([]);
+        });
+    });
+
     describe('Max Element Pool and Target Movie Score are one to one', () => {
         test.each([5, 6, 7, 8, 9, 10])('%p story elements <-> target %p', (n) => {
             expect(h.call('HACAppShell.poolSizeToTargetScore', n)).toBe(n);

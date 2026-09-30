@@ -41,12 +41,7 @@ Rulings: `docs/GAME_RULES.md` sections 1 and 2.
 | 9 | **The Genre + button had no cap.** 14 clicks gave 15 Genre rows in Script Lab, Graves and the ban list, although a script holds at most 11. | Never enforced | Stops at 11 rows, re-enabled when a row is removed |
 | 10 | **Build for Target suggests clashing scripts.** Audit 2026-09-30: 10-17 of every 20 suggestions held a spoiler pair (1.0 or lower), #2-#4 of the top five included. Ranking reads advertiser fit only. | Build for Target has always ranked this way | Never suggest a pair below 2.0 |
 | 11 | **Build for Target cards outlive the inputs.** After Find, changing the pool (5 to 9) or locking Horror left the old cards on screen. | Never handled | Hide the cards and ask for a new Find |
-
-Still open: TC24-000001 fails about 1 run in 24, because a stored score keeps
-the raw product (8.910000000000002) while the screen shows 8.9. Checking 15
-scripts per click instead of 5 makes the failure show more often. A rounding fix
-(`roundScoreToTenth`) was in progress in another session on `fix/a12-a3-tenths`;
-that work is not in the reset history below, so this series fixes it separately.
+| 12 | **TC24-000001 failed about 1 run in 24.** A generated script stored the raw product (8.910000000000002) while Graves showed 8.9, so the transfer check compared two different scores. The 15-script batch made it show more often. A fix was in progress in another session but is not in the reset history. | Raw scores were always stored | Store each movie score at the tenth the screen shows; 36 of 36 runs pass |
 
 Branch heads when this was logged. **The repository history was reset on
 2026-09-30 at 23:02** to one commit, "Initial commit: Hollywood Animal Extended

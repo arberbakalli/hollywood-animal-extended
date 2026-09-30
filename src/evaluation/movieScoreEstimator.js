@@ -23,12 +23,21 @@
         return SCRIPT_LIMIT_BY_MOVIE_LIMIT[movieLimit];
     }
 
+    // Movie scores carry one decimal. A score is stored at the tenth the
+    // screen shows (the same toFixed(1) as HACScoreFormatting.formatMovieScore,
+    // which loads later), so a stored 8.910000000000002 can no longer sit
+    // behind a displayed 8.9. That mismatch made TC24-000001 fail about one
+    // run in 24 (2026-09-30).
+    function toShownTenth(value) {
+        return Number(value.toFixed(1));
+    }
+
     function calculateMovieScores(matrix, bonuses, tags) {
         const scoringCount = tags ? getScoringElementCount(tags) : 0;
         const tagCap = getMovieScoreCap(scoringCount);
         const maxGameScore = 9.9;
-        const commercial = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore));
-        const artistic = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore));
+        const commercial = toShownTenth(Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore)));
+        const artistic = toShownTenth(Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore)));
 
         return { commercial, artistic, tagCap, scoringCount };
     }
