@@ -340,3 +340,59 @@ Feature: Script Evaluation — Colman Graves
     When the user searches for text with no matching Finale
     Then the Finale search field remains visible
     And the Finale search wrapper remains visible
+
+  # [automated] TC03-000041, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: An element in an Unsuccessful pair gets a Swap slot that clears the clash
+    Given a script where Long Journey scores 1.0 with Evil Monster
+    And no swap for Long Journey raises the script average
+    When the user opens Swap Suggestions
+    Then Long Journey has a slot that names the clash with Evil Monster
+    And the slot lists replacements that clear the clash
+
+  # [automated] TC03-000042, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Swap Suggestions never brings a clashing element back
+    Given the user removed Long Journey because it clashed with Evil Monster
+    When the user generates Best Matches again and opens Swap Suggestions
+    Then Long Journey is not offered as a replacement
+    And no Swap Suggestion is in the Unsuccessful band
+
+  # [automated] TC03-000043, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Best Additions says why the list is short
+    Given a script with 6 story elements and a Max Element Pool of 8
+    And fewer than 2 story elements clear the Minimum Fit
+    When the user generates Best Matches
+    Then a note says the script has room for 2 more story elements
+    And the note says to lower Minimum Fit to see more
+
+  # [automated] TC03-000044, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner report 2026-09-30.
+  Scenario: Removing a clashing element with its remove button leaves no trace in Best Matches
+    Given Best Matches has run for a script with Long Journey
+    When the user removes Long Journey with its remove button
+    Then no Best Matches tab offers or mentions Long Journey, before or after generating again
+
+  # [automated] TC03-000045, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner request 2026-09-30.
+  Scenario: The short-list note lowers Minimum Fit in one click
+    Given Best Additions shows the short-list note at 4.0+
+    When the user clicks "Lower to 3.5+"
+    Then Minimum Fit is 3.5
+    And the list shows enough story elements to fill the free slots
+
+  # [automated] TC03-000046..49, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario Outline: Changing the script after Evaluate hides the old results
+    Given Evaluate shows the Long Journey x Evil Monster clash
+    When the user <change> without pressing Evaluate
+    Then the five Evaluate panels are hidden
+    And a notice says "Script changed. Press Evaluate Script to update."
+
+    Examples:
+      | change                                   |
+      | picks another Theme in a dropdown        |
+      | removes Long Journey with its remove button |
+      | presses Reset                            |
+      | changes a Genre share                    |
+
+  # [automated] TC03-000050, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Adding an empty row after Evaluate keeps the results
+    Given Evaluate has shown its results
+    When the user adds an empty Theme & Event row
+    Then the results stay visible, because the script did not change

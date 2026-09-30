@@ -152,3 +152,29 @@ Feature: Build for Target
     When the user selects both a target audience and an advertiser
     And the user searches for top combinations
     Then only the advertiser constrains the results
+
+  # [automated] TC05-000021, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Build for Target never suggests a combination with an Unsuccessful pair
+    When the user finds top combinations at a pool of 5, then of 10
+    Then no suggested combination holds a pair below 2.0
+
+  # [automated] TC05-000022, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: A clash between two locked elements is named, and the results stay
+    Given the user locked Evil Monster and Long Journey, which score 1.0 together
+    When the user finds top combinations
+    Then combinations are suggested
+    And a note says "Your locked Evil Monster and Long Journey clash (1.0). Suggestions add no clash of their own."
+
+  # [automated] TC05-000023, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario Outline: Changing an input after Find hides the old cards
+    Given top combinations are showing
+    When the user changes <input>
+    Then the cards are hidden
+    And a notice says "Inputs changed. Press Find Top Combinations to update."
+
+    Examples:
+      | input         |
+      | the pool      |
+      | a lock        |
+      | an audience   |
+      | an advertiser |

@@ -468,3 +468,29 @@ Feature: Script Lab
     When the user loads that file back
     Then the pinned script is restored
     And a message says how many scripts were loaded
+
+  # [automated] TC01-000041, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Max Element Pool 8 generates 8 story elements
+    Given the Max Element Pool is 8
+    When the user generates scripts
+    Then every generated script has 8 story elements
+
+  # [automated] TC01-000042, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: One Generate Scripts click makes a list to page through
+    When the user generates scripts
+    Then 5 scripts are shown
+    When the user clicks Show more twice
+    Then 15 scripts are shown, and the first 5 did not change
+
+  # [automated] TC01-000043 and TC26-000003, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Max Element Pool and Target Movie Score move together, one to one
+    When the user walks either control from 5 to 10, one step at a time
+    Then at every step the pool, the target and the "Requires ~N" help show the same N
+    And Generate builds exactly N story elements
+
+  # [automated] TC06-000009, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: The Genre + button stops at 11 rows
+    When the user clicks the Genre + button well past eleven rows
+    Then there are 11 Genre rows and the button is disabled
+    When the user removes one Genre row
+    Then the button works again

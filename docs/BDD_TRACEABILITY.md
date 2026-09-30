@@ -57,6 +57,10 @@ file is the fast lookup for agents before editing tests or product code.
   `tests/movie-score-cap.test.js`
 - Swap replaces only the suggested element; Best Matches reads the current script:
   `tests/e2e/colman-graves.spec.js` (TC03-000037, TC03-000038)
+- Swap slots for Unsuccessful pairs, no clash-creating swaps, the Best Additions
+  shortfall note, pool-sized generation and paged Generate Scripts:
+  `tests/bug-hunt-2026-09-30.test.js`,
+  `tests/e2e/bug-hunt-2026-09-30.spec.js` (TC03-000041..43, TC01-000041..42)
 
 ## Marketing And Release
 

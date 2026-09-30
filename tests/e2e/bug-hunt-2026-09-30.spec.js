@@ -1,0 +1,369 @@
+import { test, expect, openHollywood } from '../fixtures/base.js';
+
+// The owner's script from the 2026-09-30 report, with Max Element Pool 8.
+// Rulings: docs/GAME_RULES.md sections 1 and 2. Unit coverage of the same
+// rules: tests/bug-hunt-2026-09-30.test.js.
+const OWNER_SCRIPT = [
+  ['genre', 'ADVENTURE'],
+  ['setting', 'FANTASY_KINGDOM'],
+  ['protagonist', 'PROTAGONIST_CYNIC'],
+  ['antagonist', 'ANTAGONIST_EVIL_MONSTER'],
+  ['finale', 'FINALE_PROTAGONIST_FINDS_TREASURE'],
+];
+const OWNER_THEMES = ['THEME_TREASURE_HUNT', 'THEME_LONG_JOURNEY', 'THEME_EVIL_TRANSFORMATION'];
+
+const themeRows = (page) => page.locator('#inputs-theme-event-graves select.tag-selector');
+
+async function buildOwnerScript(steps, page) {
+  await steps.setSliderValue('elementPoolSlider', 'Navigation', 8);
+  await steps.on('evaluateTab', 'Navigation').click();
+  for (const [slug, id] of OWNER_SCRIPT) {
+    await page.locator(`#inputs-${slug}-graves select.tag-selector`).first().selectOption(id);
+  }
+  for (let i = 1; i < OWNER_THEMES.length; i++) {
+    await steps.on('themeEventAddButton', 'ColmanGraves').click();
+  }
+  await expect(themeRows(page)).toHaveCount(OWNER_THEMES.length);
+  for (let i = 0; i < OWNER_THEMES.length; i++) {
+    await themeRows(page).nth(i).selectOption(OWNER_THEMES[i]);
+  }
+}
+
+async function openSwapSuggestions(steps) {
+  await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+  await steps.on('swapSuggestionsTab', 'ColmanGraves').click();
+}
+
+const swapList = (page) => page.locator('#gravesBestMatchesList');
+
+test.describe('Bug hunt 2026-09-30', () => {
+  test.beforeEach(async ({ steps }) => {
+    await openHollywood(steps);
+  });
+
+  // Given a script whose only Unsuccessful pair is Long Journey x Evil Monster
+  // When the user opens Swap Suggestions
+  // Then Long Journey has a slot that names the clash and offers a replacement
+  test('TC03-000041 an element in an Unsuccessful pair gets a Swap slot that clears it', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await openSwapSuggestions(steps);
+
+    const slot = swapList(page).locator('.best-match-slot-group', { hasText: 'Long Journey (Theme & Event)' });
+    await expect(slot).toHaveCount(1);
+    await expect(slot.locator('.best-match-slot-note')).toContainText('clashes with Evil Monster (1.0)');
+    await expect(slot.locator('.best-match-slot-note')).toContainText('clears the clash');
+    await expect(slot.locator('[data-role="graves-best-match"]').first()).toBeVisible();
+    await expect(swapList(page).locator('.best-match-band-unsuccessful')).toHaveCount(0);
+  });
+
+  // Given the user removed Long Journey because it clashed
+  // When they generate Best Matches again and open Swap Suggestions
+  // Then Long Journey is not offered back as a replacement
+  test('TC03-000042 Swap Suggestions never brings back a clashing element', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await themeRows(page).nth(1).selectOption('');
+    await openSwapSuggestions(steps);
+
+    await expect(swapList(page).locator('[data-role="graves-best-match"]').first()).toBeVisible();
+    await expect(swapList(page).locator('[data-role="graves-best-match"][data-tag-id="THEME_LONG_JOURNEY"]')).toHaveCount(0);
+    await expect(swapList(page).locator('.best-match-band-unsuccessful')).toHaveCount(0);
+  });
+
+  // The owner removed Long Journey with the row's remove button, not by
+  // emptying the dropdown. Both removal paths must give the same result.
+  // Given Best Matches has run for the owner's script
+  // When the user removes Long Journey with its remove button and generates again
+  // Then no Best Matches tab offers or mentions Long Journey
+  test('TC03-000044 removing a clashing element with its remove button leaves no trace in Best Matches', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await openSwapSuggestions(steps);
+    await expect(swapList(page)).toContainText('Long Journey');
+
+    const ljRow = page.locator('#inputs-theme-event-graves [data-role="tag-selector-row"]')
+      .filter({ has: page.locator('option:checked[value="THEME_LONG_JOURNEY"]') });
+    await ljRow.locator('button.remove-btn').click();
+    await expect(themeRows(page)).toHaveCount(2);
+
+    for (const regenerate of [false, true]) {
+      if (regenerate) await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+      for (const tab of ['swapSuggestionsTab', 'bestAdditionsTab', 'pairwiseTab']) {
+        await steps.on(tab, 'ColmanGraves').click();
+        await expect(swapList(page).locator('[data-role="graves-best-match"]').first()).toBeVisible();
+        await expect(swapList(page), `${tab}, regenerated: ${regenerate}`).not.toContainText('Long Journey');
+      }
+    }
+  });
+
+  // Given 6 story elements and a pool of 8
+  // When Best Additions lists fewer than 2 story elements at the chosen fit
+  // Then a note names the free slots and says to lower Minimum Fit
+  test('TC03-000043 Best Additions says when fewer story elements clear the fit than slots are free', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+
+    const note = page.locator('[data-role="graves-additions-shortfall"]');
+    await expect(note).toContainText('room for 2 more story elements');
+    await expect(note).toContainText('Lower Minimum Fit');
+  });
+
+  // Build for Target audit 2026-09-30. Owner rulings: never suggest a
+  // combination holding a pair below 2.0, and hide the cards once an input
+  // changes, the same as Evaluate.
+  const openBuildForTarget = async (steps, page) => {
+    await steps.on('marketTab', 'Navigation').click();
+    await page.locator('#marketing-mode-targeted-button').click();
+  };
+  const targetedCards = (page) => page.locator('#targetedResultsList .targeted-combination-card');
+  const targetedStale = (page) => page.locator('#targeted-stale-notice');
+
+  test('TC05-000021 Build for Target never suggests a combination with an Unsuccessful pair', async ({ steps, page }) => {
+    await openBuildForTarget(steps, page);
+    for (const pool of [5, 10]) {
+      await steps.setSliderValue('elementPoolSlider', 'Navigation', pool);
+      await page.locator('#findCombinationsButton').click();
+      await expect(targetedCards(page).first()).toBeVisible();
+      const worstPairs = await targetedCards(page).evaluateAll(cards => cards.map(card => {
+        const tags = [...card.querySelectorAll('.targeted-tag-chip')].map(chip => GAME_DATA.tags[chip.dataset.tagId]);
+        let worst = 6;
+        for (let a = 0; a < tags.length; a++) for (let b = a + 1; b < tags.length; b++) {
+          worst = Math.min(worst, getRawCompatibilityScore(tags[a], tags[b]));
+        }
+        return worst;
+      }));
+      expect(worstPairs.length, `pool ${pool}`).toBe(20);
+      expect(worstPairs.filter(score => score < 2), `pool ${pool}`).toEqual([]);
+    }
+  });
+
+  test('TC05-000022 a clash between two locked elements is named, and the results stay', async ({ steps, page }) => {
+    await openBuildForTarget(steps, page);
+    await steps.setSliderValue('elementPoolSlider', 'Navigation', 7);
+    await page.locator('#inputs-antagonist-targeted select.tag-selector').first().selectOption('ANTAGONIST_EVIL_MONSTER');
+    await page.locator('#inputs-theme-event-targeted select.tag-selector').first().selectOption('THEME_LONG_JOURNEY');
+    await page.locator('#findCombinationsButton').click();
+
+    await expect(targetedCards(page).first()).toBeVisible();
+    await expect(page.locator('[data-role="targeted-search-note"]'))
+      .toHaveText('Your locked Evil Monster and Long Journey clash (1.0). Suggestions add no clash of their own.');
+  });
+
+  for (const [change, act] of [
+    ['the pool', page => page.locator('#globalElementPoolInput').fill('8').then(() => page.locator('#globalElementPoolInput').press('Tab'))],
+    ['a lock', page => page.locator('#inputs-genre-targeted select.tag-selector').first().selectOption('HORROR')],
+    ['an audience', page => page.locator('.targeted-audience-checkbox').first().check()],
+    ['an advertiser', page => page.locator('.targeted-advertiser-checkbox').first().check()],
+  ]) {
+    test(`TC05-000023 changing ${change} after Find hides the old cards until Find runs again`, async ({ steps, page }) => {
+      await openBuildForTarget(steps, page);
+      await page.locator('#findCombinationsButton').click();
+      await expect(targetedCards(page).first()).toBeVisible();
+      await expect(targetedStale(page)).toBeHidden();
+
+      await act(page);
+      await expect(page.locator('#targeted-results-panel')).toBeHidden();
+      await expect(targetedStale(page)).toHaveText('Inputs changed. Press Find Top Combinations to update.');
+
+      await page.locator('#findCombinationsButton').click();
+      await expect(targetedStale(page)).toBeHidden();
+      await expect(targetedCards(page).first()).toBeVisible();
+    });
+  }
+
+  // Owner ruling 2026-09-30: a script holds at most 11 genres (10 at the 5%
+  // floor plus one taking the rest), so the Genre + button stops at 11 rows.
+  // There are exactly 11 genres, so no context ever needs a twelfth row.
+  // Given any context with a Genre + button
+  // When the user clicks it well past eleven rows
+  // Then it stops at 11 rows, and works again once a row is removed
+  for (const [context, tab] of [['generator', 'buildTab'], ['graves', 'evaluateTab'], ['excluded', 'buildTab']]) {
+    test(`TC06-000009 ${context}: the Genre + button stops at 11 rows`, async ({ steps, page }) => {
+      await steps.on(tab, 'Navigation').click();
+      if (context === 'excluded') {
+        const toggle = page.locator('#toggleExcludedElementsButton');
+        if (await page.locator('#excluded-content').evaluate(el => el.classList.contains('hidden'))) await toggle.click();
+      }
+      const add = page.locator(`#add-genre-${context}-button`);
+      const rows = page.locator(`#inputs-genre-${context} [data-role="tag-selector-row"]`);
+
+      for (let i = 0; i < 14; i++) {
+        if (await add.isDisabled()) break;
+        await add.click();
+      }
+      await expect(rows).toHaveCount(11);
+      await expect(add).toBeDisabled();
+
+      await rows.first().locator('button.remove-btn').click();
+      await expect(rows).toHaveCount(10);
+      await expect(add).toBeEnabled();
+    });
+  }
+
+  // Owner report 2026-09-30: after Evaluate, changing the script left the old
+  // Pair Analysis and Conflicts on screen. Ruling: hide them and prompt.
+  // Given Evaluate shows the Long Journey x Evil Monster clash
+  // When the user changes the script in any way, without pressing Evaluate
+  // Then the old results are hidden and a notice asks for a new Evaluate
+  const staleNotice = (page) => page.locator('#graves-stale-notice');
+  const evaluateAndSeeClash = async (steps, page) => {
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+    await expect(page.locator('#graves-conflicts-panel')).toBeVisible();
+    await expect(page.locator('#gravesConflictDisplay')).toContainText('Long Journey');
+    await expect(staleNotice(page)).toBeHidden();
+  };
+  const expectStale = async (page) => {
+    for (const panel of ['#graves-summary-row', '#graves-reading-panel', '#graves-detail-row', '#graves-pairs-panel', '#graves-breakdown-panel']) {
+      await expect(page.locator(panel), panel).toBeHidden();
+    }
+    await expect(staleNotice(page)).toBeVisible();
+    await expect(staleNotice(page)).toHaveText('Script changed. Press Evaluate Script to update.');
+  };
+
+  test('TC03-000046 changing a dropdown after Evaluate hides the old results until Evaluate runs again', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await evaluateAndSeeClash(steps, page);
+
+    await themeRows(page).nth(1).selectOption('EVENTS_ANCIENT_PUZZLE');
+    await expectStale(page);
+
+    await steps.on('evaluateButton', 'ColmanGraves').click();
+    await expect(staleNotice(page)).toBeHidden();
+    await expect(page.locator('#graves-pairs-panel')).toBeVisible();
+    await expect(page.locator('#results-graves')).not.toContainText('Long Journey');
+  });
+
+  test('TC03-000047 removing a row with its remove button after Evaluate hides the old results', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await evaluateAndSeeClash(steps, page);
+
+    await page.locator('#inputs-theme-event-graves [data-role="tag-selector-row"]')
+      .filter({ has: page.locator('option:checked[value="THEME_LONG_JOURNEY"]') })
+      .locator('button.remove-btn').click();
+    await expectStale(page);
+  });
+
+  test('TC03-000048 Reset after Evaluate hides the old results', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await evaluateAndSeeClash(steps, page);
+
+    await page.locator('#resetGravesButton').click();
+    await expectStale(page);
+  });
+
+  test('TC03-000049 changing a Genre share after Evaluate hides the old results', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await page.locator('#add-genre-graves-button').click();
+    await page.locator('#inputs-genre-graves select.tag-selector').first().selectOption('SCIENCE_FICTION');
+    await evaluateAndSeeClash(steps, page);
+
+    const share = page.locator('#inputs-genre-graves .genre-row .percent-input').first();
+    await share.fill('40');
+    await share.dispatchEvent('change');
+    await expectStale(page);
+  });
+
+  test('TC03-000050 adding an empty row after Evaluate keeps the results, because the script did not change', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await evaluateAndSeeClash(steps, page);
+
+    await steps.on('themeEventAddButton', 'ColmanGraves').click();
+    await expect(themeRows(page)).toHaveCount(4);
+    await expect(page.locator('#graves-conflicts-panel')).toBeVisible();
+    await expect(staleNotice(page)).toBeHidden();
+  });
+
+  // Given the short-list note is showing at 4.0+
+  // When the user clicks its button
+  // Then Minimum Fit drops one step and the list refills with story elements
+  test('TC03-000045 the short-list note lowers Minimum Fit by one step in one click', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+
+    const button = page.locator('[data-action="lower-minimum-fit"]');
+    await expect(button).toHaveText('Lower to 3.5+');
+    await button.click();
+
+    await expect(page.locator('#gravesBestScoreFilter')).toHaveValue('3.5');
+    await expect(page.locator('[data-role="graves-additions-shortfall"]')).toHaveCount(0);
+    const storyRows = swapList(page).locator('[data-role="graves-best-match"]:not([data-category="Genre"]):not([data-category="Setting"])');
+    expect(await storyRows.count()).toBeGreaterThanOrEqual(2);
+  });
+
+  // Owner, 2026-09-30: "you should always be able to select 5 to 10 elements."
+  // Given any Max Element Pool from 5 to 10, set with the header slider
+  // When the user generates scripts in Script Lab
+  // Then every script carries exactly that many story elements
+  test('TC01-000043 every Max Element Pool from 5 to 10 generates exactly that many story elements', async ({ steps, page }) => {
+    for (const pool of [5, 6, 7, 8, 9, 10]) {
+      await steps.setSliderValue('elementPoolSlider', 'Navigation', pool);
+      await page.locator('#generateScriptsButton').click();
+      await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
+      const counts = await page.evaluate(() => generatedScriptsCache.map(script =>
+        script.tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting').length));
+      expect(new Set(counts), `pool ${pool}`).toEqual(new Set([pool]));
+    }
+  });
+
+  // Owner ruling 2026-09-30: pool and target are one to one, 5 to 10.
+  // Given the user walks one control from 5 to 10, one step at a time
+  // When each step lands
+  // Then the other control, the help text and Generate all say the same N
+  const storyCounts = (page) => page.evaluate(() => generatedScriptsCache.map(script =>
+    script.tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting').length));
+
+  for (const [label, slider, page] of [
+    ['Max Element Pool', 'elementPoolSlider', 'Navigation'],
+    ['Target Movie Score', 'movieScoreSlider', 'ScriptLab'],
+  ]) {
+    test(`TC26-000003 walking ${label} 5 to 10 keeps pool, target, help and Generate at the same N`, async ({ steps, page: browserPage }) => {
+      await steps.on('buildTab', 'Navigation').click();
+      for (const n of [5, 6, 7, 8, 9, 10]) {
+        await steps.setSliderValue(slider, page, n);
+        for (const control of ['#globalElementPoolInput', '#globalElementPoolSlider', '#genScoreInput', '#genScoreSlider']) {
+          await expect(browserPage.locator(control), `${control} at ${n}`).toHaveValue(String(n));
+        }
+        await expect(browserPage.locator('#genTagsRequiredDisplay'))
+          .toHaveText(`Requires ~${n} Story Elements (excluding Genre & Setting).`);
+        await browserPage.locator('#generateScriptsButton').click();
+        await expect(browserPage.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
+        expect(new Set(await storyCounts(browserPage)), `Generate at ${n}`).toEqual(new Set([n]));
+      }
+    });
+  }
+
+  // Given Max Element Pool 8
+  // When the user generates scripts in Script Lab
+  // Then every script carries 8 story elements, not 7
+  test('TC01-000041 Max Element Pool 8 generates 8 story elements', async ({ steps, page }) => {
+    await steps.setSliderValue('elementPoolSlider', 'Navigation', 8);
+    await page.locator('#generateScriptsButton').click();
+    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
+
+    const counts = await page.evaluate(() => generatedScriptsCache.map(script =>
+      script.tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting').length));
+    expect(counts).toHaveLength(15);
+    expect(new Set(counts)).toEqual(new Set([8]));
+  });
+
+  // Given one click on Generate Scripts
+  // When the user pages through the results
+  // Then 5 show first, and Show more reveals the rest 5 at a time
+  test('TC01-000042 Generate Scripts pages 15 results, 5 at a time', async ({ page }) => {
+    const cards = page.locator('#generatorResultsList .gen-card');
+    const showMore = page.locator('#showMoreGeneratedScriptsButton');
+
+    await page.locator('#generateScriptsButton').click();
+    await expect(cards).toHaveCount(5, { timeout: 20000 });
+    const firstPage = await cards.allTextContents();
+    await expect(showMore).toHaveText('Show 5 More (5 remaining)');
+
+    await showMore.click();
+    await expect(cards).toHaveCount(10);
+    // Paging reveals more; it never regenerates what is already shown.
+    expect((await cards.allTextContents()).slice(0, 5)).toEqual(firstPage);
+    await expect(showMore).toHaveText('Show 5 More (0 remaining)');
+
+    await showMore.click();
+    await expect(cards).toHaveCount(15);
+    await expect(showMore).toHaveCount(0);
+  });
+});
