@@ -59,6 +59,7 @@
         // Attach event listeners
         document.getElementById('findCombinationsButton')?.addEventListener('click', findTargetedCombinations);
         document.getElementById('resetTargetedButton')?.addEventListener('click', resetTargetedTab);
+        watchTargetedInputs();
 
         // Initialize audience compatibility
         if (global.HACAudienceCompatibility?.setupCompatibilityListeners) {
@@ -73,6 +74,8 @@
         document.getElementById('targeted-results-panel').classList.add('hidden');
         document.getElementById('targetedResultsList').innerHTML = '';
         clearFeedbackMessage('targetedFeedbackMessage');
+        searchedSignature = null;
+        setTargetedStaleNotice(false);
         // Reset clears the advertisers, so the audiences become live again.
         syncAudienceAvailability();
     }
@@ -119,9 +122,58 @@
         }
 
         // Find combinations that score A+ for target agencies
-        const combinations = await searchForTargetCombinations(targetAgencies, selectedTags, selectedAudiences, 20, maxElements);
+        const report = {};
+        const combinations = await searchForTargetCombinations(targetAgencies, selectedTags, selectedAudiences, 20, maxElements, report);
 
-        displayTargetedResults(combinations, targetAgencies, selectedAudiences);
+        displayTargetedResults(combinations, targetAgencies, selectedAudiences, searchReportNote(report, combinations.length, 20));
+        searchedSignature = targetedInputSignature();
+        setTargetedStaleNotice(false);
+    }
+
+    /* Results that no longer match the inputs (owner ruling 2026-09-30, the
+       same rule as Evaluate): the pool, a lock, an audience or an advertiser
+       changing after Find hides the cards and asks for a new Find. */
+    let searchedSignature = null;
+
+    function targetedInputSignature() {
+        const container = document.getElementById('selectors-container-targeted');
+        const picks = container && typeof container.querySelectorAll === 'function'
+            ? Array.from(container.querySelectorAll('[data-role="tag-selector-row"]')).map(row => {
+                const value = row.querySelector('select.tag-selector')?.value;
+                if (!value) return null;
+                const share = row.querySelector('.percent-input');
+                return share ? `${value}@${share.value}` : value;
+            }).filter(Boolean).sort()
+            : [];
+        const checked = Array.from(document.querySelectorAll('.targeted-audience-checkbox:checked, .targeted-advertiser-checkbox:checked'))
+            .map(box => box.value).sort();
+        return [getTargetedElementBudget(), ...picks, '|', ...checked].join(',');
+    }
+
+    function setTargetedStaleNotice(visible) {
+        const notice = document.getElementById('targeted-stale-notice');
+        if (!notice || !notice.classList) return;
+        if (visible) notice.classList.remove('hidden');
+        else notice.classList.add('hidden');
+    }
+
+    function hideStaleTargetedResults() {
+        const panel = document.getElementById('targeted-results-panel');
+        if (searchedSignature === null || !panel || panel.classList.contains('hidden')) return;
+        if (targetedInputSignature() === searchedSignature) return;
+        searchedSignature = null;
+        panel.classList.add('hidden');
+        setTargetedStaleNotice(true);
+    }
+
+    function watchTargetedInputs() {
+        const tab = document.getElementById('tab-targeted') || document;
+        ['change', 'input'].forEach(type => {
+            tab.addEventListener(type, hideStaleTargetedResults);
+            document.getElementById('global-element-pool-control')?.addEventListener(type, hideStaleTargetedResults);
+        });
+        const container = document.getElementById('selectors-container-targeted');
+        if (container) new MutationObserver(hideStaleTargetedResults).observe(container, { childList: true, subtree: true });
     }
 
     // Genre and Setting are structural picks every script carries, so they never
@@ -143,13 +195,68 @@
             : 10;
     }
 
-    async function searchForTargetCombinations(targetAgencies, constraintTags = [], constraintAudiences = [], maxResults = 20, storyElementBudget = 10) {
+    /* ---------------------------------------------------------------------
+       No suggestion carries a clash (owner ruling 2026-09-30)
+       ---------------------------------------------------------------------
+       Ranking reads advertiser fit only, so 10-17 of every 20 suggestions held
+       a spoiler pair that Evaluate then flagged red. A combination is dropped
+       when any pair it forms is below Graves' danger line (2.0), except a pair
+       between two locked elements: those are the player's own choice, so they
+       are named in a note instead of emptying the list. The search walks every
+       starting point, which finds 38-108 clean combinations per pool and
+       agency set against a clean ban list (measured 2026-09-30). */
+    function clashThreshold() {
+        return HACGravesBestMatchesEngine.CONFLICT_PAIR_THRESHOLD;
+    }
+
+    function hasSuggestedClash(combo, lockedIds) {
+        for (let a = 0; a < combo.length; a++) {
+            for (let b = a + 1; b < combo.length; b++) {
+                if (lockedIds.has(combo[a].id) && lockedIds.has(combo[b].id)) continue;
+                if (getRawCompatibilityScore(combo[a], combo[b]) < clashThreshold()) return true;
+            }
+        }
+        return false;
+    }
+
+    // Named in the game's category order (GAME_RULES.md section 1), so the
+    // note reads the same however the locks were entered.
+    function lockedClashesOf(lockedTags) {
+        const order = category => GAME_DATA.categories.indexOf(category);
+        const sorted = [...lockedTags].sort((x, y) => order(x.category) - order(y.category));
+        const clashes = [];
+        for (let a = 0; a < sorted.length; a++) {
+            for (let b = a + 1; b < sorted.length; b++) {
+                const score = getRawCompatibilityScore(sorted[a], sorted[b]);
+                if (score < clashThreshold()) clashes.push({ a: sorted[a].id, b: sorted[b].id, score });
+            }
+        }
+        return clashes;
+    }
+
+    function searchReportNote(report, found, maxResults) {
+        const notes = [];
+        (report.lockedClashes || []).forEach(clash => {
+            const name = id => GAME_DATA.tags[id]?.name || id;
+            notes.push(`Your locked ${name(clash.a)} and ${name(clash.b)} clash (${clash.score.toFixed(1)}). Suggestions add no clash of their own.`);
+        });
+        if (report.dropped > 0 && found < maxResults) {
+            notes.push(`Showing ${found}. ${report.dropped} other combination${report.dropped === 1 ? ' was' : 's were'} left out because ${report.dropped === 1 ? 'it holds' : 'they hold'} a pair below ${clashThreshold().toFixed(1)}.`);
+        }
+        return notes.join(' ');
+    }
+
+    async function searchForTargetCombinations(targetAgencies, constraintTags = [], constraintAudiences = [], maxResults = 20, storyElementBudget = 10, report = {}) {
         await ensureCompatibilityLoaded();
 
         const excludedIds = getGeneratorExcludedIds();
         const allTags = Object.values(GAME_DATA.tags).filter(t => t && t.id && !excludedIds.has(t.id));
         const lockedTags = resolveTargetedTagInputs(constraintTags);
-        const combinations = generateTargetedCombinations(allTags, lockedTags, targetAgencies, storyElementBudget, maxResults * 4);
+        const lockedIds = new Set(lockedTags.map(tag => tag.id));
+        const generated = generateTargetedCombinations(allTags, lockedTags, targetAgencies, storyElementBudget, allTags.length);
+        const combinations = generated.filter(combo => !hasSuggestedClash(combo, lockedIds));
+        report.dropped = generated.length - combinations.length;
+        report.lockedClashes = lockedClashesOf(lockedTags);
         const scoredCombinations = [];
 
         for (const combo of combinations) {
@@ -353,12 +460,15 @@
         return 'tone-neutral';
     }
 
-    function displayTargetedResults(combinations, targetAgencies, selectedAudiences) {
+    function displayTargetedResults(combinations, targetAgencies, selectedAudiences, note = '') {
         const panel = document.getElementById('targeted-results-panel');
         const list = document.getElementById('targetedResultsList');
+        const noteMarkup = note
+            ? `<div class="best-match-slot-note targeted-search-note" data-role="targeted-search-note">${note}</div>`
+            : '';
 
         if (combinations.length === 0) {
-            list.innerHTML = '<div class="empty-state padded-empty">No combinations found. Try different audiences or fewer constraints.</div>';
+            list.innerHTML = noteMarkup + '<div class="empty-state padded-empty">No combinations found. Try different audiences or fewer constraints.</div>';
             panel.classList.remove('hidden');
             return;
         }
@@ -379,7 +489,7 @@
                 </div>
                 <div class="targeted-tag-list">
                     ${combo.tags.map(tag => `
-                        <div class="targeted-tag-chip ${categoryToElementSlug(tag.category)} ${tag.category === 'Genre' ? `genre-${toDomId(tag.id)}` : ''}">
+                        <div class="targeted-tag-chip ${categoryToElementSlug(tag.category)} ${tag.category === 'Genre' ? `genre-${toDomId(tag.id)}` : ''}" data-tag-id="${tag.id}">
                             ${tag.name}
                         </div>
                     `).join('')}
@@ -390,7 +500,7 @@
             </div>
         `).join('');
 
-        list.innerHTML = html;
+        list.innerHTML = noteMarkup + html;
         panel.classList.remove('hidden');
     }
 
@@ -401,6 +511,7 @@
         findTargetedCombinations,
         searchForTargetCombinations,
         scoringElementsOf,
+        searchReportNote,
         getTargetedElementBudget,
         resolveTargetedTagInputs,
         withCompatibilityWeights,
