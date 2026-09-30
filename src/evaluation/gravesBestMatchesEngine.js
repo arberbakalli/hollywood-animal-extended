@@ -97,13 +97,23 @@
         const currentAverage = calculateMatrixScore(selectedTags).rawAverage;
         const allRows = [];
         const slots = [];
+        const unresolvedClashes = [];
 
         selectedTags.forEach((tag, index) => {
             const rest = selectedTags.filter((_, position) => position !== index);
             if (rest.length === 0) return;
 
             const averageWithout = calculateMatrixScore(rest).rawAverage;
-            const slot = { tag, rest, averageWithout, index };
+            // A slot in an Unsuccessful pair is there to clear the clash, so
+            // it does not also have to raise the average (owner ruling
+            // 2026-09-30). An element that clashes once can still fit the rest
+            // well enough that no swap raises the average, and the slot then
+            // stayed silent exactly where Evaluate showed red.
+            const own = scoreAgainstSet(tag, rest, options.getRawCompatibilityScore);
+            const clash = own.worstScore < CONFLICT_PAIR_THRESHOLD
+                ? { against: own.worstAgainst, score: own.worstScore }
+                : null;
+            const slot = { tag, rest, averageWithout, index, clash };
             slots.push(slot);
 
             const sameCategory = candidates.filter(candidate =>
@@ -118,9 +128,12 @@
                     resultingAverage: averageWith(averageWithout, rest.length, row.newPairSum),
                     band: bandFor(row.fitAverage, row.worstScore)
                 }))
-                // Every row already raises the script average, so the fit
-                // threshold is a second and much stricter filter on top.
-                .filter(row => row.resultingAverage > currentAverage);
+                // A swap never brings in an Unsuccessful pair: that trades one
+                // clash for another, however the average moves.
+                .filter(row => row.worstScore >= CONFLICT_PAIR_THRESHOLD)
+                // Outside a clash, every row raises the script average, so the
+                // fit threshold is a second and much stricter filter on top.
+                .filter(row => clash || row.resultingAverage > currentAverage);
 
             // Widening is per slot. A candidate is scored against the remaining
             // elements, so a weak script -- the one actually worth repairing --
@@ -132,10 +145,14 @@
                 rowsForSlot = rowsAtFit(0).map(row => Object.assign({}, row, { belowRequestedFit: true }));
             }
 
+            if (clash && rowsForSlot.length === 0) {
+                unresolvedClashes.push({ tag, against: clash.against, score: clash.score });
+            }
+
             allRows.push(...rowsForSlot);
         });
 
-        if (allRows.length === 0) return null;
+        if (allRows.length === 0 && unresolvedClashes.length === 0) return null;
 
         const rowsBySlot = {};
         allRows.forEach(row => {
@@ -148,7 +165,7 @@
             rowsBySlot[row.slotIndex].rows.push(row);
         });
 
-        return { rowsBySlot, allRows, currentAverage };
+        return { rowsBySlot, allRows, currentAverage, unresolvedClashes };
     }
 
     // Pairwise deliberately ignores the element budget: it is an analysis view,
