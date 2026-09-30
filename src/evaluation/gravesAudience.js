@@ -31,8 +31,63 @@
         }
     }
 
+    /* ---------------------------------------------------------------------
+       Results that no longer match the script
+       ---------------------------------------------------------------------
+       Evaluate draws its panels once. Changing the builder afterwards left
+       the old Pair Analysis and Conflicts on screen, naming elements the
+       script no longer held (owner report 2026-09-30). Ruling: the moment the
+       script differs from the one evaluated, hide the panels and ask for a
+       new Evaluate. The snapshot is read straight from the builder rows,
+       without collectTagInputs, which redraws dropdowns and would feed the
+       observer below. */
+    let evaluatedSignature = null;
+
+    function gravesScriptSignature() {
+        const container = document.getElementById('selectors-container-graves');
+        if (!container || typeof container.querySelectorAll !== 'function') return '';
+        return Array.from(container.querySelectorAll('[data-role="tag-selector-row"]'))
+            .map(row => {
+                const value = row.querySelector('select.tag-selector')?.value;
+                if (!value) return null;
+                const share = row.querySelector('.percent-input');
+                return share ? `${value}@${share.value}` : value;
+            })
+            .filter(Boolean)
+            .sort()
+            .join('|');
+    }
+
+    function setStaleNotice(visible) {
+        const notice = document.getElementById('graves-stale-notice');
+        if (!notice || !notice.classList) return;
+        if (visible) notice.classList.remove('hidden');
+        else notice.classList.add('hidden');
+    }
+
+    function hideStaleGravesResults() {
+        const summary = document.getElementById('graves-summary-row');
+        if (evaluatedSignature === null || !summary || summary.classList.contains('hidden')) return;
+        if (gravesScriptSignature() === evaluatedSignature) return;
+        evaluatedSignature = null;
+        hideGravesEvaluationResults();
+        setStaleNotice(true);
+    }
+
+    // Covers every way the builder changes: a dropdown or share (change,
+    // input), and rows added, removed or rebuilt by x, Reset, search or a
+    // Library load (childList). A Best Matches Add or Swap fires change.
+    function watchGravesBuilder() {
+        const container = document.getElementById('selectors-container-graves');
+        if (!container) return;
+        ['change', 'input'].forEach(type => container.addEventListener(type, hideStaleGravesResults));
+        new MutationObserver(hideStaleGravesResults).observe(container, { childList: true, subtree: true });
+    }
+
     async function evaluateColmanGravesScript() {
         clearFeedbackMessage('gravesFeedbackMessage');
+        setStaleNotice(false);
+        evaluatedSignature = null;
         hideGravesBestMatches();
         // Clear any previous verdict up front, so a rejected script never leaves
         // the last script's results sitting next to the error message.
@@ -113,6 +168,8 @@
             const panel = document.getElementById(panelId);
             if (panel) panel.classList.remove('hidden');
         });
+        evaluatedSignature = gravesScriptSignature();
+        setStaleNotice(false);
 
         const verdictEl = document.getElementById('gravesVerdictDisplay');
         verdictEl.textContent = verdict.label;
@@ -308,6 +365,8 @@
         findGravesPairsByBand,
         gravesConflictSeverity,
         summarizeGravesConflicts,
-        renderColmanGravesResults
+        renderColmanGravesResults,
+        gravesScriptSignature,
+        watchGravesBuilder
     };
 })(globalThis);

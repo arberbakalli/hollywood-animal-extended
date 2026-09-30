@@ -459,6 +459,8 @@
             if (element) element.addEventListener('click', handler);
         });
 
+        global.HACGravesAudience?.watchGravesBuilder?.();
+
         const loadScriptsInput = document.getElementById('loadScriptsInput');
         if (loadScriptsInput) {
             loadScriptsInput.addEventListener('change', e => handleFileLoad(e.target));
