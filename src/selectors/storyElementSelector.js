@@ -447,6 +447,13 @@
         if (!container) return;
 
         if (category === 'Genre' && genreRowCount(container) >= MAX_GENRE_ROWS) {
+            // At the cap a pick still lands in an empty row. A reset leaves one,
+            // and Load Profile / Apply Starting Tags add one row per ban, so
+            // an eleventh Genre ban was dropped without a word.
+            const emptySelect = selectedId
+                ? Array.from(container.querySelectorAll('select.tag-selector')).find(select => select.value === '')
+                : null;
+            if (emptySelect) selectTagOption(emptySelect, category, selectedId);
             syncGenreAddButton(context);
             return;
         }

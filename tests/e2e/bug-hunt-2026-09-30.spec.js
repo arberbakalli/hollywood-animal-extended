@@ -198,6 +198,28 @@ test.describe('Bug hunt 2026-09-30', () => {
     });
   }
 
+  // Audit 2026-09-30: the 11-row cap counted the empty row a reset leaves, so
+  // restoring a ban list that holds all 11 genres dropped one without a word.
+  // Given the ban list was reset (one empty Genre row)
+  // When a ban profile with all 11 genres is loaded, which adds one row per ban
+  // Then all 11 are banned, in 11 rows
+  test('TC06-000010 loading 11 genre bans over an empty row keeps all 11', async ({ steps, page }) => {
+    await steps.on('buildTab', 'Navigation').click();
+    const banned = await page.evaluate(() => {
+      // The same steps as Load Profile in src/app/appShell.js.
+      resetSelectors('excluded');
+      const genres = Object.values(GAME_DATA.tags).filter(tag => tag.category === 'Genre');
+      genres.forEach(tag => addDropdown('Genre', tag.id, 'excluded'));
+      updateExcludedCount();
+      return genres.length;
+    });
+    expect(banned).toBe(11);
+    const values = await page.locator('#inputs-genre-excluded select.tag-selector')
+      .evaluateAll(selects => selects.map(select => select.value).filter(Boolean));
+    expect(new Set(values).size).toBe(11);
+    await expect(page.locator('#inputs-genre-excluded [data-role="tag-selector-row"]')).toHaveCount(11);
+  });
+
   // Owner report 2026-09-30: after Evaluate, changing the script left the old
   // Pair Analysis and Conflicts on screen. Ruling: hide them and prompt.
   // Given Evaluate shows the Long Journey x Evil Monster clash
