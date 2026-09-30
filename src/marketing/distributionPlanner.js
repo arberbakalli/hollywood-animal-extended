@@ -42,7 +42,7 @@
         const ownedInput = document.getElementById('ownedScreeningsInput');
         const scoreDisplay = document.getElementById('dist-com-score-display');
 
-        const score = parseFloat(comInput?.value) || 0;
+        const score = HACScoreFormatting.readMovieScoreInput('comScoreInput');
         const owned = parseInt(ownedInput?.value, 10) || 0;
 
         if(scoreDisplay) scoreDisplay.innerText = score.toFixed(1);
@@ -80,7 +80,7 @@
 
         if (!statusEl) return;
 
-        const commercialScore = parseFloat(document.getElementById('comScoreInput')?.value) || 0;
+        const commercialScore = HACScoreFormatting.readMovieScoreInput('comScoreInput');
         const artisticScore = getArtisticScore();
         const boutique = isBoutiqueActive();
         const behemoth = isBehemothActive();
@@ -264,7 +264,7 @@
     }
 
     function getArtisticScore() {
-        return parseFloat(document.getElementById('artScoreInput')?.value) || 0;
+        return HACScoreFormatting.readMovieScoreInput('artScoreInput');
     }
 
     // Both policies are quoted verbatim in the game's own string table:

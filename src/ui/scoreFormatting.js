@@ -36,6 +36,16 @@
         return num.toFixed(1);
     }
 
+    // A movie score runs 0.0 to 10.0 (GAME_RULES.md section 1). The slider
+    // stops there, but the number box accepts any value, and the planners read
+    // the box: 12 gave a week 1 of 24,000 (audit 2026-09-30). Every reader goes
+    // through this.
+    function readMovieScoreInput(id) {
+        const value = parseFloat(document.getElementById(id)?.value);
+        if (!Number.isFinite(value)) return 0;
+        return Math.min(10, Math.max(0, value));
+    }
+
     function setToneClass(element, tone) {
         element.classList.remove('tone-success', 'tone-danger', 'tone-neutral', 'tone-accent', 'tone-art');
         element.classList.add(`tone-${tone}`);
@@ -47,6 +57,7 @@
         formatScore,
         formatSimpleScore,
         formatMovieScore,
+        readMovieScoreInput,
         setToneClass
     };
 })(globalThis);

@@ -32,8 +32,8 @@
             return;
         }
 
-        const inputCom = parseFloat(document.getElementById('comScoreInput').value) || 0;
-        const inputArt = parseFloat(document.getElementById('artScoreInput').value) || 0;
+        const inputCom = HACScoreFormatting.readMovieScoreInput('comScoreInput');
+        const inputArt = HACScoreFormatting.readMovieScoreInput('artScoreInput');
 
         let tagAffinity = { "YM": 0, "YF": 0, "TM": 0, "TF": 0, "AM": 0, "AF": 0 };
         tagInputs.forEach(item => {
@@ -450,8 +450,7 @@
             const resultsSection = document.getElementById('results-advertisers');
             if (!resultsSection || resultsSection.classList.contains('hidden')) return;
 
-            const comInput = document.getElementById('comScoreInput');
-            renderCampaignDuration(parseFloat(comInput && comInput.value) || 0);
+            renderCampaignDuration(HACScoreFormatting.readMovieScoreInput('comScoreInput'));
         });
     }
 

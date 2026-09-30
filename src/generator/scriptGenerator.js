@@ -35,6 +35,15 @@
                     updateSliderTrack(slider);
                 }
             });
+            // Leaving the box settles it on the value the planners use, as the
+            // pool box does (TC10-000008).
+            input.addEventListener('change', (e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && (val > 10 || val < 0)) {
+                    e.target.value = Math.min(10, Math.max(0, val));
+                    e.target.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
             updateSliderTrack(slider);
         });
     }

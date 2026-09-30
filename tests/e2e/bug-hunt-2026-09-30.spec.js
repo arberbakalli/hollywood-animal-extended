@@ -270,6 +270,26 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(swapList(page).locator(`[data-role="graves-best-match"][data-tag-id="${suggested}"]`)).toHaveCount(0);
   });
 
+  // Audit 2026-09-30: a movie score runs 0.0 to 10.0 (GAME_RULES.md section
+  // 1). Typing 12 moved the slider to 10, but the grid read the box and showed
+  // week 1 as 24,000. The box now settles on the limit when it is left, like
+  // the pool box (TC10-000008), and every reader clamps.
+  test('TC04-000036 a movie score typed above 10 or below 0 is read as 10 or 0', async ({ steps, page }) => {
+    await steps.on('marketTab', 'Navigation').click();
+    const weekOne = async () => Number((await page.locator('#dist-week-1-value').textContent()).replace(/[^\d]/g, ''));
+    const box = page.locator('#comScoreInput');
+
+    await box.fill('12');
+    await expect.poll(weekOne).toBe(20000);
+    await box.press('Tab');
+    await expect(box).toHaveValue('10');
+
+    await box.fill('-3');
+    await expect.poll(weekOne).toBe(0);
+    await box.press('Tab');
+    await expect(box).toHaveValue('0');
+  });
+
   // Audit 2026-09-30: Swap's Show more counted every row minus 10, but each
   // slot already shows up to 10 of its own. At 3.5+ it offered "18 more"
   // with every row on screen, and a click showed nothing.
