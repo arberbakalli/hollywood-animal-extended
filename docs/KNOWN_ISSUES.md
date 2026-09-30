@@ -19,6 +19,50 @@ output, or in the source. Completed work and handoff notes are intentionally exc
   work split. Share the display-only renderer with the pool synchronization path;
   do not dispatch the existing score input event, which also remaps pool 8 to 7.
 
+## Owner bug hunt 2026-09-30
+
+Found by the owner on the live site (main `375e90d`) with one script: Adventure
+35% / Science-Fiction 65%, Fantasy Kingdom, Hardened Cynic, Evil Monster, Treasure
+Hunt, Long Journey, Evil Transformation, Protagonist Finds Treasure, Max Element
+Pool 8, 141 exclusions. None of these was captured before. Fixed on branch
+`claude/bug-hunt-2026-09-30`; each stays open here until that branch is on main.
+Rulings: `docs/GAME_RULES.md` sections 1 and 2.
+
+| # | Bug | Came in with | Fix |
+|---|---|---|---|
+| 1 | **Script Lab cannot generate 8 story elements.** Pool 8 sets target 8, and the generator took its count from the target (8 → 7). Counts went 7, then 9. | `60522dc` (2026-09-28, Rating Limit rule) | Generate the pool, never fewer than the target needs |
+| 2 | **An Unsuccessful pair gets no Swap slot.** Long Journey × Evil Monster (1.0) was red in Evaluate, but Swap offered nothing for either. A slot appeared only when a swap raised the raw average, and Long Journey fits the rest well enough that none did. Swapping it for Ancient Puzzle clears the clash at the same average. | `d6b9974` (2026-09-06, rank against the whole script) | Every element in an Unsuccessful pair gets a slot that clears the clash |
+| 3 | **Swap offers a removed, clashing element back.** After Long Journey was removed, Swap offered Evil Transformation → Long Journey as "+0.11", which restores the 1.0 clash (both rows become spoilers; matrix total −1.03 → −3.53). It looked like stale state; it was the average-only rule. | `d6b9974` | A swap never brings in an Unsuccessful pair |
+| 4 | **Best Additions is short with no reason.** 6 story elements at pool 8 listed only Action (a Genre) at 4.0+. Fit widening runs only when the list is empty, so one Genre row stopped it; 11 story elements clear 3.5+. | `2bbb800` (2026-09-22, fit widening) | A note names the free slots and says to lower Minimum Fit |
+| 5 | **Generate Scripts rotates instead of listing.** Each click made 5 new random scripts, so seeing more meant clicking again and losing the last five. | `73a7ee8` (2025-12-31, multi-attempt logic) | One click makes 15, shows 5, Show more pages the rest |
+| 6 | **Evaluate results outlive the script.** After Evaluate, changing the builder left the old Pair Analysis and Conflicts on screen, still naming a removed Long Journey. Found in the owner's local test. | Evaluate has always drawn once | Hide the panels and ask for a new Evaluate |
+| 7 | **Pool and target were not one to one.** The ceiling table was read as a requirement (target 6–8 needed N−1; pool 5–7 targeted pool + 1), so pool 7 showed target 8 and "Requires ~7". A sixth copy of the old minimum sat in the number box (`if (val < 6) val = 6`) and was found only by the 5→10 walk test. | `60522dc` (2026-09-28) and earlier | Pool N = target N = N story elements, 5 to 10 |
+| 8 | **The 5–6 row of the Rating Limit table was wrong.** Recorded as Script 6 / Movie 7; the game shows Script 5 / Movie 6. A 5-element script was estimated up to 7.0. | `60522dc` (2026-09-28) | Owner re-read the tooltip 2026-09-30 |
+| 9 | **The Genre + button had no cap.** 14 clicks gave 15 Genre rows in Script Lab, Graves and the ban list, although a script holds at most 11. | Never enforced | Stops at 11 rows, re-enabled when a row is removed |
+| 10 | **Build for Target suggests clashing scripts.** Audit 2026-09-30: 10-17 of every 20 suggestions held a spoiler pair (1.0 or lower), #2-#4 of the top five included. Ranking reads advertiser fit only. | Build for Target has always ranked this way | Never suggest a pair below 2.0 |
+| 11 | **Build for Target cards outlive the inputs.** After Find, changing the pool (5 to 9) or locking Horror left the old cards on screen. | Never handled | Hide the cards and ask for a new Find |
+
+Still open: TC24-000001 fails about 1 run in 24, because a stored score keeps
+the raw product (8.910000000000002) while the screen shows 8.9. Checking 15
+scripts per click instead of 5 makes the failure show more often. A rounding fix
+(`roundScoreToTenth`) was in progress in another session on `fix/a12-a3-tenths`;
+that work is not in the reset history below, so this series fixes it separately.
+
+Branch heads when this was logged. **The repository history was reset on
+2026-09-30 at 23:02** to one commit, "Initial commit: Hollywood Animal Extended
+Calculator" (`62e9c05`), and `main` on GitHub was replaced with it. The
+"Came in with" commits above (`60522dc`, `d6b9974`, `2bbb800`, `73a7ee8`) are
+from the old history, which survives only in `parked/act-2-polish`; the bugs were
+found on the old `main` at `375e90d`.
+
+| Branch | Head | Note |
+|---|---|---|
+| `main` / `origin/main` | `62e9c05` | The reset history; base of this series |
+| `claude/bug-hunt-2026-09-30` | this series | Local only, not pushed |
+| `parked/act-2-polish` | `935fca3` | Old history, parked until Act 2 |
+| `fix/a12-a3-tenths` | gone | Existed only in the old repository |
+| `codex/hardening` | gone | Its worktree folder remains, detached from the repository |
+
 ## Data Correctness
 
 - **18 character tags have no Age & Gender Appeal rating data at all.**

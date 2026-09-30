@@ -76,6 +76,17 @@ game's (owner ruling 2026-09-29):
 percentage, with one taking whatever remains up to 100%. Two is a common mix, not
 a limit.
 
+**Each genre holds at least 5%, in steps of 5.** Eleven genres is therefore ten
+at 5% plus one at 50%. The Genre + button stops at 11 rows in every context
+(there are exactly 11 genres), and works again when a row is removed.
+
+> Owner ruling 2026-09-30 (audit item Q12). The extracted game file sets
+> `min_genre_fraction: 0.1`, which would cap a script at 10 genres; the owner
+> ruled 5% and eleven. If the game ever refuses a 5% share, that value is why.
+> Floor: `GENRE_PERCENT_MIN` in `src/selectors/genreMix.js`. Row cap:
+> `MAX_GENRE_ROWS` in `src/selectors/storyElementSelector.js`, pinned by
+> TC06-000009. Before this ruling the + button added rows without limit.
+
 Uncapped does not mean generated: Build for Target seeds the single Genre a script
 requires and spends the rest of the budget on story elements. Additional genres
 come from what the player chose.
@@ -128,17 +139,34 @@ This is the game's own Rating Limit table:
 | Story elements | Script limit | Movie limit |
 |---|---|---|
 | Under 5 | 5 | 6 |
-| 5–6 | 6 | 7 |
+| 5–6 | 5 | 6 |
 | 7–8 | 7 | 8 |
 | 9 | 8 | 9 |
 | 10 | 10 | 10 |
 
 **A movie score of 10 needs all ten story elements.** Nine top out at 9.
 
-The Script Lab target follows it: a target of 6–8 asks for N−1 story elements,
-9 asks for 9, and 10 asks for 10. The other direction: a Max Element Pool of 5–7
-targets pool + 1, and 8, 9 and 10 target themselves. Pool 8 targets 8, not 9,
-because 8 elements top out at 8.0, so pools 7 and 8 both target 8.
+> Owner reading of the game's Rating Limit tooltip, 2026-09-30. It corrects the
+> 5–6 row, recorded 2026-09-28 as Script 6 / Movie 7.
+
+**Max Element Pool and Target Movie Score are one to one, 5 to 10.** The pool is
+the story-element count; the target follows it (pool 7 = target 7), and moving
+either control moves the other. The "Requires ~N" help shows the same N, and
+Script Lab generates exactly N. The table above is a ceiling, not a requirement:
+the earlier mapping (target 6–8 asks for N−1, pool 5–7 targets pool + 1) read
+it as a requirement, which made 8 story elements unreachable.
+
+> Owner rulings 2026-09-30 ("you should always be able to select 5 to 10
+> elements"; "target movie with 5 elements is 5"). Enforced in
+> `HACAppShell.poolSizeToTargetScore` / `targetScoreToPoolSize`
+> (`src/app/appShell.js`), `getRequiredElementCount` and
+> `getGenerationElementCount` (`src/generator/scriptGenerator.js`). Pinned by
+> `tests/bug-hunt-2026-09-30.test.js`, TC26-000003 and TC01-000041..43.
+
+**One Generate Scripts click makes 15 scripts and shows 5**; Show more reveals
+the rest 5 at a time. Clicking again makes a new list. (Owner ruling
+2026-09-30: page through one list rather than re-click to rotate. Pinned by
+TC01-000042.)
 
 > Owner rulings 2026-09-28, from a screenshot of the game's Rating Limit tooltip
 > (pool 8 → target 8 ruled the same day).
@@ -187,15 +215,70 @@ Slapstick Comedy's colour is a placeholder until the owner sees it in the game.
 
 | Feature | Budget applies? | Behaviour |
 |---|---|---|
-| Script Lab | Yes | Generates within the pool |
+| Script Lab | Yes | Generates the pool (section 1) |
 | Best Additions | Yes | Engine returns no rows at the budget |
 | Pairwise | Yes, on the **Add button only** | Rows still list; Add is disabled |
 | Swap Suggestions | **No** | A swap trades within a category, so the count cannot change |
-| Build for Target | Yes | Combination = budget in story elements, plus context |
+| Build for Target | Yes | Combination = budget in story elements, plus context; never a pair below 2.0 |
 
 A complete 5-element script sits at its budget, so Best Additions is correctly
 empty. That is intended: raise the pool, or swap. A test wanting additions from a
 complete script must raise the pool first.
+
+**Best Additions says when the list is short.** When fewer story elements clear
+Minimum Fit than the budget has free slots, a note names the free slots and the
+fit, with a button that lowers Minimum Fit one step (4.0 → 3.5) and redraws the
+list. A Genre row does not count, because it spends no slot. (Owner ruling 2026-09-30: a 6-element script at pool 8 listed
+only Action at 4.0+, with no reason given. `additionsShortfallNote` in
+`src/evaluation/gravesBestMatches.js`; TC03-000043.)
+
+### Build for Target never suggests a clash
+
+No suggested combination holds a pair below 2.0 (Graves' danger line). The
+search walks every starting point and drops the ones that clash; if fewer than
+20 clean ones remain, a note says how many were left out and why. A pair between
+two **locked** elements is the player's choice: it is named in a note ("Your
+locked Evil Monster and Long Journey clash (1.0)"), in game category order, and
+the results stay. When the pool, a lock, an audience or an advertiser changes
+after Find, the cards are hidden and a notice asks for a new Find.
+
+> Owner rulings 2026-09-30, after the Build for Target audit found 10-17 of every
+> 20 suggestions carrying a spoiler pair (ranking reads advertiser fit only).
+> `searchForTargetCombinations` and `watchTargetedInputs` in
+> `src/marketing/targetedAds.js`. Pinned by `tests/bug-hunt-2026-09-30.test.js`
+> (every pool 5-10 against every agency) and TC05-000021..23.
+
+### Evaluate results never outlive the script
+
+When the Submit Script builder changes after Evaluate Script (a dropdown, a
+remove button, Reset, a Genre share, a search pick, a Library load, or a Best
+Matches Add or Swap), the five Evaluate panels are hidden and a notice says
+"Script changed. Press Evaluate Script to update." A change that leaves the
+script the same, such as adding an empty row, keeps the results. (Owner ruling
+2026-09-30: the old Pair Analysis and Conflicts named elements the script no
+longer held. `watchGravesBuilder` in `src/evaluation/gravesAudience.js`;
+TC03-000046..50.)
+
+### Swap Suggestions and Unsuccessful pairs
+
+Owner rulings 2026-09-30, enforced in `buildSwaps`
+(`src/evaluation/gravesBestMatchesEngine.js`), pinned by
+`tests/bug-hunt-2026-09-30.test.js`, TC03-000041 and TC03-000042:
+
+- **A swap never brings in an Unsuccessful pair** (< 2.0) with the rest of the
+  script. Such a candidate stays visible in Best Additions and Pairwise, with
+  its clash warning; Swap Suggestions does not offer it as an improvement.
+- **Every element in an Unsuccessful pair gets a slot**, which lists the
+  replacements that clear the clash, ranked by the resulting average, even when
+  the average stays level or falls. Outside a clash, a slot still lists only
+  swaps that raise the average.
+- **A clash that no available replacement clears is named**, not dropped, with
+  the exclusion count when Script Lab exclusions are hiding candidates.
+
+Why: the raw average cannot see a clash. Long Journey scored 1.0 against Evil
+Monster but fitted the rest of the owner's script well, so no swap raised the
+average and Evaluate's red pair had no Swap slot. After the owner removed it,
+Swap offered it back as "+0.11".
 
 Within Pairwise, Add is disabled only when it would actually grow the pool — a
 Swap, or a Genre/Setting candidate, stays live at the budget.

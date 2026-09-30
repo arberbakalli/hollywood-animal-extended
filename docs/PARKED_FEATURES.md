@@ -5,6 +5,48 @@ history. Not scoped, not scheduled — pick one up when ready.
 
 ---
 
+## Genre Synergy — PRIORITY: HIGH
+
+**Raised:** 2026-09-26, during the JSON data cleanup. **Raised again and set
+to high priority by the owner:** 2026-09-30 ("pair the genres"), after an
+earlier session did not carry it forward. Pick this up first.
+
+**Owner clarification 2026-09-30:** the core is a genre-pair view: pair
+Genre 1 with each other genre and show whether it is a good match, straight
+from the game file's `GenrePairs.json` scores. That is direction 1 (and the
+table in direction 3); direction 2 stays optional.
+
+The three candidate directions, for reference:
+
+1. **Surface existing `GenrePairs.json` data in the UI.** The data already
+   exists — `data/GenrePairs.json` has a `primary`/`secondary` bonus score
+   for genre pairs (renamed from `Item1`/`Item2` during the cleanup), used
+   internally by `calculateGenrePairScore()` in
+   `src/evaluation/compatibilityEngine.js` and `getCompatibleGenres()` in
+   `src/generator/scriptGenerationEngine.js` — but never shown to the
+   player. A script currently gets a genre-pair bonus without the player
+   knowing why, or what pairs synergize well before picking a second genre.
+2. **Generation-time synergy hints.** Have the generator actively favor or
+   suggest high-synergy genre pairs, beyond just scoring what's already
+   picked — a more active nudge than a passive score.
+3. **A standalone genre-pair reference table/visualization.** A dedicated
+   panel showing all genre-pair synergy scores at a glance, independent of
+   an in-progress script — similar in spirit to the force-directed
+   compatibility graph built as a one-off visualization during this
+   session (not shipped in the app).
+
+**Why parked:** not one clean feature — likely some combination of the
+three above, and which combination (and how synergy surfaces without
+overwhelming the existing Script Lab UI) needs a design decision the owner
+hasn't made yet. Ask which combination before building.
+
+**Data location:** `data/GenrePairs.json` (11 genres, `primary`/`secondary`
+numeric scores per pair — already cleaned up, no re-extraction needed
+unlike the unlock-info item below). The genre-pair bonus applies only when
+the second genre holds at least 35% (`docs/GAME_RULES.md` section 6).
+
+---
+
 ## Story element unlock info (date / recipe)
 
 **Raised:** 2026-09-26, during the JSON data cleanup.
@@ -34,38 +76,3 @@ Not scoped yet — no data model, no UI mockup, no owner ruling on presentation.
 same way `gender` was recovered — see `docs/GAME_RULES.md` §8 for the
 precedent.
 
----
-
-## Genre Synergy
-
-**Raised:** 2026-09-26, during the JSON data cleanup.
-
-**Idea, not yet scoped** — owner picked a blend of three candidate
-directions and said it needs more filtering/thinking through before
-building, so this is intentionally left open rather than pre-decided:
-
-1. **Surface existing `GenrePairs.json` data in the UI.** The data already
-   exists — `data/GenrePairs.json` has a `primary`/`secondary` bonus score
-   for genre pairs (renamed from `Item1`/`Item2` during the cleanup), used
-   internally by `calculateGenrePairScore()` in
-   `src/evaluation/compatibilityEngine.js` and `getCompatibleGenres()` in
-   `src/generator/scriptGenerationEngine.js` — but never shown to the
-   player. A script currently gets a genre-pair bonus without the player
-   knowing why, or what pairs synergize well before picking a second genre.
-2. **Generation-time synergy hints.** Have the generator actively favor or
-   suggest high-synergy genre pairs, beyond just scoring what's already
-   picked — a more active nudge than a passive score.
-3. **A standalone genre-pair reference table/visualization.** A dedicated
-   panel showing all genre-pair synergy scores at a glance, independent of
-   an in-progress script — similar in spirit to the force-directed
-   compatibility graph built as a one-off visualization during this
-   session (not shipped in the app).
-
-**Why parked:** not one clean feature — likely some combination of the
-three above, and which combination (and how synergy surfaces without
-overwhelming the existing Script Lab UI) needs a design decision the owner
-hasn't made yet.
-
-**Data location:** `data/GenrePairs.json` (11 genres, `primary`/`secondary`
-numeric scores per pair — already cleaned up, no re-extraction needed
-unlike the unlock-info item above).
