@@ -653,6 +653,37 @@ test.describe('Bug hunt 2026-09-30', () => {
     expect(await saved()).toBe(before + 1);
   });
 
+  // Owner ruling 2026-10-01: a pinned Library script that holds a banned
+  // element highlights it and says so, so the player can remove the pin or
+  // lift the ban. Lifting the ban clears the highlight.
+  test('TC01-000054 a pinned script highlights an element that is now banned', async ({ page }) => {
+    await page.locator('#generateScriptsButton').click();
+    const card = page.locator('#generatorResultsList .gen-card').first();
+    await expect(card).toBeVisible({ timeout: 20000 });
+    if (await card.locator('.pin-btn').isHidden()) await card.locator('.gen-header').click();
+    await card.locator('.pin-btn').click();
+    const pinned = page.locator('#pinnedResultsList .gen-card').first();
+    await expect(pinned).toBeVisible();
+    const tag = await page.evaluate(() => {
+      const t = pinnedScripts[0].tags.find(x => x.category === 'Theme & Event' || x.category === 'Supporting Character');
+      return { id: t.id, category: t.category, name: GAME_DATA.tags[t.id].name };
+    });
+
+    await openBanList(page);
+    const slug = tag.category === 'Theme & Event' ? 'theme-event' : 'supporting-character';
+    await page.locator(`#add-${slug}-excluded-button`).click();
+    const banRow = page.locator(`#inputs-${slug}-excluded select.tag-selector`).first();
+    await banRow.selectOption(tag.id);
+
+    const warning = pinned.locator('[data-role="script-banned-warning"]');
+    await expect(warning).toHaveText(`Banned: ${tag.name}. Remove the pin or lift the ban.`);
+    await expect(pinned.locator('.gen-tag-chip.tag-banned')).toHaveCount(1);
+
+    await banRow.selectOption('');
+    await expect(warning).toHaveCount(0);
+    await expect(pinned.locator('.gen-tag-chip.tag-banned')).toHaveCount(0);
+  });
+
   // Owner ruling 2026-10-01: an element can be banned only once. The ban
   // list's dropdowns gray out an element banned in another row, as the script
   // builders do, and no path adds a second row for the same ban.

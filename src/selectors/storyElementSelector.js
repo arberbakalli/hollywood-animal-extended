@@ -201,6 +201,7 @@
         global.HACTargetedAds?.checkTargetedResultsCurrent?.();
         global.HACScriptGenerator?.checkGeneratedAgainstBans?.();
         global.HACMarketingPlanner?.checkAnalysisCurrent?.();
+        if (typeof pinnedScripts !== 'undefined' && pinnedScripts.length > 0) global.HACScriptLibrary?.renderPinnedScripts?.();
     }
 
     function propagateExclusionChange(category) {

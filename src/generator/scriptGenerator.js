@@ -570,6 +570,10 @@
         let tagsHtml = '';
         const fixedInputs = collectTagInputs('generator');
         const fixedIds = new Set(fixedInputs.map(t => t.id));
+        // A pinned script keeps an element banned after it was saved; it is
+        // highlighted so the player can remove the pin or lift the ban (owner
+        // ruling 2026-10-01). Generated cards hide on such a ban instead.
+        const bannedIds = isPinnedSection ? getGeneratorExcludedIds() : new Set();
         const sortedTags = [...scriptObj.tags].sort((a, b) => {
             let idxA = GAME_DATA.categories.indexOf(a.category);
             let idxB = GAME_DATA.categories.indexOf(b.category);
@@ -585,7 +589,8 @@
             const categoryClass = categoryToElementSlug(t.category);
             const tagClass = t.category === 'Genre' ? `genre-${toDomId(t.id)}` : '';
             const freshnessPill = HACFreshness.hasFreshness(t.category) ? HACFreshness.pillHtml(t.id) : '';
-            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${tagClass} ${isFixed ? 'tag-fixed' : ''}">${tagName} <small>${t.category}</small>${freshnessPill}</span>`;
+            const isBanned = bannedIds.has(t.id);
+            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${tagClass} ${isFixed ? 'tag-fixed' : ''} ${isBanned ? 'tag-banned' : ''}">${tagName} <small>${t.category}</small>${freshnessPill}</span>`;
         });
 
         const isOptimized = scriptObj.optimizedFor === 'artistic' || scriptObj.optimizedFor === 'commercial';
@@ -642,6 +647,10 @@
         // the player or read from a shared file, so it is set as a property
         // below, never interpolated into the markup.
         const clashWarning = clashWarningText(scriptObj.tags);
+        const bannedNames = scriptObj.tags.filter(t => bannedIds.has(t.id)).map(t => GAME_DATA.tags[t.id]?.name || t.id);
+        const bannedWarning = bannedNames.length
+            ? `Banned: ${bannedNames.join(', ')}. Remove the pin or lift the ban.`
+            : '';
         const shownFit = Number(scriptObj.stats.avgComp.toFixed(1));
         const belowTarget = Number.isFinite(scriptObj.compatTarget) && shownFit < scriptObj.compatTarget
             ? `Avg Fit ${shownFit.toFixed(1)} is below your ${scriptObj.compatTarget.toFixed(1)} target.`
@@ -664,6 +673,7 @@
                     <div id="${cardScope}-freshness-${scriptDomId}" class="gen-freshness-status hidden" data-role="script-freshness-status"></div>
                     ${clashWarning ? `<div id="${cardScope}-clash-${scriptDomId}" class="best-match-warning gen-clash-warning" data-role="script-clash-warning">${clashWarning}</div>` : ''}
                     ${belowTarget ? `<div id="${cardScope}-below-target-${scriptDomId}" class="gen-below-target" data-role="script-below-target">${belowTarget}</div>` : ''}
+                    ${bannedWarning ? `<div id="${cardScope}-banned-${scriptDomId}" class="best-match-warning gen-banned-warning" data-role="script-banned-warning">${bannedWarning}</div>` : ''}
                 </div>
                 <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" type="button" title="${pinTitle}" data-role="script-pin-button">
                     ${isActuallyPinned ? '★' : '☆'}

@@ -277,7 +277,9 @@ The same rule runs through every panel that computes from a script (audit
   The distribution calculator, which Analyze moves into its results, goes back
   to its own place and stays on screen.
 - **Script Lab** hides generated scripts when a ban hits one of them, and asks
-  for a new Generate. Saved Library scripts are left as they are.
+  for a new Generate. A pinned Library script is kept; its banned element is
+  struck through and the card says "Banned: X. Remove the pin or lift the
+  ban." (owner ruling 2026-10-01; TC01-000054).
 - **A refusal** (Evaluate, Generate, the Highest Appeal modes, Analyze) never
   leaves the previous results beside its message.
 - A ban reaches every watcher directly: it clears a pick without firing change.

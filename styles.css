@@ -1088,6 +1088,12 @@ input[type="text"] {
     border: 1px solid transparent;
 }
 
+/* A pinned script's element that is now banned (owner ruling 2026-10-01). */
+.gen-tag-chip.tag-banned {
+    text-decoration: line-through;
+    border-color: var(--danger);
+}
+
 .gen-tag-chip.tag-fixed {
     border-color: var(--accent);
     color: var(--accent);
