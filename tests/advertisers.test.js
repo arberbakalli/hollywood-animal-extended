@@ -201,14 +201,16 @@ describe('generateReasoning follows the grade', () => {
 describe('renderAdvertiserCard', () => {
     const entry = {
         agency: { name: 'Spark', targets: ['YM', 'YF'], type: 2, level: 3 },
-        score: 4.25, grade: 'B', tier: 'grade-good', reasoning: 'Good compatibility across YM, YF.',
+        // Graded on the tenth it shows (owner ruling 2026-10-01, edit
+        // approved). The old fixture paired 4.25 with a B.
+        score: 4.3, grade: 'A+', tier: 'grade-high', reasoning: 'Strong appeal across YM, YF.',
     };
 
     test('renders the score, grade and reasoning', () => {
         const html = h.call('renderAdvertiserCard', entry, 'top');
         expect(html).toContain('Spark');
-        expect(html).toContain('4.25');
-        expect(html).toContain('grade-good');
+        expect(html).toContain('4.3');
+        expect(html).toContain('grade-high');
         expect(html).toContain(entry.reasoning);
         expect(html).toContain('advertiser-card top');
     });

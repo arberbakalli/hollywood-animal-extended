@@ -6,7 +6,11 @@
     const GRAVES_SERIOUS_BELOW = 1.5;
     const STRONG_FIT_THRESHOLD = 4.0;
 
+    // Banded on the tenth the screen shows (owner ruling 2026-10-01): 3.476
+    // shows "3.5", so it reads Common, not Risky. Every Average Fit display
+    // shows one decimal.
     function getGravesVerdict(rawAverage) {
+        rawAverage = Number(rawAverage.toFixed(1));
         if (rawAverage >= 4.0) {
             return {
                 label: 'Success',

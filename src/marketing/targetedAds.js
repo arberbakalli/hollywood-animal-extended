@@ -262,8 +262,11 @@
         const scoredCombinations = [];
 
         for (const combo of combinations) {
+            // Each agency's score carries one decimal, exactly as Analyze shows
+            // it (owner ruling 2026-10-01); the card averages those and grades
+            // the average, which marketing-hardening.test.js pins.
             const scores = targetAgencies.map(agency => {
-                const score = calculateAdvertiserMatch(combo, 0, agency);
+                const score = Number(calculateAdvertiserMatch(combo, 0, agency).toFixed(1));
                 return { agency, score };
             });
 
@@ -481,7 +484,7 @@
                     <div class="targeted-combination-rank">#${i + 1}</div>
                     <div class="targeted-combination-score">
                         <span class="targeted-score-label">Advertiser fit</span>
-                        <span class="targeted-score-value">${combo.avgScore.toFixed(2)}</span>
+                        <span class="targeted-score-value">${combo.avgScore.toFixed(1)}</span>
                         <span class="targeted-score-grade">${combo.grade}</span>
                     </div>
                     <div class="targeted-combination-compat ${compatibilityTone(combo.compatibility)}">

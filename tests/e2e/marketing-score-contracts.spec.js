@@ -1,9 +1,10 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
 
 for (const [commercial, artistic, lean, sparkScore] of [
-  [5, 5, 'Balanced', '3.00'],
-  [8, 5, 'Commercial', '3.25'],
-  [5, 8, 'Artistic', '2.80'],
+  // One decimal, rounded half up (owner ruling 2026-10-01, edit approved).
+  [5, 5, 'Balanced', '3.0'],
+  [8, 5, 'Commercial', '3.3'],
+  [5, 8, 'Artistic', '2.8'],
 ]) {
   test(`TC23-000001 ${lean} movie lean is displayed above advertisers and changes specialist fit`, async ({ steps, page }) => {
     await openHollywood(steps);

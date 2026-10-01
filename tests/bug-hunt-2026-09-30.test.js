@@ -307,6 +307,43 @@ describe('bug hunt 2026-09-30', () => {
         });
     });
 
+    // Owner rulings 2026-10-01: a number and the label next to it agree. The
+    // verdict bands the Average Fit tenth on screen (3.476 shows 3.5, so it
+    // is Common, not Risky), and an advertiser score carries one decimal,
+    // rounded half up, graded on that tenth.
+    describe('labels follow the number shown', () => {
+        const verdict = value => h.call('HACGravesAnalysis.getGravesVerdict', value).label;
+
+        test('3.476 shows 3.5 and reads Common', () => {
+            expect(verdict(3.476)).toBe('Common');
+        });
+
+        test('across 0 to 5, the verdict of a value is the verdict of its shown tenth', () => {
+            const problems = [];
+            for (let i = 0; i <= 5000; i++) {
+                const value = i / 1000;
+                const shown = Number(value.toFixed(1));
+                if (verdict(value) !== verdict(shown)) problems.push(`${value}: ${verdict(value)} vs ${shown}: ${verdict(shown)}`);
+            }
+            expect(problems).toEqual([]);
+        });
+
+        test('every advertiser card carries one decimal and the grade of that tenth', () => {
+            const tags = Object.values(h.GAME_DATA.tags);
+            const problems = [];
+            for (let seed = 0; seed < 400; seed++) {
+                const pick = Array.from({ length: 1 + (seed % 7) }, (_, i) => tags[(seed * 37 + i * 101) % tags.length]);
+                const result = h.call('HACAdvertiserMatcher.getRecommendations', { tags: pick, movieLean: ((seed % 5) - 2) / 10 });
+                result.allScores.forEach(entry => {
+                    if (entry.score !== Number(entry.score.toFixed(1))) problems.push(`${seed} ${entry.agency.name}: ${entry.score}`);
+                    const expected = h.call('predictGradeFromScore', entry.score).grade;
+                    if (entry.grade !== expected) problems.push(`${seed} ${entry.agency.name}: ${entry.score} graded ${entry.grade}, not ${expected}`);
+                });
+            }
+            expect(problems).toEqual([]);
+        });
+    });
+
     // Owner ruling 2026-10-01: use the real entry. The data holds every pair
     // in both directions; 36 pairs disagree, all with Hardened Cynic's own
     // row at 3 (the extract's "no data" value) and the reverse at 4 or 5.
@@ -387,7 +424,7 @@ describe('bug hunt 2026-09-30', () => {
             const result = importScripts([entry(BASE, 'same'), entry(BASE, 'other')]);
             expect(result).toEqual({ added: 1, skipped: 0 });
             expect(h.call('HACScriptLibrary.importSummary', 2, result).text)
-                .toBe('Loaded 1 scripts. 1 was already in your library.');
+                .toBe('Loaded 1 script. 1 was already in your library.');
         });
 
         test.each([

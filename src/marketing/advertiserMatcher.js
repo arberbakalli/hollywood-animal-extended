@@ -77,7 +77,10 @@
         const movieLean = (scriptConfig && scriptConfig.movieLean) || 0;
 
         const ranked = agencies.map(agency => {
-            const score = calculateAdvertiserMatch(tags, movieLean, agency);
+            // One decimal, rounded half up, graded on that tenth (GAME_RULES
+            // section 6; tie mode ruled 2026-10-01). Grading the raw score
+            // put "1.94 D" on cards where C starts at 1.94.
+            const score = Number(calculateAdvertiserMatch(tags, movieLean, agency).toFixed(1));
             const { grade, tier } = predictGradeFromScore(score);
             return { agency, score, grade, tier, reasoning: generateReasoning(agency, score) };
         }).sort((a, b) =>
@@ -100,7 +103,7 @@
             <div class="advertiser-card ${extraClass}">
                 <div class="adv-name">${entry.agency.name}</div>
                 <div class="adv-score">
-                    <span class="score-value ${entry.tier}">${entry.score.toFixed(2)}</span>
+                    <span class="score-value ${entry.tier}">${entry.score.toFixed(1)}</span>
                     <span class="score-grade">${entry.grade}</span>
                 </div>
                 <div class="adv-reasoning">${entry.reasoning}</div>
