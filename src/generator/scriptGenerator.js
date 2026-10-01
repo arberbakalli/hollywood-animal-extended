@@ -433,6 +433,7 @@
     }
 
     function renderGeneratedScripts(scripts, options = {}) {
+        setGeneratorStaleNotice(false);
         const container = document.getElementById('generatorResultsList');
         container.innerHTML = '';
         document.getElementById('results-generator').classList.remove('hidden');
@@ -463,6 +464,30 @@
             button.addEventListener('click', showMoreGeneratedScripts);
             container.appendChild(button);
         }
+    }
+
+    // GAME_RULES.md section 5: no context ever holds a banned element. Taking
+    // the element out of a generated script would leave a script of the wrong
+    // size with the wrong score, so the results are hidden and the player is
+    // asked to generate again (audit 2026-09-30). A lifted ban invalidates
+    // nothing, and saved Library scripts are the player's own, so neither
+    // hides anything.
+    function setGeneratorStaleNotice(visible) {
+        const notice = document.getElementById('generator-stale-notice');
+        if (!notice || !notice.classList) return;
+        if (visible) notice.classList.remove('hidden');
+        else notice.classList.add('hidden');
+    }
+
+    function checkGeneratedAgainstBans() {
+        const results = document.getElementById('results-generator');
+        if (!results || results.classList.contains('hidden')) return;
+        const banned = getGeneratorExcludedIds();
+        const holdsBan = (generatorResultsState.scripts || []).some(script =>
+            script.tags.some(tag => banned.has(tag.id)));
+        if (!holdsBan) return;
+        results.classList.add('hidden');
+        setGeneratorStaleNotice(true);
     }
 
     // Redraws the current results without losing the page the user is on.
@@ -656,6 +681,7 @@
         getRandomTagByCategory,
         renderGeneratedScripts,
         refreshGeneratedScripts,
+        checkGeneratedAgainstBans,
         showMoreGeneratedScripts,
         createScriptId,
         buildScriptStats,

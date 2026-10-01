@@ -199,6 +199,7 @@
     function notifyExclusionChange() {
         global.HACGravesAudience?.checkGravesResultsCurrent?.();
         global.HACTargetedAds?.checkTargetedResultsCurrent?.();
+        global.HACScriptGenerator?.checkGeneratedAgainstBans?.();
     }
 
     function propagateExclusionChange(category) {

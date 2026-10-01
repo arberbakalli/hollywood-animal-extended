@@ -69,9 +69,6 @@ or an owner-approved edit to an existing test, so none was guessed.
 - Library import accepts duplicate elements or two Settings in one entry, does
   not count a duplicate `uniqueId`, and keeps a Genre share that is not a 5% step
   (0.37). `src/library/scriptLibrary.js` about line 139-177.
-- Generated Script Lab cards keep an element banned after Generate
-  (GAME_RULES section 5: no context holds a banned element); a transfer then
-  drops it with only "Skipped excluded elements".
 
 **Needs an owner ruling:**
 - Verdict vs Average Fit: 3.476 shows "3.5" next to "Risky" (bands read the

@@ -270,6 +270,46 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(swapList(page).locator(`[data-role="graves-best-match"][data-tag-id="${suggested}"]`)).toHaveCount(0);
   });
 
+  // Audit 2026-09-30: GAME_RULES.md section 5 says no context ever holds a
+  // banned element, but generated cards kept one after a ban, and a transfer
+  // then dropped it from the script without a clear reason.
+  const banFromScriptLab = async (page, tag) => {
+    const slug = tag.category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+    const content = page.locator('#excluded-content');
+    if (await content.evaluate(el => el.classList.contains('hidden'))) await page.locator('#toggleExcludedElementsButton').click();
+    await page.locator(`#add-${slug}-excluded-button`).click();
+    await page.locator(`#inputs-${slug}-excluded select.tag-selector`).first().selectOption(tag.id);
+  };
+
+  test('TC01-000047 banning an element of a generated script hides the results and asks to generate again', async ({ page }) => {
+    await page.locator('#generateScriptsButton').click();
+    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
+    const tag = await page.evaluate(() => generatedScriptsCache[0].tags
+      .find(t => t.category === 'Theme & Event' || t.category === 'Supporting Character'));
+
+    await banFromScriptLab(page, tag);
+    await expect(page.locator('#results-generator')).toBeHidden();
+    await expect(page.locator('#generator-stale-notice'))
+      .toHaveText('Exclusions changed: a generated script used an element you banned. Generate again to update.');
+
+    await page.locator('#generateScriptsButton').click();
+    await expect(page.locator('#generator-stale-notice')).toBeHidden();
+    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
+  });
+
+  test('TC01-000048 banning an element no generated script uses keeps the results', async ({ page }) => {
+    await page.locator('#generateScriptsButton').click();
+    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
+    const unused = await page.evaluate(() => {
+      const used = new Set(generatedScriptsCache.flatMap(s => s.tags.map(t => t.id)));
+      return Object.values(GAME_DATA.tags).find(t => t.category === 'Theme & Event' && !used.has(t.id));
+    });
+
+    await banFromScriptLab(page, unused);
+    await expect(page.locator('#results-generator')).toBeVisible();
+    await expect(page.locator('#generator-stale-notice')).toBeHidden();
+  });
+
   // Audit 2026-09-30: a refused Generate or Analyze left the previous results
   // on screen beside the refusal. Evaluate already clears them, so a rejected
   // script never sits next to the last script's numbers.
