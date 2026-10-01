@@ -325,6 +325,23 @@ describe('bug hunt 2026-09-30', () => {
         });
     });
 
+    // Owner ruling 2026-10-01: the grid applies the holiday boost the row
+    // shows. Three audiences averaging 18.333...% showed "+18.3%", but week 1
+    // was boosted by the exact mean (18,934 at commercial 8, not 18,928).
+    describe('the holiday boost is the percentage shown', () => {
+        const HOLIDAY = { name: 'Test', bonuses: { TM: 20, AM: 20, YF: 15 } };
+
+        test('a mean of 18.333... is applied as 18.3', () => {
+            expect(h.call('HACMarketingPlanner.holidayBonusFor', HOLIDAY, ['TM', 'AM', 'YF'])).toBe(18.3);
+        });
+
+        test('week 1 at commercial 8 is 16,000 x 1.183, rounded up', () => {
+            const bonus = h.call('HACMarketingPlanner.holidayBonusFor', HOLIDAY, ['TM', 'AM', 'YF']);
+            const weeks = h.call('HACDistributionPlanner.weeklyDemandFor', 8, { holidayBonusPercent: bonus });
+            expect(weeks[0]).toBe(18928);
+        });
+    });
+
     // Owner rulings 2026-10-01: a number and the label next to it agree. The
     // verdict bands the Average Fit tenth on screen (3.476 shows 3.5, so it
     // is Common, not Risky), and an advertiser score carries one decimal,

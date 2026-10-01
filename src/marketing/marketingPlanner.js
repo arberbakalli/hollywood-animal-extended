@@ -446,7 +446,9 @@
         if (!holiday || !holiday.bonuses || !targetIds || targetIds.length === 0) return 0;
 
         const total = targetIds.reduce((sum, id) => sum + (holiday.bonuses[id] || 0), 0);
-        return total / targetIds.length;
+        // The tenth the row shows ("+18.3%"), so the grid applies exactly
+        // what the label says (owner ruling 2026-10-01).
+        return Number((total / targetIds.length).toFixed(1));
     }
 
     // Pre-release is the only stretch Factory Policy shortens; release is fixed by

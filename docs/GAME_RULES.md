@@ -527,10 +527,16 @@ correct if the source data diverges. A demographic the game omits scores zero.
 > extraction settled the amounts but not the duration — `Holidays.json` has no
 > week dimension at all. Weeks 1, 2 and 3+ are each asserted separately.
 
-Holidays are listed in **calendar order** (owner ruling 2026-09-29), sorted on
-the game file's own `month` and `day`: Valentine's Day, Memorial Day,
-Independence Day, Halloween, Thanksgiving, Christmas. Every averaged bonus in
-the current game file is a whole percent.
+The holiday **data** is kept in **calendar order** (owner ruling 2026-09-29),
+sorted on the game file's own `month` and `day`: Valentine's Day, Memorial Day,
+Independence Day, Halloween, Thanksgiving, Christmas. The **holiday panel**
+lists them best first, by the script's bonus (owner ruling 2026-10-01). Every
+averaged bonus in the current game file is a whole percent.
+
+A holiday's boost for a script is the mean of its bonuses over the script's
+target audiences, taken at the tenth the row shows: three audiences averaging
+18.333...% show "+18.3%", and week 1 is boosted by 18.3% (owner ruling
+2026-10-01; `holidayBonusFor`).
 
 ---
 
