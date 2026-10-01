@@ -170,6 +170,31 @@ test.describe('Bug hunt 2026-09-30', () => {
     });
   }
 
+  // Audit 2026-10-01: the Audience Compatibility table read the bans from
+  // the saved copy in storage, every other context from the live list. With
+  // storage unavailable (private browsing) or before the save runs, a banned
+  // element was still listed.
+  test('TC05-000025 the Audience Compatibility table hides a ban even when storage is unavailable', async ({ steps, page }) => {
+    await page.addInitScript(() => {
+      Storage.prototype.setItem = function (key, value) {
+        if (String(key).includes('exclu')) throw new Error('storage unavailable');
+        return undefined;
+      };
+    });
+    await openHollywood(steps);
+    await page.locator('#tab-generator-button').click();
+    const content = page.locator('#excluded-content');
+    if (await content.evaluate(el => el.classList.contains('hidden'))) await page.locator('#toggleExcludedElementsButton').click();
+    await page.locator('#add-theme-event-excluded-button').click();
+    await page.locator('#inputs-theme-event-excluded select.tag-selector').first().selectOption('THEME_TREASURE_HUNT');
+
+    await openBuildForTarget(steps, page);
+    await page.locator('#showAudienceCompatibilityButton').click();
+    const names = await page.locator('#compatibilityTableContainer td.element-name').allTextContents();
+    expect(names.length).toBeGreaterThan(0);
+    expect(names.map(name => name.trim())).not.toContain('Treasure Hunt');
+  });
+
   test('TC05-000024 banning a suggested element after Find hides the old cards', async ({ steps, page }) => {
     await openBuildForTarget(steps, page);
     await page.locator('#findCombinationsButton').click();

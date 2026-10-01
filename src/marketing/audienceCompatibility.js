@@ -40,11 +40,23 @@
         return `element-name ${categoryClass} ${genreClass}`.trim();
     }
 
+    // Banned if either the live ban list (the one every other context reads)
+    // or the saved copy has it. The table used to read the saved copy only,
+    // which lags the list by a tick and is empty when storage is unavailable,
+    // so a banned element was still listed (audit 2026-10-01). TC11-000010
+    // pins that a ban written to storage is honoured too.
     function getExcludedTagIds() {
-        if (typeof HACExclusionStore === 'undefined' || typeof HACExclusionStore.loadExclusions !== 'function') {
-            return new Set();
+        const ids = new Set();
+        const banList = typeof document !== 'undefined' && document.getElementById
+            ? document.getElementById('selectors-container-excluded')
+            : null;
+        if (banList && typeof getGeneratorExcludedIds === 'function') {
+            getGeneratorExcludedIds().forEach(id => ids.add(id));
         }
-        return new Set(HACExclusionStore.loadExclusions().map(exclusion => exclusion.id));
+        if (typeof HACExclusionStore !== 'undefined' && typeof HACExclusionStore.loadExclusions === 'function') {
+            HACExclusionStore.loadExclusions().forEach(exclusion => ids.add(exclusion.id));
+        }
+        return ids;
     }
 
     function renderTableHeader() {
