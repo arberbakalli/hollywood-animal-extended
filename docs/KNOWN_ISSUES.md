@@ -60,17 +60,33 @@ found on the old `main` at `375e90d`.
 
 ## Audit 2026-09-30: open findings
 
-Found by the invariant audit of Script Lab, Evaluate, Build for Target and
-Marketing & Release. Fixed items are in the commits of
-`main`. These are still open. Each needs an owner ruling
-or an owner-approved edit to an existing test, so none was guessed.
+Found by the invariant audit of Script Lab, Evaluate, Build for Target,
+Marketing & Release and the Library. Everything fixed is on `main`, one commit
+per fix. Still open:
 
-**Still to fix (rule is settled, work not done yet):**
-(All three are done: see the commits after 0fce41e.)
+**Owner task (2026-10-01): complete the gender-specific ratings.** The Age &
+Gender Appeal toggle does nothing for 38 of the 49 unisex characters, because
+`data/TagsToAgeCompatibilityData.json` holds gender-specific ratings for 29
+characters only; the rest fall back to one rating for both genders. Missing:
+- Protagonist (13): HOPELESS_ROMANTIC, OUTCAST, WARRIOR, ACCIDENTAL_HERO,
+  LAST_SURVIVOR, WAR_VETERAN, SHERIFFS_CONJOINED_TWINS,
+  PARENT_IN_INVISIBLE_CLOTHES, WAYWARD_SOUL, RETIRED_LEGEND,
+  CHARISMATIC_CRIMINAL, DIS_IDEALIST, CYNIC
+- Antagonist (11): SERIAL_KILLER, HEARTLESS_BUREAUCRAT, ANCIENT_EVIL, ROBOT,
+  VENGEFUL_SPIRIT, UNDEAD, WAR_CRIMINAL, OLD_FRIEND_ENEMY, ENEMY_FROM_THE_PAST,
+  RULE_ENFORCER, TYRANT
+- Supporting Character (14): LOVE_INTEREST, SIDEKICK, ANGRY_BOSS, RIVAL,
+  STRICT_PARENT, MENTOR, PARENT_FIGURE, FIRST_VICTIM, MYSTERIOUS_GUIDE,
+  ANNOYING_SUITOR, STEPPARENT, STEPCHILD, KEY_WITNESS, VILLAINS_RIGHT_HAND
 
-**Needs an owner ruling:**
-- TC01-000020 (Reset Locks hides results) never generates first, so it passes
-  vacuously. TC01-000051 now covers the real case; TC01-000020 itself is unchanged.
+Once the data is in the file, the toggle works for them with no code change.
+
+**Needs an owner ruling:** after a freshness pill click, the shown scripts keep
+their order and a notice says it is out of date. Keep the notice only, or offer
+a re-sort?
+
+**Test note:** TC01-000020 (Reset Locks hides results) never generates first, so
+it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 
 ## Data Correctness
 

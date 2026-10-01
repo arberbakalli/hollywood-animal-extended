@@ -67,9 +67,11 @@ Every fix has a test that failed before the fix. Every rule the owner set is in
 
 ## Still open
 
-- **Needs the owner:** the Age & Gender Appeal gender toggle does nothing for 38 unisex characters
-  that have no gender-specific data (hide it, explain it, or extract data); the
-  vanished Evil Transformation row (never reproduced; send the clicks).
+- **Owner task:** gender-specific ratings are missing for 38 unisex characters
+  (list in `docs/KNOWN_ISSUES.md`); the toggle works once the data is added.
+- **Needs the owner:** freshness after a pill click (notice only, or re-sort).
+- The vanished Evil Transformation row is guarded by TC03-000059 (every Best
+  Matches action, for Theme & Event, Supporting Character and Genre).
 - **Parked, high priority:** Genre pairing (`docs/PARKED_FEATURES.md`).
 - **Not yet audited:** freshness order after Show more.
 
