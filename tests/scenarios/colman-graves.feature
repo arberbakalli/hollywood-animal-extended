@@ -396,3 +396,18 @@ Feature: Script Evaluation — Colman Graves
     Given Evaluate has shown its results
     When the user adds an empty Theme & Event row
     Then the results stay visible, because the script did not change
+
+  # [automated] TC03-000059, tests/e2e/best-matches-actions.spec.js. Owner request 2026-10-01,
+  # after Evil Transformation vanished from the builder on 2026-09-30.
+  Scenario Outline: No Best Matches action loses, duplicates or adds a stray element
+    Given a script with three <category> picks
+    When the user presses each Add and Swap button in every Best Matches tab, and one more after it
+    Then the incoming element is in the script
+    And no other element has vanished
+    And no element is in the script twice
+
+    Examples:
+      | category             |
+      | Theme & Event        |
+      | Supporting Character |
+      | Genre                |
