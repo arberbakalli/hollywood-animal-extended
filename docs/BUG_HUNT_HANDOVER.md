@@ -70,7 +70,7 @@ Every fix has a test that failed before the fix. Every rule the owner set is in
   that have no gender-specific data (hide it, explain it, or extract data); the
   vanished Evil Transformation row (never reproduced; send the clicks).
 - **Parked, high priority:** Genre pairing (`docs/PARKED_FEATURES.md`).
-- **Not yet audited:** a ban profile with duplicate ids makes two rows; pinned
+- **Not yet audited:** pinned
   Library scripts keep a banned element; freshness order after Show more.
 
 ## For the next session

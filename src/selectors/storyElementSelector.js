@@ -465,6 +465,13 @@
         const container = document.getElementById(containerId);
         if (!container) return;
 
+        // An element is picked once per category: Load Profile and a search
+        // pick used to add a second row for the same element, which banned it
+        // twice (owner ruling 2026-10-01). The dropdowns already gray it out.
+        if (selectedId && Array.from(container.querySelectorAll('select.tag-selector')).some(select => select.value === selectedId)) {
+            return;
+        }
+
         if (category === 'Genre' && genreRowCount(container) >= MAX_GENRE_ROWS) {
             // At the cap a pick still lands in an empty row. A reset leaves one,
             // and Load Profile / Apply Starting Tags add one row per ban, so
@@ -653,6 +660,8 @@
         const container = document.getElementById(containerId);
         if (!container) return;
         const selects = container.querySelectorAll('select.tag-selector');
+        // Already picked in this category: nothing to add (owner ruling 2026-10-01).
+        if (Array.from(selects).some(select => select.value === tagObj.id)) return;
         let filled = false;
         for (let select of selects) {
             if (select.value === "") {

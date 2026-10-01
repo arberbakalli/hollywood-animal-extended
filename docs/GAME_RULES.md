@@ -486,6 +486,10 @@ Colman Graves, Marketing & Release and Build for Target.
   it, so no context ever holds a banned element.
 - A lifted ban restores the element everywhere immediately, with no reload.
 
+- An element can be banned **once**. The ban list grays out an element banned
+  in another row, as the builders do, and Load Profile or a search pick never
+  adds a second row for it (owner ruling 2026-10-01; TC09-000026..28).
+
 Exclusion refreshes must cover **every category**, derived from the data.
 Iterating `MULTI_SELECT_CATEGORIES` skips Setting, Protagonist, Antagonist and
 Finale, which leaves a lifted ban on screen until an unrelated click redraws that

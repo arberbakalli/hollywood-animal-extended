@@ -653,6 +653,47 @@ test.describe('Bug hunt 2026-09-30', () => {
     expect(await saved()).toBe(before + 1);
   });
 
+  // Owner ruling 2026-10-01: an element can be banned only once. The ban
+  // list's dropdowns gray out an element banned in another row, as the script
+  // builders do, and no path adds a second row for the same ban.
+  const openBanList = async (page) => {
+    await page.locator('#tab-generator-button').click();
+    const content = page.locator('#excluded-content');
+    if (await content.evaluate(el => el.classList.contains('hidden'))) await page.locator('#toggleExcludedElementsButton').click();
+  };
+  const bannedGenreRows = (page) => page.locator('#inputs-genre-excluded select.tag-selector')
+    .evaluateAll(selects => selects.map(select => select.value).filter(Boolean));
+
+  test('TC09-000026 a genre banned in one row is grayed out in the others', async ({ page }) => {
+    await openBanList(page);
+    await page.locator('#add-genre-excluded-button').click();
+    await page.locator('#add-genre-excluded-button').click();
+    const rows = page.locator('#inputs-genre-excluded select.tag-selector');
+    await rows.first().selectOption('ACTION');
+    expect(await rows.nth(1).locator('option[value="ACTION"]').evaluate(option => option.disabled)).toBe(true);
+  });
+
+  test('TC09-000027 a ban profile that lists an element twice bans it once', async ({ page }) => {
+    await openBanList(page);
+    await page.evaluate(() => {
+      // The same steps as Load Profile in src/app/appShell.js.
+      resetSelectors('excluded');
+      ['ACTION', 'COMEDY', 'ACTION'].forEach(id => addDropdown('Genre', id, 'excluded'));
+      updateExcludedCount();
+    });
+    expect((await bannedGenreRows(page)).sort()).toEqual(['ACTION', 'COMEDY']);
+  });
+
+  test('TC09-000028 picking an already banned element from search adds no second ban', async ({ page }) => {
+    await openBanList(page);
+    await page.evaluate(() => {
+      resetSelectors('excluded');
+      addDropdown('Genre', 'ACTION', 'excluded');
+      selectTagFromSearch(GAME_DATA.tags.ACTION, 'excluded');
+    });
+    expect(await bannedGenreRows(page)).toEqual(['ACTION']);
+  });
+
   // Audit 2026-09-30: the 11-row cap counted the empty row a reset leaves, so
   // restoring a ban list that holds all 11 genres dropped one without a word.
   // Given the ban list was reset (one empty Genre row)
