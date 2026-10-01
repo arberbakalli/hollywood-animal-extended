@@ -69,9 +69,6 @@ or an owner-approved edit to an existing test, so none was guessed.
 - Library import accepts duplicate elements or two Settings in one entry, does
   not count a duplicate `uniqueId`, and keeps a Genre share that is not a 5% step
   (0.37). `src/library/scriptLibrary.js` about line 139-177.
-- Transfer from Graves to Marketing can pick a different genre-pair bonus when
-  two genres tie and the pair has no bonus data: new rows are prepended, so the
-  genre order flips (`compatibilityEngine.js` about line 91). Verify first.
 - Generated Script Lab cards keep an element banned after Generate
   (GAME_RULES section 5: no context holds a banned element); a transfer then
   drops it with only "Skipped excluded elements".

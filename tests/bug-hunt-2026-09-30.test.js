@@ -307,6 +307,46 @@ describe('bug hunt 2026-09-30', () => {
         });
     });
 
+    // Audit 2026-09-30: genres are sorted by share, and a tie kept the input
+    // order, so the same script scored differently depending on which row was
+    // added first (Graves prepends new rows; transfers keep theirs).
+    describe('a script scores the same whatever order its genre rows are in', () => {
+        const genreIds = () => Object.values(h.GAME_DATA.tags).filter(tag => tag.category === 'Genre').map(tag => tag.id);
+        const rest = () => ['FANTASY_KINGDOM', 'PROTAGONIST_DARING_ADVENTURER', 'ANTAGONIST_EVIL_MONSTER',
+            'THEME_TREASURE_HUNT', 'FINALE_PROTAGONIST_FINDS_TREASURE']
+            .map(id => ({ id, category: h.GAME_DATA.tags[id].category, percent: 1 }));
+        const evaluate = (genres) => {
+            const result = h.call('HACScriptEvaluation.calculateScriptEvaluation',
+                [...genres.map(([id, percent]) => ({ id, category: 'Genre', percent })), ...rest()]);
+            return JSON.stringify({ bonuses: result.bonuses, scores: result.movieScores });
+        };
+
+        test('every pair of genres at 50/50', () => {
+            const ids = genreIds();
+            const problems = [];
+            for (let a = 0; a < ids.length; a++) {
+                for (let b = a + 1; b < ids.length; b++) {
+                    const forward = evaluate([[ids[a], 0.5], [ids[b], 0.5]]);
+                    const reverse = evaluate([[ids[b], 0.5], [ids[a], 0.5]]);
+                    if (forward !== reverse) problems.push(`${ids[a]} / ${ids[b]}`);
+                }
+            }
+            expect(problems).toEqual([]);
+        });
+
+        test('every 50/25/25 split, with the two 25s in either order', () => {
+            const ids = genreIds();
+            const problems = [];
+            ids.forEach(top => ids.forEach(x => ids.forEach(y => {
+                if (top === x || top === y || x >= y) return;
+                const forward = evaluate([[top, 0.5], [x, 0.25], [y, 0.25]]);
+                const reverse = evaluate([[top, 0.5], [y, 0.25], [x, 0.25]]);
+                if (forward !== reverse) problems.push(`${top} + ${x} / ${y}`);
+            })));
+            expect(problems).toEqual([]);
+        });
+    });
+
     // TC24-000001 failed about one run in 24: a generated script stored
     // 8.910000000000002 while Graves showed 8.9, so the transfer check saw two
     // different scores. Movie scores carry one decimal (GAME_RULES.md), so the

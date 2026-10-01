@@ -79,6 +79,17 @@
         return { totalScore, spoilers, rawAverage };
     }
 
+    // Genres by share, a tie broken by the game's own genre order (the order
+    // of the data file). The sort used to keep the input order, so the same
+    // script scored differently depending on which genre row was added first:
+    // 54 of 55 genre pairs at 50/50 (audit 2026-09-30). Which genre the game
+    // picks on a tie is not confirmed (GAME_RULES.md section 6).
+    function genresByShare(tags, gameData) {
+        const gameOrder = Object.keys(gameData.tags);
+        return tags.filter(t => t.category === "Genre")
+            .sort((a, b) => b.percent - a.percent || gameOrder.indexOf(a.id) - gameOrder.indexOf(b.id));
+    }
+
     function calculateTotalBonuses(tags, gameData) {
         let totalArt = 0;
         let totalCom = 0;
@@ -88,7 +99,7 @@
             totalArt += genrePair.art;
             totalCom += genrePair.com;
         } else {
-            const genres = tags.filter(t => t.category === "Genre").sort((a, b) => b.percent - a.percent);
+            const genres = genresByShare(tags, gameData);
             if (genres.length > 0) {
                 const topGenre = gameData.tags[genres[0].id];
                 if (topGenre) {
@@ -112,7 +123,7 @@
     }
 
     function calculateGenrePairScore(tags, gameData) {
-        const genres = tags.filter(t => t.category === "Genre").sort((a, b) => b.percent - a.percent);
+        const genres = genresByShare(tags, gameData);
         if (genres.length < 2) return null;
 
         const g1 = genres[0];

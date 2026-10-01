@@ -499,6 +499,11 @@ a review of the source.
   weighted average is never below its own minimum. So every row scores its worst
   pair. Found by the 2026-09-29 audit; open question whether the game intends the
   weights to matter. The 3.0 default is pinned in `tests/scoring-rule-edges.test.js`.
+- **Genre tie-break** (same file, `genresByShare`): when two genres hold the
+  same share, the one earlier in the game's genre list (the data file order)
+  counts as the larger. Before 2026-09-30 the input order decided, so the same
+  script scored differently by row order (54 of 55 pairs at 50/50). The order
+  makes scores stable; whether the game breaks ties this way is not confirmed.
 - **Genre-pair bonus** (same file): it applies only when the second genre holds
   at least 35%. The code also checks that the top two make up 70%, but that is
   implied: genres are sorted by share, so a second genre at 35% puts the top two
