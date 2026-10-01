@@ -69,9 +69,6 @@ or an owner-approved edit to an existing test, so none was guessed.
 (All three are done: see the commits after 0fce41e.)
 
 **Needs an owner ruling:**
-- Conflict severity: data is whole numbers 1-5, so "severe" (< 1.0) and "mild"
-  (1.5-2.0) never occur; every conflict reads "serious", and the engine treats
-  1.0 as a spoiler. Should the bands move?
 - A Genre share does not weight pair scores (a 5% genre counts like 95%).
   Listed in GAME_RULES section 6 as unconfirmed.
 - TC01-000020 (Reset Locks hides results) never generates first, so it passes

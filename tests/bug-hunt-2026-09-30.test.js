@@ -325,6 +325,28 @@ describe('bug hunt 2026-09-30', () => {
         });
     });
 
+    // Owner ruling 2026-10-01: a pair at 1.0 or below is Severe, the spoiler
+    // line the scoring engine already uses (its row scores -1). The data is
+    // whole numbers, so every real conflict is 1.0, and all read "Serious".
+    describe('conflict severity follows the spoiler line', () => {
+        const severity = score => h.call('HACGravesAnalysis.gravesConflictSeverity', score);
+
+        test('1.0 is severe; just above it is serious', () => {
+            expect(severity(1.0)).toBe('severe');
+            expect(severity(1.01)).toBe('serious');
+        });
+
+        test('the owner script reports its Evil Monster x Long Journey clash as severe', () => {
+            const tags = ['ADVENTURE', 'FANTASY_KINGDOM', 'PROTAGONIST_CYNIC', 'ANTAGONIST_EVIL_MONSTER',
+                'THEME_LONG_JOURNEY', 'FINALE_PROTAGONIST_FINDS_TREASURE']
+                .map(id => ({ ...h.GAME_DATA.tags[id], percent: 1 }));
+            const summary = h.call('HACGravesAnalysis.summarizeGravesConflicts', h.call('HACGravesAnalysis.findGravesConflicts', tags));
+            expect(summary.severe).toBe(1);
+            expect(summary.serious).toBe(0);
+            expect(summary.tone).toBe('severe');
+        });
+    });
+
     // Owner ruling 2026-10-01: the grid applies the holiday boost the row
     // shows. Three audiences averaging 18.333...% showed "+18.3%", but week 1
     // was boosted by the exact mean (18,934 at commercial 8, not 18,928).

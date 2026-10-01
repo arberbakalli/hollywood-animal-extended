@@ -2,7 +2,10 @@
     "use strict";
 
     const GRAVES_DANGER_LINE = 2.0;
-    const GRAVES_SEVERE_BELOW = 1.0;
+    // Severe at 1.0 or below: the spoiler line of the scoring engine, where
+    // the row scores -1 (owner ruling 2026-10-01; the data is whole numbers,
+    // so with '< 1.0' every real conflict read Serious).
+    const GRAVES_SEVERE_AT_OR_BELOW = 1.0;
     const GRAVES_SERIOUS_BELOW = 1.5;
     const STRONG_FIT_THRESHOLD = 4.0;
 
@@ -92,7 +95,7 @@
 
     function gravesConflictSeverity(rawScore) {
         if (rawScore >= GRAVES_DANGER_LINE) return 'none';
-        if (rawScore < GRAVES_SEVERE_BELOW) return 'severe';
+        if (rawScore <= GRAVES_SEVERE_AT_OR_BELOW) return 'severe';
         if (rawScore < GRAVES_SERIOUS_BELOW) return 'serious';
         return 'mild';
     }

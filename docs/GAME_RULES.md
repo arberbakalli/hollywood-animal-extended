@@ -382,8 +382,12 @@ set:
 | Severity | Range |
 |---|---|
 | Mild | 1.5 – 2.0 |
-| Serious | 1.0 – 1.5 |
-| Severe | < 1.0 |
+| Serious | above 1.0 – 1.5 |
+| Severe | 1.0 or below |
+
+> Owner ruling 2026-10-01: Severe starts at 1.0, the scoring engine's spoiler
+> line. The data holds whole numbers, so with "< 1.0" every real conflict read
+> Serious. Mild and Serious stay for any fractional data.
 
 ### Verdict bands
 
