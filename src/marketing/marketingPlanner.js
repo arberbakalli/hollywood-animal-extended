@@ -104,41 +104,8 @@
         const inputCom = HACScoreFormatting.readMovieScoreInput('comScoreInput');
         const inputArt = HACScoreFormatting.readMovieScoreInput('artScoreInput');
 
-        let tagAffinity = { "YM": 0, "YF": 0, "TM": 0, "TF": 0, "AM": 0, "AF": 0 };
-        tagInputs.forEach(item => {
-            const tagData = GAME_DATA.tags[item.id];
-            if(!tagData) return;
-            const multiplier = item.percent;
-            for(let demo in tagAffinity) {
-                if(tagData.weights[demo]) {
-                    tagAffinity[demo] += (tagData.weights[demo] * multiplier);
-                }
-            }
-        });
-
-        let minVal = Number.MAX_VALUE;
-        for (let demo in tagAffinity) {
-            if (tagAffinity[demo] < minVal) minVal = tagAffinity[demo];
-        }
-        if (minVal < 1.0) {
-            const liftAmount = 1.0 - minVal;
-            for (let demo in tagAffinity) {
-                tagAffinity[demo] += liftAmount;
-            }
-        }
-
-        let totalSum = 0;
-        for (let demo in tagAffinity) totalSum += tagAffinity[demo];
-        const RELEASE_MAGIC_NUMBER = 3.0;
-        let baselineScores = {};
-        for(let demo in tagAffinity) {
-            if (totalSum === 0) {
-                baselineScores[demo] = 0;
-            } else {
-                let normalized = (tagAffinity[demo] / totalSum) * RELEASE_MAGIC_NUMBER;
-                baselineScores[demo] = Math.min(1.0, Math.max(0, normalized));
-            }
-        }
+        // The one audience model, shared with Graves (owner ruling 2026-10-01).
+        const baselineScores = HACGravesAnalysis.audienceShares(tagInputs);
 
         const normalizedArt = inputArt / 10.0;
         const normalizedCom = inputCom / 10.0;
@@ -177,8 +144,8 @@
             });
         }
 
-        const THRESHOLD_GOOD = 0.67;
-        const THRESHOLD_BAD = 0.33;
+        const THRESHOLD_GOOD = HACGravesAnalysis.AUDIENCE_HIGH_FROM;
+        const THRESHOLD_BAD = HACGravesAnalysis.AUDIENCE_TARGET_ABOVE;
 
         const targetAudiences = demoGrades.filter(d => d.score > THRESHOLD_BAD);
         const highInterestIds = demoGrades.filter(d => d.score >= THRESHOLD_GOOD).map(d => d.id);

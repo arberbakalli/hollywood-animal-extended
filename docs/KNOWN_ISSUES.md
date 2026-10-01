@@ -74,8 +74,6 @@ or an owner-approved edit to an existing test, so none was guessed.
   1.0 as a spoiler. Should the bands move?
 - A Genre share does not weight pair scores (a 5% genre counts like 95%).
   Listed in GAME_RULES section 6 as unconfirmed.
-- Graves "Likely Audience" and Marketing's target audiences use two models.
-**Needs an approved edit to an existing test:**
 - TC01-000020 (Reset Locks hides results) never generates first, so it passes
   vacuously. TC01-000051 now covers the real case; TC01-000020 itself is unchanged.
 

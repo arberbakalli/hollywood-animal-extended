@@ -253,7 +253,7 @@
             audiences.forEach(audience => {
                 const chip = document.createElement('div');
                 chip.id = `graves-audience-${toDomId(audience.id)}`;
-                chip.className = `audience-pill ${audience.strength >= 67 ? 'pill-best' : 'pill-moderate'}`;
+                chip.className = `audience-pill ${audience.high ? 'pill-best' : 'pill-moderate'}`;
                 chip.dataset.role = 'graves-audience-pill';
                 chip.dataset.audienceId = audience.id;
                 chip.textContent = `${audience.name} ${audience.strength}%`;

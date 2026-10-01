@@ -45,27 +45,48 @@
         };
     }
 
-    function calculateGravesAudience(tags) {
-        const affinity = Object.fromEntries(Object.keys(GAME_DATA.demographics).map(id => [id, 0]));
+    // The release model's audience shares (Marketing & Release): affinity from
+    // the weights by share, lifted so the lowest is at least 1, then each
+    // audience's share of the total times 3, clamped to 0..1. One function for
+    // both tabs (owner ruling 2026-10-01): Graves used its own scaling (top
+    // audience = 100%), so the same script named different audiences.
+    const AUDIENCE_HIGH_FROM = 0.67;
+    const AUDIENCE_TARGET_ABOVE = 0.33;
+    const RELEASE_MAGIC_NUMBER = 3.0;
 
+    function audienceShares(tags) {
+        const affinity = Object.fromEntries(Object.keys(GAME_DATA.demographics).map(id => [id, 0]));
         tags.forEach(item => {
             const tagData = GAME_DATA.tags[item.id];
             if (!tagData || !tagData.weights) return;
-
             Object.keys(affinity).forEach(demoId => {
-                affinity[demoId] += (tagData.weights[demoId] || 0) * item.percent;
+                if (tagData.weights[demoId]) affinity[demoId] += tagData.weights[demoId] * item.percent;
             });
         });
 
-        const maxAffinity = Math.max(1, ...Object.values(affinity));
-        return Object.entries(affinity)
-            .map(([id, score]) => ({
+        const minVal = Math.min(...Object.values(affinity));
+        if (minVal < 1.0) {
+            Object.keys(affinity).forEach(demoId => { affinity[demoId] += 1.0 - minVal; });
+        }
+        const total = Object.values(affinity).reduce((sum, value) => sum + value, 0);
+        return Object.fromEntries(Object.entries(affinity).map(([demoId, value]) => [
+            demoId,
+            total === 0 ? 0 : Math.min(1.0, Math.max(0, (value / total) * RELEASE_MAGIC_NUMBER))
+        ]));
+    }
+
+    // Target audiences, highest share first: above 0.33, high from 0.67.
+    function calculateGravesAudience(tags) {
+        const shares = audienceShares(tags);
+        return Object.entries(shares)
+            .filter(([, share]) => share > AUDIENCE_TARGET_ABOVE)
+            .map(([id, share]) => ({
                 id,
                 name: GAME_DATA.demographics[id].name,
-                score,
-                strength: Math.round((score / maxAffinity) * 100)
+                score: share,
+                strength: Math.round(share * 100),
+                high: share >= AUDIENCE_HIGH_FROM
             }))
-            .filter(item => item.score > 0)
             .sort((a, b) => b.score - a.score);
     }
 
@@ -189,6 +210,9 @@
         findGravesPairsByBand,
         formatFinalRating,
         getGravesVerdict,
+        audienceShares,
+        AUDIENCE_HIGH_FROM,
+        AUDIENCE_TARGET_ABOVE,
         gravesConflictSeverity,
         summarizeGravesConflicts
     };

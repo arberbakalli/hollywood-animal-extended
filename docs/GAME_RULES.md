@@ -300,6 +300,15 @@ reached the target says so ("Avg Fit 3.2 is below your 4.0 target."). (Owner
 ruling 2026-10-01; before it, 24 of 48 scripts at pool 10 fell below 4.0.
 TC01-000052/53.)
 
+### One audience model
+
+Colman Graves' Likely Audience and Marketing & Release's target audiences use
+the same model: affinity from the audience weights by share, lifted so the
+lowest is at least 1, each audience's share of the total times 3, clamped to
+0..1; a target above 0.33, high interest from 0.67. (Owner ruling 2026-10-01:
+Graves used its own scaling, so the same script named different audiences.
+`audienceShares` in `src/evaluation/gravesAnalysis.js`; TC03-000058.)
+
 ### Score inputs
 
 A movie score typed into Marketing & Release is read as 0 to 10, and the box

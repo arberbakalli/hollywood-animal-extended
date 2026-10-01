@@ -478,6 +478,39 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(feedback).toContainText('Max Element Pool is set to 5, but you selected 6');
   });
 
+  // Owner ruling 2026-10-01: Graves' Likely Audience uses Marketing's target
+  // audience model, so both tabs name the same audiences, at the same tier,
+  // for the same script. Graves used its own scaling (top audience = 100%).
+  const SCRIPTS = {
+    owner: [['ADVENTURE', 'Genre'], ['FANTASY_KINGDOM', 'Setting'], ['PROTAGONIST_CYNIC', 'Protagonist'],
+      ['ANTAGONIST_EVIL_MONSTER', 'Antagonist'], ['THEME_TREASURE_HUNT', 'Theme & Event'], ['SUPPORTINGCHARACTER_SIDEKICK', 'Supporting Character'], ['FINALE_PROTAGONIST_FINDS_TREASURE', 'Finale']],
+    romance: [['DRAMA', 'Genre'], ['MODERN_AMERICAN_TOWN', 'Setting'], ['PROTAGONIST_HOPELESS_ROMANTIC', 'Protagonist'],
+      ['ANTAGONIST_MURDERER', 'Antagonist'], ['THEME_LOVE_TRIANGLE', 'Theme & Event'], ['SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS', 'Supporting Character'], ['FINALE_SWEETHEARTS_STAY_TOGETHER', 'Finale']],
+    western: [['ACTION', 'Genre'], ['WILD_WEST', 'Setting'], ['PROTAGONIST_COWBOY', 'Protagonist'],
+      ['ANTAGONIST_BANDIT', 'Antagonist'], ['EVENTS_SHOOTOUT', 'Theme & Event'], ['SUPPORTINGCHARACTER_SIDEKICK', 'Supporting Character'], ['FINALE_ANTAGONIST_GETS_KILLED', 'Finale']],
+  };
+  const pillsIn = (page, container) => page.locator(`${container} .audience-pill`).evaluateAll(pills => pills
+    .map(pill => `${pill.textContent.replace(/\s*\d+%$/, '').trim()}:${pill.classList.contains('pill-best') ? 'high' : 'moderate'}`)
+    .sort());
+
+  for (const [name, script] of Object.entries(SCRIPTS)) {
+    test(`TC03-000058 ${name}: Graves and Marketing name the same audiences at the same tier`, async ({ steps, page }) => {
+      await steps.on('evaluateTab', 'Navigation').click();
+      await page.evaluate(tags => restoreSelection('graves', tags),
+        script.map(([id, category]) => ({ id, category, percent: 1 })));
+      await page.locator('#evaluateGravesButton').click();
+      await expect(page.locator('#gravesAudienceDisplay .audience-pill').first()).toBeVisible();
+      const graves = await pillsIn(page, '#gravesAudienceDisplay');
+
+      await page.locator('#transferGravesTagsButton').click();
+      await expect(page.locator('#results-advertisers')).toBeVisible();
+      const marketing = await pillsIn(page, '#targetAudienceDisplay');
+
+      expect(marketing.length).toBeGreaterThan(0);
+      expect(graves).toEqual(marketing);
+    });
+  }
+
   // Owner ruling 2026-10-01: Analyze results do not outlive their inputs
   // (the elements and both scores), the same rule as Evaluate. Analyze moves
   // the live distribution calculator into its results, so hiding the results
