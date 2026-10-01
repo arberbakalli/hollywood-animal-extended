@@ -270,6 +270,48 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(swapList(page).locator(`[data-role="graves-best-match"][data-tag-id="${suggested}"]`)).toHaveCount(0);
   });
 
+  // Owner ruling 2026-10-01: Script Lab shows every result, and a card whose
+  // script holds an Unsuccessful pair (< 2.0) says so, so the player sees
+  // the score-versus-coherence trade-off.
+  test('TC01-000049 a Script Lab card names the clash its script holds', async ({ page }) => {
+    // Cards are drawn after Generate or a library load, which load the
+    // compatibility data first; drawing one directly has to do the same.
+    await page.evaluate(() => ensureCompatibilityLoaded());
+    await page.evaluate(() => {
+      const clashing = ['ADVENTURE', 'FANTASY_KINGDOM', 'PROTAGONIST_DARING_ADVENTURER', 'ANTAGONIST_EVIL_MONSTER',
+        'THEME_LONG_JOURNEY', 'FINALE_PROTAGONIST_FINDS_TREASURE']
+        .map(id => ({ id, category: GAME_DATA.tags[id].category, percent: 1 }));
+      const clean = ['ADVENTURE', 'FANTASY_KINGDOM', 'PROTAGONIST_DARING_ADVENTURER', 'ANTAGONIST_EVIL_MONSTER',
+        'THEME_TREASURE_HUNT', 'FINALE_PROTAGONIST_FINDS_TREASURE']
+        .map(id => ({ id, category: GAME_DATA.tags[id].category, percent: 1 }));
+      const scripts = [HACScriptGenerator.buildScriptFromTags(clashing, 'Clashing'), HACScriptGenerator.buildScriptFromTags(clean, 'Clean')];
+      generatedScriptsCache = scripts;
+      HACScriptGenerator.renderGeneratedScripts(scripts);
+    });
+    const cards = page.locator('#generatorResultsList .gen-card');
+    await expect(cards).toHaveCount(2);
+    await expect(cards.nth(0).locator('[data-role="script-clash-warning"]'))
+      .toHaveText('Clash: Evil Monster × Long Journey (1.0)');
+    await expect(cards.nth(1).locator('[data-role="script-clash-warning"]')).toHaveCount(0);
+  });
+
+  test('TC01-000050 every Highest Artistic card warns exactly when its script holds a clash', async ({ steps, page }) => {
+    await steps.setSliderValue('elementPoolSlider', 'Navigation', 10);
+    await page.locator('#generateBestArtisticScriptsButton').click();
+    await expect(page.locator('#generatorResultsList .gen-card').first()).toBeVisible({ timeout: 30000 });
+    const mismatches = await page.evaluate(() => [...document.querySelectorAll('#generatorResultsList .gen-card')].map(card => {
+      const script = generatedScriptsCache.find(s => String(s.uniqueId) === card.dataset.scriptId);
+      const tags = script.tags.map(t => GAME_DATA.tags[t.id]);
+      let clash = false;
+      for (let a = 0; a < tags.length; a++) for (let b = a + 1; b < tags.length; b++) {
+        if (getRawCompatibilityScore(tags[a], tags[b]) < 2) clash = true;
+      }
+      const warned = !!card.querySelector('[data-role="script-clash-warning"]');
+      return clash === warned ? null : `${card.dataset.scriptId}: clash ${clash}, warned ${warned}`;
+    }).filter(Boolean));
+    expect(mismatches).toEqual([]);
+  });
+
   // Audit 2026-09-30: GAME_RULES.md section 5 says no context ever holds a
   // banned element, but generated cards kept one after a ban, and a transfer
   // then dropped it from the script without a clear reason.

@@ -522,6 +522,27 @@
         return HACScriptGenerationEngine.buildScriptFromTags(tags, name);
     }
 
+    // Owner ruling 2026-10-01: Script Lab shows every result, but a card whose
+    // script holds an Unsuccessful pair (< 2.0) names it, so the player sees
+    // the score-versus-coherence trade-off. The worst pair is named, in game
+    // category order; any others are counted.
+    function clashWarningText(tags) {
+        const order = tag => GAME_DATA.categories.indexOf(tag.category);
+        const known = tags.map(t => GAME_DATA.tags[t.id]).filter(Boolean).sort((a, b) => order(a) - order(b));
+        const clashes = [];
+        for (let a = 0; a < known.length; a++) {
+            for (let b = a + 1; b < known.length; b++) {
+                const score = getRawCompatibilityScore(known[a], known[b]);
+                if (score < HACGravesBestMatchesEngine.CONFLICT_PAIR_THRESHOLD) clashes.push({ x: known[a], y: known[b], score });
+            }
+        }
+        if (clashes.length === 0) return '';
+        clashes.sort((p, q) => p.score - q.score);
+        const worst = clashes[0];
+        const more = clashes.length > 1 ? ` and ${clashes.length - 1} more` : '';
+        return `Clash: ${worst.x.name} × ${worst.y.name} (${worst.score.toFixed(1)})${more}`;
+    }
+
     function createScriptCardHTML(scriptObj, isPinnedSection) {
         const div = document.createElement('div');
         const cardScope = isPinnedSection ? 'pinned-script' : 'generated-script';
@@ -610,6 +631,8 @@
         // Editable Name Input (Only if in pinned section). The name is typed by
         // the player or read from a shared file, so it is set as a property
         // below, never interpolated into the markup.
+        const clashWarning = clashWarningText(scriptObj.tags);
+
         const nameInputHtml = isPinnedSection
             ? `<input type="text" class="script-name-input"
                id="${cardScope}-name-${scriptDomId}"
@@ -625,6 +648,7 @@
                         ${scoreBadgesHtml}
                     </div>
                     <div id="${cardScope}-freshness-${scriptDomId}" class="gen-freshness-status hidden" data-role="script-freshness-status"></div>
+                    ${clashWarning ? `<div id="${cardScope}-clash-${scriptDomId}" class="best-match-warning gen-clash-warning" data-role="script-clash-warning">${clashWarning}</div>` : ''}
                 </div>
                 <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" type="button" title="${pinTitle}" data-role="script-pin-button">
                     ${isActuallyPinned ? '★' : '☆'}

@@ -79,9 +79,9 @@ or an owner-approved edit to an existing test, so none was guessed.
 - Best Additions hides Genre candidates at the element budget, although Genre
   does not count toward it; Pairwise keeps them live.
 - Graves "Likely Audience" and Marketing's target audiences use two models.
-- Script Lab Highest Artistic/Commercial return scripts with clashes (16 of 48
-  at pool 10 with Starting Tags) and ignore Target Average Compatibility. Apply
-  the no-clash rule that Swap and Build for Target now follow?
+- Script Lab Highest Artistic/Commercial ignore Target Average Compatibility
+  (24 of 48 below 4.0 at pool 10). The clash part was ruled 2026-10-01: every
+  card now names its clash.
 - Marketing Analyze results stay on screen after the inputs change (the hide +
   prompt rule applies to Evaluate and Build for Target).
 - Holidays are listed by score, not in calendar order (GAME_RULES section 5).

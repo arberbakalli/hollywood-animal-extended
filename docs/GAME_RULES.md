@@ -276,6 +276,15 @@ The same rule runs through every panel that computes from a script (audit
   leaves the previous results beside its message.
 - A ban reaches every watcher directly: it clears a pick without firing change.
 
+### Script Lab cards name their clashes
+
+Script Lab shows every result it generates, in all three modes. A card whose
+script holds an Unsuccessful pair (< 2.0) names the worst one, in game category
+order, and counts the rest ("Clash: Evil Monster × Long Journey (1.0) and 1
+more"), so the player sees what a high score costs in coherence. (Owner ruling
+2026-10-01. `clashWarningText` in `src/generator/scriptGenerator.js`;
+TC01-000049/50.)
+
 ### Score inputs
 
 A movie score typed into Marketing & Release is read as 0 to 10, and the box
