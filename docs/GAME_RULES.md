@@ -259,6 +259,36 @@ script the same, such as adding an empty row, keeps the results. (Owner ruling
 longer held. `watchGravesBuilder` in `src/evaluation/gravesAudience.js`;
 TC03-000046..50.)
 
+### Results never outlive their inputs
+
+The same rule runs through every panel that computes from a script (audit
+2026-09-30):
+
+- **Evaluate** hides its five panels and asks for a new Evaluate (above).
+- **Best Matches** redraws from the current script and ban list instead of
+  hiding, because its mode tabs live in the panel and TC03-000038 pins that
+  switching mode after a change works.
+- **Build for Target** hides its cards and asks for a new Find when the pool, a
+  lock, an audience, an advertiser or the ban list changes.
+- **Script Lab** hides generated scripts when a ban hits one of them, and asks
+  for a new Generate. Saved Library scripts are left as they are.
+- **A refusal** (Evaluate, Generate, the Highest Appeal modes, Analyze) never
+  leaves the previous results beside its message.
+- A ban reaches every watcher directly: it clears a pick without firing change.
+
+### Score inputs
+
+A movie score typed into Marketing & Release is read as 0 to 10, and the box
+settles on the limit when it is left (`HACScoreFormatting.readMovieScoreInput`;
+TC04-000036). A stored movie score is the tenth the screen shows (TC24-000001).
+
+### Script Library files
+
+Import skips an entry with an unknown element, the same element twice, or two
+picks in a one-pick category; it splits Genre shares into 5% steps that sum to
+100, as every builder does; and the load message counts scripts already in the
+library (`src/library/scriptLibrary.js`; `tests/bug-hunt-2026-09-30.test.js`).
+
 ### Swap Suggestions and Unsuccessful pairs
 
 Owner rulings 2026-09-30, enforced in `buildSwaps`
