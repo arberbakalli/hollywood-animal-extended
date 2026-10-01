@@ -373,6 +373,10 @@
 
         // Map scoreKind to bonus property: 'artistic' -> 'art', 'commercial' -> 'com'
         const bonusKey = scoreKind === 'artistic' ? 'art' : 'com';
+        // Highest Appeal respects Target Average Compatibility (owner ruling
+        // 2026-10-01): a candidate at or above it beats a higher bonus below
+        // it. Compared on the tenth shown, as every Average Fit label is.
+        const meetsTarget = script => Number(script.stats.avgComp.toFixed(1)) >= targetComp;
 
         for (let i = 0; i < OPTIMIZED_RESULT_COUNT; i++) {
             let bestCandidate = null;
@@ -389,9 +393,12 @@
                     bestCandidate = { ...candidate, _bonus: candidateBonus, _evaluation: evaluation };
                 } else {
                     const existingBonus = bestCandidate._bonus;
-                    const scoreGap = candidateBonus !== existingBonus
-                        ? candidateBonus - existingBonus
-                        : candidate.stats.avgComp - bestCandidate.stats.avgComp;
+                    const targetGap = Number(meetsTarget(candidate)) - Number(meetsTarget(bestCandidate));
+                    const scoreGap = targetGap !== 0
+                        ? targetGap
+                        : candidateBonus !== existingBonus
+                            ? candidateBonus - existingBonus
+                            : candidate.stats.avgComp - bestCandidate.stats.avgComp;
                     if (fresherOrBetter(candidate, bestCandidate, scoreGap)) {
                         bestCandidate = { ...candidate, _bonus: candidateBonus, _evaluation: evaluation };
                     }
@@ -400,12 +407,15 @@
 
             if (bestCandidate) {
                 bestCandidate.optimizedFor = scoreKind;
+                bestCandidate.compatTarget = targetComp;
                 generatedBatch.push(bestCandidate);
             }
         }
 
-        // Freshness first, then bonus (highest first), then average compatibility
+        // Freshness first, then the target, then bonus (highest first), then
+        // average compatibility
         const ranked = HACFreshness.rankByFreshness(generatedBatch, (a, b) => {
+            if (meetsTarget(a) !== meetsTarget(b)) return Number(meetsTarget(b)) - Number(meetsTarget(a));
             if (b._bonus !== a._bonus) {
                 return b._bonus - a._bonus;
             }
@@ -632,6 +642,10 @@
         // the player or read from a shared file, so it is set as a property
         // below, never interpolated into the markup.
         const clashWarning = clashWarningText(scriptObj.tags);
+        const shownFit = Number(scriptObj.stats.avgComp.toFixed(1));
+        const belowTarget = Number.isFinite(scriptObj.compatTarget) && shownFit < scriptObj.compatTarget
+            ? `Avg Fit ${shownFit.toFixed(1)} is below your ${scriptObj.compatTarget.toFixed(1)} target.`
+            : '';
 
         const nameInputHtml = isPinnedSection
             ? `<input type="text" class="script-name-input"
@@ -649,6 +663,7 @@
                     </div>
                     <div id="${cardScope}-freshness-${scriptDomId}" class="gen-freshness-status hidden" data-role="script-freshness-status"></div>
                     ${clashWarning ? `<div id="${cardScope}-clash-${scriptDomId}" class="best-match-warning gen-clash-warning" data-role="script-clash-warning">${clashWarning}</div>` : ''}
+                    ${belowTarget ? `<div id="${cardScope}-below-target-${scriptDomId}" class="gen-below-target" data-role="script-below-target">${belowTarget}</div>` : ''}
                 </div>
                 <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" type="button" title="${pinTitle}" data-role="script-pin-button">
                     ${isActuallyPinned ? '★' : '☆'}

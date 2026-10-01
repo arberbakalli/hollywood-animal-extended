@@ -270,6 +270,61 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(swapList(page).locator(`[data-role="graves-best-match"][data-tag-id="${suggested}"]`)).toHaveCount(0);
   });
 
+  // Owner ruling 2026-10-01: Highest Appeal respects Target Average
+  // Compatibility. Per slot, a candidate at or above the target beats a
+  // higher-bonus one below it; a slot that never reaches the target says how
+  // far below it is. Candidates are canned, as in script-lab-freshness.spec.js.
+  const cannedAppeal = (page, plan) => page.evaluate((plan) => {
+    const byArt = Object.values(GAME_DATA.tags).filter(tag => tag.category === 'Protagonist')
+      .sort((a, b) => (Number(b.art) || 0) - (Number(a.art) || 0));
+    const highBonus = byArt[0].id;
+    const lowBonus = byArt[byArt.length - 1].id;
+    const script = (protagonist, avgComp) => ({
+      tags: [
+        { id: 'ACTION', category: 'Genre', percent: 1 },
+        { id: 'WILD_WEST', category: 'Setting', percent: 1 },
+        { id: protagonist, category: 'Protagonist', percent: 1 },
+        { id: 'ANTAGONIST_BANDIT', category: 'Antagonist', percent: 1 },
+        { id: 'FINALE_PROTAGONIST_FINDS_TREASURE', category: 'Finale', percent: 1 },
+      ],
+      stats: { avgComp, synergySum: avgComp * 3, maxScriptQuality: 6, movieScore: '6.0' },
+      scores: { commercial: 6, artistic: 6 },
+      uniqueId: `${protagonist}-${Math.random()}`,
+    });
+    let calls = 0;
+    HACScriptGenerationEngine.runGenerationAlgorithm = () => (plan === 'mixed' && (++calls % 2 === 0)
+      ? script(lowBonus, 4.5)
+      : script(highBonus, 3.2));
+    return { highBonus, lowBonus };
+  }, plan);
+
+  test('TC01-000052 Highest Artistic picks a script that meets the compatibility target over a higher bonus', async ({ steps, page }) => {
+    await steps.on('buildTab', 'Navigation').click();
+    await expect(page.locator('#genCompInput')).toHaveValue('4');
+    const { lowBonus } = await cannedAppeal(page, 'mixed');
+    await page.locator('#generateBestArtisticScriptsButton').click();
+    await expect(page.locator('#generatorResultsList .gen-card').first()).toBeVisible();
+
+    const picked = await page.evaluate(() => generatedScriptsCache
+      .map(script => ({ protagonist: script.tags.find(tag => tag.category === 'Protagonist').id, fit: script.stats.avgComp })));
+    expect(picked.length).toBeGreaterThan(0);
+    picked.forEach(entry => {
+      expect(entry.protagonist).toBe(lowBonus);
+      expect(entry.fit).toBeGreaterThanOrEqual(4);
+    });
+    await expect(page.locator('[data-role="script-below-target"]')).toHaveCount(0);
+  });
+
+  test('TC01-000053 a Highest Appeal card that never reached the target says how far below it is', async ({ steps, page }) => {
+    await steps.on('buildTab', 'Navigation').click();
+    await cannedAppeal(page, 'below');
+    await page.locator('#generateBestArtisticScriptsButton').click();
+    const first = page.locator('#generatorResultsList .gen-card').first();
+    await expect(first).toBeVisible();
+    await expect(first.locator('[data-role="script-below-target"]'))
+      .toHaveText('Avg Fit 3.2 is below your 4.0 target.');
+  });
+
   // Audit 2026-09-30: TC01-000020 asserts Reset Locks hides the results but
   // never generates first, so it passes with nothing to hide. This one
   // generates, then resets.

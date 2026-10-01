@@ -75,10 +75,6 @@ or an owner-approved edit to an existing test, so none was guessed.
 - A Genre share does not weight pair scores (a 5% genre counts like 95%).
   Listed in GAME_RULES section 6 as unconfirmed.
 - Graves "Likely Audience" and Marketing's target audiences use two models.
-- Script Lab Highest Artistic/Commercial ignore Target Average Compatibility
-  (24 of 48 below 4.0 at pool 10). The clash part was ruled 2026-10-01: every
-  card now names its clash.
-
 **Needs an approved edit to an existing test:**
 - TC01-000020 (Reset Locks hides results) never generates first, so it passes
   vacuously. TC01-000051 now covers the real case; TC01-000020 itself is unchanged.

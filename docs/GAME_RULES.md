@@ -291,6 +291,15 @@ more"), so the player sees what a high score costs in coherence. (Owner ruling
 2026-10-01. `clashWarningText` in `src/generator/scriptGenerator.js`;
 TC01-000049/50.)
 
+### Highest Appeal respects the compatibility target
+
+Highest Artistic and Highest Commercial keep Target Average Compatibility: per
+slot, freshness first, then a script at or above the target (on the tenth
+shown), then the higher bonus. Results rank the same way. A card that never
+reached the target says so ("Avg Fit 3.2 is below your 4.0 target."). (Owner
+ruling 2026-10-01; before it, 24 of 48 scripts at pool 10 fell below 4.0.
+TC01-000052/53.)
+
 ### Score inputs
 
 A movie score typed into Marketing & Release is read as 0 to 10, and the box
