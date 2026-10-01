@@ -202,8 +202,7 @@
         const skippedNote = skipped > 0 ? ` Skipped ${skipped} invalid ${skipped === 1 ? 'entry' : 'entries'}.` : '';
         const alreadyNote = already > 0 ? ` ${already} ${already === 1 ? 'was' : 'were'} already in your library.` : '';
         if (added > 0) {
-            // "scripts" even for one: TC01-000029 pins "Loaded 1 scripts".
-            return { text: `Loaded ${added} scripts.${skippedNote}${alreadyNote}`, tone: 'success' };
+            return { text: `Loaded ${added} script${added === 1 ? '' : 's'}.${skippedNote}${alreadyNote}`, tone: 'success' };
         }
         if (skipped > 0) {
             return { text: `No valid scripts found in file.${skippedNote}${alreadyNote}`, tone: 'accent' };

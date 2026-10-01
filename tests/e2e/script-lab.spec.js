@@ -635,6 +635,6 @@ test.describe('Script Lab — generator', () => {
     await (await chooserPromise).setFiles(savedFile);
 
     await steps.on('pinnedCards', 'ScriptLab').verifyCount({ exactly: 1 });
-    await steps.on('pinnedFeedbackMessage', 'ScriptLab').verifyTextContains('Loaded 1 scripts');
+    await steps.on('pinnedFeedbackMessage', 'ScriptLab').verifyTextContains('Loaded 1 script.');
   });
 });

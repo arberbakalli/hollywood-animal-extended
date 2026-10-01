@@ -450,7 +450,7 @@ Feature: Script Lab
 
   # [automated] tests/e2e/script-lab.spec.js TC01-000029. Watched in the app
   # 2026-09-22 before automating: pin 1, reload, library empties to 0, load the
-  # saved file, back to 1 with "Loaded 1 scripts."
+  # saved file, back to 1 with "Loaded 1 script."
   #
   # The reload is the scenario, not staging for it. `pinnedScripts` is an
   # in-memory array with no persistence, unlike the exclusion list, so a refresh
