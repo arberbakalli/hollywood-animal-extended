@@ -25,7 +25,7 @@ Found by the owner on the live site (main `375e90d`) with one script: Adventure
 35% / Science-Fiction 65%, Fantasy Kingdom, Hardened Cynic, Evil Monster, Treasure
 Hunt, Long Journey, Evil Transformation, Protagonist Finds Treasure, Max Element
 Pool 8, 141 exclusions. None of these was captured before. Fixed on branch
-`claude/bug-hunt-2026-09-30`; each stays open here until that branch is on main.
+the bug-hunt commits on `main` (replayed onto `02f95cc` on 2026-10-01).
 Rulings: `docs/GAME_RULES.md` sections 1 and 2.
 
 | # | Bug | Came in with | Fix |
@@ -52,8 +52,8 @@ found on the old `main` at `375e90d`.
 
 | Branch | Head | Note |
 |---|---|---|
-| `main` / `origin/main` | `62e9c05` | The reset history; base of this series |
-| `claude/bug-hunt-2026-09-30` | this series | Local only, not pushed |
+| `main` / `origin/main` | `bf3b796`+ | Rewritten to `02f95cc` on 2026-10-01, bug-hunt commits replayed on top |
+| `claude/bug-hunt-2026-09-30` | same files | Old history; do not merge |
 | `parked/act-2-polish` | `935fca3` | Old history, parked until Act 2 |
 | `fix/a12-a3-tenths` | gone | Existed only in the old repository |
 | `codex/hardening` | gone | Its worktree folder remains, detached from the repository |
@@ -62,7 +62,7 @@ found on the old `main` at `375e90d`.
 
 Found by the invariant audit of Script Lab, Evaluate, Build for Target and
 Marketing & Release. Fixed items are in the commits of
-`claude/bug-hunt-2026-09-30`. These are still open. Each needs an owner ruling
+`main`. These are still open. Each needs an owner ruling
 or an owner-approved edit to an existing test, so none was guessed.
 
 **Still to fix (rule is settled, work not done yet):**

@@ -1,9 +1,10 @@
 # Bug hunt 2026-09-30 / 2026-10-01: what changed
 
-**Status: on `main` and live.** The fixes were merged into `main` on 2026-10-01
-(commit `4e6b12e`) and deployed to the live site. Jest 649 tests and Playwright
-346 tests passed before the merge. Fixes made after the merge sit on the branch
-`claude/bug-hunt-2026-09-30` until they are merged too.
+**Status: on `main` and live.** `main` was rewritten on 2026-10-01 into a fresh
+"Initial commit" (`02f95cc`); the bug-hunt commits were then replayed on top of
+it, one per fix (`02f95cc..bf3b796` and later). Jest 649 tests and Playwright
+351 tests passed on that code. The old branch `claude/bug-hunt-2026-09-30` holds
+the same files on a history `main` no longer has: do not merge it.
 
 Every fix has a test that failed before the fix. Every rule the owner set is in
 `docs/GAME_RULES.md`. Every bug, with the old commit that caused it, is in
@@ -74,8 +75,8 @@ Every fix has a test that failed before the fix. Every rule the owner set is in
 
 ## For the next session
 
-1. Merge the branch into `main` again if it has commits that `main` lacks
-   (`git log main..claude/bug-hunt-2026-09-30`).
+1. Start from `main`. Before rewriting `main` (squash, reword), check that it
+   still contains the bug-hunt commits, or they drop off as on 2026-10-01.
 2. Run `npm test` and Playwright on an isolated port (one Playwright run at a
    time).
 3. Codex has its own branch, `codex/hardening-verification`, built on an older
