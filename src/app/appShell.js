@@ -345,7 +345,11 @@
         });
 
         document.querySelectorAll('[data-reset-context]').forEach(button => {
-            button.addEventListener('click', () => resetSelectors(button.dataset.resetContext));
+            button.addEventListener('click', () => {
+                const context = button.dataset.resetContext;
+                resetSelectors(context);
+                if (context === 'excluded') HACExclusionStore.saveExclusions();
+            });
         });
 
         function applyStartingTagsExclusions() {
