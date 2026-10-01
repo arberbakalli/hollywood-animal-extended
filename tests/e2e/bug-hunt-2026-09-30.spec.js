@@ -413,6 +413,45 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(feedback).toContainText('Max Element Pool is set to 5, but you selected 6');
   });
 
+  // Owner ruling 2026-10-01: Analyze results do not outlive their inputs
+  // (the elements and both scores), the same rule as Evaluate. Analyze moves
+  // the live distribution calculator into its results, so hiding the results
+  // must hand the calculator back to its own place first.
+  const analyzeCynic = async (steps, page) => {
+    await steps.on('marketTab', 'Navigation').click();
+    await page.locator('#inputs-protagonist-advertisers select.tag-selector').first().selectOption('PROTAGONIST_CYNIC');
+    await page.locator('#analyzeMovieButton').click();
+    await expect(page.locator('#results-advertisers')).toBeVisible();
+  };
+  const analyzeStale = (page) => page.locator('#advertisers-stale-notice');
+
+  for (const [change, act] of [
+    ['an element', page => page.locator('#inputs-antagonist-advertisers select.tag-selector').first().selectOption('ANTAGONIST_EVIL_MONSTER')],
+    ['the commercial score', page => page.locator('#comScoreInput').fill('8')],
+  ]) {
+    test(`TC04-000039 changing ${change} after Analyze hides the old analysis but keeps the calculator`, async ({ steps, page }) => {
+      await analyzeCynic(steps, page);
+      await expect(analyzeStale(page)).toBeHidden();
+
+      await act(page);
+      await expect(page.locator('#results-advertisers')).toBeHidden();
+      await expect(analyzeStale(page)).toHaveText('Inputs changed. Press Analyze to update.');
+      await expect(page.locator('#dist-wrapper')).toBeVisible();
+
+      await page.locator('#analyzeMovieButton').click();
+      await expect(analyzeStale(page)).toBeHidden();
+      await expect(page.locator('#results-advertisers')).toBeVisible();
+    });
+  }
+
+  test('TC04-000040 a refused Analyze keeps the distribution calculator on screen', async ({ steps, page }) => {
+    await analyzeCynic(steps, page);
+    await page.locator('#inputs-protagonist-advertisers select.tag-selector').first().selectOption('');
+    await page.locator('#analyzeMovieButton').click();
+    await expect(page.locator('#results-advertisers')).toBeHidden();
+    await expect(page.locator('#dist-wrapper')).toBeVisible();
+  });
+
   // Audit 2026-09-30: a movie score runs 0.0 to 10.0 (GAME_RULES.md section
   // 1). Typing 12 moved the slider to 10, but the grid read the box and showed
   // week 1 as 24,000. The box now settles on the limit when it is left, like

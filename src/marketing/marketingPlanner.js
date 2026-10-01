@@ -4,12 +4,75 @@
     // Holiday Release lists the best option plus this many minus one alternatives.
     const SHOWN_HOLIDAY_COUNT = 4;
 
+    /* ---------------------------------------------------------------------
+       Results that no longer match their inputs (owner ruling 2026-10-01,
+       the same rule as Evaluate). The analysis reads the elements and both
+       scores. Analyze moves the live distribution calculator into its
+       results, so hiding them hands the calculator back to its own place;
+       a refused Analyze used to hide it until the next good one. */
+    let analyzedSignature = null;
+
+    function advertiserInputSignature() {
+        const container = document.getElementById('selectors-container-advertisers');
+        const picks = container && typeof container.querySelectorAll === 'function'
+            ? Array.from(container.querySelectorAll('[data-role="tag-selector-row"]')).map(row => {
+                const value = row.querySelector('select.tag-selector')?.value;
+                if (!value) return null;
+                const share = row.querySelector('.percent-input');
+                return share ? `${value}@${share.value}` : value;
+            }).filter(Boolean).sort()
+            : [];
+        return [...picks, '|',
+            HACScoreFormatting.readMovieScoreInput('comScoreInput'),
+            HACScoreFormatting.readMovieScoreInput('artScoreInput')].join(',');
+    }
+
+    function setAnalysisStaleNotice(visible) {
+        const notice = document.getElementById('advertisers-stale-notice');
+        if (!notice || !notice.classList) return;
+        if (visible) notice.classList.remove('hidden');
+        else notice.classList.add('hidden');
+    }
+
+    function hideAdvertiserResults() {
+        const distCard = document.getElementById('dist-wrapper');
+        const anchor = document.getElementById('dist-calc-anchor');
+        if (distCard && anchor && distCard.parentElement !== anchor) {
+            anchor.appendChild(distCard);
+            distCard.classList.remove('distribution-card--in-results');
+        }
+        document.getElementById('results-advertisers')?.classList.add('hidden');
+    }
+
+    function checkAnalysisCurrent() {
+        const results = document.getElementById('results-advertisers');
+        if (analyzedSignature === null || !results || results.classList.contains('hidden')) return;
+        if (advertiserInputSignature() === analyzedSignature) return;
+        analyzedSignature = null;
+        hideAdvertiserResults();
+        setAnalysisStaleNotice(true);
+    }
+
+    function watchAdvertiserInputs() {
+        const container = document.getElementById('selectors-container-advertisers');
+        if (container) {
+            ['change', 'input'].forEach(type => container.addEventListener(type, checkAnalysisCurrent));
+            new MutationObserver(checkAnalysisCurrent).observe(container, { childList: true, subtree: true });
+        }
+        ['comScoreInput', 'comScoreSlider', 'artScoreInput', 'artScoreSlider'].forEach(id => {
+            const control = document.getElementById(id);
+            if (control) ['change', 'input'].forEach(type => control.addEventListener(type, checkAnalysisCurrent));
+        });
+    }
+
     async function analyzeMovie() {
         clearFeedbackMessage('advertisersFeedbackMessage');
+        setAnalysisStaleNotice(false);
+        analyzedSignature = null;
         try {
             await HACDataLoaders.ensureScoringDataLoaded();
         } catch (error) {
-            document.getElementById('results-advertisers')?.classList.add('hidden');
+            hideAdvertiserResults();
             showFeedbackMessage('advertisersFeedbackMessage', `Could not load scoring data. ${error.message}`);
             return;
         }
@@ -17,7 +80,7 @@
         // A refusal never leaves the previous analysis beside its message, as
         // Evaluate already does (audit 2026-09-30).
         const refuse = message => {
-            document.getElementById('results-advertisers')?.classList.add('hidden');
+            hideAdvertiserResults();
             showFeedbackMessage('advertisersFeedbackMessage', message, 'accent');
         };
         if(tagInputs.length === 0) {
@@ -238,6 +301,7 @@
 
         document.getElementById('results-advertisers').classList.remove('hidden');
         document.getElementById('results-advertisers').scrollIntoView({ behavior: 'smooth' });
+        analyzedSignature = advertiserInputSignature();
     }
 
     function displayAdvertiserRecommendations(recommendations) {
@@ -463,12 +527,15 @@
     // Initialize factory policy listener on DOM ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', setupFactoryPolicyListener);
+        document.addEventListener('DOMContentLoaded', watchAdvertiserInputs);
     } else {
         setupFactoryPolicyListener();
+        watchAdvertiserInputs();
     }
 
     global.HACMarketingPlanner = {
         analyzeMovie,
+        checkAnalysisCurrent,
         displayAdvertiserRecommendations,
         holidayBonusFor,
         syncHolidayRowStates,

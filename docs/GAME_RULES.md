@@ -270,6 +270,10 @@ The same rule runs through every panel that computes from a script (audit
   switching mode after a change works.
 - **Build for Target** hides its cards and asks for a new Find when the pool, a
   lock, an audience, an advertiser or the ban list changes.
+- **Analyze** (Marketing & Release) hides its results and asks for a new
+  Analyze when an element or either score changes (owner ruling 2026-10-01).
+  The distribution calculator, which Analyze moves into its results, goes back
+  to its own place and stays on screen.
 - **Script Lab** hides generated scripts when a ban hits one of them, and asks
   for a new Generate. Saved Library scripts are left as they are.
 - **A refusal** (Evaluate, Generate, the Highest Appeal modes, Analyze) never

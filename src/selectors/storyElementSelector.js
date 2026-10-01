@@ -200,6 +200,7 @@
         global.HACGravesAudience?.checkGravesResultsCurrent?.();
         global.HACTargetedAds?.checkTargetedResultsCurrent?.();
         global.HACScriptGenerator?.checkGeneratedAgainstBans?.();
+        global.HACMarketingPlanner?.checkAnalysisCurrent?.();
     }
 
     function propagateExclusionChange(category) {
