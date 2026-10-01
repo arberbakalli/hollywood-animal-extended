@@ -66,8 +66,7 @@ Every fix has a test that failed before the fix. Every rule the owner set is in
 
 ## Still open
 
-- **Needs the owner:** genre-share weighting of pair scores (check in the game);
-  the Age & Gender Appeal gender toggle does nothing for 38 unisex characters
+- **Needs the owner:** the Age & Gender Appeal gender toggle does nothing for 38 unisex characters
   that have no gender-specific data (hide it, explain it, or extract data); the
   vanished Evil Transformation row (never reproduced; send the clicks).
 - **Parked, high priority:** Genre pairing (`docs/PARKED_FEATURES.md`).

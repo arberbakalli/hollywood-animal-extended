@@ -121,11 +121,12 @@ Feature: Script Lab
     And each contains one Genre and one Setting outside the story budget
 
   # [automated] TC22-000001, tests/e2e/hardening-boundaries.spec.js.
-  Scenario: Commercial nine gets the Behemoth boost without slower decay
+  # Owner ruling 2026-10-01: the decay gate opens from 9 and above.
+  Scenario: Commercial nine gets the Behemoth boost and the slower decay
     Given commercial score is 9.0 in Marketing and Release
     When the player enables Behemoth
     Then week two demand is 11250 screenings
-    And week three demand is 9000 screenings
+    And week three demand is 9563 screenings
 
   # [automated] TC22-000002, tests/e2e/hardening-boundaries.spec.js.
   Scenario: Behemoth increases week-eight demand only while enabled
@@ -397,18 +398,19 @@ Feature: Script Lab
     When the user raises the target movie score
     Then the required story elements hint updates
 
-  # [automated] TC01-000016. Regression: the hint used the movie score itself as the story
-  # element count, so score 7 showed 7. From 9 up the game's Rating Limit table
-  # makes the count equal the score (docs/GAME_RULES.md section 1).
+  # [automated] TC01-000016. The hint shows the story element count the target
+  # asks for, one to one from 5 to 10 (owner ruling 2026-10-01,
+  # docs/GAME_RULES.md section 1).
   Scenario Outline: Target movie score shows the correct story element count
     When the user sets the target movie score to <movie_score>
     Then the required story elements hint says "~<story_elements> Story Elements"
 
     Examples:
       | movie_score | story_elements |
-      | 6           | 5              |
-      | 7           | 6              |
-      | 8           | 7              |
+      | 5           | 5              |
+      | 6           | 6              |
+      | 7           | 7              |
+      | 8           | 8              |
       | 9           | 9              |
       | 10          | 10             |
 

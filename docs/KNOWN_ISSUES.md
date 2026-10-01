@@ -69,8 +69,6 @@ or an owner-approved edit to an existing test, so none was guessed.
 (All three are done: see the commits after 0fce41e.)
 
 **Needs an owner ruling:**
-- A Genre share does not weight pair scores (a 5% genre counts like 95%).
-  Listed in GAME_RULES section 6 as unconfirmed.
 - TC01-000020 (Reset Locks hides results) never generates first, so it passes
   vacuously. TC01-000051 now covers the real case; TC01-000020 itself is unchanged.
 

@@ -300,26 +300,26 @@ Feature: Script Evaluation — Colman Graves
     When the user clicks it again
     Then the successful pair rows expand again
 
-  # [automated] Genre and Setting are exempt from the 5-10 story element budget,
-  # so a complete script sits at the budget when Max Element Pool is at its
-  # default of 5 and Best Additions has nothing it is allowed to offer. The
-  # empty state has to name that, because no fit threshold and no category will
-  # ever produce a row while the budget is full. TC03-000005/8/12/28 raise the
-  # pool first for this reason.
+  # [automated] TC03-000029. Genre and Setting are exempt from the 5-10 story
+  # element budget, so a complete script sits at the budget when Max Element
+  # Pool is at its default of 5. Best Additions then lists Genres only, which
+  # spend no budget (owner ruling 2026-10-01), under a note that names the
+  # budget. TC03-000005/8/12/28 raise the pool first for story-element rows.
   Scenario: Best Additions explains when the element budget is full
     Given the user has evaluated a complete script
     And the Max Element Pool is at its default
     When the user generates Best Additions
-    Then no suggestions are listed
-    And the message says the script already uses all the story elements it is allowed
-    And the message points to Max Element Pool and to Swap Suggestions
-    And the message states that Genre and Setting do not count toward the budget
+    Then only Genre suggestions are listed
+    And the note says the script already uses all the story elements it is allowed
+    And the note points to Max Element Pool and to Swap Suggestions
+    And the note states that Genre and Setting do not count toward the budget
 
   # [automated] TC03-000030. The auto-widening retry must not leave the control reading a
   # threshold the user never chose, or the next search silently runs under the
   # wrong filter.
   Scenario: A failed search restores the minimum fit the user chose
     Given the user has set the minimum fit to "4.0+"
+    And Match Category is a story category the full budget leaves empty
     When the user generates Best Additions and nothing is found at any threshold
     Then the minimum fit control still reads "4.0+"
 

@@ -23,19 +23,20 @@ Feature: Consistent scripts across generation, evaluation and marketing
 
   # [automated] TC24-000002, tests/e2e/generation-score-transfers.spec.js.
   # Regression values for the current scoring model, not independent game-math verification.
+  # Five story elements top out at 6.0 (Rating Limit table, owner 2026-09-30).
   Scenario Outline: A positive locked script keeps its movie scores on transfer
     Given Drama and Comedy are locked with equal shares
     And Modern European City, White Collar, Corrupt Official, Couple Gets Married, Love Interest and Femme Fatale are locked
     When the player uses <mode>
-    Then every generated script has commercial and artistic movie scores of 7.0
+    Then every generated script has commercial and artistic movie scores of 6.0
     And the first result displays <metric> as <value>
     When the player opens the first result in Colman Graves and Marketing
     Then both destinations preserve its elements and genre shares
-    And both destinations retain commercial and artistic movie scores of 7.0
+    And both destinations retain commercial and artistic movie scores of 6.0
 
     Examples:
       | mode                      | metric           | value |
-      | Generate Scripts          | Movie Score      | 7.0   |
+      | Generate Scripts          | Movie Score      | 6.0   |
       | Highest Artistic Appeal   | Artistic Bonus   | 0.65  |
       | Highest Commercial Appeal | Commercial Bonus | 0.40  |
 

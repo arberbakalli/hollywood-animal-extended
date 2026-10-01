@@ -581,7 +581,10 @@ a review of the source.
   a pair missing from the data counts as 3.0, and each pair scores `(raw - 3) / 2`.
   Each row takes its worst pair, and a pair at or below 1.0 raises a spoiler. The
   total is multiplied by 0.9 when positive and by 1.25 when negative.
-  The code also weights a row's pairs by category (Genre 20 x share, Setting 5,
+  **Owner assumption 2026-10-01:** a genre's share does not weight its pair
+  scores; a 5% genre counts as much as a 95% one in Average Fit, the verdict and
+  Conflicts. It cannot be checked in the game, so it is assumed, as the code
+  already does. The code also weights a row's pairs by category (Genre 20 x share, Setting 5,
   others 3 on negative pairs), but the weights cannot change any result: the row
   then keeps the lower of that weighted average and its worst pair, and a
   weighted average is never below its own minimum. So every row scores its worst

@@ -78,12 +78,12 @@ Feature: Marketing and Release
       | Artistic Ability |
 
   # [automated] TC04-000028. Behemoth has two separate effects: a
-  # +25% boost to all weeks 1-8 whenever it is active, plus slower decay only
-  # above commercial score 9.
+  # +25% boost to all weeks 1-8 whenever it is active, plus slower decay from
+  # commercial score 9 and above (owner ruling 2026-10-01).
   Scenario: Behemoth applies 25% boost to all weeks
     When the user enables the Behemoth studio policy
     Then all weeks 1-8 demand increases by 25 percent
-    When the user raises the commercial score above 9
+    When the user raises the commercial score to 9 or above
     Then week 3 keeps more attendance than the normal grid
 
   # [automated] TC-BEH-002 and TC-BEH-003. The control should explain that the Behemoth boost
@@ -94,7 +94,7 @@ Feature: Marketing and Release
     And its tooltip explains the 25 percent boost to all weeks
 
   # [automated] TC04-000014. Boutique is the artistic counterpart: it never changes week 1,
-  # and its slower decay is gated by artistic score above 9.
+  # and its slower decay is gated by artistic score 9 and above.
   Scenario: Boutique slows later weeks only for highly artistic films
     When the user sets the artistic score to 10
     And the user enables the Boutique studio policy
@@ -213,22 +213,20 @@ Feature: Marketing and Release
 
   # [automated] TC-BEH-006. The grid shows decay through the week3/week2 ratio
   # because the boost lifts both weeks together.
-  Scenario: Behemoth slower decay requires commercial score above 9
-    When the user sets the commercial score to 9.0
+  Scenario: Below commercial score 9 Behemoth boosts every week but not the decay
+    When the user sets the commercial score to 8.5
     And the user enables the Behemoth studio policy
     Then week 3 shows the boost but uses the normal decay rate
-    When the user raises the commercial score to 9.1
-    Then week 3 shows the boost and uses the slower decay rate
 
   # [automated] TC04-000028. Studio policy status messaging shows the user
   # exactly what effects are active based on the current state.
   Scenario: Behemoth status shows boost-only when score below 9
     When the user sets the commercial score to 8.0
     And the user enables the Behemoth studio policy
-    Then the studio policy status reads "Behemoth: +25% Boost Active (Slower decay at commercial 9+)"
+    Then the studio policy status reads "Behemoth: +25% Boost Active (Slower decay from commercial 9 and above)"
 
-  # [automated] TC04-000028. Behemoth status shows both effects when score exceeds 9.
-  Scenario: Behemoth status shows boost plus decay when score above 9
+  # [automated] TC04-000028. Behemoth status shows both effects from score 9.
+  Scenario: Behemoth status shows boost plus decay from score 9
     When the user sets the commercial score to 10.0
     And the user enables the Behemoth studio policy
     Then the studio policy status reads "Behemoth: +25% Boost + Slower Decay Active"
@@ -237,7 +235,7 @@ Feature: Marketing and Release
   Scenario: Boutique status messaging tracks artistic score threshold
     When the user sets the artistic score to 8.0
     And the user enables the Boutique studio policy
-    Then the studio policy status reads "Boutique: Slower Decay at artistic 9+"
+    Then the studio policy status reads "Boutique: Slower Decay from artistic 9 and above"
     And the artistic score is displayed in the distribution info
 
   # [automated] TC04-000028. When both studio policies are active, both show in status.
