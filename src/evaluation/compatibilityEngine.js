@@ -1,4 +1,31 @@
 (function(global) {
+    // The value the data uses for "no entry". A missing pair counts as 3.0.
+    const NO_DATA = 3.0;
+
+    function readDirected(fromId, toId, gameData) {
+        const row = gameData.compatibility[fromId];
+        const value = row ? row[toId] : undefined;
+        return value === undefined || value === null || value === '' ? null : parseFloat(value);
+    }
+
+    // One score per pair, whichever element comes first. The data holds every
+    // pair in both directions; 36 pairs disagree, all with Hardened Cynic's
+    // own row at 3.0 and the reverse at 4 or 5, so the panels that read A->B
+    // and the ones that read B->A disagreed. Owner ruling 2026-10-01: use the
+    // real entry, so a 3.0 that disagrees with the other direction yields to it.
+    function pairScore(tagA, tagB, gameData) {
+        const ab = readDirected(tagA.id, tagB.id, gameData);
+        const ba = readDirected(tagB.id, tagA.id, gameData);
+        if (ab === null && ba === null) return NO_DATA;
+        if (ab === null) return ba;
+        if (ba === null) return ab;
+        if (ab === ba) return ab;
+        if (ab === NO_DATA) return ba;
+        if (ba === NO_DATA) return ab;
+        // Two different real entries: none in the data (measured 2026-10-01).
+        return ab;
+    }
+
     function calculateMatrixScore(tags, gameData) {
         let totalScore = 0;
         let spoilers = [];
@@ -7,14 +34,7 @@
 
         for (let i = 0; i < tags.length; i++) {
             for (let j = i + 1; j < tags.length; j++) {
-                let tA = tags[i];
-                let tB = tags[j];
-                let rawVal = 3.0;
-                if (gameData.compatibility[tA.id] && gameData.compatibility[tA.id][tB.id]) {
-                    rawVal = parseFloat(gameData.compatibility[tA.id][tB.id]);
-                } else if (gameData.compatibility[tB.id] && gameData.compatibility[tB.id][tA.id]) {
-                    rawVal = parseFloat(gameData.compatibility[tB.id][tA.id]);
-                }
+                const rawVal = pairScore(tags[i], tags[j], gameData);
                 rawSum += rawVal;
                 pairCount++;
             }
@@ -28,12 +48,7 @@
             let worstPartner = "";
             tags.forEach(tagB => {
                 if (tagA.id === tagB.id) return;
-                let rawVal = 3.0;
-                if (gameData.compatibility[tagA.id] && gameData.compatibility[tagA.id][tagB.id]) {
-                    rawVal = parseFloat(gameData.compatibility[tagA.id][tagB.id]);
-                } else if (gameData.compatibility[tagB.id] && gameData.compatibility[tagB.id][tagA.id]) {
-                    rawVal = parseFloat(gameData.compatibility[tagB.id][tagA.id]);
-                }
+                const rawVal = pairScore(tagA, tagB, gameData);
                 let score = (rawVal - 3.0) / 2.0;
                 let weight = 1.0;
                 if (score < 0) {
@@ -148,15 +163,7 @@
     }
 
     function getRawCompatibilityScore(tagA, tagB, gameData) {
-        if (gameData.compatibility[tagA.id] && gameData.compatibility[tagA.id][tagB.id]) {
-            return parseFloat(gameData.compatibility[tagA.id][tagB.id]);
-        }
-
-        if (gameData.compatibility[tagB.id] && gameData.compatibility[tagB.id][tagA.id]) {
-            return parseFloat(gameData.compatibility[tagB.id][tagA.id]);
-        }
-
-        return 3.0;
+        return pairScore(tagA, tagB, gameData);
     }
 
     global.HACCompatibilityEngine = {

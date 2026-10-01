@@ -322,6 +322,14 @@ Swap, or a Genre/Setting candidate, stays live at the budget.
 
 Pair compatibility is a raw score out of 5.
 
+**A pair has one score, whichever element comes first.** The data holds every
+pair in both directions. Where the two disagree and one is 3.0 (the extract's
+"no data" value), the other is the real entry and is used. 36 pairs disagree,
+all with Hardened Cynic's own row at 3.0 and the reverse at 4 or 5. (Owner
+ruling 2026-10-01: use the real entry. `pairScore` in
+`src/evaluation/compatibilityEngine.js`; every pair is checked in
+`tests/bug-hunt-2026-09-30.test.js`.)
+
 | Band | Range | Where shown |
 |---|---|---|
 | Successful | ≥ 4.0 | Pair Analysis, Best Matches |

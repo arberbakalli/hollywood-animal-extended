@@ -71,9 +71,6 @@ or an owner-approved edit to an existing test, so none was guessed.
 **Needs an owner ruling:**
 - Verdict vs Average Fit: 3.476 shows "3.5" next to "Risky" (bands read the
   unrounded value). Band the shown tenth, or show two decimals?
-- Asymmetric pair data: `PROTAGONIST_CYNIC`'s own row is all 3s while the
-  reverse entries hold 4-5 (36 pairs). Best Additions and Pair Analysis read
-  different directions, so they disagree. Which direction is the game's?
 - Conflict severity: data is whole numbers 1-5, so "severe" (< 1.0) and "mild"
   (1.5-2.0) never occur; every conflict reads "serious", and the engine treats
   1.0 as a spoiler. Should the bands move?

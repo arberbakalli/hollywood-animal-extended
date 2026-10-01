@@ -307,6 +307,41 @@ describe('bug hunt 2026-09-30', () => {
         });
     });
 
+    // Owner ruling 2026-10-01: use the real entry. The data holds every pair
+    // in both directions; 36 pairs disagree, all with Hardened Cynic's own
+    // row at 3 (the extract's "no data" value) and the reverse at 4 or 5.
+    // Best Additions read one direction and Pair Analysis the other.
+    describe('a pair scores the same in both directions', () => {
+        test('every pair in the data, through the shared lookup', () => {
+            const tags = Object.values(h.GAME_DATA.tags);
+            const problems = [];
+            for (let a = 0; a < tags.length; a++) {
+                for (let b = a + 1; b < tags.length; b++) {
+                    const ab = h.call('getRawCompatibilityScore', tags[a], tags[b]);
+                    const ba = h.call('getRawCompatibilityScore', tags[b], tags[a]);
+                    if (ab !== ba) problems.push(`${tags[a].id} x ${tags[b].id}: ${ab} / ${ba}`);
+                }
+            }
+            expect(problems).toEqual([]);
+        });
+
+        test('the real entry wins over the 3.0 default: Hardened Cynic x Evil Transformation is 5', () => {
+            const cynic = h.GAME_DATA.tags.PROTAGONIST_CYNIC;
+            const evil = h.GAME_DATA.tags.THEME_EVIL_TRANSFORMATION;
+            expect(h.call('getRawCompatibilityScore', cynic, evil)).toBe(5);
+            expect(h.call('getRawCompatibilityScore', evil, cynic)).toBe(5);
+        });
+
+        test('the matrix score does not depend on which element comes first', () => {
+            const tags = ['PROTAGONIST_CYNIC', 'THEME_EVIL_TRANSFORMATION', 'ADVENTURE', 'FANTASY_KINGDOM']
+                .map(id => ({ ...h.GAME_DATA.tags[id], percent: 1 }));
+            const forward = h.call('calculateMatrixScore', tags);
+            const reverse = h.call('calculateMatrixScore', [...tags].reverse());
+            expect(reverse.rawAverage).toBe(forward.rawAverage);
+            expect(reverse.totalScore).toBeCloseTo(forward.totalScore, 10);
+        });
+    });
+
     // Audit 2026-09-30: a library file is shared between players, so import
     // trusts nothing in it. It already skipped unknown elements; it accepted
     // a duplicate element, two Settings, and a Genre share no builder can hold.
