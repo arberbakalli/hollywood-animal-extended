@@ -449,12 +449,32 @@ budget is over $1,000,000". Both effects follow it:
 
 Slower decay only, weeks 3+, from **artistic** score **9 and above**.
 
-> Owner ruling 2026-10-01: both decay gates open from 9 and above. The game's
-> strings say "above 9" for both (`localization/English.json:12479`, `:12490`);
-> the owner ruled against that reading. Before this the gates were strictly
-> above 9. `resolveDecayRate` and `describeStudioPolicies` in
-> `src/marketing/distributionPlanner.js`; the status line reads "from … 9 and
-> above" below the gate.
+### The decay gates: 9 and above
+
+**Both slower-decay gates open at a score of 9 or higher (`>= 9`)**: Behemoth on
+the commercial score, Boutique on the artistic score. A score of exactly 9 gets
+the slower decay; 8.9 does not.
+
+| Score | Behemoth slower decay (commercial) | Boutique slower decay (artistic) |
+|---|---|---|
+| 8.9 or below | No | No |
+| **9.0** | **Yes** | **Yes** |
+| above 9 | Yes | Yes |
+
+> Owner ruling 2026-10-01. The game's strings say "above 9" for both
+> (`localization/English.json:12479`, `:12490`); the owner ruled `>= 9` against
+> that reading. Before this ruling both gates were strictly above 9 (`> 9`).
+> Enforced in `resolveDecayRate` and `describeStudioPolicies`
+> (`src/marketing/distributionPlanner.js`). Below the gate the status line reads
+> "Slower decay from commercial 9 and above" / "Slower Decay from artistic 9 and
+> above"; the toggle tooltips say "9 or above".
+>
+> Pinned at exactly 9, for both policies: `distribution-behemoth.test.js`
+> ("slower decay threshold (score >= 9)"), `distribution-boutique.test.js`
+> ("slows decay at exactly artistic 9"), `distribution-studio-policy-status.test.js`
+> (both "at exactly 9 the decay is active"), TC22-000001 (commercial 9 with
+> Behemoth: week 3 = 9563) and TC04-000014 (artistic 9 slows the decay, 8 does
+> not). Checked 2026-10-01: with the gate set back to `> 9`, all six fail.
 
 | Score | Behemoth slower decay | Boutique slower decay |
 |---|---|---|

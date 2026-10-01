@@ -53,7 +53,7 @@ test.describe('Distribution Calculator — Behemoth Policy Feature', () => {
       expect(demandAfter).toBe(expectedIncrease);
     });
 
-    test('TC-BEH-005: Decay rate improves (0.85 vs 0.8) when score > 9 and Behemoth active', async ({ page }) => {
+    test('TC-BEH-005: Decay rate improves (0.85 vs 0.8) when score >= 9 and Behemoth active', async ({ page }) => {
       await page.click('button:has-text("Marketing & Release")');
 
       // Set commercial score to 10.0 (above Behemoth threshold of 9)
@@ -77,7 +77,7 @@ test.describe('Distribution Calculator — Behemoth Policy Feature', () => {
     // Below the decay threshold the two halves of the Behemoth policy part ways:
     // the +25% boost still applies to every week, the slower decay does not.
     // The boost lifts weeks 2 and 3 together, so the week-on-week ratio is what
-    // exposes the decay rate — it stays at the base 0.8 until the score passes 9.
+    // exposes the decay rate — it stays at the base 0.8 until the score reaches 9.
     test('TC-BEH-006: below score 9, Behemoth boosts every week but not the decay', async ({ page }) => {
       await page.click('button:has-text("Marketing & Release")');
 
@@ -101,7 +101,7 @@ test.describe('Distribution Calculator — Behemoth Policy Feature', () => {
       expect(parseInt(week2After)).toBe(Math.ceil(parseInt(week2Before) * 1.25));
       expect(parseInt(week3After)).toBe(Math.ceil(parseInt(week3Before) * 1.25));
 
-      // Weeks 3+ keep the base 0.8 decay until the score passes 9, so the boost
+      // Weeks 3+ keep the base 0.8 decay until the score reaches 9, so the boost
       // must not have changed the shape of the curve.
       expect(parseInt(week3Before) / parseInt(week2Before)).toBeCloseTo(0.8, 5);
       expect(parseInt(week3After) / parseInt(week2After)).toBeCloseTo(0.8, 5);

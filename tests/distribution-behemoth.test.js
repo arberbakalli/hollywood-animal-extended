@@ -68,7 +68,7 @@ describe('Distribution — Behemoth policy', () => {
 
         test('applies below the decay threshold too', () => {
             // The two halves of the policy have different gates: the week 1
-            // boost applies at any score, only the slower decay needs score > 9.
+            // boost applies at any score, only the slower decay needs score 9 and above.
             // Confirmed with the repo owner; not yet traced to a game file.
             const off = weeklyDemand(5, { behemoth: false });
             const on = weeklyDemand(5, { behemoth: true });
@@ -87,7 +87,7 @@ describe('Distribution — Behemoth policy', () => {
             }
         });
 
-        test('boost applies at all score levels (not just > 9)', () => {
+        test('boost applies at all score levels (not just 9 and above)', () => {
             const off = weeklyDemand(5, { behemoth: false });
             const on = weeklyDemand(5, { behemoth: true });
 

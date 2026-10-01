@@ -35,7 +35,7 @@ describe('Distribution — Boutique policy', () => {
     });
 
     describe('gate', () => {
-        test('slows decay when artistic rating is above 9', () => {
+        test('slows decay when artistic rating is above the gate', () => {
             expect(decay(5, 10, false, true)).toBe(ONE_MODIFIER);
         });
 
