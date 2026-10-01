@@ -94,7 +94,7 @@ or an owner-approved edit to an existing test, so none was guessed.
 - The library load message says "Loaded 1 scripts." TC01-000029 pins that
   exact text, so the grammar fix needs approval.
 - TC01-000020 (Reset Locks hides results) never generates first, so it passes
-  vacuously. A new, non-vacuous test can be added without approval.
+  vacuously. TC01-000051 now covers the real case; TC01-000020 itself is unchanged.
 
 ## Data Correctness
 
