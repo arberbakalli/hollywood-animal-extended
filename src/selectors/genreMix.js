@@ -67,8 +67,9 @@
             return;
         }
         const ceiling = 100 - GENRE_PERCENT_MIN * others.length;
+        const requested = Number.isFinite(requestedValue) ? requestedValue : GENRE_PERCENT_MIN;
         const value = Math.min(ceiling,
-            Math.max(GENRE_PERCENT_MIN, snapGenrePercent(requestedValue)));
+            Math.max(GENRE_PERCENT_MIN, snapGenrePercent(requested)));
         writeGenrePercent(changedRow, value);
         splitGenrePercent(100 - value, others.map(readGenrePercent))
             .forEach((share, index) => writeGenrePercent(others[index], share));
