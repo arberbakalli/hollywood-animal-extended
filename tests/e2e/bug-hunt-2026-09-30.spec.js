@@ -342,23 +342,30 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(page.locator('#results-advertisers')).toBeHidden();
   });
 
+  // A saved Library script is the one place a banned element can remain
+  // (generated scripts hide on a ban, TC01-000047), so the transfer goes
+  // through a pinned script.
   test('TC04-000038 a transfer that skips a banned element still shows why Analyze refused', async ({ steps, page }) => {
     await steps.setSliderValue('elementPoolSlider', 'Navigation', 7);
     await page.locator('#generateScriptsButton').click();
     const card = page.locator('#generatorResultsList .gen-card').first();
     await expect(card).toBeVisible({ timeout: 20000 });
-    const script = await page.evaluate(() => generatedScriptsCache[0].tags);
+    if (await card.locator('.pin-btn').isHidden()) await card.locator('.gen-header').click();
+    await card.locator('.pin-btn').click();
+    const pinned = page.locator('#pinnedResultsList .gen-card').first();
+    await expect(pinned).toBeVisible();
+
+    const script = await page.evaluate(() => pinnedScripts[0].tags);
     const banned = script.find(tag => tag.category === 'Theme & Event' || tag.category === 'Supporting Character');
     const slug = banned.category === 'Theme & Event' ? 'theme-event' : 'supporting-character';
-
     const content = page.locator('#excluded-content');
     if (await content.evaluate(el => el.classList.contains('hidden'))) await page.locator('#toggleExcludedElementsButton').click();
     await page.locator(`#add-${slug}-excluded-button`).click();
     await page.locator(`#inputs-${slug}-excluded select.tag-selector`).first().selectOption(banned.id);
     await steps.setSliderValue('elementPoolSlider', 'Navigation', 5);
 
-    if (await card.locator('.gen-details').isHidden()) await card.locator('.gen-header').click();
-    await card.locator('[data-role="script-transfer-button"]').click();
+    if (await pinned.locator('[data-role="script-transfer-button"]').isHidden()) await pinned.locator('.gen-header').click();
+    await pinned.locator('[data-role="script-transfer-button"]').click();
     const feedback = page.locator('#advertisersFeedbackMessage');
     await expect(feedback).toContainText('Skipped excluded elements');
     await expect(feedback).toContainText('Max Element Pool is set to 5, but you selected 6');
