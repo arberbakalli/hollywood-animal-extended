@@ -69,8 +69,6 @@ or an owner-approved edit to an existing test, so none was guessed.
 (All three are done: see the commits after 0fce41e.)
 
 **Needs an owner ruling:**
-- Verdict vs Average Fit: 3.476 shows "3.5" next to "Risky" (bands read the
-  unrounded value). Band the shown tenth, or show two decimals?
 - Conflict severity: data is whole numbers 1-5, so "severe" (< 1.0) and "mild"
   (1.5-2.0) never occur; every conflict reads "serious", and the engine treats
   1.0 as a spoiler. Should the bands move?
@@ -86,13 +84,8 @@ or an owner-approved edit to an existing test, so none was guessed.
 - Holiday label shows +18.3% while the grid applies 18.333...%.
 
 **Needs an approved edit to an existing test:**
-- Advertiser grade is set from the raw score but two decimals are shown: 1.7%
-  of cards disagree ("1.94 D" where C starts at 1.94). GAME_RULES says one
-  decimal, graded on it (open tie-mode question Q3). TC23-000001 pins "3.00".
 - The studio-policy line says "9+" while the gate is strictly above 9 (the
   tooltip and the rule say "above 9"). TC04-000028 and a Jest test pin "9+".
-- The library load message says "Loaded 1 scripts." TC01-000029 pins that
-  exact text, so the grammar fix needs approval.
 - TC01-000020 (Reset Locks hides results) never generates first, so it passes
   vacuously. TC01-000051 now covers the real case; TC01-000020 itself is unchanged.
 
