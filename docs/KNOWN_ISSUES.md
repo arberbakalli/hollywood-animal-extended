@@ -74,8 +74,6 @@ or an owner-approved edit to an existing test, so none was guessed.
   1.0 as a spoiler. Should the bands move?
 - A Genre share does not weight pair scores (a 5% genre counts like 95%).
   Listed in GAME_RULES section 6 as unconfirmed.
-- Best Additions hides Genre candidates at the element budget, although Genre
-  does not count toward it; Pairwise keeps them live.
 - Graves "Likely Audience" and Marketing's target audiences use two models.
 - Script Lab Highest Artistic/Commercial ignore Target Average Compatibility
   (24 of 48 below 4.0 at pool 10). The clash part was ruled 2026-10-01: every

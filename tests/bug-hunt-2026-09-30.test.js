@@ -140,6 +140,24 @@ describe('bug hunt 2026-09-30', () => {
         });
     });
 
+    // Owner ruling 2026-10-01: Genre does not count toward the budget, so a
+    // Genre stays addable when the story elements are full. Pairwise already
+    // kept Genre Add live there; Best Additions showed nothing.
+    describe('Best Additions at the element budget', () => {
+        const theme = (id) => ({ id, name: id, category: 'Theme & Event' });
+        const OPTS = { calculateMatrixScore: () => ({ rawAverage: 3 }), getRawCompatibilityScore: () => 5, multiSelectCategories: ['Theme & Event', 'Genre'] };
+        const rows = (candidates) => h.call('HACGravesBestMatchesEngine.buildAdditions',
+            [theme('A'), theme('B')], candidates, 0, 2, OPTS);
+
+        test('a Genre candidate is still listed', () => {
+            expect(rows([{ id: 'ACTION', name: 'Action', category: 'Genre' }]).map(row => row.candidate.id)).toEqual(['ACTION']);
+        });
+
+        test('a story element is not', () => {
+            expect(rows([theme('C')])).toEqual([]);
+        });
+    });
+
     describe('Best Additions explains a short list', () => {
         // The harness reports Max Element Pool 10.
         const themes = (count) => Array.from({ length: count }, (_, i) => ({

@@ -76,9 +76,13 @@
         const poolCount = selectedTags.filter(tag =>
             tag.category !== 'Genre' && tag.category !== 'Setting'
         ).length;
+        // Genre and Setting spend no budget, so they stay addable when the
+        // story elements are full (owner ruling 2026-10-01). Setting still
+        // holds one, which isCategoryFull enforces.
+        const spendsBudget = candidate => candidate.category !== 'Genre' && candidate.category !== 'Setting';
         const eligibleCandidates = candidates.filter(candidate => {
             if (isCategoryFull(candidate.category, counts, options.multiSelectCategories)) return false;
-            if (poolCount >= maxPoolSize) return false;
+            if (spendsBudget(candidate) && poolCount >= maxPoolSize) return false;
             return true;
         });
 

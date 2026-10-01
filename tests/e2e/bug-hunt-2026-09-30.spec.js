@@ -635,6 +635,23 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(staleNotice(page)).toBeHidden();
   });
 
+  // Owner ruling 2026-10-01: at the element budget Best Additions still
+  // lists Genres, which do not count toward it, and says why only Genres.
+  test('TC03-000057 at the element budget Best Additions lists Genres only, and says so', async ({ steps, page }) => {
+    await buildOwnerScript(steps, page);
+    await steps.setSliderValue('elementPoolSlider', 'Navigation', 6);
+    await steps.on('evaluateTab', 'Navigation').click();
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', { type: DropdownSelectType.VALUE, value: '0' });
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+    await steps.on('bestAdditionsTab', 'ColmanGraves').click();
+
+    const rows = swapList(page).locator('[data-role="graves-best-match"]');
+    await expect(rows.first()).toBeVisible();
+    const categories = await rows.evaluateAll(list => [...new Set(list.map(row => row.dataset.category))]);
+    expect(categories).toEqual(['Genre']);
+    await expect(page.locator('[data-role="graves-additions-budget-note"]')).toContainText('already uses all 6 story elements');
+  });
+
   // Given the short-list note is showing at 4.0+
   // When the user clicks its button
   // Then Minimum Fit drops one step and the list refills with story elements

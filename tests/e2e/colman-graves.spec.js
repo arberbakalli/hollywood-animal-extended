@@ -322,9 +322,13 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
     await steps.on('bestMatchesPanel', 'ColmanGraves').verifyState('visible');
 
-    await steps.on('bestMatchRows', 'ColmanGraves').verifyCount({ exactly: 0 });
+    // Owner ruling 2026-10-01, edit approved: Genre spends no budget, so at
+    // the full budget Best Additions lists Genres only, under the budget note.
+    const categories = await page.locator('#gravesBestMatchesList [data-role="graves-best-match"]')
+      .evaluateAll(rows => [...new Set(rows.map(row => row.dataset.category))]);
+    expect(categories).toEqual(['Genre']);
 
-    const message = await page.locator('#gravesBestMatchesList .empty-state').textContent();
+    const message = await page.locator('[data-role="graves-additions-budget-note"]').textContent();
     expect(message).toContain('already uses all 5 story elements');
     expect(message).toContain('Max Element Pool');
     expect(message).toContain('Swap Suggestions');
@@ -343,6 +347,10 @@ test.describe('Script Evaluation — Colman Graves', () => {
       type: DropdownSelectType.VALUE,
       value: '4.0',
     });
+    // Owner ruling 2026-10-01, edit approved: Genres stay addable at the
+    // budget, so the search is narrowed to a story category, which the full
+    // budget leaves empty at every threshold.
+    await page.locator('#gravesBestCategoryFilter').selectOption('Theme & Event');
 
     // At the default pool this finds nothing at any threshold, so the retry
     // exhausts every value on its way down.

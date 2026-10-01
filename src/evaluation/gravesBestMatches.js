@@ -400,6 +400,10 @@
             list.innerHTML = emptyMarkup(additionsEmptyReason(selectedTags));
             return;
         }
+        // At the budget only Genres can still be added; say so above them.
+        const budgetNote = atElementBudget(selectedTags)
+            ? `<div class="best-match-slot-note" data-role="graves-additions-budget-note">${elementBudgetMessage()} Only Genres can still be added here.</div>`
+            : '';
         const shortfall = additionsShortfallNote(selectedTags, rows, minimumFit(),
             document.getElementById('gravesBestCategoryFilter')?.value || '');
         const lower = shortfall ? nextLowerFit(document.getElementById('gravesBestScoreFilter')?.value) : null;
@@ -410,7 +414,7 @@
             ? `<div class="best-match-slot-note best-match-shortfall-note" data-role="graves-additions-shortfall">${shortfall}${lowerButton}</div>`
             : '';
         const markup = groupedMarkup(rows, visibleRowCount);
-        list.innerHTML = note + markup + showMoreButton();
+        list.innerHTML = budgetNote + note + markup + showMoreButton();
         bindShowMoreButton(list);
     }
 

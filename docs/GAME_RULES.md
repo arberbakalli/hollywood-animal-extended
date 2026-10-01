@@ -216,14 +216,16 @@ Slapstick Comedy's colour is a placeholder until the owner sees it in the game.
 | Feature | Budget applies? | Behaviour |
 |---|---|---|
 | Script Lab | Yes | Generates the pool (section 1) |
-| Best Additions | Yes | Engine returns no rows at the budget |
+| Best Additions | Yes | At the budget, lists Genres only (they spend no budget) |
 | Pairwise | Yes, on the **Add button only** | Rows still list; Add is disabled |
 | Swap Suggestions | **No** | A swap trades within a category, so the count cannot change |
 | Build for Target | Yes | Combination = budget in story elements, plus context; never a pair below 2.0 |
 
-A complete 5-element script sits at its budget, so Best Additions is correctly
-empty. That is intended: raise the pool, or swap. A test wanting additions from a
-complete script must raise the pool first.
+A complete 5-element script sits at its budget, so Best Additions lists no
+story element: raise the pool, or swap. It still lists Genres, which spend no
+budget, under a note that says so (owner ruling 2026-10-01; it used to be empty).
+A test wanting story-element additions from a complete script must raise the
+pool first.
 
 **Best Additions says when the list is short.** When fewer story elements clear
 Minimum Fit than the budget has free slots, a note names the free slots and the
