@@ -1,23 +1,22 @@
 ﻿# Known Issues
 
-Last verified: 2026-09-28
+Original audit: 2026-09-28. Later verification is dated beside each update.
 
-Confirmed, unresolved risks. Each entry has been observed directly â€” in the running app, in test
-output, or in the source. Completed work and handoff notes are intentionally excluded.
+Observed risks and their outcomes. Resolved regressions stay here when the lesson
+helps prevent a repeat.
 
-## Script Lab Controls
+## Resolved Script Lab Control Regression
 
-- **Pool changes leave the required-story-element help text stale.** Reproduced
+- **Pool changes left the required-story-element help text stale.** Reproduced
   2026-09-29 in `codex/hardening` on base `3125050`: enter 9 in Max Element Pool
   and leave the field. The target score reads 9, while
   `#genTagsRequiredDisplay` still says "Requires ~5 Story Elements".
   `src/app/appShell.js:173` updates the score fields directly;
   `src/generator/scriptGenerator.js:70` refreshes the help text only on score
   input events. New TC24-000001 cases in
-  `tests/e2e/generation-score-transfers.spec.js` fail on this discrepancy for
-  all three generation modes. Claude owns the production fix under the current
-  work split. Share the display-only renderer with the pool synchronization path;
-  do not dispatch the existing score input event, which also remaps pool 8 to 7.
+  `tests/e2e/generation-score-transfers.spec.js` originally failed for all three
+  modes. Resolved on main: TC24-000001 passed in all three modes during the full
+  Playwright run on 2026-10-01. The pool and target now stay one to one.
 
 ## Owner bug hunt 2026-09-30
 

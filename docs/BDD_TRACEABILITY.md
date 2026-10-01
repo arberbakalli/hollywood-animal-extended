@@ -158,12 +158,14 @@ cross-feature contracts live in `tests/scenarios/product-hardening.feature`.
   `tests/e2e/advertiser-fit-parity.spec.js` (TC25-000001) compares displayed fit and
   grades for all eight agencies using the same fully locked script in both views.
   Rendered movie-lean label and specialist fit: TC23-000001 in
-  `tests/e2e/marketing-score-contracts.spec.js`.
+  `tests/e2e/marketing-score-contracts.spec.js`. Displayed recommendation order:
+  TC30-000001 in `tests/e2e/marketing-profile-ranking.spec.js`.
+- An empty Genre percentage is normalized into finite 5% steps totaling 100 in
+  all four builders: `tests/genre-share-empty-input.test.js` and TC29-000001 in
+  `tests/e2e/genre-share-empty-input.spec.js`.
 - Rendered text contrast, focus color stability and suggestion bounds at 390px
   and 1280px: `tests/e2e/readability-hardening.spec.js`. This does not certify
   native operating-system dropdown popups or every responsive width.
 
-TC24-000001 currently fails before generation: changing the pool to nine leaves
-the required-story-element help text at five. Its downstream transfer assertions
-are not yet verified at this boundary; see `docs/KNOWN_ISSUES.md`. Do not count
-that case as passing coverage or promote a corresponding scenario until fixed.
+TC24-000001 now passes at pool nine, including its transfer assertions. The full
+Playwright run on 2026-10-01 passed all three mode cases.
