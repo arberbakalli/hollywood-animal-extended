@@ -27,7 +27,7 @@ This project uses three documents for QA governance:
 **Product rules** — what the game and app do, not how.
 - Starting Tags: exactly 250 elements, 57 whitelisted, 193 banned on first visit
 - Distribution formula: Week 1 = commercial score × 2 × 1,000; subsequent weeks decay at 0.8 (or 0.85/0.90 with policies)
-- Studio policies: Behemoth (>9 commercial) and Boutique (>9 artistic) gates
+- Studio policies: Behemoth (commercial 9 and above) and Boutique (artistic 9 and above) gates
 - Graves evaluation scoring and compatibility matrix rules
 
 ### 2. [docs/QA_FRAMEWORK.md](QA_FRAMEWORK.md)

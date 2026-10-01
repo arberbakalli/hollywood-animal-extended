@@ -455,6 +455,12 @@ Slower decay only, weeks 3+, from **artistic** score **9 and above**.
 > `src/marketing/distributionPlanner.js`; the status line reads "from … 9 and
 > above" below the gate.
 
+| Score | Behemoth slower decay | Boutique slower decay |
+|---|---|---|
+| 8.9 | No | No |
+| 9.0 | Yes | Yes |
+| 10.0 | Yes | Yes |
+
 ### Both together
 
 A studio can hold both. The decay modifiers compose additively on the fall:

@@ -188,9 +188,9 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
   to a production budget that exceeds $1,000,000. The game string says "first week"; the owner
   ruled on 2026-09-22 that it applies to every week 1-8, since the game shows the Behemoth icon on
   each. The calculator has no budget input, so the toggle stands for "Behemoth, with a budget over
-  $1,000,000". The slower-decay perk follows the same toggle, plus commercial above 9 (owner,
-  2026-09-28). A Behemoth studio under the budget line, which in the game still gets the slower
-  decay, is not modelled.
+  $1,000,000". The slower-decay perk follows the same toggle, plus commercial 9 and above
+  (owner correction, 2026-10-01). A Behemoth studio under the budget line, which in the game
+  still gets the slower decay, is not modelled.
 - **Attendance is deliberately not modelled.** The calculator outputs demand in screenings and
   assumes it is met. The game reports an occupancy percentage instead, computed against
   `localization/English.json:11269` ("400 seats per show") and surfaced as the
