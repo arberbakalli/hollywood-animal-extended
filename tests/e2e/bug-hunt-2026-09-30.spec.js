@@ -270,6 +270,16 @@ test.describe('Bug hunt 2026-09-30', () => {
     await expect(swapList(page).locator(`[data-role="graves-best-match"][data-tag-id="${suggested}"]`)).toHaveCount(0);
   });
 
+  // Audit 2026-09-30: TC01-000020 asserts Reset Locks hides the results but
+  // never generates first, so it passes with nothing to hide. This one
+  // generates, then resets.
+  test('TC01-000051 Reset Locks hides results that were on screen', async ({ page }) => {
+    await page.locator('#generateScriptsButton').click();
+    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
+    await page.locator('#resetGeneratorLocksButton').click();
+    await expect(page.locator('#results-generator')).toBeHidden();
+  });
+
   // Owner ruling 2026-10-01: Script Lab shows every result, and a card whose
   // script holds an Unsuccessful pair (< 2.0) says so, so the player sees
   // the score-versus-coherence trade-off.
