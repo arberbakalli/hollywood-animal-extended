@@ -66,9 +66,7 @@ Marketing & Release. Fixed items are in the commits of
 or an owner-approved edit to an existing test, so none was guessed.
 
 **Still to fix (rule is settled, work not done yet):**
-- Library import accepts duplicate elements or two Settings in one entry, does
-  not count a duplicate `uniqueId`, and keeps a Genre share that is not a 5% step
-  (0.37). `src/library/scriptLibrary.js` about line 139-177.
+(All three are done: see the commits after 0fce41e.)
 
 **Needs an owner ruling:**
 - Verdict vs Average Fit: 3.476 shows "3.5" next to "Risky" (bands read the
@@ -98,6 +96,8 @@ or an owner-approved edit to an existing test, so none was guessed.
   decimal, graded on it (open tie-mode question Q3). TC23-000001 pins "3.00".
 - The studio-policy line says "9+" while the gate is strictly above 9 (the
   tooltip and the rule say "above 9"). TC04-000028 and a Jest test pin "9+".
+- The library load message says "Loaded 1 scripts." TC01-000029 pins that
+  exact text, so the grammar fix needs approval.
 - TC01-000020 (Reset Locks hides results) never generates first, so it passes
   vacuously. A new, non-vacuous test can be added without approval.
 

@@ -307,6 +307,64 @@ describe('bug hunt 2026-09-30', () => {
         });
     });
 
+    // Audit 2026-09-30: a library file is shared between players, so import
+    // trusts nothing in it. It already skipped unknown elements; it accepted
+    // a duplicate element, two Settings, and a Genre share no builder can hold.
+    describe('Script Library import', () => {
+        const entry = (tags, uniqueId = `u-${Math.random()}`) => ({ uniqueId, name: 'File script', tags });
+        const BASE = [
+            { id: 'ADVENTURE', category: 'Genre', percent: 1 },
+            { id: 'FANTASY_KINGDOM', category: 'Setting', percent: 1 },
+            { id: 'PROTAGONIST_DARING_ADVENTURER', category: 'Protagonist', percent: 1 },
+            { id: 'ANTAGONIST_EVIL_MONSTER', category: 'Antagonist', percent: 1 },
+            { id: 'FINALE_PROTAGONIST_FINDS_TREASURE', category: 'Finale', percent: 1 },
+        ];
+        const importScripts = entries => h.call('HACScriptLibrary.importScripts', entries);
+        beforeEach(() => { globalThis.pinnedScripts.length = 0; });
+
+        test('skips an entry that holds the same element twice', () => {
+            const tags = [...BASE, { id: 'THEME_TREASURE_HUNT', category: 'Theme & Event' }, { id: 'THEME_TREASURE_HUNT', category: 'Theme & Event' }];
+            expect(importScripts([entry(tags)])).toEqual({ added: 0, skipped: 1 });
+        });
+
+        test.each(['Setting', 'Protagonist', 'Antagonist', 'Finale'])('skips an entry with two %s picks', (category) => {
+            const second = Object.values(h.GAME_DATA.tags).find(tag => tag.category === category && !BASE.some(b => b.id === tag.id));
+            expect(importScripts([entry([...BASE, { id: second.id, category }])])).toEqual({ added: 0, skipped: 1 });
+        });
+
+        test('keeps Genre shares in 5% steps that sum to 100, as every builder does', () => {
+            const tags = [
+                { id: 'ADVENTURE', category: 'Genre', percent: 0.37 },
+                { id: 'ACTION', category: 'Genre', percent: 0.37 },
+                { id: 'DRAMA', category: 'Genre', percent: 0.26 },
+                ...BASE.slice(1),
+            ];
+            importScripts([entry(tags)]);
+            const shares = globalThis.pinnedScripts[0].tags.filter(tag => tag.category === 'Genre').map(tag => Math.round(tag.percent * 100));
+            expect(shares.reduce((sum, share) => sum + share, 0)).toBe(100);
+            shares.forEach(share => expect(share % 5).toBe(0));
+        });
+
+        // importScripts keeps its { added, skipped } shape (pinned by
+        // script-library-import.test.js); the message counts the rest.
+        test('the load message names scripts that were already in the library', () => {
+            importScripts([entry(BASE, 'same')]);
+            const result = importScripts([entry(BASE, 'same'), entry(BASE, 'other')]);
+            expect(result).toEqual({ added: 1, skipped: 0 });
+            expect(h.call('HACScriptLibrary.importSummary', 2, result).text)
+                .toBe('Loaded 1 scripts. 1 was already in your library.');
+        });
+
+        test.each([
+            [3, { added: 3, skipped: 0 }, 'Loaded 3 scripts.'],
+            [4, { added: 2, skipped: 1 }, 'Loaded 2 scripts. Skipped 1 invalid entry. 1 was already in your library.'],
+            [2, { added: 0, skipped: 2 }, 'No valid scripts found in file. Skipped 2 invalid entries.'],
+            [2, { added: 0, skipped: 0 }, 'No new unique scripts found in file. 2 were already in your library.'],
+        ])('the load message for %p entries and %p', (count, result, text) => {
+            expect(h.call('HACScriptLibrary.importSummary', count, result).text).toBe(text);
+        });
+    });
+
     // Audit 2026-09-30: genres are sorted by share, and a tie kept the input
     // order, so the same script scored differently depending on which row was
     // added first (Graves prepends new rows; transfers keep theirs).

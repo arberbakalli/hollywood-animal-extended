@@ -139,15 +139,31 @@
         if (entry.uniqueId === undefined || entry.uniqueId === null || entry.uniqueId === '') return null;
 
         const tags = [];
+        const seen = new Set();
         for (const imported of entry.tags) {
             const gameTag = imported && GAME_DATA.tags[imported.id];
             if (!gameTag) return null;
+            // The same element twice, or a second pick in a one-pick category,
+            // is not a script the game accepts (audit 2026-09-30).
+            if (seen.has(gameTag.id)) return null;
+            if (!MULTI_SELECT_CATEGORIES.includes(gameTag.category)
+                && tags.some(tag => tag.category === gameTag.category)) return null;
+            seen.add(gameTag.id);
             const percent = Number(imported.percent);
             tags.push({
                 id: gameTag.id,
                 category: gameTag.category,
                 percent: gameTag.category === 'Genre' && percent > 0 && percent <= 1 ? percent : 1.0
             });
+        }
+
+        // Genre shares in 5% steps that sum to 100, the same split every
+        // builder applies (restoreGenrePercents), so the card, Graves and
+        // Marketing score one mix. A share of 0.37 was kept as is.
+        const genres = tags.filter(tag => tag.category === 'Genre');
+        if (genres.length > 0 && global.HACGenreMix?.splitGenrePercent) {
+            HACGenreMix.splitGenrePercent(100, genres.map(tag => tag.percent))
+                .forEach((share, index) => { genres[index].percent = share / 100; });
         }
 
         const name = typeof entry.name === 'string' ? entry.name : 'Untitled Script';
@@ -179,6 +195,22 @@
         return { added, skipped };
     }
 
+    // Valid entries that were neither added nor skipped were already in the
+    // library; the message used to say nothing about them (audit 2026-09-30).
+    function importSummary(entryCount, { added, skipped }) {
+        const already = Math.max(0, entryCount - added - skipped);
+        const skippedNote = skipped > 0 ? ` Skipped ${skipped} invalid ${skipped === 1 ? 'entry' : 'entries'}.` : '';
+        const alreadyNote = already > 0 ? ` ${already} ${already === 1 ? 'was' : 'were'} already in your library.` : '';
+        if (added > 0) {
+            // "scripts" even for one: TC01-000029 pins "Loaded 1 scripts".
+            return { text: `Loaded ${added} scripts.${skippedNote}${alreadyNote}`, tone: 'success' };
+        }
+        if (skipped > 0) {
+            return { text: `No valid scripts found in file.${skippedNote}${alreadyNote}`, tone: 'accent' };
+        }
+        return { text: `No new unique scripts found in file.${alreadyNote}`, tone: 'accent' };
+    }
+
     function handleFileLoad(input) {
         const file = input.files[0];
         if (!file) return;
@@ -206,19 +238,10 @@
                 showFeedbackMessage('pinnedScriptsFeedbackMessage', `Could not load scoring data. ${error.message}`);
                 return;
             }
-            const { added, skipped } = importScripts(loaded);
-            const skippedNote = skipped > 0
-                ? ` Skipped ${skipped} invalid ${skipped === 1 ? 'entry' : 'entries'}.`
-                : '';
-
-            if (added > 0) {
-                renderPinnedScripts();
-                showFeedbackMessage('pinnedScriptsFeedbackMessage', `Loaded ${added} scripts.${skippedNote}`, 'success');
-            } else if (skipped > 0) {
-                showFeedbackMessage('pinnedScriptsFeedbackMessage', `No valid scripts found in file.${skippedNote}`, 'accent');
-            } else {
-                showFeedbackMessage('pinnedScriptsFeedbackMessage', 'No new unique scripts found in file.', 'accent');
-            }
+            const result = importScripts(loaded);
+            if (result.added > 0) renderPinnedScripts();
+            const summary = importSummary(loaded.length, result);
+            showFeedbackMessage('pinnedScriptsFeedbackMessage', summary.text, summary.tone);
         }, { once: true });
         reader.readAsText(file);
     }
@@ -300,6 +323,7 @@
         savePinnedScripts,
         triggerLoadScripts,
         importScripts,
+        importSummary,
         handleFileLoad,
         transferScriptToAdvertisers,
         transferScriptToContext
