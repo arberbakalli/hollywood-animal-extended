@@ -11,14 +11,17 @@ async function pick(page, category, id, context) {
   await empty.first().selectOption(id);
 }
 
-test('TC22-000001 commercial nine keeps ordinary decay from week two with Behemoth enabled', async ({ steps, page }) => {
+// Owner ruling 2026-10-01, edit approved: the decay gate opens from 9, so
+// week 3 falls at 0.85: 9000 x 0.85 x 1.25 = 9562.5, rounded up because the
+// opening window (indexes below 4) rounds up.
+test('TC22-000001 commercial nine slows the decay from week three with Behemoth enabled', async ({ steps, page }) => {
   await openHollywood(steps);
   await steps.on('marketTab', 'Navigation').click();
   await page.locator('#comScoreInput').fill('9');
   await page.locator('#behemothToggle').check();
   await expect(page.locator('#dist-week-1-value')).toHaveAttribute('data-demand', '22500');
   await expect(page.locator('#dist-week-2-value')).toHaveAttribute('data-demand', '11250');
-  await expect(page.locator('#dist-week-3-value')).toHaveAttribute('data-demand', '9000');
+  await expect(page.locator('#dist-week-3-value')).toHaveAttribute('data-demand', '9563');
 });
 
 test('TC22-000002 week eight gets the Behemoth lift only while the toggle is on', async ({ steps, page }) => {

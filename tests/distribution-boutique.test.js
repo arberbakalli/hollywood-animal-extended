@@ -39,8 +39,9 @@ describe('Distribution — Boutique policy', () => {
             expect(decay(5, 10, false, true)).toBe(ONE_MODIFIER);
         });
 
-        test('does nothing at exactly artistic 9', () => {
-            expect(decay(5, 9, false, true)).toBe(BASE);
+        // Owner ruling 2026-10-01, edit approved: the gate opens from 9.
+        test('slows decay at exactly artistic 9', () => {
+            expect(decay(5, 9, false, true)).toBe(ONE_MODIFIER);
         });
 
         test('does nothing below artistic 9', () => {

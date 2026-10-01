@@ -406,7 +406,7 @@ The toggle stands for "this studio holds Behemoth and the film's production
 budget is over $1,000,000". Both effects follow it:
 
 1. **+25% boost on every week 1–8**. It rides on the budget, not on any score.
-2. **Slower decay**, weeks 3+, when the **commercial** score is also above 9.
+2. **Slower decay**, weeks 3+, when the **commercial** score is also **9 or above**.
 
 > Owner ruling 2026-09-28: the $1,000,000 budget is the condition, and it is
 > strictly *over* $1,000,000 (the game string says "exceeds"). The slower decay
@@ -420,7 +420,14 @@ budget is over $1,000,000". Both effects follow it:
 
 ### Boutique
 
-Slower decay only, weeks 3+, above **artistic** score 9.
+Slower decay only, weeks 3+, from **artistic** score **9 and above**.
+
+> Owner ruling 2026-10-01: both decay gates open from 9 and above. The game's
+> strings say "above 9" for both (`localization/English.json:12479`, `:12490`);
+> the owner ruled against that reading. Before this the gates were strictly
+> above 9. `resolveDecayRate` and `describeStudioPolicies` in
+> `src/marketing/distributionPlanner.js`; the status line reads "from … 9 and
+> above" below the gate.
 
 ### Both together
 
@@ -568,8 +575,8 @@ a review of the source.
   every multiplier (`rounding.ROUND_UP_UNTIL_INDEX` in `data.js`).
 - **Campaign timing** (`src/marketing/marketingPlanner.js`): 6 weeks
   pre-release, halved by Factory Policy; 4 weeks of release; 4 weeks
-  post-release only at commercial ≥ 9.0. The studio policies gate on strictly
-  above 9.
+  post-release only at commercial ≥ 9.0. The studio policies gate from 9 and
+  above too (owner ruling 2026-10-01, section 4).
 - **Target audiences** (same file): high interest from 0.67, moderate above
   0.33, normalised with a factor of 3.0 (`RELEASE_MAGIC_NUMBER`).
 - **Advertiser grades** (`src/marketing/advertiserMatcher.js`): A+ from 3.33,

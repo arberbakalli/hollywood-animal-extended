@@ -84,8 +84,6 @@ or an owner-approved edit to an existing test, so none was guessed.
 - Holiday label shows +18.3% while the grid applies 18.333...%.
 
 **Needs an approved edit to an existing test:**
-- The studio-policy line says "9+" while the gate is strictly above 9 (the
-  tooltip and the rule say "above 9"). TC04-000028 and a Jest test pin "9+".
 - TC01-000020 (Reset Locks hides results) never generates first, so it passes
   vacuously. TC01-000051 now covers the real case; TC01-000020 itself is unchanged.
 

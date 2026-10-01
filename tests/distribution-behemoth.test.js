@@ -105,7 +105,9 @@ describe('Distribution — Behemoth policy', () => {
             }
         });
 
-        test('slower decay threshold (score > 9) is independent of boost', () => {
+        // Owner ruling 2026-10-01, edit approved: the gate opens from 9 and
+        // above (it was strictly above 9).
+        test('slower decay threshold (score >= 9) is independent of boost', () => {
             const off = weeklyDemand(9, { behemoth: false });
             const on = weeklyDemand(9, { behemoth: true });
 
@@ -113,12 +115,11 @@ describe('Distribution — Behemoth policy', () => {
             for (let week = 0; week < WEEKS; week++) {
                 expect(on[week]).toBeGreaterThan(off[week]);
             }
-            // Slower decay does not apply at score 9, but boost does
-            // Weeks 3+ decay at normal rate (0.8) not slower (0.85)
-            const decayRate = 0.8;
+            // At score 9 the slower decay applies too: weeks 3+ fall at 0.85,
+            // not 0.8, so they sit above the boosted ordinary curve.
             for (let week = 2; week < WEEKS; week++) {
-                const expected = off[week] * BEHEMOTH_WEEK_ONE_BOOST;
-                expect(Math.abs(on[week] - expected)).toBeLessThan(1);
+                const ordinaryBoosted = off[week] * BEHEMOTH_WEEK_ONE_BOOST;
+                expect(on[week]).toBeGreaterThan(ordinaryBoosted + 1);
             }
         });
     });

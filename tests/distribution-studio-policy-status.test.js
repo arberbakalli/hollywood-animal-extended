@@ -36,12 +36,13 @@ describe('Distribution — studio policy status line', () => {
     describe('Behemoth alone', () => {
         test('below the decay gate it reports the boost and names the gate', () => {
             expect(describe_({ behemoth: true, boutique: false, commercialScore: 8, artisticScore: 0 }))
-                .toBe('Behemoth: +25% Boost Active (Slower decay at commercial 9+)');
+                .toBe('Behemoth: +25% Boost Active (Slower decay from commercial 9 and above)');
         });
 
-        test('at exactly 9 the decay is still not active', () => {
+        // Owner ruling 2026-10-01, edit approved: the gate opens from 9.
+        test('at exactly 9 the decay is active', () => {
             expect(describe_({ behemoth: true, boutique: false, commercialScore: 9, artisticScore: 0 }))
-                .toBe('Behemoth: +25% Boost Active (Slower decay at commercial 9+)');
+                .toBe('Behemoth: +25% Boost + Slower Decay Active');
         });
 
         test('above 9 it reports both halves', () => {
@@ -64,12 +65,13 @@ describe('Distribution — studio policy status line', () => {
     describe('Boutique alone', () => {
         test('below the gate it names the gate', () => {
             expect(describe_({ behemoth: false, boutique: true, commercialScore: 0, artisticScore: 8 }))
-                .toBe('Boutique: Slower Decay at artistic 9+');
+                .toBe('Boutique: Slower Decay from artistic 9 and above');
         });
 
-        test('at exactly 9 the decay is still not active', () => {
+        // Owner ruling 2026-10-01, edit approved: the gate opens from 9.
+        test('at exactly 9 the decay is active', () => {
             expect(describe_({ behemoth: false, boutique: true, commercialScore: 0, artisticScore: 9 }))
-                .toBe('Boutique: Slower Decay at artistic 9+');
+                .toBe('Boutique: Slower Decay Active');
         });
 
         test('above 9 the decay is reported active', () => {
@@ -97,15 +99,15 @@ describe('Distribution — studio policy status line', () => {
 
         test('each policy reads its own axis independently', () => {
             expect(describe_({ behemoth: true, boutique: true, commercialScore: 10, artisticScore: 5 }))
-                .toBe('Behemoth: +25% Boost + Slower Decay Active | Boutique: Slower Decay at artistic 9+');
+                .toBe('Behemoth: +25% Boost + Slower Decay Active | Boutique: Slower Decay from artistic 9 and above');
 
             expect(describe_({ behemoth: true, boutique: true, commercialScore: 5, artisticScore: 10 }))
-                .toBe('Behemoth: +25% Boost Active (Slower decay at commercial 9+) | Boutique: Slower Decay Active');
+                .toBe('Behemoth: +25% Boost Active (Slower decay from commercial 9 and above) | Boutique: Slower Decay Active');
         });
 
         test('neither gate open still reports the Behemoth boost', () => {
             expect(describe_({ behemoth: true, boutique: true, commercialScore: 5, artisticScore: 5 }))
-                .toBe('Behemoth: +25% Boost Active (Slower decay at commercial 9+) | Boutique: Slower Decay at artistic 9+');
+                .toBe('Behemoth: +25% Boost Active (Slower decay from commercial 9 and above) | Boutique: Slower Decay from artistic 9 and above');
         });
     });
 

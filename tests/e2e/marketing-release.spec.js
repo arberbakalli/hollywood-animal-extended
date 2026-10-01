@@ -212,7 +212,8 @@ test.describe('Marketing and Release — distribution calculator', () => {
     expect(week3Behemoth).toBeGreaterThan(week3Normal);
   });
 
-  test('TC04-000014 the Boutique policy slows later weeks only above artistic score 9', async ({ steps }) => {
+  // Owner ruling 2026-10-01, edit approved: the gate opens from 9.
+  test('TC04-000014 the Boutique policy slows later weeks only from artistic score 9', async ({ steps }) => {
     await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 10);
     const week1Before = await attr(steps, 'weekOneCard', 'data-demand');
     const normalValues = (await steps.getAll('weekCards', 'MarketingRelease', {
@@ -233,7 +234,14 @@ test.describe('Marketing and Release — distribution calculator', () => {
     const thresholdValues = (await steps.getAll('weekCards', 'MarketingRelease', {
       extractAttribute: 'data-demand',
     })).map(Number);
-    expect(thresholdValues[2]).toBe(normalValues[2]);
+    expect(thresholdValues[2]).toBeGreaterThan(normalValues[2]);
+
+    // Below the gate the decay is ordinary again (new coverage).
+    await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 8);
+    const belowValues = (await steps.getAll('weekCards', 'MarketingRelease', {
+      extractAttribute: 'data-demand',
+    })).map(Number);
+    expect(belowValues[2]).toBe(normalValues[2]);
   });
 
   // Both gates open at 10/10, so the fall slows to 0.9 and Behemoth's +25% rides
@@ -376,14 +384,14 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 8);
     await steps.on('behemothToggle', 'MarketingRelease').check();
     await expect(status).toBeVisible();
-    await expect(status).toContainText('Behemoth: +25% Boost Active (Slower decay at commercial 9+)');
+    await expect(status).toContainText('Behemoth: +25% Boost Active (Slower decay from commercial 9 and above)');
 
     await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', 10);
     await expect(status).toContainText('Behemoth: +25% Boost + Slower Decay Active');
 
     await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 8);
     await steps.on('boutiqueToggle', 'MarketingRelease').check();
-    await expect(status).toContainText('Boutique: Slower Decay at artistic 9+');
+    await expect(status).toContainText('Boutique: Slower Decay from artistic 9 and above');
 
     await steps.setSliderValue('artisticScoreSlider', 'MarketingRelease', 10);
     await expect(status).toContainText('Boutique: Slower Decay Active');
