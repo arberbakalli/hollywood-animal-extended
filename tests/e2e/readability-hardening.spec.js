@@ -99,6 +99,7 @@ for (const width of [390, 1280]) {
     await openHollywood(steps);
     const select = page.locator('#inputs-genre-generator select.tag-selector');
     expect(await categoryBorderMatchesPalette(select), `genre placeholder border uses category palette at ${width}px`).toBe(true);
+    expect(await selectorTextMatchesPalette(select), `genre placeholder text uses category palette at ${width}px`).toBe(true);
     await select.focus();
     const genres = await select.locator('option[value]:not([value=""])').evaluateAll(options => options.map(option => option.value));
     expect(genres).toHaveLength(11);
@@ -118,7 +119,7 @@ for (const width of [390, 1280]) {
     for (const category of ['setting', 'protagonist', 'antagonist', 'supporting-character', 'theme-event', 'finale']) {
       const picker = page.locator(`#inputs-${category}-generator select.tag-selector`);
       expect(await categoryBorderMatchesPalette(picker), `${category} placeholder border uses category palette`).toBe(true);
-      expect(await textContrast(picker), `${category} placeholder contrast`).toBeGreaterThanOrEqual(4.5);
+      expect(await selectorTextMatchesPalette(picker), `${category} placeholder text uses category palette`).toBe(true);
       await picker.focus();
       expect(await categoryOptionsMatchPalette(picker), `${category} options use category palette`).toBe(true);
       await picker.selectOption({ index: 1 });

@@ -40,7 +40,8 @@
 ## Dropdown Styling Rules
 
 ### When a Dropdown Is Empty
-- **Text Color**: Muted placeholder (`--text-muted`)
+- **Text Color**: Full category palette color (`--category-color`), so
+  `-- Select Protagonist --`, `-- Select Setting --`, etc. match their section label.
 - **Border Color**: Full category palette color (`--category-color`), not a faint transparent mix
 - **Background**: Dark input background (`--input-bg`)
 
@@ -68,7 +69,7 @@
 ```css
 /* Empty state - all categories */
 select.tag-selector:not(.has-selected-tag) {
-    color: var(--text-muted);
+    color: var(--category-color);
     border-color: var(--category-color);
 }
 
@@ -139,9 +140,32 @@ select[data-category="Finale"].has-selected-tag {
 - [x] Setting: blue (#8fa3d1) across all contexts
 - [x] Genre: per-genre colors in dropdowns and exclusion list
 - [x] Genre labels: gold (#d4af37)
+- [x] Empty dropdown placeholder text: full category palette color
 - [x] Empty dropdown borders: full category palette color, not faint transparent mix
 - [x] Selected Genre dropdown text and border: selected genre palette color
 - [x] High-synergy indicators: emerald green (#10b981), not neon green
 - [x] Boutique toggle and every other success/"good" state: `--success`, no neon anywhere (2026-09-28)
 - [x] All dropdowns: colored text + border when selected
 - [x] All exclusion items: category color applied
+
+## 2026-10-03 Dropdown Polish Notes
+
+Removed:
+- Faint placeholder borders using `color-mix(... 50%, transparent)`.
+- Muted gray placeholder text for category selectors.
+- Lifted/mixed dropdown option text such as
+  `color-mix(in srgb, var(--cat-protagonist) 42%, var(--text-main))`.
+- Selected Genre dropdowns using the generic gold Genre category color after a
+  specific genre was chosen.
+- The tried-and-rejected selected-state `font-weight: 600`.
+
+Added:
+- Empty dropdown placeholder text and border use the section's own
+  `--category-color`.
+- Non-Genre dropdown options use the same category palette color as their label.
+- Selected non-Genre dropdown text and border use the category palette color.
+- Genre options use each genre's documented color.
+- Selected Genre dropdown text and border use the selected genre's documented
+  color via `data-genre` and `--tag-color`.
+- Playwright coverage in `tests/e2e/readability-hardening.spec.js` verifies the
+  palette linkage without hardcoding individual hex values.
