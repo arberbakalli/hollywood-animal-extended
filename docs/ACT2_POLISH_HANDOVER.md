@@ -41,8 +41,9 @@ date so the tracker can follow the game's 500-day window?
 
 ### Genre Dropdown Polish
 
-The owner likes the closed Genre select shape on main. The parked selected-Genre
-readability polish shipped on 2026-10-03.
+The owner likes the closed Genre select shape on main. A heavier selected-Genre
+readability polish was tried on 2026-10-03 and rejected, so keep this parked
+until a specific visual is approved.
 
 Known candidate from the parked CSS branch:
 
@@ -50,7 +51,6 @@ Known candidate from the parked CSS branch:
 select[data-category="Genre"].has-selected-tag {
     color: var(--category-color);
     border-color: var(--category-color);
-    font-weight: 600;
 }
 
 .category-group[data-category="Genre"] .category-label {
@@ -58,8 +58,10 @@ select[data-category="Genre"].has-selected-tag {
 }
 ```
 
-Pinned by `tests/e2e/readability-hardening.spec.js`. Native `<option>` styling
-is browser-limited, so future changes still need real-browser verification.
+`tests/e2e/readability-hardening.spec.js` covers readability and focus
+stability, not approval for an exact weight or palette. Native `<option>`
+styling is browser-limited, so future changes still need real-browser
+verification.
 
 ## Start Here Later
 
