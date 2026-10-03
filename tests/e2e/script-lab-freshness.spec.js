@@ -13,6 +13,9 @@ const COWBOY = 'PROTAGONIST_COWBOY';
 const locked = (page, slug) => page.locator(`#inputs-${slug}-generator .select-row`).first();
 const lockedSelect = (page, slug) => locked(page, slug).locator('select.tag-selector');
 const lockedPill = (page, slug) => locked(page, slug).locator(':scope > .freshness-pill');
+const contextRow = (page, context, slug) => page.locator(`#inputs-${slug}-${context} .select-row`).first();
+const contextSelect = (page, context, slug) => contextRow(page, context, slug).locator('select.tag-selector');
+const contextPill = (page, context, slug) => contextRow(page, context, slug).locator(':scope > .freshness-pill');
 const cards = page => page.locator('#generatorResultsList .gen-card');
 const notice = page => page.locator('#generatorFreshnessNotice');
 
@@ -34,6 +37,12 @@ const expandAll = async page => {
 };
 
 const stateOf = (page, id) => page.evaluate(tagId => HACFreshness.freshnessStore().getState(tagId), id);
+
+const chooseTag = async (select, id) => {
+  await expect(select).toBeVisible();
+  await select.focus();
+  await select.selectOption(id);
+};
 
 test.describe('Script Lab — element freshness', () => {
   test.beforeEach(async ({ steps }) => {
@@ -84,6 +93,36 @@ test.describe('Script Lab — element freshness', () => {
     await openScriptLab(steps);
     await lockedSelect(page, 'protagonist').selectOption(COWBOY);
 
+    await expect(lockedPill(page, 'protagonist')).toHaveText('Rotten');
+  });
+
+  test('TC28-000016 the same freshness state follows an element through Graves and Marketing', async ({ page }) => {
+    await chooseTag(lockedSelect(page, 'protagonist'), COWBOY);
+    await expect(lockedPill(page, 'protagonist')).toHaveText('Fresh');
+
+    await page.locator('#tab-evaluate-button').click();
+    await chooseTag(contextSelect(page, 'graves', 'protagonist'), COWBOY);
+    await expect(contextPill(page, 'graves', 'protagonist')).toHaveText('Fresh');
+    await contextPill(page, 'graves', 'protagonist').click();
+    await expect(contextPill(page, 'graves', 'protagonist')).toHaveText('Stale');
+
+    await page.locator('#tab-generator-button').click();
+    await expect(lockedPill(page, 'protagonist')).toHaveText('Stale');
+
+    await page.locator('#tab-advertisers-button').click();
+    await chooseTag(contextSelect(page, 'advertisers', 'protagonist'), COWBOY);
+    await expect(contextPill(page, 'advertisers', 'protagonist')).toHaveText('Stale');
+    await contextPill(page, 'advertisers', 'protagonist').click();
+    await expect(contextPill(page, 'advertisers', 'protagonist')).toHaveText('Rotten');
+
+    await page.locator('#marketing-mode-targeted-button').click();
+    await chooseTag(contextSelect(page, 'targeted', 'protagonist'), COWBOY);
+    await expect(contextPill(page, 'targeted', 'protagonist')).toHaveText('Rotten');
+
+    await page.locator('#tab-evaluate-button').click();
+    await expect(contextPill(page, 'graves', 'protagonist')).toHaveText('Rotten');
+
+    await page.locator('#tab-generator-button').click();
     await expect(lockedPill(page, 'protagonist')).toHaveText('Rotten');
   });
 
@@ -214,13 +253,11 @@ test.describe('Script Lab — element freshness', () => {
 
     await generate(steps, page);
 
-    // One click makes 15 and shows 5 (owner ruling 2026-09-30, approved
-    // rewrite): the Stale script ranks 15th, behind two Show more clicks.
-    expect(await cardProtagonists(page)).toEqual(Array(5).fill(fresh));
-    await page.locator('#showMoreGeneratedScriptsButton').click();
-    await page.locator('#showMoreGeneratedScriptsButton').click();
-    await expect(cards(page)).toHaveCount(15);
-    expect(await cardProtagonists(page)).toEqual([...Array(14).fill(fresh), stale]);
+    // Results are unique by tag set (owner ruling 2026-10-03), so this canned
+    // generator produces one Fresh script and one Stale script. Freshness still
+    // decides their order before score.
+    await expect(cards(page)).toHaveCount(2);
+    expect(await cardProtagonists(page)).toEqual([fresh, stale]);
     await expect(cards(page).last().locator('[data-role="script-freshness-status"]')).toHaveText('Stale elements · viewer interest ×0.5');
     await expect(cards(page).first().locator('[data-role="script-freshness-status"]')).toBeHidden();
   });

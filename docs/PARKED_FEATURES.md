@@ -5,6 +5,29 @@ history. Not scoped, not scheduled — pick one up when ready.
 
 ---
 
+## Marketing & Release realism pass — PRIORITY: HIGH
+
+**Raised:** 2026-10-03, after in-game release screenshots showed large gaps
+between the calculator's screening demand and the game's attendance/profit.
+
+See `docs/MARKETING_RELEASE_INVESTIGATION.md`.
+
+Core questions:
+
+- Factory Policy/building appears to add an opening-week release boost somewhere
+  around 11% to 39%, but the source formula is not yet extracted.
+- One high-fit advertiser can be financially worse than four decent advertisers;
+  the app's "Top Pick" framing is probably rating-focused, not profit-focused.
+- Attendance/occupancy is not modelled by the current distribution grid, so the
+  app may overstate how many screenings are useful.
+- Recommended Advertisement Duration may need to become part of a broader
+  campaign strategy panel instead of a small timing widget.
+
+Do not guess formulas from screenshots. Extract game files or run controlled
+in-game tests before changing source data.
+
+---
+
 ## Genre Synergy — PRIORITY: HIGH
 
 **Raised:** 2026-09-26, during the JSON data cleanup. **Raised again and set

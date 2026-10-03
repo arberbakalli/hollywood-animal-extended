@@ -326,18 +326,17 @@ test.describe('Bug hunt 2026-09-30', () => {
   test('TC01-000052 Highest Artistic picks a script that meets the compatibility target over a higher bonus', async ({ steps, page }) => {
     await steps.on('buildTab', 'Navigation').click();
     await expect(page.locator('#genCompInput')).toHaveValue('4');
-    const { lowBonus } = await cannedAppeal(page, 'mixed');
+    const { highBonus, lowBonus } = await cannedAppeal(page, 'mixed');
     await page.locator('#generateBestArtisticScriptsButton').click();
     await expect(page.locator('#generatorResultsList .gen-card').first()).toBeVisible();
 
     const picked = await page.evaluate(() => generatedScriptsCache
       .map(script => ({ protagonist: script.tags.find(tag => tag.category === 'Protagonist').id, fit: script.stats.avgComp })));
-    expect(picked.length).toBeGreaterThan(0);
-    picked.forEach(entry => {
-      expect(entry.protagonist).toBe(lowBonus);
-      expect(entry.fit).toBeGreaterThanOrEqual(4);
-    });
-    await expect(page.locator('[data-role="script-below-target"]')).toHaveCount(0);
+    expect(picked).toEqual([
+      { protagonist: lowBonus, fit: 4.5 },
+      { protagonist: highBonus, fit: 3.2 },
+    ]);
+    await expect(page.locator('[data-role="script-below-target"]')).toHaveCount(1);
   });
 
   test('TC01-000053 a Highest Appeal card that never reached the target says how far below it is', async ({ steps, page }) => {

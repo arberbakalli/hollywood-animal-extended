@@ -163,10 +163,11 @@ it as a requirement, which made 8 story elements unreachable.
 > `getGenerationElementCount` (`src/generator/scriptGenerator.js`). Pinned by
 > `tests/bug-hunt-2026-09-30.test.js`, TC26-000003 and TC01-000041..43.
 
-**One Generate Scripts click makes 15 scripts and shows 5**; Show more reveals
-the rest 5 at a time. Clicking again makes a new list. (Owner ruling
-2026-09-30: page through one list rather than re-click to rotate. Pinned by
-TC01-000042.)
+**One Generate Scripts click makes up to 15 unique scripts and shows 5**; Show
+more reveals the rest 5 at a time. Clicking again makes a new list. Same tag
+sets in a different display order count once. (Owner rulings 2026-09-30 and
+2026-10-03: page through one list rather than re-click to rotate; no shuffled
+duplicates. Pinned by TC01-000042 and `tests/generator-unique-results.test.js`.)
 
 > Owner rulings 2026-09-28, from a screenshot of the game's Rating Limit tooltip
 > (pool 8 → target 8 ruled the same day).
@@ -835,9 +836,14 @@ interest in films that carry it. The game's own words (`localization/English.jso
   counts. States persist per browser; an element with no recorded state is Fresh.
 - **One state per element, everywhere.** Changing it in one place changes every
   place that shows that element.
-- **Scope: Script Lab.** Pills appear on the locked story elements and on every
-  story element of a generated or pinned script card. Build for Target, the
-  Evaluate tab and Marketing do not show or read freshness.
+- **Scope: shared story-element UI.** Pills appear wherever the calculator lets
+  the player select or inspect story elements: Script Lab locked rows,
+  generated or pinned script cards, Colman Graves, Marketing Analyze Script,
+  and Build for Target. These all read and write the same saved state.
+- **Generation reads freshness; score tools display it.** Script generation uses
+  the state to fill free slots and rank results. Colman Graves and Marketing
+  show and update the same state, but do not alter compatibility, movie scores,
+  advertiser grades, or distribution math until the game formula is proven.
 - **Excluded elements have no freshness.** Excluding an element clears its
   state, so it comes back Fresh when the player makes it available again.
 - **Generation deprioritizes worn-out elements.** When Generate fills a slot the
@@ -856,5 +862,5 @@ interest in films that carry it. The game's own words (`localization/English.jso
 > Enforced in: `src/generator/scriptGenerationEngine.js` (`HACFreshness` block:
 > states, store, script freshness, freshest-first picks), `src/generator/scriptGenerator.js`
 > (ranking, card pills, the out-of-date notice), `src/selectors/storyElementSelector.js`
-> (locked-row pills) and `src/library/exclusionStore.js` (excluding clears the state).
+> (shared builder-row pills) and `src/library/exclusionStore.js` (excluding clears the state).
 > Pinned by `tests/freshness.test.js` and `tests/e2e/script-lab-freshness.spec.js`.

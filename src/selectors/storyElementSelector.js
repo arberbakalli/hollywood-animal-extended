@@ -53,6 +53,10 @@
         return HACSelectorExclusions.filterTagsForContext(tags, context);
     }
 
+    function contextShowsFreshness(context) {
+        return ['generator', 'graves', 'advertisers', 'targeted'].includes(context);
+    }
+
     function clearExcludedSelectionsInCategory(category, context, excludedIds = getExcludedIdsForContext(context)) {
         return HACSelectorExclusions.clearExcludedSelectionsInCategory(category, context, excludedIds);
     }
@@ -527,13 +531,10 @@
         });
         row.appendChild(select);
 
-        // Freshness (GAME_RULES section 9): the locked story elements in Script
-        // Lab only, never Genre, Setting or an excluded row. The pill overlays
-        // the right end of the select, so clicking it cycles the state and
-        // clicking anywhere else on the box opens the dropdown as before. It
-        // follows the element, not the row: pick another element and the pill
-        // shows that element's own state.
-        const freshnessPill = context === 'generator' && HACFreshness.hasFreshness(category)
+        // Freshness (GAME_RULES section 9): story elements share one saved
+        // state across Script Lab, Colman Graves, and Marketing. Genre,
+        // Setting, and excluded rows never carry freshness.
+        const freshnessPill = contextShowsFreshness(context) && HACFreshness.hasFreshness(category)
             ? HACFreshness.createPill()
             : null;
         if (freshnessPill) {

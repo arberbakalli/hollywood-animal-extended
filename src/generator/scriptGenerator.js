@@ -57,6 +57,21 @@
         return Math.max(getRequiredElementCount(targetScore), getMaxElementPoolSize());
     }
 
+    function scriptSetSignature(script) {
+        return (script.tags || [])
+            .map(tag => `${tag.id}:${Number(tag.percent ?? 1).toFixed(4)}`)
+            .sort()
+            .join('|');
+    }
+
+    function keepBestUniqueScript(uniqueBySignature, candidate, isBetter) {
+        const signature = scriptSetSignature(candidate);
+        const existing = uniqueBySignature.get(signature);
+        if (!existing || isBetter(candidate, existing)) {
+            uniqueBySignature.set(signature, candidate);
+        }
+    }
+
     function updateRequiredElementDisplay(targetScore) {
         const requiredTags = getRequiredElementCount(targetScore);
         document.getElementById('genTagsRequiredDisplay').innerText =
@@ -321,42 +336,42 @@
 
         const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
 
-        const generatedBatch = [];
+        const uniqueBySignature = new Map();
         // The locks set how fresh a script can be; a slot stops early only once
         // it is that fresh, or a Stale hit on the target would end the search
         // before a Fresh one had a chance.
         const freshnessFloor = HACFreshness.freshnessRank(HACFreshness.scriptFreshness(fixedTags).state);
 
-        for (let i = 0; i < STANDARD_RESULT_COUNT; i++) {
-            let bestCandidate = null;
-            const MAX_ATTEMPTS = 50;
+        for(let attempt = 0; attempt < STANDARD_RESULT_COUNT * 50; attempt++) {
+            const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
 
-            for(let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-                const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
+            keepBestUniqueScript(uniqueBySignature, candidate, (next, current) =>
+                fresherOrBetter(next, current, next.stats.avgComp - current.stats.avgComp)
+            );
 
-                if (!bestCandidate || fresherOrBetter(candidate, bestCandidate, candidate.stats.avgComp - bestCandidate.stats.avgComp)) {
-                    bestCandidate = candidate;
-                }
-
-                const asFreshAsLocks = HACFreshness.freshnessRank(HACFreshness.scriptFreshness(bestCandidate.tags).state) <= freshnessFloor;
-                if (asFreshAsLocks && bestCandidate.stats.avgComp >= targetComp && parseFloat(bestCandidate.stats.movieScore) > 0) {
-                    break;
-                }
+            const ready = Array.from(uniqueBySignature.values()).filter(script => {
+                const asFreshAsLocks = HACFreshness.freshnessRank(HACFreshness.scriptFreshness(script.tags).state) <= freshnessFloor;
+                return asFreshAsLocks && script.stats.avgComp >= targetComp && parseFloat(script.stats.movieScore) > 0;
+            });
+            if (ready.length >= STANDARD_RESULT_COUNT) {
+                break;
             }
-
-            generatedBatch.push(bestCandidate);
         }
 
-        const ranked = HACFreshness.rankByFreshness(generatedBatch, (a, b) => {
+        const ranked = HACFreshness.rankByFreshness(Array.from(uniqueBySignature.values()), (a, b) => {
             const scoreA = parseFloat(a.stats.movieScore);
             const scoreB = parseFloat(b.stats.movieScore);
             if (scoreA !== scoreB) return scoreB - scoreA;
             return b.stats.avgComp - a.stats.avgComp;
-        });
+        }).slice(0, STANDARD_RESULT_COUNT);
 
         generatedScriptsCache = ranked;
         hideFreshnessNotice();
-        renderGeneratedScripts(ranked, { visibleCount: STANDARD_VISIBLE_COUNT, pageSize: STANDARD_VISIBLE_COUNT });
+        renderGeneratedScripts(ranked, {
+            resultLimit: STANDARD_RESULT_COUNT,
+            visibleCount: STANDARD_VISIBLE_COUNT,
+            pageSize: STANDARD_VISIBLE_COUNT
+        });
     }
 
     async function generateBestScoreScripts(scoreKind) {
@@ -369,7 +384,7 @@
         }
 
         const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
-        const generatedBatch = [];
+        const uniqueBySignature = new Map();
 
         // Map scoreKind to bonus property: 'artistic' -> 'art', 'commercial' -> 'com'
         const bonusKey = scoreKind === 'artistic' ? 'art' : 'com';
@@ -378,54 +393,46 @@
         // it. Compared on the tenth shown, as every Average Fit label is.
         const meetsTarget = script => Number(script.stats.avgComp.toFixed(1)) >= targetComp;
 
-        for (let i = 0; i < OPTIMIZED_RESULT_COUNT; i++) {
-            let bestCandidate = null;
-            const maxAttempts = 35;
+        for (let attempt = 0; attempt < OPTIMIZED_RESULT_COUNT * 35; attempt++) {
+            const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
 
-            for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
+            // Calculate bonuses for this candidate
+            const evaluation = HACScriptEvaluation.calculateScriptEvaluation(candidate.tags);
+            const candidateBonus = evaluation.bonuses[bonusKey];
+            const candidateWithBonus = {
+                ...candidate,
+                _bonus: candidateBonus,
+                _evaluation: evaluation,
+                optimizedFor: scoreKind,
+                compatTarget: targetComp
+            };
 
-                // Calculate bonuses for this candidate
-                const evaluation = HACScriptEvaluation.calculateScriptEvaluation(candidate.tags);
-                const candidateBonus = evaluation.bonuses[bonusKey];
-
-                if (!bestCandidate) {
-                    bestCandidate = { ...candidate, _bonus: candidateBonus, _evaluation: evaluation };
-                } else {
-                    const existingBonus = bestCandidate._bonus;
-                    const targetGap = Number(meetsTarget(candidate)) - Number(meetsTarget(bestCandidate));
-                    const scoreGap = targetGap !== 0
-                        ? targetGap
-                        : candidateBonus !== existingBonus
-                            ? candidateBonus - existingBonus
-                            : candidate.stats.avgComp - bestCandidate.stats.avgComp;
-                    if (fresherOrBetter(candidate, bestCandidate, scoreGap)) {
-                        bestCandidate = { ...candidate, _bonus: candidateBonus, _evaluation: evaluation };
-                    }
-                }
-            }
-
-            if (bestCandidate) {
-                bestCandidate.optimizedFor = scoreKind;
-                bestCandidate.compatTarget = targetComp;
-                generatedBatch.push(bestCandidate);
-            }
+            keepBestUniqueScript(uniqueBySignature, candidateWithBonus, (next, current) => {
+                const targetGap = Number(meetsTarget(next)) - Number(meetsTarget(current));
+                const scoreGap = targetGap !== 0
+                    ? targetGap
+                    : next._bonus !== current._bonus
+                        ? next._bonus - current._bonus
+                        : next.stats.avgComp - current.stats.avgComp;
+                return fresherOrBetter(next, current, scoreGap);
+            });
         }
 
         // Freshness first, then the target, then bonus (highest first), then
         // average compatibility
-        const ranked = HACFreshness.rankByFreshness(generatedBatch, (a, b) => {
+        const ranked = HACFreshness.rankByFreshness(Array.from(uniqueBySignature.values()), (a, b) => {
             if (meetsTarget(a) !== meetsTarget(b)) return Number(meetsTarget(b)) - Number(meetsTarget(a));
             if (b._bonus !== a._bonus) {
                 return b._bonus - a._bonus;
             }
             return b.stats.avgComp - a.stats.avgComp;
-        });
+        }).slice(0, OPTIMIZED_RESULT_COUNT);
 
         generatedScriptsCache = ranked;
         hideFreshnessNotice();
         renderGeneratedScripts(ranked, {
             mode: scoreKind,
+            resultLimit: OPTIMIZED_RESULT_COUNT,
             visibleCount: INITIAL_OPTIMIZED_VISIBLE_COUNT
         });
     }
@@ -444,6 +451,7 @@
 
     function renderGeneratedScripts(scripts, options = {}) {
         setGeneratorStaleNotice(false);
+        setGeneratorUniquenessNotice(scripts.length, options.resultLimit);
         const container = document.getElementById('generatorResultsList');
         container.innerHTML = '';
         document.getElementById('results-generator').classList.remove('hidden');
@@ -452,6 +460,7 @@
             scripts,
             visibleCount: options.visibleCount || scripts.length,
             pageSize: options.pageSize || INITIAL_OPTIMIZED_VISIBLE_COUNT,
+            resultLimit: options.resultLimit || scripts.length,
             mode: options.mode || 'standard'
         };
 
@@ -508,6 +517,7 @@
         renderGeneratedScripts(generatorResultsState.scripts, {
             mode: generatorResultsState.mode,
             pageSize: generatorResultsState.pageSize,
+            resultLimit: generatorResultsState.resultLimit,
             visibleCount: generatorResultsState.visibleCount
         });
     }
@@ -516,8 +526,22 @@
         renderGeneratedScripts(generatorResultsState.scripts, {
             mode: generatorResultsState.mode,
             pageSize: generatorResultsState.pageSize,
+            resultLimit: generatorResultsState.resultLimit,
             visibleCount: Math.min(generatorResultsState.visibleCount + generatorResultsState.pageSize, generatorResultsState.scripts.length)
         });
+    }
+
+    function setGeneratorUniquenessNotice(resultCount, resultLimit) {
+        const notice = document.getElementById('generatorUniquenessNotice');
+        if (!notice) return;
+        if (!resultLimit || resultCount >= resultLimit) {
+            notice.textContent = '';
+            notice.classList.add('hidden');
+            return;
+        }
+
+        notice.textContent = `Only ${resultCount} unique option${resultCount === 1 ? '' : 's'} match these locks and targets. Lower the target score or compatibility, or change locked/excluded elements to see more.`;
+        notice.classList.remove('hidden');
     }
 
     function createScriptId() {

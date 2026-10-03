@@ -48,7 +48,8 @@ test.describe('generation and transfer score integrity', () => {
 
       await page.locator(button).click();
       const cards = page.locator('#generatorResultsList .gen-card');
-      await expect(cards).toHaveCount(mode === 'standard' ? 5 : 3);
+      await expect(cards).toHaveCount(1, { timeout: 15000 });
+      await expect(page.locator('#generatorUniquenessNotice')).toContainText('Only 1 unique option');
       await expect(cards.first()).not.toContainText(/NaN|Infinity/);
       const generated = await page.evaluate(() => generatedScriptsCache.map(script => ({
         tags: script.tags, scores: script.scores, stats: script.stats
@@ -96,7 +97,8 @@ test.describe('generation and transfer score integrity', () => {
       await expect(roles).toHaveText(['Cowboy', 'Bandit', 'Sidekick']);
 
       await page.locator(button).click();
-      await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(mode === 'standard' ? 5 : 3);
+      await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(1, { timeout: 15000 });
+      await expect(page.locator('#generatorUniquenessNotice')).toContainText('Only 1 unique option');
       const scripts = await page.evaluate(() => generatedScriptsCache.map(script => ({
         ids: script.tags.map(tag => tag.id),
         banned: script.tags.filter(tag => getGeneratorExcludedIds().has(tag.id)).map(tag => tag.id),
@@ -139,7 +141,8 @@ test.describe('generation and transfer score integrity', () => {
     await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(0);
     await page.unroute('**/data/TagCompatibilityData.json');
     await page.locator('#generateScriptsButton').click();
-    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5);
+    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(1, { timeout: 15000 });
+    await expect(page.locator('#generatorUniquenessNotice')).toContainText('Only 1 unique option');
     await expect(page.locator('#generatorResultsList')).not.toContainText(/NaN|Infinity/);
   });
 

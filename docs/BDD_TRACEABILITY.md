@@ -92,9 +92,9 @@ file is the fast lookup for agents before editing tests or product code.
   freshness, freshest-first generation, freshness-first ranking
   (GAME_RULES section 9):
   `tests/freshness.test.js`
-- Script Lab pills (locked rows and result chips), one state everywhere,
-  exclusion reset, out-of-date notice, Generate and Highest Artistic
-  ranking, pill layout on desktop and phone:
+- Script Lab, Colman Graves, Marketing Analyze Script, and Build for Target
+  pills, one state everywhere, exclusion reset, out-of-date notice, Generate
+  and Highest Artistic ranking, pill layout on desktop and phone:
   `tests/e2e/script-lab-freshness.spec.js`,
   `tests/scenarios/script-lab-freshness.feature`
 

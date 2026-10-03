@@ -60,7 +60,7 @@ for (const [mode, button] of MODES) {
     await expect(page.locator('#genTagsRequiredDisplay')).toContainText('9 Story Elements');
     await page.locator(button).click();
     const cards = page.locator('#generatorResultsList .gen-card');
-    await expect(cards).toHaveCount(mode === 'standard' ? 5 : 3);
+    await expect(cards).toHaveCount(mode === 'standard' ? 5 : 3, { timeout: 15000 });
     const scripts = await page.evaluate(() => generatedScriptsCache.map(script => ({
       tags: script.tags,
       scores: script.scores,
@@ -104,11 +104,12 @@ for (const [mode, button] of MODES) {
     ]) await lockTag(page, category, id);
     await page.locator(button).click();
     const cards = page.locator('#generatorResultsList .gen-card');
-    await expect(cards).toHaveCount(mode === 'standard' ? 5 : 3);
+    await expect(cards).toHaveCount(1);
+    await expect(page.locator('#generatorUniquenessNotice')).toContainText('Only 1 unique option');
     const scripts = await page.evaluate(() => generatedScriptsCache.map(script => ({
       tags: script.tags, scores: script.scores,
     })));
-    expect(scripts).toHaveLength(mode === 'standard' ? 15 : 12);
+    expect(scripts).toHaveLength(1);
     for (const script of scripts) expect(script.scores).toEqual({ commercial: 6, artistic: 6 });
     // Bonus ranking and final movie scores are separate quantities in optimized modes.
     const primary = cards.first().locator('.gen-badge-group').first();

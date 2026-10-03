@@ -478,11 +478,18 @@ Feature: Script Lab
     Then every generated script has 8 story elements
 
   # [automated] TC01-000042, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
-  Scenario: One Generate Scripts click makes a list to page through
+  Scenario: One Generate Scripts click makes a unique list to page through
     When the user generates scripts
     Then 5 scripts are shown
     When the user clicks Show more twice
-    Then 15 scripts are shown, and the first 5 did not change
+    Then up to 15 unique scripts are shown, and the first 5 did not change
+
+  # [automated] tests/generator-unique-results.test.js. Owner ruling 2026-10-03:
+  # same tags in a shuffled display order are one suggestion, not variety.
+  Scenario: Generated script suggestions are unique by tag set
+    When the generator finds the same tags in a different order
+    Then only one generated suggestion is shown for that tag set
+    And the page explains that locked targets can leave fewer unique options
 
   # [automated] TC01-000043 and TC26-000003, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
   Scenario: Max Element Pool and Target Movie Score move together, one to one
