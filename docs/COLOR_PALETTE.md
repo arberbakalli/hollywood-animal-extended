@@ -39,10 +39,18 @@
 
 ## Dropdown Styling Rules
 
-### When Item is Selected in Exclusion List
+### When a Dropdown Is Empty
+- **Text Color**: Muted placeholder (`--text-muted`)
+- **Border Color**: Full category palette color (`--category-color`), not a faint transparent mix
+- **Background**: Dark input background (`--input-bg`)
+
+### When Item is Selected
 1. **Text Color**: Use category color
 2. **Border Color**: Use category color  
 3. **Background**: Dark input background (`--input-bg`)
+4. **Genre exception**: A selected Genre dropdown uses the selected genre's own
+   documented color (`--cat-genre-action`, `--cat-genre-drama`, etc.) for text
+   and border, not the gold Genre category color.
 
 ### When Displaying in Dropdown Options
 - **Option text color**: Match category color (via `option.category` class)
@@ -58,16 +66,22 @@
 
 ### Dropdowns
 ```css
-/* Selected state - all categories */
-select[data-category="X"].has-selected-tag {
+/* Empty state - all categories */
+select.tag-selector:not(.has-selected-tag) {
+    color: var(--text-muted);
+    border-color: var(--category-color);
+}
+
+/* Selected state - story element categories */
+select.tag-selector.has-selected-tag {
     color: var(--category-color);
     border-color: var(--category-color);
 }
 
-/* Genre specifics */
-select[data-category="Genre"].has-selected-tag {
-    color: var(--category-color); /* per-genre color */
-    border-color: var(--category-color);
+/* Selected Genre uses the selected genre's own color */
+select.tag-selector[data-genre]:not([data-genre=""]) {
+    color: var(--tag-color);
+    border-color: var(--tag-color);
 }
 
 /* Setting specifics */
@@ -125,6 +139,8 @@ select[data-category="Finale"].has-selected-tag {
 - [x] Setting: blue (#8fa3d1) across all contexts
 - [x] Genre: per-genre colors in dropdowns and exclusion list
 - [x] Genre labels: gold (#d4af37)
+- [x] Empty dropdown borders: full category palette color, not faint transparent mix
+- [x] Selected Genre dropdown text and border: selected genre palette color
 - [x] High-synergy indicators: emerald green (#10b981), not neon green
 - [x] Boutique toggle and every other success/"good" state: `--success`, no neon anywhere (2026-09-28)
 - [x] All dropdowns: colored text + border when selected

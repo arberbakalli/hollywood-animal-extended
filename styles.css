@@ -3477,8 +3477,15 @@ option.finale { color: color-mix(in srgb, var(--cat-finale) 42%, var(--text-main
 :is(.genre-slapstick-comedy, .genre-slapstick_comedy, [data-genre="slapstick-comedy"]) { --tag-color: var(--cat-genre-slapstick-comedy); }
 :is(.genre-thriller, [data-genre="thriller"]) { --tag-color: var(--cat-genre-thriller); }
 
-select.tag-selector[data-genre]:not([data-genre=""]),
-select.tag-selector option[class*="genre-"],
+select.tag-selector[data-genre]:not([data-genre=""]) {
+    color: var(--tag-color);
+    border-color: var(--tag-color);
+}
+
+select.tag-selector option[class*="genre-"] {
+    color: var(--tag-color);
+}
+
 .element-name[class*="genre-"] {
     color: color-mix(in srgb, var(--tag-color) 42%, var(--text-main));
 }

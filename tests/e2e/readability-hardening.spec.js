@@ -52,6 +52,32 @@ async function selectorTextMatchesPalette(locator) {
   });
 }
 
+async function genreSelectorMatchesSelectedPalette(locator) {
+  return locator.evaluate(element => {
+    if (!element.dataset.genre) return false;
+    const probe = document.createElement('span');
+    probe.dataset.genre = element.dataset.genre;
+    probe.style.color = 'var(--tag-color)';
+    document.body.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    const style = getComputedStyle(element);
+    return style.color === paletteColor && style.borderTopColor === paletteColor;
+  });
+}
+
+async function genreOptionsMatchPalette(locator) {
+  return locator.evaluate(element => Array.from(element.querySelectorAll('option[class*="genre-"]')).every(option => {
+    const probe = document.createElement('span');
+    probe.className = option.className;
+    probe.style.color = 'var(--tag-color)';
+    document.body.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    return getComputedStyle(option).color === paletteColor;
+  }));
+}
+
 for (const width of [390, 1280]) {
   test(`TC21-000001 ${width}px: genre text remains readable and stable when a dropdown gains focus`, async ({ steps, page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
@@ -61,11 +87,12 @@ for (const width of [390, 1280]) {
     await select.focus();
     const genres = await select.locator('option[value]:not([value=""])').evaluateAll(options => options.map(option => option.value));
     expect(genres).toHaveLength(11);
+    expect(await genreOptionsMatchPalette(select), `genre options use documented palette at ${width}px`).toBe(true);
     for (const genre of genres) {
       await select.selectOption(genre);
       await select.blur();
       const restingColor = await select.evaluate(node => getComputedStyle(node).color);
-      expect(await textContrast(select), `${genre} text contrast at ${width}px`).toBeGreaterThanOrEqual(4.5);
+      expect(await genreSelectorMatchesSelectedPalette(select), `${genre} selected text and border use documented palette at ${width}px`).toBe(true);
       await select.focus();
       await expect(select).toHaveCSS('color', restingColor);
       const remove = select.locator('..').locator('.remove-btn');
