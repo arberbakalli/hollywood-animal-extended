@@ -41,8 +41,8 @@ date so the tracker can follow the game's 500-day window?
 
 ### Genre Dropdown Polish
 
-The owner likes the closed Genre select shape on main. The remaining polish is
-for the open dropdown/readability state only.
+The owner likes the closed Genre select shape on main. The parked selected-Genre
+readability polish shipped on 2026-10-03.
 
 Known candidate from the parked CSS branch:
 
@@ -58,9 +58,8 @@ select[data-category="Genre"].has-selected-tag {
 }
 ```
 
-Before changing this, write a small visual/readability check. Avoid changing
-game text. Native `<option>` styling is browser-limited, so verify in the real
-browser rather than trusting CSS alone.
+Pinned by `tests/e2e/readability-hardening.spec.js`. Native `<option>` styling
+is browser-limited, so future changes still need real-browser verification.
 
 ## Start Here Later
 

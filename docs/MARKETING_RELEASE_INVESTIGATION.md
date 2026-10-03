@@ -33,6 +33,44 @@ before changing calculator source data.
    - If game gives a range, show min/max and let the player choose observed
      value for the run.
 
+## Working Recommendation From 2026-10-03 Review
+
+Do **not** replace the current distribution formula yet. Treat it as the app's
+baseline **screening demand** estimate, not as a full attendance, revenue or
+profit simulation.
+
+The screenshots strongly suggest the calculator is missing a second layer:
+attendance/occupancy/ad-reach conversion. The game can show 100% ad effect and
+still produce 26%-53% attendance depending on advertiser mix, audience fit,
+screenings and likely other hidden campaign math. That means the existing
+commercial-score curve may still be a useful baseline, while the app is
+currently overconfident because it assumes demand is fully met.
+
+Recommended product shape:
+
+1. Keep **Baseline Demand** as the current formula.
+2. Add a separate **Adjusted Attendance / Calibration** layer only when we have
+   enough evidence. Until then, make it user-entered or clearly labelled as
+   experimental.
+3. Add a **Factory Opening Week Boost** input/slider only after confirming the
+   source. If still unconfirmed, make it an optional manual observed value
+   rather than a game-rule constant.
+4. Split advertiser guidance:
+   - **Best Kinomark Pick:** one or two highest-fit advertisers.
+   - **Best Profit Campaign:** four or more good-enough advertisers that cover
+     likely viewers while avoiding hostile audiences.
+   - **Avoid These:** advertisers that over-target audiences weak for the film.
+5. Recommended Advertisers should stop implying "Top Pick = best profit." It is
+   currently best fit/rating strategy, not a revenue strategy.
+6. Show confidence labels:
+   - **Game-file backed** for extracted formulas.
+   - **Owner-observed** for repeated screenshots/runs.
+   - **Experimental** for calibration sliders and profit estimates.
+
+The safest next implementation is UI/product framing first: make the app honest
+about baseline demand vs attendance/profit, then add math only when game files
+or controlled runs prove it.
+
 ## Evidence To Gather Next
 
 - Game file/string for Factory opening-week boost and its percentage source.

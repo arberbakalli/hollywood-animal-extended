@@ -1,6 +1,6 @@
 # Genre Dropdown CSS Decision
 
-Status: parked candidate, not final shipped behavior.
+Status: shipped 2026-10-03.
 
 The owner likes the closed Genre select shape on main. The candidate below is
 for improving selected Genre readability without changing the text.
@@ -17,5 +17,5 @@ select[data-category="Genre"].has-selected-tag {
 }
 ```
 
-Before applying it, verify contrast and dropdown behavior in browser at desktop
-and narrow widths.
+Verified by `tests/e2e/readability-hardening.spec.js` at desktop and narrow
+widths.

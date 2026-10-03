@@ -631,6 +631,7 @@ select.tag-selector:not(.has-selected-tag) {
 select[data-category="Genre"].has-selected-tag {
     color: var(--category-color);
     border-color: var(--category-color);
+    font-weight: 600;
 }
 
 /* Setting - blue to match category label */
