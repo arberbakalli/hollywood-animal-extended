@@ -621,10 +621,10 @@ select.tag-selector.has-selected-tag {
     background: var(--input-bg);
 }
 
-/* Empty selects (placeholder "-- Select --") also show category color but more muted */
+/* Empty selects keep muted text, but use the category palette for the border. */
 select.tag-selector:not(.has-selected-tag) {
     color: var(--text-muted);
-    border-color: color-mix(in srgb, var(--category-color) 50%, transparent);
+    border-color: var(--category-color);
 }
 
 /* Genre selector - use per-genre color for text AND border when selected */

@@ -26,11 +26,25 @@ async function textContrast(locator) {
   });
 }
 
+async function categoryBorderMatchesPalette(locator) {
+  return locator.evaluate(element => {
+    const group = element.closest('.category-group');
+    if (!group) return false;
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--category-color)';
+    group.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    return getComputedStyle(element).borderTopColor === paletteColor;
+  });
+}
+
 for (const width of [390, 1280]) {
   test(`TC21-000001 ${width}px: genre text remains readable and stable when a dropdown gains focus`, async ({ steps, page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     await openHollywood(steps);
     const select = page.locator('#inputs-genre-generator select.tag-selector');
+    expect(await categoryBorderMatchesPalette(select), `genre placeholder border uses category palette at ${width}px`).toBe(true);
     await select.focus();
     const genres = await select.locator('option[value]:not([value=""])').evaluateAll(options => options.map(option => option.value));
     expect(genres).toHaveLength(11);
@@ -48,6 +62,7 @@ for (const width of [390, 1280]) {
     }
     for (const category of ['setting', 'protagonist', 'antagonist', 'supporting-character', 'theme-event', 'finale']) {
       const picker = page.locator(`#inputs-${category}-generator select.tag-selector`);
+      expect(await categoryBorderMatchesPalette(picker), `${category} placeholder border uses category palette`).toBe(true);
       expect(await textContrast(picker), `${category} placeholder contrast`).toBeGreaterThanOrEqual(4.5);
       await picker.focus();
       await picker.selectOption({ index: 1 });
