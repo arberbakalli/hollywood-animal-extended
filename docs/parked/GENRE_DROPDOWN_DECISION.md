@@ -18,6 +18,5 @@ select[data-category="Genre"].has-selected-tag {
 }
 ```
 
-`tests/e2e/readability-hardening.spec.js` verifies contrast and focus stability
-at desktop and narrow widths, but it does not approve a specific font weight or
-visual treatment.
+Before applying it, verify contrast and dropdown behavior in browser at desktop
+and narrow widths.
