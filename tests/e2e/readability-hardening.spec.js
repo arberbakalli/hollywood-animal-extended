@@ -52,6 +52,21 @@ async function selectorTextMatchesPalette(locator) {
   });
 }
 
+async function categoryOptionsMatchPalette(locator) {
+  return locator.evaluate(element => {
+    const group = element.closest('.category-group');
+    if (!group) return false;
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--category-color)';
+    group.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    return Array.from(element.querySelectorAll('option:not(:first-child)')).every(option =>
+      getComputedStyle(option).color === paletteColor
+    );
+  });
+}
+
 async function genreSelectorMatchesSelectedPalette(locator) {
   return locator.evaluate(element => {
     if (!element.dataset.genre) return false;
@@ -105,6 +120,7 @@ for (const width of [390, 1280]) {
       expect(await categoryBorderMatchesPalette(picker), `${category} placeholder border uses category palette`).toBe(true);
       expect(await textContrast(picker), `${category} placeholder contrast`).toBeGreaterThanOrEqual(4.5);
       await picker.focus();
+      expect(await categoryOptionsMatchPalette(picker), `${category} options use category palette`).toBe(true);
       await picker.selectOption({ index: 1 });
       expect(await selectorTextMatchesPalette(picker), `${category} selected text uses category palette`).toBe(true);
     }
