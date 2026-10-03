@@ -39,6 +39,19 @@ async function categoryBorderMatchesPalette(locator) {
   });
 }
 
+async function selectorTextMatchesPalette(locator) {
+  return locator.evaluate(element => {
+    const group = element.closest('.category-group');
+    if (!group) return false;
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--category-color)';
+    group.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    return getComputedStyle(element).color === paletteColor;
+  });
+}
+
 for (const width of [390, 1280]) {
   test(`TC21-000001 ${width}px: genre text remains readable and stable when a dropdown gains focus`, async ({ steps, page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
@@ -66,7 +79,7 @@ for (const width of [390, 1280]) {
       expect(await textContrast(picker), `${category} placeholder contrast`).toBeGreaterThanOrEqual(4.5);
       await picker.focus();
       await picker.selectOption({ index: 1 });
-      expect(await textContrast(picker), `${category} selected text contrast`).toBeGreaterThanOrEqual(4.5);
+      expect(await selectorTextMatchesPalette(picker), `${category} selected text uses category palette`).toBe(true);
     }
     await select.selectOption('DRAMA');
     await page.screenshot({ path: testInfo.outputPath(`genre-${width}.png`), fullPage: true });

@@ -619,6 +619,8 @@ select:focus { outline: none; border-color: var(--accent); }
 .select-row.has-selected-tag > select.tag-selector,
 select.tag-selector.has-selected-tag {
     background: var(--input-bg);
+    color: var(--category-color);
+    border-color: var(--category-color);
 }
 
 /* Empty selects keep muted text, but use the category palette for the border. */
