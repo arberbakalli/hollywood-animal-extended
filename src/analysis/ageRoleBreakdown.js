@@ -26,7 +26,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
         if (ageRoleData && genderSpecificData) return { ageRoleData, genderSpecificData };
         try {
             const [basicResponse, genderResponse] = await Promise.all([
-                fetch('data/age-role-compatibility.json'),
+                fetch('data/AgeRoleCompatibility.json'),
                 fetch('data/TagsToAgeCompatibilityData.json')
             ]);
             ageRoleData = await basicResponse.json();
@@ -81,7 +81,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
                 if (!select.value) return;
                 roles.push({
                     type: 'supporting',
-                    // age-role-compatibility.json's supportingCharacters bucket uses
+                    // AgeRoleCompatibility.json's supportingCharacters bucket uses
                     // SUPPORTING_CHARACTER_ (with underscore); GAME_DATA.tags and
                     // TagData.json use the real in-game id, SUPPORTINGCHARACTER_
                     // (without). rawId keeps the real id for gender-lock lookups;
@@ -115,7 +115,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
 
     // Source of truth for gender lock: TagData.json's `gender` field (M/F/U),
     // surfaced on GAME_DATA.tags[rawId].gender by dataLoaders.js. See
-    // docs/GAME_RULES.md #8. Not age-role-compatibility.json's locked_gender --
+    // docs/GAME_RULES.md #8. Not AgeRoleCompatibility.json's locked_gender --
     // that is a copy kept in sync with this one, and can drift (37 entries did,
     // fixed 2026-09-26); reading the original avoids relying on the copy.
     function getValidGenders(rawId) {

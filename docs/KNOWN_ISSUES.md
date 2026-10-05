@@ -90,7 +90,7 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 ## Data Correctness
 
 - **18 character tags have no Age & Gender Appeal rating data at all.**
-  `data/age-role-compatibility.json` is missing an entry entirely (not a
+  `data/AgeRoleCompatibility.json` is missing an entry entirely (not a
   drifted one — see the gender-lock entry below for that) for:
   `PROTAGONIST_CHARISMATIC_CRIMINAL`, `PROTAGONIST_CYNIC`,
   `PROTAGONIST_DIS_IDEALIST`, `PROTAGONIST_LAST_SURVIVOR`,
@@ -158,7 +158,7 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
   > identical-input-must-give-identical-output proof holds regardless of
   > which of our two existing per-tag datasets you compare the raw array
   > against. Whatever those 8 numbers mean in the game's own terms, they are
-  > not the source of either `age-role-compatibility.json` or
+  > not the source of either `AgeRoleCompatibility.json` or
   > `TagsAudienceWeights.json`.
   >
   > **Do not attempt to derive these 18 tags' ratings from
@@ -166,7 +166,7 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
   > is closed, under every interpretation tried so far.** Filling this gap
   > needs real in-game observation (playing and testing appeal per
   > demographic), matching how the rest of
-  > `age-role-compatibility.json`'s `"verified"`/`"estimated"` values were
+  > `AgeRoleCompatibility.json`'s `"verified"`/`"estimated"` values were
   > evidently produced in the first place, not file extraction.
 - **The base distribution curve is not in any game file in this repo.** Week 1 = commercial score
   × 2 × 1,000; week 2 = commercial score × 1 × 1,000; weeks 3-8 = previous week × 0.8 (20% decay).

@@ -768,7 +768,7 @@ gender button(s) render in the Age & Gender Appeal panel.**
 `getValidGenders()` in `src/analysis/ageRoleBreakdown.js` reads
 `GAME_DATA.tags[rawId].gender` directly (surfaced there by
 `src/data/dataLoaders.js`) and nowhere else — it does not read
-`data/age-role-compatibility.json`'s `locked_gender` at all. That field
+`data/AgeRoleCompatibility.json`'s `locked_gender` at all. That field
 still exists as a second, independently-displayed copy (used for nothing but
 its own presence in that file) and is kept in sync only as a courtesy: a
 regression test cross-checks it against `TagData.json` and fails if the two
@@ -784,7 +784,7 @@ change: every `gender` value is exactly `"M"`, `"F"`, `"U"`, or absent
 `ANTAGONIST_CRIMINAL_GANG`) — no malformed values, no case that falls
 through `getValidGenders()`'s three-way branch unhandled.
 
-`data/age-role-compatibility.json`'s `locked_gender` field (`"M"`, `"F"`, or
+`data/AgeRoleCompatibility.json`'s `locked_gender` field (`"M"`, `"F"`, or
 `null` for unisex) previously disagreed with `TagData.json`'s `gender` field
 on 37 entries — all `locked_gender: null` while `TagData.json` said they
 were locked, silently under-reporting the lock back when the panel still

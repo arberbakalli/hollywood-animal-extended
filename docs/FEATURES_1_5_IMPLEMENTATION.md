@@ -136,7 +136,7 @@ The current suite baseline is kept in `docs/TEST_QUALITY_GATE.md` ("Current Base
 
 - **Domain rules:** `docs/GAME_RULES.md` (demographics, scoring thresholds)
 - **Existing UI patterns:** `src/marketing/marketingPlanner.js`, `src/marketing/audienceCompatibility.js`
-- **Data structure:** `data/TagsAudienceWeights.json`, `data/age-role-compatibility.json`
+- **Data structure:** `data/TagsAudienceWeights.json`, `data/AgeRoleCompatibility.json`
 
 ## Related Features
 
