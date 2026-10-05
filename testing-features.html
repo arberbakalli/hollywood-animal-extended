@@ -7,53 +7,58 @@
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="testing-features.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body id="testing-features-body" class="hollywood-calculator-page testing-features-page">
     <div id="testing-features-shell" class="main-wrapper">
         <header id="testing-features-header" class="site-header"><div class="header-content">
-            <div class="lab-brand"><img class="lab-portrait" src="assets/colman-graves.png" alt="Colman Graves" width="56" height="76">
-                <div class="logo-area"><h1>Testing <span class="accent">Features</span></h1><h2>Hollywood Animal Extended</h2></div>
-            </div><a id="testingFeaturesBackLink" class="testing-features-link" href="index.html">Main App</a>
+            <div class="logo-area"><h1>Testing <span class="accent">Features</span></h1><h2>Hollywood Animal Extended</h2></div>
+            <a id="testingFeaturesBackLink" class="testing-features-link" href="index.html">Main App</a>
         </div></header>
         <main id="testing-features-content" class="container testing-features-container">
-            <p id="lab-load-status" class="lab-note" role="status">Loading game data...</p>
+            <p id="lab-load-status" class="subtitle lab-intro" role="status">Loading game data...</p>
             <button id="lab-retry-load" class="analyze-btn secondary-btn" type="button" hidden>Retry Loading</button>
             <div id="lab-workspace" class="lab-layout" hidden>
-                <nav class="lab-nav" role="tablist" aria-label="Testing features" aria-orientation="vertical">
-                    <button id="lab-tab-release" type="button" role="tab" aria-controls="lab-panel-release" aria-selected="true">Release Strategy Lab</button>
-                    <button id="lab-tab-advertisers" type="button" role="tab" aria-controls="lab-panel-advertisers" aria-selected="false" tabindex="-1">Advertiser Strategy</button>
-                    <button id="lab-tab-calibration" type="button" role="tab" aria-controls="lab-panel-calibration" aria-selected="false" tabindex="-1">Distribution Calibration</button>
-                    <button id="lab-tab-genres" type="button" role="tab" aria-controls="lab-panel-genres" aria-selected="false" tabindex="-1">Genre Synergy</button>
-                    <button id="lab-tab-diversity" type="button" role="tab" aria-controls="lab-panel-diversity" aria-selected="false" tabindex="-1">Unique Result Guard</button>
-                    <button id="lab-tab-awards" type="button" role="tab" aria-controls="lab-panel-awards" aria-selected="false" tabindex="-1">Award Targets</button>
-                    <button id="lab-tab-tracker" type="button" role="tab" aria-controls="lab-panel-tracker" aria-selected="false" tabindex="-1">Released-Film Tracker</button>
-                    <button id="lab-tab-unlocks" type="button" role="tab" aria-controls="lab-panel-unlocks" aria-selected="false" tabindex="-1">Unlock Info</button>
+                <nav class="lab-nav product-mode-nav" role="tablist" aria-label="Testing features" aria-orientation="vertical">
+                    <button id="lab-tab-release" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-release" aria-selected="true">Release Strategy Lab</button>
+                    <button id="lab-tab-advertisers" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-advertisers" aria-selected="false" tabindex="-1">Advertiser Strategy</button>
+                    <button id="lab-tab-calibration" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-calibration" aria-selected="false" tabindex="-1">Distribution Calibration</button>
+                    <button id="lab-tab-genres" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-genres" aria-selected="false" tabindex="-1">Genre Synergy</button>
+                    <button id="lab-tab-diversity" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-diversity" aria-selected="false" tabindex="-1">Unique Result Guard</button>
+                    <button id="lab-tab-awards" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-awards" aria-selected="false" tabindex="-1">Award Targets</button>
+                    <button id="lab-tab-tracker" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-tracker" aria-selected="false" tabindex="-1">Released-Film Tracker</button>
+                    <button id="lab-tab-unlocks" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-unlocks" aria-selected="false" tabindex="-1">Unlock Info</button>
                 </nav>
                 <div>
                     <section id="lab-panel-release" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-release" tabindex="0">
-                        <h3>Release Strategy Lab</h3><p class="lab-note">Screening demand uses the current calculator. Factory is a calibration-only opening-week assumption. Behemoth/Boutique later-week decay likely needs more game evidence before promotion.</p>
+                        <div class="card lab-card">
+                        <h3>Release Strategy Lab</h3><p class="subtitle lab-note">Screening demand uses the current calculator. Factory is a calibration-only opening-week assumption. Behemoth/Boutique later-week decay likely needs more game evidence before promotion.</p>
                         <form id="lab-release-form"><div class="lab-fields">
                         <label for="lab-release-commercial">Commercial rating<input id="lab-release-commercial" type="number" min="0" max="10" step="0.1" value="7.1" required></label>
                         <label for="lab-release-artistic">Artistic rating<input id="lab-release-artistic" type="number" min="0" max="10" step="0.1" value="5.9" required></label></div>
-                        <div class="lab-toggles"><label><input id="lab-release-behemoth" type="checkbox">Behemoth</label><label><input id="lab-release-boutique" type="checkbox">Boutique</label><label><input id="lab-release-opening" type="checkbox">Striking Image / Artistic Ability</label><label><input id="lab-release-factory" type="checkbox">Factory building</label></div>
+                        <div class="dist-toggles lab-switches"><div class="toggle-wrapper"><label class="toggle-label-text distribution-toggle-label--behemoth" for="lab-release-behemoth">Behemoth</label><div class="toggle-container distribution-toggle distribution-toggle--behemoth"><input id="lab-release-behemoth" class="toggle-checkbox" type="checkbox" role="switch"><div class="toggle-track" aria-hidden="true"><div class="toggle-thumb" aria-hidden="true"></div></div></div></div><div class="toggle-wrapper"><label class="toggle-label-text distribution-toggle-label--boutique" for="lab-release-boutique">Boutique</label><div class="toggle-container distribution-toggle distribution-toggle--boutique"><input id="lab-release-boutique" class="toggle-checkbox" type="checkbox" role="switch"><div class="toggle-track" aria-hidden="true"><div class="toggle-thumb" aria-hidden="true"></div></div></div></div><div class="toggle-wrapper"><label class="toggle-label-text distribution-toggle-label--striking" for="lab-release-opening">Striking Image / Artistic Ability</label><div class="toggle-container distribution-toggle distribution-toggle--striking"><input id="lab-release-opening" class="toggle-checkbox" type="checkbox" role="switch"><div class="toggle-track" aria-hidden="true"><div class="toggle-thumb" aria-hidden="true"></div></div></div></div><div class="toggle-wrapper"><label class="toggle-label-text distribution-toggle-label--factory" for="lab-release-factory">Factory building</label><div class="toggle-container distribution-toggle distribution-toggle--factory"><input id="lab-release-factory" class="toggle-checkbox" type="checkbox" role="switch"><div class="toggle-track" aria-hidden="true"><div class="toggle-thumb" aria-hidden="true"></div></div></div></div></div>
                         <label for="lab-release-boost">Factory opening-week boost: <output id="lab-release-boost-label" for="lab-release-boost">25%</output></label>
                         <input id="lab-release-boost" type="range" min="0" max="100" step="1" value="25" disabled>
                         <div class="lab-actions"><button class="analyze-btn" type="submit">Compare Release</button></div></form>
                         <div id="lab-release-result" class="lab-output" aria-live="polite"></div>
+                        </div>
                     </section>
                     <section id="lab-panel-advertisers" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-advertisers" tabindex="0" hidden>
-                        <h3>Advertiser Strategy</h3><p class="lab-note">Campaign sketch only. Keep the movie lean idea, but treat advertiser profit/reach as unconfirmed until more game evidence exists.</p>
+                        <div class="card lab-card">
+                        <h3>Advertiser Strategy</h3><p class="subtitle lab-note">Campaign sketch only. Keep the movie lean idea, but treat advertiser profit/reach as unconfirmed until more game evidence exists.</p>
                         <form id="lab-advertisers-form"><div class="lab-fields">
                         <select id="lab-advertisers-tags" multiple hidden aria-hidden="true"></select>
-                        <label for="lab-advertisers-lean">Movie lean<select id="lab-advertisers-lean"><option value="0">Balanced</option><option value="1">Artistic</option><option value="2">Commercial</option></select></label></div>
+                        <label for="lab-advertisers-lean">Movie lean<select id="lab-advertisers-lean" class="filter-select"><option value="0">Balanced</option><option value="1">Artistic</option><option value="2">Commercial</option></select></label></div>
                         <fieldset><legend>Desired audiences</legend><div id="lab-audiences" class="lab-toggles"></div></fieldset>
                         <fieldset><legend>Campaign advertisers</legend><div id="lab-agencies" class="lab-toggles"></div></fieldset>
                         <div class="lab-actions"><button class="analyze-btn" type="submit">Compare Campaign</button></div></form>
                         <div id="lab-advertisers-result" class="lab-output" aria-live="polite"></div>
+                        </div>
                     </section>
                     <section id="lab-panel-calibration" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-calibration" tabindex="0" hidden>
-                        <h3>Distribution Calibration</h3><p class="lab-note">Occupied screening equivalents = screenings x attendance. These are not viewer counts. Compare an observation with demand; no correction factor is applied to the app.</p>
-                        <div class="lab-actions"><button id="lab-calibration-four-ads" type="button" class="analyze-btn secondary-btn">Load 4-ad Observation</button><button id="lab-calibration-one-ad" type="button" class="analyze-btn secondary-btn">Load 1-ad Observation</button></div>
+                        <div class="card lab-card">
+                        <h3>Distribution Calibration</h3><p class="subtitle lab-note">Occupied screening equivalents = screenings x attendance. These are not viewer counts. Compare an observation with demand; no correction factor is applied to the app.</p>
+                        <div class="product-mode-nav" role="group" aria-label="Owner observations"><button id="lab-calibration-four-ads" type="button" class="product-mode-btn">Load 4-ad Observation</button><button id="lab-calibration-one-ad" type="button" class="product-mode-btn">Load 1-ad Observation</button></div>
                         <form id="lab-calibration-form"><div class="lab-fields">
                         <label for="lab-calibration-screenings">Week-one screenings<input id="lab-calibration-screenings" type="number" min="1" value="49896" required></label>
                         <label for="lab-calibration-attendance">Attendance (%)<input id="lab-calibration-attendance" type="number" min="0" max="100" step="0.1" value="53" required></label>
@@ -61,38 +66,46 @@
                         <label for="lab-calibration-ads">Advertiser count<input id="lab-calibration-ads" type="number" min="1" max="8" value="4" required></label></div>
                         <div class="lab-actions"><button class="analyze-btn" type="submit">Compare Observation</button></div></form>
                         <div id="lab-calibration-result" class="lab-output" aria-live="polite"></div>
+                        </div>
                     </section>
                     <section id="lab-panel-genres" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-genres" tabindex="0" hidden>
-                        <h3>Genre Synergy</h3><p class="lab-note">Genre pair bonuses from game data, commercial and artistic. A pair activates when the second genre holds at least 35%. These bonuses are not the 0-5 story compatibility score.</p>
-                        <div class="lab-fields"><label for="lab-genre-primary">Primary genre<select id="lab-genre-primary"></select></label>
+                        <div class="card lab-card">
+                        <h3>Genre Synergy</h3><p class="subtitle lab-note">Genre pair bonuses from game data, commercial and artistic. A pair activates when the second genre holds at least 35%. These bonuses are not the 0-5 story compatibility score.</p>
+                        <div class="lab-fields"><label for="lab-genre-primary">Primary genre<select id="lab-genre-primary" class="filter-select"></select></label>
                         <label for="lab-genre-secondary-share">Second genre share (%)<input id="lab-genre-secondary-share" type="number" min="5" max="50" step="5" value="35" required></label></div>
                         <div id="lab-genres-result" class="lab-output" aria-live="polite"></div>
-                        <div class="lab-pairings">
-                            <h4>Story element pairings</h4>
-                            <div class="lab-fields"><label for="lab-genre-element-category">Category<select id="lab-genre-element-category"></select></label>
-                            <label for="lab-genre-element-rank">Rank by<select id="lab-genre-element-rank"><option value="pairs">Strong pairs within genre</option><option value="genre">Selected genre fit</option><option value="cross">Strong pairs across genres</option></select></label>
+                        </div>
+                        <div class="card lab-card lab-pairings">
+                            <h3>Story element pairings</h3>
+                            <div class="lab-fields"><label for="lab-genre-element-category">Category<select id="lab-genre-element-category" class="filter-select"></select></label>
+                            <label for="lab-genre-element-rank">Rank by<select id="lab-genre-element-rank" class="filter-select"><option value="pairs">Strong pairs within genre</option><option value="genre">Selected genre fit</option><option value="cross">Strong pairs across genres</option></select></label>
                             <label for="lab-genre-element-search" class="lab-field-wide">Find an element<input id="lab-genre-element-search" type="search" placeholder="Search story elements"></label></div>
                             <div id="lab-genre-elements-result" class="lab-output" aria-live="polite"></div>
                         </div>
                     </section>
                     <section id="lab-panel-diversity" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-diversity" tabindex="0" hidden>
-                        <h3>Unique Result Guard</h3><p class="lab-note">Rejected as a standalone player tool. This exists to inspect the rule every generator should follow: reshuffled copies must not pollute results.</p>
+                        <div class="card lab-card">
+                        <h3>Unique Result Guard</h3><p class="subtitle lab-note">Rejected as a standalone player tool. This exists to inspect the rule every generator should follow: reshuffled copies must not pollute results.</p>
                         <form id="lab-diversity-form"><label for="lab-diversity-candidates">Candidate scripts (JSON arrays of element IDs)</label>
                         <textarea id="lab-diversity-candidates" spellcheck="false" required></textarea>
-                        <div class="lab-actions"><button class="analyze-btn" type="submit">Find Unique Scripts</button><button id="lab-diversity-sample" class="analyze-btn secondary-btn" type="button">Load Detective Example</button></div></form>
+                        <div class="lab-actions"><button class="analyze-btn" type="submit">Find Unique Scripts</button><button id="lab-diversity-sample" class="analyze-btn secondary-btn lab-secondary" type="button">Load Detective Example</button></div></form>
                         <div id="lab-diversity-result" class="lab-output" aria-live="polite"></div>
+                        </div>
                     </section>
                     <section id="lab-panel-awards" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-awards" tabindex="0" hidden>
-                        <h3>Award Targets</h3><p class="lab-note">See all targets at once, then attach a movie idea to the goal you want to chase. This is guidance, not an award prediction.</p>
+                        <div class="card lab-card">
+                        <h3>Award Targets</h3><p class="subtitle lab-note">See all targets at once, then attach a movie idea to the goal you want to chase. This is guidance, not an award prediction.</p>
                         <div id="lab-awards-result" class="lab-output" aria-live="polite"></div>
                         <form id="lab-awards-form"><div class="lab-fields">
                         <label for="lab-award-film">Movie idea<input id="lab-award-film" maxlength="100" placeholder="Optional title or concept"></label>
                         <label for="lab-award-year">Target year<input id="lab-award-year" type="number" min="1900" max="2100" value="1935"></label>
                         <label for="lab-award-elements" class="lab-field-wide">Elements to remember<select id="lab-award-elements" multiple></select></label></div></form>
                         <fieldset><legend>Targets to track</legend><div id="lab-award-targets" class="lab-toggles"></div></fieldset>
+                        </div>
                     </section>
                     <section id="lab-panel-tracker" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-tracker" tabindex="0" hidden>
-                        <h3>Released-Film Tracker</h3><p class="lab-note">Idea still in baking process. Dates alone may not match the game's freshness pips, so this warns softly instead of claiming Fresh/Stale/Rotten truth.</p>
+                        <div class="card lab-card">
+                        <h3>Released-Film Tracker</h3><p class="lab-callout" role="note"><strong>Idea still in baking: not a finished feature.</strong> Dates alone may not match the game's freshness pips, so this warns softly instead of claiming Fresh/Stale/Rotten truth.</p>
                         <form id="lab-tracker-form"><div class="lab-fields">
                         <label for="lab-tracker-title">Film title<input id="lab-tracker-title" maxlength="100" required></label>
                         <label for="lab-tracker-date">Release date<input id="lab-tracker-date" type="date" value="1941-04-21" required></label>
@@ -100,13 +113,16 @@
                         <div class="lab-actions"><button class="analyze-btn" type="submit">Record Release</button></div></form>
                         <label for="lab-tracker-reference">Current in-game date</label><input id="lab-tracker-reference" type="date" value="1941-04-21" required>
                         <div id="lab-tracker-result" class="lab-output" aria-live="polite"></div>
+                        </div>
                     </section>
                     <section id="lab-panel-unlocks" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-unlocks" tabindex="0" hidden>
-                        <h3>Unlock Info</h3><p class="lab-note">Three states matter: starting deck, date unlocks, and recipe/factory unlocks. Current shipped data only proves the starting deck.</p>
-                        <div class="lab-fields"><label for="lab-unlock-category">Category<select id="lab-unlock-category"></select></label>
+                        <div class="card lab-card">
+                        <h3>Unlock Info</h3><p class="subtitle lab-note">Three states matter: starting deck, date unlocks, and recipe/factory unlocks. Current shipped data only proves the starting deck.</p>
+                        <div class="lab-fields"><label for="lab-unlock-category">Category<select id="lab-unlock-category" class="filter-select"></select></label>
                         <label for="lab-unlock-search">Find an element<input id="lab-unlock-search" type="search" placeholder="Search elements"></label>
-                        <label for="lab-unlock-tag">Story element<select id="lab-unlock-tag"></select></label></div>
+                        <label for="lab-unlock-tag">Story element<select id="lab-unlock-tag" class="filter-select"></select></label></div>
                         <div id="lab-unlocks-result" class="lab-output" aria-live="polite"></div>
+                        </div>
                     </section>
                 </div>
             </div>
