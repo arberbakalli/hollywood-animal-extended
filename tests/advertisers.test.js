@@ -184,14 +184,14 @@ describe('generateReasoning follows the grade', () => {
     const spark = { name: 'Spark', targets: ['YM', 'YF'] };
 
     test.each([
-        [3.4, 'A+', 'Strong appeal across YM, YF.'],
-        [2.9, 'A', 'Strong appeal across YM, YF.'],
-        [2.8, 'B+', 'Good compatibility across YM, YF.'],
-        [2.4, 'B', 'Good compatibility across YM, YF.'],
-        [2.3, 'C+', 'Adequate reach for YM, YF, but not a standout.'],
-        [2.0, 'C', 'Adequate reach for YM, YF, but not a standout.'],
-        [1.5, 'D', 'Adequate reach for YM, YF, but not a standout.'],
-        [1.4, 'F', 'Your elements score poorly with YM, YF — this campaign would underperform.'],
+        [3.4, 'A+', 'Strong appeal across Young men, Young women.'],
+        [2.9, 'A', 'Strong appeal across Young men, Young women.'],
+        [2.8, 'B+', 'Good compatibility across Young men, Young women.'],
+        [2.4, 'B', 'Good compatibility across Young men, Young women.'],
+        [2.3, 'C+', 'Adequate reach for Young men, Young women, but not a standout.'],
+        [2.0, 'C', 'Adequate reach for Young men, Young women, but not a standout.'],
+        [1.5, 'D', 'Adequate reach for Young men, Young women, but not a standout.'],
+        [1.4, 'F', 'Your elements score poorly with Young men, Young women — this campaign would underperform.'],
     ])('a score of %d (%s) reads "%s"', (score, grade, sentence) => {
         expect(h.call('predictGradeFromScore', score).grade).toBe(grade);
         expect(h.call('generateReasoning', spark, score)).toBe(sentence);
@@ -203,7 +203,7 @@ describe('renderAdvertiserCard', () => {
         agency: { name: 'Spark', targets: ['YM', 'YF'], type: 2, level: 3 },
         // Graded on the tenth it shows (owner ruling 2026-10-01, edit
         // approved). The old fixture paired 4.25 with a B.
-        score: 4.3, grade: 'A+', tier: 'grade-high', reasoning: 'Strong appeal across YM, YF.',
+        score: 4.3, grade: 'A+', tier: 'grade-high', reasoning: 'Strong appeal across Young men, Young women.',
     };
 
     test('renders the score, grade and reasoning', () => {

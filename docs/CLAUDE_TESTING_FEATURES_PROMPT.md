@@ -45,14 +45,44 @@ in `lab/`, not `src/`, because the main-page module guard owns that tree.
 existing executable test was changed for these prototypes.
 
 Available tools: Release Strategy Lab, Advertiser Strategy, Distribution
-Calibration, Genre Synergy, Script Diversity, Award Targets, Released-Film
+Calibration, Genre Synergy, Unique Result Guard, Award Targets, Released-Film
 Tracker, Unlock Info. Their focused suite is
 `tests/e2e/testing-features.spec.js`; pure lab tests are
 `tests/testing-features.test.js`.
 
+Owner feedback applied on 2026-10-05:
+
+- Distribution Calibration and Genre Synergy are the strongest prototypes.
+- Release Strategy should show week/demand only; do not re-add scenario and
+  difference columns.
+- Advertiser Strategy needs redesign; keep movie lean, but do not bring back a
+  giant visible movie-element multi-select.
+- Script Diversity is not a standalone product. Its dedupe rule belongs inside
+  generated result lists.
+- Award Targets should show all three goals together and attach movie/year/
+  element notes.
+- Released-Film Tracker is still debated; do not present date windows as
+  confirmed freshness truth.
+- Unlock Info uses `extractedFilesFromGameSourceOfTruth/TagData.json` for
+  recovered date, recipe, starting-recipe and Trash King policy conditions.
+  Do not invent quest/NPC gates unless another source file proves them.
+- Genre Synergy now includes direct story-element pair scores and cross-genre
+  counts, plus pair counts against the available 4+ story pool for the selected
+  genre. Use the production compatibility engine and its 4+ / <2 bands;
+  these counts are not movie outcomes. Keep Script Lab exclusions out of its
+  available-element list.
+- Script Lab and Build for Target already deduplicate their generated sets.
+  Inspect a real output path before proposing another Set/Map layer. Graves
+  additions and swaps are individual suggestions, not duplicate scripts.
+- The compatibility JSON is already an adjacency matrix. An extra graph cache
+  needs a measured query or rendering problem before it is worth maintaining.
+- Best genre summaries retain all ties, not just the first alphabetical match.
+  Drama + Comedy and Drama + Romance both give +0.25 commercial. Recommendations
+  honor exclusions; reference rows remain visible and labeled.
+
 Research is the valuable next contribution: recover actual Factory and
-attendance/advertiser reach formulas and original unlock conditions. Do not
-turn the screenshot ratios or sandbox boost into game truth. Award Targets
+attendance/advertiser reach formulas and any quest/NPC layer behind unlock
+recipes. Do not turn the screenshot ratios or sandbox boost into game truth. Award Targets
 currently supplies planning guidance; the exact awards model remains open.
 Main already deduplicates generated scripts; the lab displays candidate-list
 deduplication so the owner can inspect it.
@@ -72,8 +102,9 @@ runs on the same results directory or server port.
 
 3. Script Diversity
    - Prevent generated results that are the same set of tags in shuffled order.
-   - Show a clear message when no more unique combinations exist at the current
-     constraints.
+   - Say when all unique candidates in the supplied batch are shown. Do not
+     claim the entire search space is exhausted unless an exhaustive search
+     actually proves it.
 
 4. Act 2 Polish
    - Read parked notes and prototype only the smallest visible slice.

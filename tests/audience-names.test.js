@@ -40,4 +40,9 @@ describe('audience names follow the game files', () => {
 
         expect(reasoning).toContain('Best audience fit: Young women (5.0), Young men (4.0), Men (3.0)');
     });
+
+    test('Analyze Script advertiser reasoning names audiences as the game does', () => {
+        expect(h.call('HACAdvertiserMatcher.generateReasoning', { targets: ['TM', 'TF'] }, 3.4))
+            .toBe('Strong appeal across Boys, Girls.');
+    });
 });

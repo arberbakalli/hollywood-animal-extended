@@ -43,14 +43,102 @@ not approved changes to the main app's behavior.
 
 | Panel | Demoable behavior | Evidence / limitation |
 | --- | --- | --- |
-| Release Strategy Lab | Compare eight weeks; toggle Behemoth, Boutique, opening ability and Factory; adjust Factory percentage | Calls `HACDistributionPlanner.weeklyDemandFor`. Factory is illustrative, week one only; 0-100 input range is a sandbox range, not a verified game limit. Observed 11-39% is not encoded as a formula. |
-| Advertiser Strategy | Select real tags, lean, audiences and agencies; compare grades, covered/missing/additional audiences and shortlist | Calls `HACAdvertiserMatcher.getRecommendations`, with agencies from `data.js`. Coverage is a union of listed demographics, not measured reach. No profit estimate. |
+| Release Strategy Lab | Show eight weeks of demand only; toggle Behemoth, Boutique, opening ability and Factory; adjust Factory percentage | Calls `HACDistributionPlanner.weeklyDemandFor`. Factory is illustrative, week one only; 0-100 input range is a sandbox range, not a verified game limit. Owner feedback says real Behemoth/Boutique + good audience targeting may decay much slower than the current calculator. |
+| Advertiser Strategy | Keep movie lean, desired audiences and campaign advertiser selection; show compact top-five fit preview and audience gaps | Calls `HACAdvertiserMatcher.getRecommendations`, with agencies from `data.js`. The ugly all-elements selector was removed from the visible UI. Coverage is a union of listed demographics, not measured reach. No profit estimate. The tool counts stored Script Lab exclusions when its sample elements are hidden. |
 | Distribution Calibration | Load the owner's 1-ad / 4-ad observations or enter another observation; compare occupied screening equivalents with a supplied demand estimate | Screenings multiplied by attendance is an equivalent, not viewers. Predicted demand is editable: 35,500 uses the existing calculator for 7.1 commercial, Behemoth and opening ability; 34,000 is the owner's reported game suggestion. Observations alone cannot identify causes. |
-| Genre Synergy | Choose a primary genre; inspect all ten alternatives and change second share | Bonuses come from `GenrePairs.json`; activation calls the existing compatibility engine at the 35% boundary. Commercial/artistic bonuses are distinct from story-pair fit. At 50/50 the existing engine's data-order tie break applies. |
-| Script Diversity | Inspect a Detective candidate batch or paste JSON IDs; collapse reshuffled copies, keep distinct sets and reject malformed/unknown IDs | Main already deduplicates generated results. Lab inspector compares element IDs only; production also includes genre percentages in its signature. The note describes the supplied batch, never claims the entire search space was exhausted. |
-| Award Targets | Switch between Box Office Success, Critical Acclaim and Fan Favorites and see each metric and planning guidance | Based on `ACT2_POLISH_HANDOVER.md`; no simulated award cutoff or prediction. |
-| Released-Film Tracker | Record films, dates and real elements; persist/reload journal, warn on repeats in 500 days, remove a chosen film | Separate `hac.testing-features.releases.v1` storage key. Warns only; no production freshness writes. Prototype includes day 500 and excludes future films. |
-| Unlock Info | Search actual tags and distinguish verified starter availability from missing unlock conditions | Starter facts from `GAME_DATA.starterWhitelist`. Current `TagData.json` and the only available historical version (`07a6ae9`) lack `parameters.Condition`; later dates/recipes remain unknown. |
+| Genre Synergy | Choose a primary genre; inspect all ten alternatives, change second share, see best commercial/artistic pair summaries, and explore story-element pairings | Bonuses come from `GenrePairs.json`; direct story-element scores come from `TagCompatibilityData.json` through the production pair-score function. The 2.5 MB compatibility file loads only when this panel opens. At 50/50 the existing engine's data-order tie break applies. |
+| Unique Result Guard | Inspect a Detective candidate batch or paste JSON IDs; collapse reshuffled copies, keep distinct sets and reject malformed/unknown IDs | Rejected as a standalone player-facing feature. Its rule belongs inside generated result lists in Script Lab, Marketing and maybe Graves. Lab inspector compares element IDs only; production also includes genre percentages in its signature. |
+| Award Targets | Show Box Office Success, Critical Acclaim and Fan Favorites together; attach a movie idea, year, target and elements to a planning memo | Based on `ACT2_POLISH_HANDOVER.md`; no simulated award cutoff or prediction. |
+| Released-Film Tracker | Record films, dates and real elements; persist/reload journal, warn softly on repeats in 500 days, remove a chosen film | Idea still in debate. Separate `hac.testing-features.releases.v1` storage key. Warns only; no production freshness writes. Calendar days may not map to game freshness pips. |
+| Unlock Info | Filter by category, search actual tags and distinguish starter, date, recipe, starting-recipe and Trash King policy unlock conditions | Starter facts from `GAME_DATA.starterWhitelist`; recovered conditions come from `extractedFilesFromGameSourceOfTruth/TagData.json`. Main `data/TagData.json` still does not carry those conditions. |
+
+## Owner Feedback Applied (2026-10-05)
+
+- **Keep / polish:** Distribution Calibration. The observed attendance gap is useful
+  because it helps players reason about screening capacity.
+- **Keep / polish:** Genre Synergy. The table taught the 35% second-genre
+  threshold; add best commercial/artistic summaries so the owner does not need
+  to check each row manually.
+- **Change shape:** Release Strategy should show only week and demand. Factory
+  scenario/difference columns were noise. Current later-week decay may be wrong
+  when Behemoth, Boutique and strong audience targeting all line up.
+- **Change shape:** Award Targets should show all three goals together and let
+  the owner attach a movie idea/year/elements to the target.
+- **Change shape:** Unlock Info now uses recovered game-source conditions for
+  starter, date, recipe, starting-recipe and Trash King policy unlocks. Keep
+  quest/NPC claims out until a source file proves those exact gates.
+- **Rejected as standalone:** Script Diversity. The useful behavior is the
+  result-list guard: generated scripts that are the same set in a different
+  order should collapse wherever generation happens.
+- **Needs redesign:** Advertiser Strategy. Movie lean is promising, but the
+  visible all-elements selector was bad UI. Fit grade alone is not enough for
+  profit; future work needs advertiser count/reach/cost evidence.
+- **Still baking:** Released-Film Tracker. It may become a yearly slate planner
+  with pinned elements and repeat cycles, but calendar-day warnings should not
+  pretend to be confirmed freshness truth.
+
+## Pairing Insight and Reuse Review
+
+Genre Synergy now has a searchable, category-filtered element table. It shows
+the selected genre's direct 0-5 pair score, successful and unsuccessful pairs
+against the available story elements that fit that genre at 4+, and each
+element's successful/unsuccessful matches across all eleven genres. The default
+ranking prioritizes elements with successful genre fit and the most strong
+story-element pairs. The alternate cross-genre view ranks broader usefulness.
+The caption names the pool behind each count, and category/search filters do
+not silently redefine that comparison pool. The summary
+counts successful (4+) and unsuccessful (<2) direct pairs for the current
+filter. These are game-data edges, not whole-script scores or observed film
+success. Stored Script Lab exclusions are removed from the available pool.
+
+The current compatibility JSON is already an adjacency matrix. A second
+cached graph would duplicate 2.5 MB of source data and add invalidation work;
+the lab queries the existing matrix through `HACCompatibilityEngine`. A small
+edge-list view could be useful later for graph visualization, but is not a
+prerequisite for this table. No historical frequency or outcome data exists to
+claim an element is popular or profitable.
+
+Script Lab already deduplicates generated scripts with a sorted signature that
+includes genre percentages (`src/generator/scriptGenerator.js`). Build for
+Target already deduplicates combinations by sorted IDs
+(`src/marketing/targetedAds.js`). Graves ranks individual additions and swaps,
+not whole scripts, so applying script-set dedup there would solve a different
+problem. The lab guard remains a demonstration of the rule, not a second
+production implementation. The lab's `table` and `lab-mini-card` renderers
+already cover repeated presentations; no broader rendering abstraction is
+justified yet.
+
+Tag names and categories come from `TagData.json` and localization. Exclusions
+come from the persisted Script Lab store. The release journal deliberately uses
+its own key because the game's freshness timing is not confirmed; it must not
+write to production freshness state.
+
+Lessons applied during this pass:
+
+- A `Set` compares object identity. Sorted ID signatures are required to collapse
+  reordered scripts; production signatures must retain genre percentages.
+- Reference tables can show unavailable elements, but best-pair recommendations
+  must honor exclusions and identify unavailable reference rows.
+- Cross-genre counts and within-genre story-pair counts answer different player
+  questions. Show the comparison pool instead of implying a movie prediction.
+- Lazy data readiness needs an explicit loaded flag: the initial empty
+  compatibility object is truthy. Cache the pending request, and allow a failed
+  request to retry without blocking unrelated panels.
+- An automated BDD marker must assert every meaningful result. This pass added
+  explicit best-pair, award-memo and exclusion assertions.
+- Screenshots must wait for asynchronous results. A visible panel alone can
+  still be loading, so the full-page capture can miss the table below it.
+
+| Feature | Current decision | Promotion condition |
+| --- | --- | --- |
+| Distribution Calibration | Production candidate | Preserve the distinction between screening equivalents and viewers. |
+| Genre Synergy and pairing insight | Production candidate | Owner reviews placement and the exploratory 15-row limit. |
+| Release Strategy | Lab calibration tool | Recover Factory stacking and later-week demand behavior. |
+| Advertiser Strategy | Change shape | Recover reach, costs and Kinomark effects; keep the compact fit view. |
+| Unique Result Guard | Helper inside generated results | Reuse existing dedup where it already runs; inspect any remaining result lists before changing them. |
+| Award Targets | Lab planning tool | Decide whether goals remain notes or affect generation. |
+| Released-Film Tracker | Parked | Confirm the in-game freshness clock and whether a yearly slate is useful. |
+| Unlock Info | Parked for data recovery | Recover date and recipe/factory conditions from game files. |
 
 ## Isolation and Files
 
@@ -60,7 +148,7 @@ not approved changes to the main app's behavior.
 - `lab/labModel.js`: small pure operations for the lab, imported by its unit tests.
 - `tests/testing-features.test.js`: inputs, calibration, campaign coverage,
   uniqueness, journal boundaries and starter facts.
-- `tests/e2e/testing-features.spec.js`: TC34-000001 through TC34-000011.
+- `tests/e2e/testing-features.spec.js`: TC34-000001 through TC34-000018.
 
 The lab uses ESM on its own page. Its modules intentionally live outside `src/`:
 the existing `domStructure` guard reserves that tree for modules loaded by
@@ -88,22 +176,27 @@ Native multiple selects and the JSON editor retain stable editing heights.
    and whether they should trigger generation or remain planning guidance.
 5. Confirm the journal's 500-day boundary and whether to track calendar dates or
    a rolling film count. Its warning must not silently set freshness.
-6. Re-extract original unlock conditions. Recipe and date displays need those
-   records, not guessed years or conditions from element names.
+6. Confirm whether any recipe gates are also quest/NPC-gated in another source
+   file. The current lab shows only recovered `TagData.json` conditions.
 7. Review the genre reference placement and percentages-aware diversity UI
    before promoting either into Script Lab.
 
 ## Verification Record (2026-10-05)
 
-- `npm test -- --runInBand`: 50 suites, 677 tests and 10 snapshots passed.
-- `npx playwright test tests/e2e/testing-features.spec.js tests/e2e/app-shell.spec.js --workers=1 --trace off`: 13 passed.
-- After the final lab-only CSS polish,
-  `npx playwright test tests/e2e/testing-features.spec.js --workers=1 --trace off`:
-  11 passed, with screenshots of every panel at 390px and 1280px.
-- Reviewed release, advertiser, genre and diversity screenshots; corrected
-  mobile table word breaks, editor-height specificity and dark genre text.
+- Final `npm test -- --runInBand`: 50 suites, 679 tests and 10 snapshots passed.
+- Final `npx playwright test tests/e2e/testing-features.spec.js tests/e2e/app-shell.spec.js --workers=1 --trace off`:
+  20 passed (18 lab tests and two main-shell tests), including the tied-pair follow-up.
+- Screenshots of all eight panels at 390px and 1280px were reviewed. Corrected
+  mobile table word breaks, editor-height specificity, dark genre text,
+  clipped table captions and oversized calibration buttons. Tables deliberately
+  scroll horizontally on mobile; the page itself must not overflow.
+- All 16 automated lab BDD scenarios were traced to meaningful executable
+  assertions. Coverage includes real pairing scores/counts, recommendation
+  exclusions, award memo content, persistence, failed loading and retry.
+- TC34-000014 also verifies that the compatibility matrix is loaded lazily
+  once and reused, rather than fetched again on every filter change.
 - Both lab JS files passed `node --check`; `git diff --check` passed.
-- Existing executable tests, `src/`, `data.js`, `script.js` and shared styling
+- Existing production executable tests, `src/`, `data.js`, `script.js` and shared styling
   were unchanged by this implementation. The earlier branch scaffold adds the
   Main App header link to the lab; no promotion into main was performed.
 - Full Playwright suite was not run; verification covers the lab and main shell.
@@ -113,6 +206,47 @@ overriding the native hidden attribute and the main-page module guard. Code and
 file placement were corrected; existing tests were preserved. A newly authored
 lab unit assertion was changed during implementation from repeating arithmetic
 to checking explicit expected values, before establishing the final suite.
+
+Owner-approved lab behavior changed the lab scenarios and their corresponding
+assertions. The final QA pass strengthened the later-week, best-genre and award
+memo assertions; no production test expectation was changed.
+
+The implementation is ready for owner review, not automatic production
+promotion. The eight-feature decision table above and open product decisions
+remain the handoff checklist. Claude can investigate missing game data in a
+separate worktree; production formulas must not be inferred from these lab
+observations.
+
+## Tied Genre Recommendations
+
+Best commercial and artistic summaries show every available pair tied for the
+highest respective bonus, in alphabetical order. For Drama, Comedy and Romance
+both give +0.25 commercial and both appear. Exclusions remove a pair from these
+recommendations, not from the reference table. TC34-000018 protects this behavior.
+
+After this addition, the lab Playwright suite passed all 18 tests, including
+desktop/mobile screenshots. Focused Jest checks (lab helpers, BDD markers and
+E2E IDs) passed all 30 tests across three suites. Existing assertions were kept.
+
+## Goal Completion Evidence
+
+| Goal requirement | Evidence |
+| --- | --- |
+| Inspect before rebuilding | Existing lab panels and owner feedback are retained; changes are documented above. |
+| Consistent desktop/mobile UI | Scoped lab CSS; all eight panels captured at 390px and 1280px in TC34-000011 and visually reviewed. |
+| Classify all prototypes | Eight-feature decision table with promotion conditions. |
+| Useful helpers, dedup and exclusions | Canonical signatures in `uniqueScripts`; existing production dedup inspected; TC34-000006, 000012, 000013 and 000016 cover lab behavior. |
+| Reuse and optimization review | Pairing Insight and Reuse Review; production scorer reused; lazy matrix loading asserted by TC34-000014. |
+| Strong/unsuccessful and cross-genre insight | `rankGenreElements`, real-data Jest assertions, TC34-000012 and 000017. |
+| Best commercial/artistic recommendations | Real genre bonuses and threshold checks in TC34-000005; ties and exclusions in TC34-000018. |
+| Honest calibration claims | Release/calibration panels, TC34-000002/000003/000004, and open product decisions; production formulas unchanged. |
+| Documentation and behavior scenarios | This document, Claude handoff prompt and 16 automated lab scenarios. |
+| Verification | 679 full Jest tests before the tie follow-up; 30 focused Jest tests after it; latest 20 lab/main-shell Playwright tests. |
+| Clean, reviewable branch | Diff and syntax checks pass; local commit awaits explicit owner approval. No push or merge. |
+
+The goal remains active only for the final clean-branch step. Product promotion
+and missing game-data research are explicitly separate follow-up decisions,
+not claims that the prototypes model those unknowns already.
 
 ## Review and Promotion
 

@@ -1,5 +1,5 @@
 import { LAB_STORAGE_KEY, finiteNumber, releaseCurve, calibrateAttendance, campaignCoverage,
-    uniqueScripts, AWARD_TARGETS, recentElementUse, validateRelease, unlockInfo } from './labModel.js';
+    uniqueScripts, rankGenreElements, AWARD_TARGETS, recentElementUse, validateRelease, unlockInfo } from './labModel.js';
 
 const byId = id => document.getElementById(id);
 const selectedIds = id => [...byId(id).selectedOptions].map(option => option.value);
@@ -8,8 +8,11 @@ const format = value => value.toLocaleString('en-US', { maximumFractionDigits: 2
 const signed = value => `${value > 0 ? '+' : ''}${value.toFixed(2)}`;
 let tags = [];
 let rawTags = {};
+let unlockTags = {};
 let releases = [];
 let wired = false;
+let compatibilityRequest;
+let compatibilityLoaded = false;
 
 function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -23,7 +26,10 @@ function paragraph(parent, text, className) { parent.append(element('p', text, c
 function table(parent, headers, rows, caption) {
     const wrapper = element('div', undefined, 'lab-table-wrap');
     const node = element('table', undefined, 'lab-table');
-    if (caption) node.append(element('caption', caption));
+    if (caption) {
+        node.setAttribute('aria-label', caption);
+        paragraph(parent, caption, 'lab-note');
+    }
     const head = element('thead');
     const header = element('tr');
     headers.forEach(text => { const th = element('th', text); th.scope = 'col'; header.append(th); });
@@ -51,12 +57,35 @@ function render(key, callback) {
 
 function fillTags(select, list, selected = []) {
     select.replaceChildren();
-    list.forEach(tag => {
-        const option = element('option', `${tag.name} (${tag.category})`);
+    const appendOption = (parent, tag) => {
+        const option = element('option', select.multiple ? tag.name : `${tag.name} (${tag.category})`);
         option.value = tag.id;
         option.selected = selected.includes(tag.id);
-        select.append(option);
-    });
+        parent.append(option);
+    };
+    if (select.multiple) {
+        GAME_DATA.categories.forEach(category => {
+            const members = list.filter(tag => tag.category === category);
+            if (!members.length) return;
+            const group = element('optgroup');
+            group.label = category;
+            members.forEach(tag => appendOption(group, tag));
+            select.append(group);
+        });
+    } else list.forEach(tag => appendOption(select, tag));
+}
+
+function readStoredExcludedIds() {
+    try {
+        const stored = JSON.parse(localStorage.getItem('hac.excludedTags.v1') || '[]');
+        return new Set(Array.isArray(stored) ? stored.map(entry => entry?.id).filter(Boolean) : []);
+    } catch {
+        return new Set();
+    }
+}
+
+function namesFromIds(ids) {
+    return ids.map(id => GAME_DATA.tags[id]?.name || id).join(', ') || 'None';
 }
 
 function renderRelease() {
@@ -68,16 +97,17 @@ function renderRelease() {
                 boutique: byId('lab-release-boutique').checked,
                 openingMultiplier: byId('lab-release-opening').checked ? 2 : 1
             }, byId('lab-release-factory').checked ? byId('lab-release-boost').value : 0);
-        table(output, ['Week', 'Current demand', 'Factory scenario', 'Difference'], curve.map(row =>
-            [row.week, format(row.baseline), format(row.scenario), format(row.scenario - row.baseline)]));
+        table(output, ['Week', 'Demand'], curve.map(row => [row.week, format(row.scenario)]));
+        paragraph(output, 'This is demand only. The current calculator may still under-model slow later-week falloff when Behemoth, Boutique and strong audience targeting all line up.', 'lab-note');
         paragraph(output, 'Factory stacking is illustrative. Attendance, revenue and capacity are not inferred from this curve.', 'lab-note');
     });
 }
 
 function renderAdvertisers() {
     render('advertisers', output => {
-        const ids = selectedIds('lab-advertisers-tags');
-        if (!ids.length) throw new Error('Choose at least one movie element.');
+        const excludedIds = readStoredExcludedIds();
+        const ids = selectedIds('lab-advertisers-tags').filter(id => !excludedIds.has(id));
+        if (!ids.length) throw new Error('All sample elements are excluded. Adjust Script Lab exclusions to compare this sample campaign.');
         const audiences = [...byId('lab-audiences').querySelectorAll('input:checked')].map(input => input.value);
         if (!audiences.length) throw new Error('Choose at least one desired audience.');
         const agencies = [...byId('lab-agencies').querySelectorAll('input:checked')].map(input => input.value);
@@ -85,11 +115,14 @@ function renderAdvertisers() {
         const ranked = HACAdvertiserMatcher.getRecommendations({ tags: ids.map(id => GAME_DATA.tags[id]),
             movieLean: Number(byId('lab-advertisers-lean').value) }).allScores;
         const names = values => values.map(value => GAME_DATA.demographics[value].name).join(', ') || 'None';
+        const hidden = selectedIds('lab-advertisers-tags').filter(id => excludedIds.has(id));
+        const lean = byId('lab-advertisers-lean').selectedOptions[0].textContent;
+        paragraph(output, `Movie lean: ${lean}. Fit preview uses a small sample script; excluded sample elements hidden: ${namesFromIds(hidden)}.`);
         paragraph(output, `${coverage.selected.length} advertisers selected. Covered audiences: ${names(coverage.covered)}.`);
         paragraph(output, `Uncovered desired audiences: ${names(coverage.missing)}.`, coverage.missing.length ? 'lab-negative' : 'lab-positive');
         paragraph(output, `Additional audiences reached: ${names(coverage.spillover)}.`);
-        table(output, ['Advertiser', 'Fit / 5', 'Grade', 'Audiences', 'Campaign'], ranked.map(entry =>
-            [entry.agency.name, entry.score.toFixed(1), entry.grade, names(entry.agency.targets), agencies.includes(entry.agency.id) ? 'Selected' : 'Not selected']), 'Current app fit model');
+        table(output, ['Advertiser', 'Fit / 5', 'Grade', 'Audiences', 'Campaign'], ranked.slice(0, 5).map(entry =>
+            [entry.agency.name, entry.score.toFixed(1), entry.grade, names(entry.agency.targets), agencies.includes(entry.agency.id) ? 'Selected' : 'Not selected']), 'Current app fit model, compact top five');
         const suggestions = ranked.filter(entry => entry.score >= HACAdvertiserMatcher.ADVERTISER_WEAK_THRESHOLD && entry.agency.targets.some(audience => audiences.includes(audience)));
         paragraph(output, `Campaign shortlist: ${suggestions.map(entry => entry.agency.name).join(', ') || 'No qualifying agencies'}.`);
         paragraph(output, 'Shortlist uses existing fit and desired audiences. Overlap does not prove extra reach; profit, campaign cost and Kinomark impact remain unconfirmed.', 'lab-note');
@@ -111,21 +144,101 @@ function renderCalibration() {
 function renderGenres() {
     render('genres', output => {
         const primary = byId('lab-genre-primary').value;
+        const excludedIds = readStoredExcludedIds();
         const share = number('lab-genre-secondary-share', 'Second genre share', 5, 50);
         if (share % 5 !== 0) throw new Error('Genre shares use 5% steps.');
-        const rows = tags.filter(tag => tag.category === 'Genre' && tag.id !== primary).map(tag => {
+        const pairs = tags.filter(tag => tag.category === 'Genre' && tag.id !== primary).map(tag => {
             const active = HACCompatibilityEngine.calculateGenrePairScore([
                 { id: primary, category: 'Genre', percent: 1 - share / 100 },
                 { id: tag.id, category: 'Genre', percent: share / 100 }
             ], GAME_DATA);
             const source = GAME_DATA.genrePairs[primary]?.[tag.id] || GAME_DATA.genrePairs[tag.id]?.[primary];
-            const label = element('span', tag.name, `genre-${tag.id.toLowerCase().replaceAll('_', '-')}`);
+            return { tag, active, source };
+        });
+        const best = key => {
+            const available = pairs.filter(pair => pair.source && !excludedIds.has(pair.tag.id))
+                .sort((a, b) => b.source[key] - a.source[key] || a.tag.name.localeCompare(b.tag.name));
+            return available.filter(pair => pair.source[key] === available[0].source[key]);
+        };
+        const summary = element('div', undefined, 'lab-card-grid');
+        [['Best commercial pair', best('primary'), 'primary', 'lab-commercial'],
+            ['Best artistic pair', best('secondary'), 'secondary', 'lab-artistic']].forEach(([title, winners, key, className]) => {
+            const card = element('article', undefined, 'lab-mini-card');
+            card.append(element('h4', title));
+            winners.forEach(pair => paragraph(card, `${GAME_DATA.tags[primary].name} + ${pair.tag.name}`, 'lab-best-pair'));
+            const pair = winners[0];
+            if (!pair) card.append(element('strong', 'No available pair'));
+            paragraph(card, pair ? `${signed(pair.source[key])} ${key === 'primary' ? 'commercial' : 'artistic'} bonus at 35%+ second genre share.` : 'Check your exclusions or choose another genre.', className);
+            summary.append(card);
+        });
+        output.append(summary);
+        const rows = pairs.map(({ tag, active, source }) => {
+            const label = element('span', `${tag.name}${excludedIds.has(tag.id) ? ' (excluded)' : ''}`, `genre-${tag.id.toLowerCase().replaceAll('_', '-')}`);
             label.classList.add('lab-genre-name');
             return [label, source ? signed(source.primary) : 'No data', source ? signed(source.secondary) : 'No data',
                 active ? `Active: ${signed(active.com)} commercial / ${signed(active.art)} artistic` : 'Inactive below 35%'];
         });
         table(output, ['Second genre', 'Commercial bonus', 'Artistic bonus', 'Current mix'], rows);
+        if (excludedIds.has(primary)) paragraph(output, 'This primary genre is excluded in Script Lab. The table is a reference for its pair data.', 'lab-note');
     });
+}
+
+async function ensureCompatibility() {
+    if (compatibilityLoaded) return;
+    if (!compatibilityRequest) {
+        compatibilityRequest = fetch('data/TagCompatibilityData.json').then(response => {
+            if (!response.ok) throw new Error(`Could not load pair data (${response.status}).`);
+            return response.json();
+        }).then(data => { GAME_DATA.compatibility = data; compatibilityLoaded = true; })
+            .finally(() => { compatibilityRequest = null; });
+    }
+    await compatibilityRequest;
+}
+
+async function renderGenreElements() {
+    const output = byId('lab-genre-elements-result');
+    output.textContent = 'Loading pair data...';
+    try {
+        await ensureCompatibility();
+        render('genre-elements', node => {
+            const result = rankGenreElements(tags, byId('lab-genre-primary').value,
+                (genre, tag) => HACCompatibilityEngine.getRawCompatibilityScore(genre, tag, GAME_DATA),
+                readStoredExcludedIds(), byId('lab-genre-element-category').value,
+                byId('lab-genre-element-rank').value, byId('lab-genre-element-search').value);
+            const summary = element('div', undefined, 'lab-pair-summary');
+            [['Successful', result.successful, 'lab-positive'],
+                ['Unsuccessful', result.unsuccessful, 'lab-negative'],
+                ['Available elements', result.rows.length, '']].forEach(([label, count, tone]) => {
+                const item = element('div', undefined, 'lab-pair-stat');
+                item.append(element('span', label), element('strong', String(count), tone));
+                summary.append(item);
+            });
+            node.append(summary);
+            if (!result.rows.length) {
+                paragraph(node, 'No available elements in this category. Check your exclusions or choose another category.', 'lab-note');
+                return;
+            }
+            const crossGenre = byId('lab-genre-element-rank').value === 'cross';
+            table(node, ['Element', 'Category', 'Fit / 5', crossGenre ? 'Strong genres' : 'Strong pairs', 'Unsuccessful'],
+                result.rows.slice(0, 15).map(row => [row.tag.name, row.tag.category,
+                    element('span', row.score.toFixed(1), row.score >= 4 ? 'lab-positive' : row.score < 2 ? 'lab-negative' : ''),
+                    crossGenre ? row.strongAcrossGenres : row.strongPairs,
+                    crossGenre ? row.unsuccessfulAcrossGenres : row.unsuccessfulPairs]),
+                crossGenre ? `Direct matches across ${result.genreCount} genres`
+                    : `Pair counts against ${result.genrePoolSize} available story elements that fit ${GAME_DATA.tags[byId('lab-genre-primary').value].name} successfully`);
+            paragraph(node, 'Successful pairs score 4 or 5; unsuccessful pairs score below 2. These are direct pair scores from the game data, not whole-script results.', 'lab-note');
+            if (result.rows.length > 15) paragraph(node, `Showing 15 of ${result.rows.length} available elements. Narrow by category to see others.`, 'lab-note');
+        });
+    } catch (error) {
+        render('genre-elements', node => {
+            paragraph(node, error.message, 'lab-error');
+            const retry = element('button', 'Retry Pair Data', 'analyze-btn secondary-btn');
+            retry.id = 'lab-genre-pair-retry';
+            retry.type = 'button';
+            retry.addEventListener('click', renderGenreElements);
+            node.append(retry);
+        });
+    }
 }
 
 function detectiveExample() {
@@ -160,10 +273,22 @@ function renderDiversity() {
 
 function renderAwards() {
     render('awards', output => {
-        const target = AWARD_TARGETS[byId('lab-award-target').value];
-        output.append(element('h4', target.name));
-        paragraph(output, `Target metric: ${target.metric}.`);
-        paragraph(output, target.guidance);
+        const cards = element('div', undefined, 'lab-card-grid');
+        Object.values(AWARD_TARGETS).forEach(target => {
+            const card = element('article', undefined, 'lab-mini-card');
+            card.append(element('h4', target.name));
+            paragraph(card, `Metric: ${target.metric}.`);
+            paragraph(card, target.guidance, 'lab-note');
+            cards.append(card);
+        });
+        output.append(cards);
+        const title = byId('lab-award-film').value.trim();
+        const year = byId('lab-award-year').value;
+        const remembered = selectedIds('lab-award-elements');
+        const tracked = [...byId('lab-award-targets').querySelectorAll('input:checked')].map(input => AWARD_TARGETS[input.value].name);
+        paragraph(output, title || remembered.length || tracked.length
+            ? `Plan memo: ${title || 'Untitled movie'} for ${year}; targets: ${tracked.join(', ') || 'undecided'}; elements: ${namesFromIds(remembered)}.`
+            : 'Add a movie idea if you want this panel to act like a planning note.');
     });
 }
 
@@ -186,18 +311,34 @@ function renderTracker() {
             return [release.title, release.date, release.tags.map(id => GAME_DATA.tags[id].name).join(', '), button];
         }));
         const repeated = [...use].filter(([, count]) => count > 1);
-        paragraph(output, repeated.length ? `Repeated within 500 days: ${repeated.map(([id, count]) => `${GAME_DATA.tags[id].name} (${count} films)`).join(', ')}.` : 'No repeated elements within 500 days.', repeated.length ? 'lab-negative' : 'lab-positive');
+        paragraph(output, repeated.length ? `Possible repeat within 500 days: ${repeated.map(([id, count]) => `${GAME_DATA.tags[id].name} (${count} films)`).join(', ')}.` : 'No repeats detected in this rough window.', repeated.length ? 'lab-note' : 'lab-positive');
+        paragraph(output, 'Freshness pip timing still needs game evidence; this tracker should not decide Fresh/Stale/Rotten colors yet.', 'lab-note');
     });
+}
+
+function refreshUnlockOptions() {
+    const category = byId('lab-unlock-category').value;
+    const query = byId('lab-unlock-search').value.trim().toLowerCase();
+    const previous = byId('lab-unlock-tag').value;
+    fillTags(byId('lab-unlock-tag'), tags.filter(tag =>
+        (!category || tag.category === category) && tag.name.toLowerCase().includes(query)), [previous]);
 }
 
 function renderUnlocks() {
     render('unlocks', output => {
         const id = byId('lab-unlock-tag').value;
         if (!id) { paragraph(output, 'No elements match your search.'); return; }
-        const info = unlockInfo(id, GAME_DATA.starterWhitelist, rawTags[id]?.parameters?.Condition);
+        const condition = unlockTags[id]?.parameters?.Condition || rawTags[id]?.parameters?.Condition;
+        const info = unlockInfo(id, GAME_DATA.starterWhitelist, condition);
         output.append(element('h4', GAME_DATA.tags[id].name));
-        paragraph(output, info.kind === 'recipe' ? `Unlocks after using: ${info.requirements.map(value => GAME_DATA.tags[value]?.name || value).join(' + ')}.` : info.text);
-        paragraph(output, `Source: ${info.kind === 'starter' ? 'data.js starting deck' : 'data/TagData.json; missing conditions stay unknown'}.`, 'lab-note');
+        paragraph(output, info.text);
+        if (info.requirements) {
+            paragraph(output, `Uses: ${info.requirements.map(value => GAME_DATA.tags[value]?.name || value).join(' + ')}.`);
+        }
+        if (condition) paragraph(output, `Source condition: ${condition}.`, 'lab-note');
+        if (info.kind === 'unknown') {
+            paragraph(output, 'Could be date-gated, recipe-gated or factory/research-gated. Need recovered game condition data before showing a year.', 'lab-note');
+        }
     });
 }
 
@@ -209,9 +350,35 @@ function setup() {
         releases = saved.map(release => validateRelease(release, knownIds));
     } catch { byId('lab-load-status').textContent = 'Game data loaded. Saved release journal could not be read; original stored data was preserved.'; }
     fillTags(byId('lab-advertisers-tags'), tags, ['DETECTIVE', 'PROTAGONIST_COP']);
+    fillTags(byId('lab-award-elements'), tags, ['DETECTIVE', 'PROTAGONIST_COP']);
     fillTags(byId('lab-tracker-tags'), tags, ['DETECTIVE', 'PROTAGONIST_COP']);
     fillTags(byId('lab-unlock-tag'), tags);
     fillTags(byId('lab-genre-primary'), tags.filter(tag => tag.category === 'Genre'), ['DRAMA']);
+    const pairCategory = byId('lab-genre-element-category');
+    const allStoryCategories = element('option', 'All story categories');
+    allStoryCategories.value = '';
+    pairCategory.append(allStoryCategories);
+    for (const category of GAME_DATA.categories.filter(category => category !== 'Genre' && category !== 'Setting')) {
+        const option = element('option', category);
+        option.value = category;
+        pairCategory.append(option);
+    }
+    const unlockCategory = byId('lab-unlock-category');
+    const allCategories = element('option', 'All categories');
+    allCategories.value = '';
+    unlockCategory.append(allCategories);
+    GAME_DATA.categories.forEach(category => {
+        const option = element('option', category);
+        option.value = category;
+        unlockCategory.append(option);
+    });
+    Object.entries(AWARD_TARGETS).forEach(([id, target]) => {
+        const label = element('label');
+        const input = element('input');
+        input.type = 'checkbox'; input.value = id; input.id = `lab-award-target-${id}`;
+        label.append(input, document.createTextNode(target.name));
+        byId('lab-award-targets').append(label);
+    });
     Object.entries(GAME_DATA.demographics).forEach(([id, audience]) => {
         const label = element('label');
         const input = element('input');
@@ -228,6 +395,11 @@ function setup() {
         byId('lab-agencies').append(label);
     });
     const tabs = [...document.querySelectorAll('[role="tab"]')];
+    const mobileLayout = window.matchMedia('(max-width: 760px)');
+    const updateOrientation = () => document.querySelector('.lab-nav')
+        .setAttribute('aria-orientation', mobileLayout.matches ? 'horizontal' : 'vertical');
+    mobileLayout.addEventListener('change', updateOrientation);
+    updateOrientation();
     function activate(tab) {
         tab.focus();
         tabs.forEach(item => {
@@ -235,6 +407,7 @@ function setup() {
             item.setAttribute('aria-selected', String(active)); item.tabIndex = active ? 0 : -1;
             byId(item.getAttribute('aria-controls')).hidden = !active;
         });
+        if (tab.id === 'lab-tab-genres') renderGenreElements();
     }
     tabs.forEach((tab, index) => {
         tab.addEventListener('click', () => activate(tab));
@@ -257,11 +430,19 @@ function setup() {
     });
     byId('lab-advertisers-form').addEventListener('change', renderAdvertisers);
     byId('lab-calibration-form').addEventListener('input', renderCalibration);
-    byId('lab-genre-primary').addEventListener('change', renderGenres);
+    byId('lab-genre-primary').addEventListener('change', () => { renderGenres(); renderGenreElements(); });
     byId('lab-genre-secondary-share').addEventListener('input', renderGenres);
+    byId('lab-genre-element-category').addEventListener('change', renderGenreElements);
+    byId('lab-genre-element-rank').addEventListener('change', renderGenreElements);
+    byId('lab-genre-element-search').addEventListener('input', renderGenreElements);
+    window.addEventListener('storage', event => {
+        if (event.key === 'hac.excludedTags.v1') { renderGenres(); renderGenreElements(); renderAdvertisers(); }
+    });
     byId('lab-diversity-sample').addEventListener('click', detectiveExample);
     byId('lab-diversity-candidates').addEventListener('input', () => byId('lab-diversity-result').replaceChildren());
-    byId('lab-award-target').addEventListener('change', renderAwards);
+    byId('lab-awards-form').addEventListener('input', renderAwards);
+    byId('lab-awards-form').addEventListener('change', renderAwards);
+    byId('lab-award-targets').addEventListener('change', renderAwards);
     byId('lab-tracker-reference').addEventListener('input', renderTracker);
     byId('lab-tracker-form').addEventListener('submit', event => {
         event.preventDefault();
@@ -273,12 +454,12 @@ function setup() {
             renderTracker();
         });
     });
-    byId('lab-unlock-search').addEventListener('input', () => {
-        const query = byId('lab-unlock-search').value.trim().toLowerCase();
-        const previous = byId('lab-unlock-tag').value;
-        fillTags(byId('lab-unlock-tag'), tags.filter(tag => tag.name.toLowerCase().includes(query)), [previous]);
+    const updateUnlocks = () => {
+        refreshUnlockOptions();
         renderUnlocks();
-    });
+    };
+    byId('lab-unlock-category').addEventListener('change', updateUnlocks);
+    byId('lab-unlock-search').addEventListener('input', updateUnlocks);
     byId('lab-unlock-tag').addEventListener('change', renderUnlocks);
     const observations = { 'four-ads': [49896, 53, 35500, 4], 'one-ad': [40396, 26, 34000, 1] };
     Object.entries(observations).forEach(([key, values]) => byId(`lab-calibration-${key}`).addEventListener('click', () => {
@@ -292,13 +473,15 @@ async function load() {
     byId('lab-retry-load').hidden = true;
     byId('lab-load-status').textContent = 'Loading game data...';
     try {
-        const files = ['data/TagData.json', 'data/GenrePairs.json', 'data/TagsAudienceWeights.json', 'localization/English.json'];
-        const [data, pairs, weights, localization] = await Promise.all(files.map(async path => {
+        const files = ['data/TagData.json', 'data/GenrePairs.json', 'data/TagsAudienceWeights.json',
+            'localization/English.json', 'extractedFilesFromGameSourceOfTruth/TagData.json'];
+        const [data, pairs, weights, localization, recoveredTags] = await Promise.all(files.map(async path => {
             const response = await fetch(path);
             if (!response.ok) throw new Error(`Could not load ${path} (${response.status}).`);
             return response.json();
         }));
         rawTags = data;
+        unlockTags = recoveredTags;
         GAME_DATA.genrePairs = pairs;
         tags = Object.entries(data).map(([id, item]) => ({ id,
             name: localization.locStrings[localization.IdMap[id]] || id,

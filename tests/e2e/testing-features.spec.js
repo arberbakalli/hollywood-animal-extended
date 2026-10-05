@@ -25,14 +25,13 @@ test('TC34-000002 Factory boost changes opening week while toggling off restores
     await page.locator('#lab-release-behemoth').check();
     await page.locator('#lab-release-opening').check();
     const rows = page.locator('#lab-release-result tbody tr');
-    const laterBefore = await rows.nth(1).textContent();
+    const laterBefore = await rows.allTextContents();
     await page.locator('#lab-release-factory').check();
     await page.locator('#lab-release-boost').fill('39');
-    await expect(rows.first().locator('td').nth(1)).toHaveText('35,500');
-    await expect(rows.first().locator('td').nth(2)).toHaveText('49,345');
-    await expect(rows.nth(1)).toHaveText(laterBefore);
+    await expect(rows.first().locator('td').nth(1)).toHaveText('49,345');
+    expect((await rows.allTextContents()).slice(1)).toEqual(laterBefore.slice(1));
     await page.locator('#lab-release-factory').uncheck();
-    await expect(rows.first().locator('td').nth(2)).toHaveText('35,500');
+    await expect(rows.first().locator('td').nth(1)).toHaveText('35,500');
     await expect(page.locator('#lab-release-boost')).toBeDisabled();
 });
 
@@ -43,7 +42,8 @@ test('TC34-000003 multiple advertisers expose audience gaps without claiming pro
     await page.locator('#lab-agency-ARTMAG').check();
     await expect(output).toContainText('2 advertisers selected');
     await expect(output).toContainText('Uncovered desired audiences: None');
-    await expect(output.locator('tbody tr')).toHaveCount(8);
+    await expect(output).toContainText('Movie lean: Balanced');
+    await expect(output.locator('tbody tr')).toHaveCount(5);
     await expect(output).toContainText('profit, campaign cost and Kinomark impact remain unconfirmed');
 });
 
@@ -72,6 +72,110 @@ test('TC34-000005 genre pair bonuses use game data and activate at 35 percent', 
     await page.locator('#lab-genre-secondary-share').fill('35');
     await expect(comedy).toContainText('Active');
     await expect(page.locator('#lab-genres-result tbody tr')).toHaveCount(10);
+    await expect(page.locator('#lab-genres-result .lab-mini-card').first()).toContainText('Drama + Comedy');
+    await expect(page.locator('#lab-genres-result .lab-mini-card').nth(1)).toContainText('Drama + Historical');
+});
+
+test('TC34-000018 best genre summaries show every tied winner and omit excluded pairs', async ({ page }) => {
+    await page.locator('#lab-tab-genres').click();
+    await page.locator('#lab-genre-primary').selectOption('DRAMA');
+    const commercial = page.locator('#lab-genres-result .lab-mini-card').first();
+    await expect(commercial.locator('.lab-best-pair')).toHaveText(['Drama + Comedy', 'Drama + Romance']);
+    await expect(commercial).toContainText('+0.25 commercial bonus');
+    const artistic = page.locator('#lab-genres-result .lab-mini-card').nth(1);
+    await expect(artistic.locator('.lab-best-pair')).toHaveText(['Drama + Historical']);
+    await page.evaluate(() => {
+        localStorage.setItem('hac.excludedTags.v1', JSON.stringify([{ id: 'COMEDY', category: 'Genre' }]));
+        window.dispatchEvent(new StorageEvent('storage', { key: 'hac.excludedTags.v1' }));
+    });
+    await expect(commercial.locator('.lab-best-pair')).toHaveText(['Drama + Romance']);
+});
+
+test('TC34-000016 excluded genres stay in the reference but leave best-pair recommendations', async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('hac.excludedTags.v1', JSON.stringify([{ id: 'COMEDY', category: 'Genre' }])));
+    await page.locator('#lab-tab-genres').click();
+    await page.locator('#lab-genre-primary').selectOption('DRAMA');
+    await expect(page.locator('#lab-genres-result .lab-mini-card').first()).toContainText('Drama + Romance');
+    await expect(page.locator('#lab-genres-result tbody tr').filter({ hasText: 'Comedy (excluded)' })).toHaveCount(1);
+});
+
+test('TC34-000017 genre insight ranks successful story pairs and broad genre matches separately', async ({ page }) => {
+    await page.locator('#lab-tab-genres').click();
+    await page.locator('#lab-genre-primary').selectOption('COMEDY');
+    const first = page.locator('#lab-genre-elements-result tbody tr').first();
+    await expect(first.locator('td').first()).toHaveText('Alcohol \u2014 the Spirit of Freedom');
+    await expect(first.locator('td').nth(3)).toHaveText('34');
+    await page.locator('#lab-genre-element-rank').selectOption('cross');
+    await expect(first.locator('td').first()).toHaveText('Damsel in Distress');
+    await expect(first.locator('td').nth(2)).toHaveText('3.0');
+    await expect(first.locator('td').nth(3)).toHaveText('9');
+});
+
+test('TC34-000012 genre element insight uses direct pair scores and exclusions', async ({ page }) => {
+    await page.locator('#lab-tab-genres').click();
+    await page.locator('#lab-genre-primary').selectOption('ACTION');
+    await page.locator('#lab-genre-element-category').selectOption('Protagonist');
+    await page.locator('#lab-genre-element-search').fill('Cowboy');
+    const output = page.locator('#lab-genre-elements-result');
+    await expect(output.locator('tbody tr')).toHaveCount(1);
+    await expect(output.locator('tbody tr')).toContainText('Cowboy');
+    await expect(output.locator('tbody tr td').nth(2)).toHaveText('5.0');
+    await expect(output.locator('tbody tr td').nth(3)).toHaveText('49');
+    await expect(output.locator('tbody tr td').nth(4)).toHaveText('12');
+    await expect(output.locator('.lab-pair-stat strong').first()).toHaveText('1');
+    await page.locator('#lab-genre-element-rank').selectOption('cross');
+    await expect(output.locator('tbody tr')).toHaveCount(1);
+    await expect(output.locator('tbody tr td').nth(3)).toHaveText('3');
+    await expect(output.locator('tbody tr td').nth(4)).toHaveText('1');
+    await page.evaluate(() => localStorage.setItem('hac.excludedTags.v1', JSON.stringify([{ id: 'PROTAGONIST_COWBOY', category: 'Protagonist' }])));
+    await page.locator('#lab-genre-element-search').fill('Cowboy ');
+    await page.locator('#lab-genre-element-search').fill('Cowboy');
+    await expect(output).toContainText('No available elements in this category');
+    await expect(output.locator('tbody tr')).toHaveCount(0);
+});
+
+test('TC34-000013 advertiser sample honors the Script Lab exclusion store', async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('hac.excludedTags.v1', JSON.stringify([{ id: 'DETECTIVE', category: 'Genre' }])));
+    await page.locator('#lab-tab-advertisers').click();
+    await page.evaluate(() => {
+        const original = HACAdvertiserMatcher.getRecommendations;
+        HACAdvertiserMatcher.getRecommendations = input => {
+            window.__labSeenTags = input.tags.map(tag => tag.id);
+            return original(input);
+        };
+    });
+    await page.locator('#lab-advertisers-lean').selectOption('1');
+    const output = page.locator('#lab-advertisers-result');
+    expect(await page.evaluate(() => window.__labSeenTags)).toEqual(['PROTAGONIST_COP']);
+    await expect(output).toContainText('excluded sample elements hidden: Detective');
+    await expect(output).toContainText('Movie lean: Artistic');
+    await expect(output.locator('tbody tr')).toHaveCount(5);
+});
+
+test('TC34-000014 pair data loads once when the genre insight is opened', async ({ page }) => {
+    const requests = () => page.evaluate(() => performance.getEntriesByType('resource')
+        .filter(entry => entry.name.endsWith('/data/TagCompatibilityData.json')).length);
+    expect(await requests()).toBe(0);
+    await page.locator('#lab-tab-genres').click();
+    await expect(page.locator('#lab-genre-elements-result tbody tr')).toHaveCount(15);
+    expect(await requests()).toBe(1);
+    await page.locator('#lab-genre-primary').selectOption('COMEDY');
+    await page.locator('#lab-genre-element-rank').selectOption('cross');
+    await expect(page.locator('#lab-genre-elements-result tbody tr')).toHaveCount(15);
+    expect(await requests()).toBe(1);
+});
+
+test('TC34-000015 failed pair data can be retried without blocking other tools', async ({ page }) => {
+    await page.route('**/data/TagCompatibilityData.json', route => route.fulfill({ status: 503, body: '{}' }));
+    await page.locator('#lab-tab-genres').click();
+    await expect(page.locator('#lab-genre-elements-result')).toContainText('Could not load pair data (503)');
+    await page.locator('#lab-tab-calibration').click();
+    await expect(page.locator('#lab-calibration-result')).toContainText('26,444.88');
+    await page.locator('#lab-tab-genres').click();
+    await expect(page.locator('#lab-genre-pair-retry')).toBeVisible();
+    await page.unroute('**/data/TagCompatibilityData.json');
+    await page.locator('#lab-genre-pair-retry').click();
+    await expect(page.locator('#lab-genre-elements-result tbody tr')).toHaveCount(15);
 });
 
 test('TC34-000006 reordered candidates collapse while distinct scripts remain', async ({ page }) => {
@@ -94,11 +198,14 @@ test('TC34-000007 award targets describe the selected metric without promising a
     await page.locator('#lab-tab-awards').click();
     const output = page.locator('#lab-awards-result');
     await expect(output).toContainText('Box office receipts');
-    await page.locator('#lab-award-target').selectOption('critics');
     await expect(output).toContainText('Critics ratings');
-    await page.locator('#lab-award-target').selectOption('fans');
     await expect(output).toContainText('Kinomark rating');
     await expect(output).toContainText('cutoff is not yet confirmed');
+    await page.locator('#lab-award-film').fill('Festival western');
+    await page.locator('#lab-award-year').fill('1935');
+    await page.locator('#lab-award-target-critics').check();
+    await expect(output).toContainText('Festival western for 1935');
+    await expect(output.locator(':scope > p')).toContainText('targets: Critical Acclaim');
 });
 
 test('TC34-000008 journal persists releases, warns about repeats and removes only the chosen film', async ({ page }) => {
@@ -116,17 +223,26 @@ test('TC34-000008 journal persists releases, warns about repeats and removes onl
     await page.getByRole('button', { name: 'Remove First film', exact: true }).click();
     await expect(page.locator('#lab-tracker-result tbody tr')).toHaveCount(1);
     await expect(page.locator('#lab-tracker-result')).toContainText('Second film');
-    await expect(page.locator('#lab-tracker-result')).toContainText('No repeated elements');
+    await expect(page.locator('#lab-tracker-result')).toContainText('No repeats detected');
     await page.locator('#lab-tracker-reference').fill('1943-04-21');
-    await expect(page.locator('#lab-tracker-result')).toContainText('No repeated elements');
+    await expect(page.locator('#lab-tracker-result')).toContainText('No repeats detected');
 });
 
-test('TC34-000009 unlock search distinguishes verified starter tags from unknown conditions', async ({ page }) => {
+test('TC34-000009 unlock search shows starter, date and recipe conditions from recovered game data', async ({ page }) => {
     await page.locator('#lab-tab-unlocks').click();
     await page.locator('#lab-unlock-search').fill('wild west');
     await expect(page.locator('#lab-unlocks-result')).toContainText('Available at the start');
     await page.locator('#lab-unlock-search').fill('horror');
-    await expect(page.locator('#lab-unlocks-result')).toContainText('Unlock condition has not been recovered');
+    await expect(page.locator('#lab-unlocks-result')).toContainText('Unlocks on or after 1935-09-13');
+    await page.locator('#lab-unlock-category').selectOption('Setting');
+    await page.locator('#lab-unlock-search').fill('ww2');
+    await expect(page.locator('#lab-unlock-tag option')).toHaveCount(3);
+    await page.locator('#lab-unlock-tag').selectOption('WW2_AFRICA');
+    await expect(page.locator('#lab-unlocks-result')).toContainText('Unlocks on or after 1940-06-20');
+    await page.locator('#lab-unlock-category').selectOption('Protagonist');
+    await page.locator('#lab-unlock-search').fill('toxic');
+    await expect(page.locator('#lab-unlocks-result')).toContainText('Trash King policy recipe');
+    await expect(page.locator('#lab-unlocks-result')).toContainText('Clumsy Oaf + Avenging Loved Ones');
     await page.locator('#lab-unlock-search').fill('no such element');
     await expect(page.locator('#lab-unlocks-result')).toContainText('No elements match');
 });
@@ -149,9 +265,11 @@ test('TC34-000011 lab has unique IDs and fits mobile and desktop with no runtime
         await page.setViewportSize({ width, height: 900 });
         await page.reload();
         await expect(page.locator('#lab-workspace')).toBeVisible();
+        await expect(page.locator('.lab-nav')).toHaveAttribute('aria-orientation', width < 761 ? 'horizontal' : 'vertical');
         for (const key of ['release', 'advertisers', 'calibration', 'genres', 'diversity', 'awards', 'tracker', 'unlocks']) {
             await page.locator(`#lab-tab-${key}`).click();
             await expect(page.locator(`#lab-panel-${key}`)).toBeVisible();
+            if (key === 'genres') await expect(page.locator('#lab-genre-elements-result tbody tr')).toHaveCount(15);
             expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
             await page.screenshot({ path: `output/playwright/testing-features-${key}-${width}.png`, fullPage: true });
         }

@@ -43,6 +43,39 @@ export function uniqueScripts(candidates) {
     return { scripts: unique, removed: candidates.length - unique.length };
 }
 
+export function rankGenreElements(tags, selectedGenreId, scorePair, excludedIds = new Set(), category = '', rankBy = 'pairs', query = '') {
+    const genres = tags.filter(tag => tag.category === 'Genre');
+    const selectedIndex = genres.findIndex(tag => tag.id === selectedGenreId);
+    if (selectedIndex < 0) throw new Error('Choose a genre.');
+    const available = tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting' && !excludedIds.has(tag.id))
+        .map(tag => {
+            const scores = genres.map(genre => scorePair(genre, tag));
+            return { tag, score: scores[selectedIndex],
+                strongAcrossGenres: scores.filter(score => score >= 4).length,
+                unsuccessfulAcrossGenres: scores.filter(score => score < 2).length };
+        });
+    const fittingPool = available.filter(row => row.score >= 4);
+    const rows = available.filter(row => (!category || row.tag.category === category)
+        && row.tag.name.toLowerCase().includes(query.trim().toLowerCase())).map(row => {
+        const scores = fittingPool.filter(partner => partner.tag.id !== row.tag.id)
+            .map(partner => scorePair(row.tag, partner.tag));
+        return { ...row, strongPairs: scores.filter(score => score >= 4).length,
+            unsuccessfulPairs: scores.filter(score => score < 2).length };
+    });
+    rows.sort((a, b) => {
+        const priority = rankBy === 'cross'
+            ? b.strongAcrossGenres - a.strongAcrossGenres || b.score - a.score
+            : rankBy === 'pairs'
+                ? Number(b.score >= 4) - Number(a.score >= 4) || b.strongPairs - a.strongPairs
+                    || a.unsuccessfulPairs - b.unsuccessfulPairs || b.score - a.score
+                : b.score - a.score || b.strongPairs - a.strongPairs;
+        return priority || a.tag.name.localeCompare(b.tag.name);
+    });
+    return { rows, genreCount: genres.length, genrePoolSize: fittingPool.length,
+        successful: rows.filter(row => row.score >= 4).length,
+        unsuccessful: rows.filter(row => row.score < 2).length };
+}
+
 export const AWARD_TARGETS = {
     boxOffice: { name: 'Box Office Success', metric: 'Box office receipts', guidance: 'Compare audience reach, campaign costs and observed attendance. A high advertiser grade alone does not establish profit.' },
     critics: { name: 'Critical Acclaim', metric: 'Critics ratings', guidance: 'Explore artistic rating and creative choices. The award cutoff and exact critics formula are not yet confirmed.' },
@@ -72,8 +105,27 @@ export function validateRelease(release, tagIds) {
 
 export function unlockInfo(id, starterIds, condition) {
     if (starterIds.includes(id)) return { kind: 'starter', text: 'Available at the start of a new game.' };
-    const date = /^DATE:>=(\d{2})-(\d{2})-(\d{4})$/.exec(condition || '');
-    if (date) return { kind: 'date', text: `Unlocks on or after ${date[3]}-${date[2]}-${date[1]}.` };
-    if (condition?.startsWith('RECIPE:')) return { kind: 'recipe', requirements: condition.slice(7).split(':') };
+    const source = condition || '';
+    const fullDate = /^DATE:(>=|>)(\d{2})-(\d{2})-(\d{4})$/.exec(source);
+    if (fullDate) {
+        const [, operator, day, month, year] = fullDate;
+        return { kind: 'date', text: `${operator === '>' ? 'Unlocks after' : 'Unlocks on or after'} ${year}-${month}-${day}.` };
+    }
+    const yearOnly = /^DATE:(>=|>)(\d{4})$/.exec(source);
+    if (yearOnly) {
+        const [, operator, year] = yearOnly;
+        return { kind: 'date', text: `${operator === '>' ? 'Unlocks after' : 'Unlocks in or after'} ${year}.` };
+    }
+    const recipe = /^(RECIPE|RECIPE_START|RECIPE_TRASH):(.+)$/.exec(source);
+    if (recipe) {
+        const [, recipeType, ingredients] = recipe;
+        const labels = {
+            RECIPE: 'Unlocked through a story recipe.',
+            RECIPE_START: 'Available through a starting recipe.',
+            RECIPE_TRASH: 'Unlocked through the Trash King policy recipe.'
+        };
+        return { kind: recipeType === 'RECIPE_TRASH' ? 'trash-recipe' : 'recipe',
+            recipeType, text: labels[recipeType], requirements: ingredients.split(':') };
+    }
     return { kind: 'unknown', text: 'Not in the starting pool. Unlock condition has not been recovered from the game files.' };
 }

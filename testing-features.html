@@ -24,14 +24,14 @@
                     <button id="lab-tab-advertisers" type="button" role="tab" aria-controls="lab-panel-advertisers" aria-selected="false" tabindex="-1">Advertiser Strategy</button>
                     <button id="lab-tab-calibration" type="button" role="tab" aria-controls="lab-panel-calibration" aria-selected="false" tabindex="-1">Distribution Calibration</button>
                     <button id="lab-tab-genres" type="button" role="tab" aria-controls="lab-panel-genres" aria-selected="false" tabindex="-1">Genre Synergy</button>
-                    <button id="lab-tab-diversity" type="button" role="tab" aria-controls="lab-panel-diversity" aria-selected="false" tabindex="-1">Script Diversity</button>
+                    <button id="lab-tab-diversity" type="button" role="tab" aria-controls="lab-panel-diversity" aria-selected="false" tabindex="-1">Unique Result Guard</button>
                     <button id="lab-tab-awards" type="button" role="tab" aria-controls="lab-panel-awards" aria-selected="false" tabindex="-1">Award Targets</button>
                     <button id="lab-tab-tracker" type="button" role="tab" aria-controls="lab-panel-tracker" aria-selected="false" tabindex="-1">Released-Film Tracker</button>
                     <button id="lab-tab-unlocks" type="button" role="tab" aria-controls="lab-panel-unlocks" aria-selected="false" tabindex="-1">Unlock Info</button>
                 </nav>
                 <div>
                     <section id="lab-panel-release" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-release" tabindex="0">
-                        <h3>Release Strategy Lab</h3><p class="lab-note">Screening demand uses the current calculator. Factory boost is a calibration-only opening-week assumption, not a confirmed game formula.</p>
+                        <h3>Release Strategy Lab</h3><p class="lab-note">Screening demand uses the current calculator. Factory is a calibration-only opening-week assumption. Behemoth/Boutique later-week decay likely needs more game evidence before promotion.</p>
                         <form id="lab-release-form"><div class="lab-fields">
                         <label for="lab-release-commercial">Commercial rating<input id="lab-release-commercial" type="number" min="0" max="10" step="0.1" value="7.1" required></label>
                         <label for="lab-release-artistic">Artistic rating<input id="lab-release-artistic" type="number" min="0" max="10" step="0.1" value="5.9" required></label></div>
@@ -42,9 +42,9 @@
                         <div id="lab-release-result" class="lab-output" aria-live="polite"></div>
                     </section>
                     <section id="lab-panel-advertisers" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-advertisers" tabindex="0" hidden>
-                        <h3>Advertiser Strategy</h3><p class="lab-note">Compare fit and audience coverage for a campaign. Agency count does not establish reach, profit or Kinomark; those formulas still need game evidence.</p>
+                        <h3>Advertiser Strategy</h3><p class="lab-note">Campaign sketch only. Keep the movie lean idea, but treat advertiser profit/reach as unconfirmed until more game evidence exists.</p>
                         <form id="lab-advertisers-form"><div class="lab-fields">
-                        <label for="lab-advertisers-tags">Movie elements<select id="lab-advertisers-tags" multiple required></select></label>
+                        <select id="lab-advertisers-tags" multiple hidden aria-hidden="true"></select>
                         <label for="lab-advertisers-lean">Movie lean<select id="lab-advertisers-lean"><option value="0">Balanced</option><option value="1">Artistic</option><option value="2">Commercial</option></select></label></div>
                         <fieldset><legend>Desired audiences</legend><div id="lab-audiences" class="lab-toggles"></div></fieldset>
                         <fieldset><legend>Campaign advertisers</legend><div id="lab-agencies" class="lab-toggles"></div></fieldset>
@@ -63,25 +63,36 @@
                         <div id="lab-calibration-result" class="lab-output" aria-live="polite"></div>
                     </section>
                     <section id="lab-panel-genres" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-genres" tabindex="0" hidden>
-                        <h3>Genre Synergy</h3><p class="lab-note">GenrePairs.json bonuses, commercial and artistic. A pair activates when the second genre holds at least 35%. These bonuses are not the 0-5 story compatibility score.</p>
+                        <h3>Genre Synergy</h3><p class="lab-note">Genre pair bonuses from game data, commercial and artistic. A pair activates when the second genre holds at least 35%. These bonuses are not the 0-5 story compatibility score.</p>
                         <div class="lab-fields"><label for="lab-genre-primary">Primary genre<select id="lab-genre-primary"></select></label>
                         <label for="lab-genre-secondary-share">Second genre share (%)<input id="lab-genre-secondary-share" type="number" min="5" max="50" step="5" value="35" required></label></div>
                         <div id="lab-genres-result" class="lab-output" aria-live="polite"></div>
+                        <div class="lab-pairings">
+                            <h4>Story element pairings</h4>
+                            <div class="lab-fields"><label for="lab-genre-element-category">Category<select id="lab-genre-element-category"></select></label>
+                            <label for="lab-genre-element-rank">Rank by<select id="lab-genre-element-rank"><option value="pairs">Strong pairs within genre</option><option value="genre">Selected genre fit</option><option value="cross">Strong pairs across genres</option></select></label>
+                            <label for="lab-genre-element-search" class="lab-field-wide">Find an element<input id="lab-genre-element-search" type="search" placeholder="Search story elements"></label></div>
+                            <div id="lab-genre-elements-result" class="lab-output" aria-live="polite"></div>
+                        </div>
                     </section>
                     <section id="lab-panel-diversity" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-diversity" tabindex="0" hidden>
-                        <h3>Script Diversity</h3><p class="lab-note">Compare candidate lists by element identity. Reordering the same elements counts once. Main already deduplicates generated scripts; this tool makes that behavior inspectable.</p>
+                        <h3>Unique Result Guard</h3><p class="lab-note">Rejected as a standalone player tool. This exists to inspect the rule every generator should follow: reshuffled copies must not pollute results.</p>
                         <form id="lab-diversity-form"><label for="lab-diversity-candidates">Candidate scripts (JSON arrays of element IDs)</label>
                         <textarea id="lab-diversity-candidates" spellcheck="false" required></textarea>
                         <div class="lab-actions"><button class="analyze-btn" type="submit">Find Unique Scripts</button><button id="lab-diversity-sample" class="analyze-btn secondary-btn" type="button">Load Detective Example</button></div></form>
                         <div id="lab-diversity-result" class="lab-output" aria-live="polite"></div>
                     </section>
                     <section id="lab-panel-awards" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-awards" tabindex="0" hidden>
-                        <h3>Award Targets</h3><p class="lab-note">Choose a planning objective. This is guidance, not an award prediction.</p>
-                        <label for="lab-award-target">Award target</label><select id="lab-award-target"><option value="boxOffice">Box Office Success</option><option value="critics">Critical Acclaim</option><option value="fans">Fan Favorites</option></select>
+                        <h3>Award Targets</h3><p class="lab-note">See all targets at once, then attach a movie idea to the goal you want to chase. This is guidance, not an award prediction.</p>
                         <div id="lab-awards-result" class="lab-output" aria-live="polite"></div>
+                        <form id="lab-awards-form"><div class="lab-fields">
+                        <label for="lab-award-film">Movie idea<input id="lab-award-film" maxlength="100" placeholder="Optional title or concept"></label>
+                        <label for="lab-award-year">Target year<input id="lab-award-year" type="number" min="1900" max="2100" value="1935"></label>
+                        <label for="lab-award-elements" class="lab-field-wide">Elements to remember<select id="lab-award-elements" multiple></select></label></div></form>
+                        <fieldset><legend>Targets to track</legend><div id="lab-award-targets" class="lab-toggles"></div></fieldset>
                     </section>
                     <section id="lab-panel-tracker" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-tracker" tabindex="0" hidden>
-                        <h3>Released-Film Tracker</h3><p class="lab-note">Warn about repeated elements in the previous 500 days. This journal does not change freshness pills or exclusions.</p>
+                        <h3>Released-Film Tracker</h3><p class="lab-note">Idea still in baking process. Dates alone may not match the game's freshness pips, so this warns softly instead of claiming Fresh/Stale/Rotten truth.</p>
                         <form id="lab-tracker-form"><div class="lab-fields">
                         <label for="lab-tracker-title">Film title<input id="lab-tracker-title" maxlength="100" required></label>
                         <label for="lab-tracker-date">Release date<input id="lab-tracker-date" type="date" value="1941-04-21" required></label>
@@ -91,8 +102,9 @@
                         <div id="lab-tracker-result" class="lab-output" aria-live="polite"></div>
                     </section>
                     <section id="lab-panel-unlocks" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-unlocks" tabindex="0" hidden>
-                        <h3>Unlock Info</h3><p class="lab-note">Starting availability comes from the app's verified starting deck. The shipped extract has no unlock conditions; dates and recipes cannot yet be shown reliably.</p>
-                        <div class="lab-fields"><label for="lab-unlock-search">Find an element<input id="lab-unlock-search" type="search" placeholder="Search elements"></label>
+                        <h3>Unlock Info</h3><p class="lab-note">Three states matter: starting deck, date unlocks, and recipe/factory unlocks. Current shipped data only proves the starting deck.</p>
+                        <div class="lab-fields"><label for="lab-unlock-category">Category<select id="lab-unlock-category"></select></label>
+                        <label for="lab-unlock-search">Find an element<input id="lab-unlock-search" type="search" placeholder="Search elements"></label>
                         <label for="lab-unlock-tag">Story element<select id="lab-unlock-tag"></select></label></div>
                         <div id="lab-unlocks-result" class="lab-output" aria-live="polite"></div>
                     </section>

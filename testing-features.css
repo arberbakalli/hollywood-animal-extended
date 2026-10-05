@@ -19,23 +19,39 @@
 .testing-features-page textarea { width: 100%; box-sizing: border-box; min-height: 42px; border: 1px solid #60656f; border-radius: 4px; padding: 10px; background: #292929; color: #d6dae2; font: inherit; }
 .testing-features-page input[type="range"] { width: 100%; accent-color: var(--accent); }
 .testing-features-page select[multiple] { min-height: 160px; }
+.testing-features-page select[multiple] optgroup { color: var(--accent); }
+.testing-features-page select[multiple] option { color: #d6dae2; padding: 4px 8px; }
+.testing-features-page select[multiple] option:checked { color: var(--accent); background: #3b3520; }
 .testing-features-page textarea { min-height: 180px; font-family: monospace; font-size: 13px; resize: vertical; }
+.testing-features-page fieldset { border: 1px solid #3f4248; border-radius: 6px; padding: 16px; margin: 18px 0; background: #202020; }
+.testing-features-page legend { padding: 0 8px; color: var(--accent); font-weight: 700; }
 .testing-features-page .lab-toggles { display: flex; flex-wrap: wrap; gap: 14px 22px; margin: 16px 0; }
 .testing-features-page .lab-toggles label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #d3d6dc; }
 .testing-features-page .lab-toggles input { accent-color: var(--accent); }
 .testing-features-page .lab-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+.testing-features-page .analyze-btn { width: auto; min-height: 42px; padding: 10px 16px; font-size: 14px; }
+.testing-features-page .secondary-btn { margin-top: 0; }
 .testing-features-page .lab-table-wrap { overflow-x: auto; }
 .testing-features-page .lab-table { width: 100%; min-width: 560px; border-collapse: collapse; text-align: left; font-size: 14px; overflow-wrap: normal; }
 .testing-features-page .lab-table :is(th, td) { padding: 12px 10px; border-bottom: 1px solid #3e4147; vertical-align: top; }
-.testing-features-page .lab-table th { color: #b8bcc4; font-weight: 500; }
-.testing-features-page .lab-table caption { text-align: left; padding: 8px 0 16px; color: #c6cad3; }
+.testing-features-page .lab-table th { color: #b8bcc4; font-weight: 500; white-space: nowrap; }
+.testing-features-page .lab-table td { word-break: normal; }
 .testing-features-page .lab-output { border-top: 1px solid #46484c; padding-top: 18px; margin-top: 24px; line-height: 1.7; color: #d3d6dc; overflow-wrap: anywhere; }
 .testing-features-page .lab-output p { margin: 6px 0 16px; }
 .testing-features-page .lab-positive { color: #8cca9c; }
 .testing-features-page .lab-negative { color: #f49b96; }
 .testing-features-page .lab-commercial { color: var(--accent); }
 .testing-features-page .lab-artistic { color: #a0a0ff; }
+.testing-features-page .lab-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 0 0 18px; }
+.testing-features-page .lab-mini-card { border: 1px solid #3f4248; border-radius: 6px; background: #242424; padding: 14px; min-width: 0; }
+.testing-features-page .lab-mini-card h4 { margin-top: 0; color: var(--accent); }
+.testing-features-page .lab-mini-card strong { color: #eef0f4; overflow-wrap: anywhere; }
 .testing-features-page .lab-genre-name { color: color-mix(in srgb, var(--tag-color, #d6dae2) 55%, #fff); border-left: 3px solid var(--tag-color, #d6dae2); padding-left: 8px; display: inline-block; }
+.testing-features-page .lab-pairings { margin-top: 30px; }
+.testing-features-page .lab-pairings h4 { margin-bottom: 4px; color: var(--accent); }
+.testing-features-page .lab-pair-summary { display: flex; flex-wrap: wrap; gap: 12px 28px; padding-bottom: 14px; border-bottom: 1px solid #3e4147; margin-bottom: 16px; }
+.testing-features-page .lab-pair-stat { display: flex; align-items: baseline; gap: 8px; color: #b8bcc4; font-size: 14px; }
+.testing-features-page .lab-pair-stat strong { font-size: 18px; }
 .testing-features-page .lab-error { color: #f49b96; min-height: 24px; }
 .testing-features-page .lab-brand { display: flex; align-items: center; gap: 18px; }
 .testing-features-page .lab-portrait { width: 56px; height: 76px; object-fit: contain; }

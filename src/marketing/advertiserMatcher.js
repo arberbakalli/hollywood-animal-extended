@@ -57,8 +57,12 @@
         return { grade, tier };
     }
 
+    function audienceNames(ids) {
+        return ids.map(id => GAME_DATA.demographics[id]?.name || id).join(', ');
+    }
+
     function generateReasoning(agency, score) {
-        const audiences = agency.targets.join(', ');
+        const audiences = audienceNames(agency.targets);
         const { tier } = predictGradeFromScore(score);
         if (tier === 'grade-high') return `Strong appeal across ${audiences}.`;
         if (tier === 'grade-good') return `Good compatibility across ${audiences}.`;
@@ -115,6 +119,7 @@
         ADVERTISER_WEAK_THRESHOLD,
         calculateAdvertiserMatch,
         predictGradeFromScore,
+        audienceNames,
         generateReasoning,
         getRecommendations,
         renderAdvertiserCard

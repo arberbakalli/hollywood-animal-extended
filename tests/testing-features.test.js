@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, test } from '@jest/globals';
 import { loadLegacyScript } from './helpers/legacyHarness.js';
 import { releaseCurve, calibrateAttendance, campaignCoverage, uniqueScripts, recentElementUse,
-    validateRelease, unlockInfo, finiteNumber } from '../lab/labModel.js';
+    validateRelease, unlockInfo, finiteNumber, rankGenreElements } from '../lab/labModel.js';
 
 let app;
 beforeAll(async () => { app = await loadLegacyScript(); });
@@ -54,6 +54,49 @@ describe('lab candidate inspector', () => {
     });
 });
 
+describe('lab genre element pairings', () => {
+    test('uses the production pair score, reports cross-genre counts and respects exclusions', async () => {
+        await app.ensureCompatibilityLoaded();
+        const scorePair = (genre, tag) => app.evaluate('HACCompatibilityEngine.getRawCompatibilityScore')(genre, tag, app.GAME_DATA);
+        const allTags = Object.values(app.GAME_DATA.tags);
+        const result = rankGenreElements(allTags, 'ACTION', scorePair, new Set(), 'Protagonist', 'genre', 'Cowboy');
+        expect(result.genreCount).toBe(11);
+        expect(result.rows).toHaveLength(1);
+        expect(result.rows[0].tag.id).toBe('PROTAGONIST_COWBOY');
+        expect(result.rows[0].score).toBe(5);
+        expect(result.rows[0].strongAcrossGenres).toBe(3);
+        expect(result.rows[0].unsuccessfulAcrossGenres).toBe(1);
+        expect(result.genrePoolSize).toBe(114);
+        expect(result.rows[0].strongPairs).toBe(49);
+        expect(result.rows[0].unsuccessfulPairs).toBe(12);
+        expect(result.successful).toBe(1);
+        expect(result.unsuccessful).toBe(0);
+        const withoutPartner = rankGenreElements(allTags, 'ACTION', scorePair,
+            new Set(['FINALE_ANTAGONIST_GETS_KILLED']), 'Protagonist', 'pairs', 'Cowboy');
+        expect(withoutPartner.genrePoolSize).toBe(113);
+        expect(withoutPartner.rows[0].strongPairs).toBe(48);
+        const excluded = rankGenreElements(allTags, 'ACTION', scorePair,
+            new Set(['PROTAGONIST_COWBOY']), 'Protagonist', 'cross', 'Cowboy');
+        expect(excluded.rows).toHaveLength(0);
+        expect(excluded.successful).toBe(0);
+    });
+    test('within-genre ranking favors successful pairings while cross-genre ranking exposes broad usefulness', async () => {
+        await app.ensureCompatibilityLoaded();
+        const score = app.evaluate('HACCompatibilityEngine.getRawCompatibilityScore');
+        const allTags = Object.values(app.GAME_DATA.tags);
+        const pair = (a, b) => score(a, b, app.GAME_DATA);
+        const within = rankGenreElements(allTags, 'COMEDY', pair);
+        expect(within.rows.slice(0, 2).map(row => row.tag.id)).toEqual([
+            'THEME_ALCOHOL_FREEDOM', 'SUPPORTINGCHARACTER_LOVE_INTEREST'
+        ]);
+        expect(within.rows[0].strongPairs).toBe(34);
+        const cross = rankGenreElements(allTags, 'COMEDY', pair, new Set(), '', 'cross');
+        expect(cross.rows[0].tag.id).toBe('SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS');
+        expect(cross.rows[0].strongAcrossGenres).toBe(9);
+        expect(cross.rows[0].score).toBe(3);
+    });
+});
+
 describe('lab release journal and unlock facts', () => {
     test('includes the 500-day boundary and excludes older/future releases', () => {
         const reference = '1941-04-21';
@@ -67,8 +110,24 @@ describe('lab release journal and unlock facts', () => {
         expect(() => validateRelease({ title: 'Film', date: '1941-04-21', tags: ['INVENTED'] }, ids)).toThrow('known element');
         expect(() => validateRelease({ title: 'Film', date: '1941-02-30', tags: ['DETECTIVE'] }, ids)).toThrow('valid release date');
     });
-    test('starter availability is read from the real whitelist', () => {
+    test('starter availability is read from the real whitelist before recovered date gates', () => {
         expect(unlockInfo('WILD_WEST', app.GAME_DATA.starterWhitelist).kind).toBe('starter');
-        expect(unlockInfo('HORROR', app.GAME_DATA.starterWhitelist).kind).toBe('unknown');
+        expect(unlockInfo('HORROR', app.GAME_DATA.starterWhitelist, 'DATE:>=13-09-1935')).toEqual({
+            kind: 'date', text: 'Unlocks on or after 1935-09-13.'
+        });
+    });
+    test('parses year-only, recipe and Trash King policy unlock conditions', () => {
+        expect(unlockInfo('SLAPSTICK_COMEDY', app.GAME_DATA.starterWhitelist, 'DATE:>=1950')).toEqual({
+            kind: 'date', text: 'Unlocks in or after 1950.'
+        });
+        expect(unlockInfo('EVENTS_SURVIVAL_TOURNAMENT', app.GAME_DATA.starterWhitelist,
+            'RECIPE_START:EVENTS_JOUSTING_TOURNAMENT:DYSTOPIAN_FUTURISTIC_CITY:THEME_STRUGGLE_FOR_BETTER_LIFE'))
+            .toEqual({ kind: 'recipe', recipeType: 'RECIPE_START', text: 'Available through a starting recipe.',
+                requirements: ['EVENTS_JOUSTING_TOURNAMENT', 'DYSTOPIAN_FUTURISTIC_CITY', 'THEME_STRUGGLE_FOR_BETTER_LIFE'] });
+        expect(unlockInfo('PROTAGONIST_TOXIC_VIGILANTE', app.GAME_DATA.starterWhitelist,
+            'RECIPE_TRASH:PROTAGONIST_CLUMSY_OAF:THEME_AVENGING_LOVED_ONES'))
+            .toEqual({ kind: 'trash-recipe', recipeType: 'RECIPE_TRASH',
+                text: 'Unlocked through the Trash King policy recipe.',
+                requirements: ['PROTAGONIST_CLUMSY_OAF', 'THEME_AVENGING_LOVED_ONES'] });
     });
 });
