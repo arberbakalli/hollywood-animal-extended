@@ -81,12 +81,7 @@ window.HACAnalysisAgeRoleBreakdown = (function() {
                 if (!select.value) return;
                 roles.push({
                     type: 'supporting',
-                    // AgeRoleCompatibility.json's supportingCharacters bucket uses
-                    // SUPPORTING_CHARACTER_ (with underscore); GAME_DATA.tags and
-                    // TagData.json use the real in-game id, SUPPORTINGCHARACTER_
-                    // (without). rawId keeps the real id for gender-lock lookups;
-                    // id keeps the shimmed form for the ratings lookup below.
-                    id: select.value.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_'),
+                    id: select.value,
                     rawId: select.value,
                     displayName: select.options[select.selectedIndex].text
                 });

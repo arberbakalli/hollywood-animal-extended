@@ -104,9 +104,9 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
 
         // Check known gender-locked roles
         expect(data.protagonists['PROTAGONIST_AMBITIOUS_WOMAN'].locked_gender).toBe('F');
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_PATRIARCH'].locked_gender).toBe('M');
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_FEMME_FATALE'].locked_gender).toBe('F');
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_DAMSEL_IN_DISTRESS'].locked_gender).toBe('F');
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_PATRIARCH'].locked_gender).toBe('M');
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_FEMME_FATALE'].locked_gender).toBe('F');
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS'].locked_gender).toBe('F');
     });
 
     test('flexible-gender roles have locked_gender as null', async () => {
@@ -115,7 +115,7 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         // Check roles that allow both genders
         expect(data.protagonists['PROTAGONIST_COP'].locked_gender).toBeNull();
         expect(data.antagonists['ANTAGONIST_ALIEN'].locked_gender).toBeNull();
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_SIDEKICK'].locked_gender).toBeNull();
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_SIDEKICK'].locked_gender).toBeNull();
     });
 
     test('data_source field distinguishes verified from estimated data', async () => {
@@ -150,9 +150,9 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     test('supporting characters section has expected entries', async () => {
         const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
         expect(data.supportingCharacters).toBeDefined();
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_PATRIARCH']).toBeDefined();
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_FEMME_FATALE']).toBeDefined();
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_DAMSEL_IN_DISTRESS']).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_PATRIARCH']).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_FEMME_FATALE']).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS']).toBeDefined();
     });
 
     test('stylesheet includes age/gender appeal row styling', async () => {
@@ -213,14 +213,11 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         expect(unresolved.sort()).toEqual(KNOWN_MISSING_ENTRIES);
     });
 
-    // Same id-drift bug, one bucket over: the Supporting Character shim in
-    // src/analysis/ageRoleBreakdown.js:82 rewrites the real
-    // SUPPORTINGCHARACTER_ prefix to SUPPORTING_CHARACTER_ before lookup, but
-    // that only fixes the prefix -- it does not add back an underscore the
-    // real id never had (SUPPORTINGCHARACTER_STEPCHILD / STEPPARENT), so
-    // SUPPORTING_CHARACTER_STEP_CHILD / STEP_PARENT still failed to resolve
-    // even after the shim ran.
-    test('every real Supporting Character tag id resolves in AgeRoleCompatibility.json after the id-shim', async () => {
+    // Same id-drift bug, one bucket over. The file once spelled these
+    // SUPPORTING_CHARACTER_* and the code rewrote every id before lookup; since
+    // 2026-10-05 the file uses the game's own SUPPORTINGCHARACTER_* ids
+    // (owner-approved; tests/age-data-ids.test.js guards the spelling).
+    test('every real Supporting Character tag id resolves in AgeRoleCompatibility.json', async () => {
         const tagData = JSON.parse(await readFile('data/TagData.json', 'utf8'));
         const ageRole = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
 
@@ -235,8 +232,7 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         const unresolved = [];
         Object.entries(tagData).forEach(([id, entry]) => {
             if (entry?.CategoryID !== 'SupportingCharacter') return;
-            const shimmedId = id.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_');
-            const roleData = ageRole.supportingCharacters?.[shimmedId];
+            const roleData = ageRole.supportingCharacters?.[id];
             if (!roleData || !roleData.ratings) {
                 unresolved.push(id);
             }
@@ -275,9 +271,8 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
             const bucketName = bucketForCategory[entry.CategoryID];
             if (!bucketName) return;
 
-            const shimmedId = id.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_');
             const bucket = ageRole[bucketName] || {};
-            const roleData = bucket[id] || bucket[shimmedId];
+            const roleData = bucket[id];
             if (!roleData) return; // covered by the "unresolved" tests above
 
             if (roleData.locked_gender !== entry.gender) {

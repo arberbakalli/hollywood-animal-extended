@@ -63,4 +63,16 @@ test.describe('Age & Gender Appeal - selector context regression', () => {
         await expect(page.locator('.age-role-empty-state')).toBeVisible();
         await expect(page.locator('.age-role-empty-state')).toContainText('Select at least one role');
     });
+
+    // Supporting Characters are looked up by the game's own id since 2026-10-05.
+    // Under the old file spelling (SUPPORTING_CHARACTER_*) or with an id rewrite
+    // in the code, every cell here showed "-" (docs/KNOWN_ISSUES.md).
+    test('TC-AGEAPL-RG-006 [automated] a supporting character shows its ratings from the age data', async ({ page }) => {
+        await selectRole(page, 'generator', 'supporting-character', 'SUPPORTINGCHARACTER_FEMME_FATALE');
+
+        const row = page.locator('.age-role-row--supporting').filter({ hasText: 'Femme Fatale' });
+        await expect(row).toBeVisible();
+        await expect(row.locator('.age-role-rating')).toHaveText(['Good', 'Neutral', 'Bad']);
+    });
 });
+

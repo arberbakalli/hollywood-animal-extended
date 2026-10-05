@@ -89,6 +89,23 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 
 ## Data Correctness
 
+- **`data/TagsToAgeCompatibilityData.json` holds 10 characters that are not in the
+  game** (found 2026-10-05): `PROTAGONIST_FEMINIST_ACTIVIST`, `_HOUSEWIFE`,
+  `_SCHOOLGIRL`, `_WEALTHY_WIDOW`, `_STREET_URCHIN`, `_RIGHTEOUS_ZEALOT`,
+  `ANTAGONIST_MYSTERIOUS_STRANGER`, `_SEDUCTRESS`, `_JILTED_LOVER`, `_STALKER`.
+  None is in `data/TagData.json`, the full extract or `localization/English.json`,
+  and the app never looks them up. Owner ruling: keep them (data that looks unused
+  can encode facts) until their origin is known. The same file has no Supporting
+  Characters at all; see the owner data task above. Guarded by
+  `tests/age-data-ids.test.js`, whose list of unknown ids can only shrink.
+- **Fixed 2026-10-05: one spelling for Supporting Character ids.**
+  `AgeRoleCompatibility.json` spelled its 17 Supporting Characters
+  `SUPPORTING_CHARACTER_*`; the game and every other file use
+  `SUPPORTINGCHARACTER_*`. `src/analysis/ageRoleBreakdown.js` rewrote ids before
+  every lookup, which hid the drift: a search for the real id found nothing. The
+  file now uses the game ids and the rewrite is gone. Guarded by
+  `tests/age-data-ids.test.js`.
+
 - **18 character tags have no Age & Gender Appeal rating data at all.**
   `data/AgeRoleCompatibility.json` is missing an entry entirely (not a
   drifted one — see the gender-lock entry below for that) for:
