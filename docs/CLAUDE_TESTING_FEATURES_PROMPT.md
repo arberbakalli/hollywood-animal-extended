@@ -38,6 +38,28 @@ Read these first:
 
 ## Feature Priorities
 
+Update 2026-10-05: all eight prototypes now exist. Inspect the implementation
+and `docs/TESTING_FEATURES_LAB.md` before adding more. Lab-only ESM modules live
+in `lab/`, not `src/`, because the main-page module guard owns that tree.
+`testing-features.css` is scoped to the lab page. No production module or
+existing executable test was changed for these prototypes.
+
+Available tools: Release Strategy Lab, Advertiser Strategy, Distribution
+Calibration, Genre Synergy, Script Diversity, Award Targets, Released-Film
+Tracker, Unlock Info. Their focused suite is
+`tests/e2e/testing-features.spec.js`; pure lab tests are
+`tests/testing-features.test.js`.
+
+Research is the valuable next contribution: recover actual Factory and
+attendance/advertiser reach formulas and original unlock conditions. Do not
+turn the screenshot ratios or sandbox boost into game truth. Award Targets
+currently supplies planning guidance; the exact awards model remains open.
+Main already deduplicates generated scripts; the lab displays candidate-list
+deduplication so the owner can inspect it.
+
+Use your own worktree if Codex is still writing this tree. No parallel browser
+runs on the same results directory or server port.
+
 1. Distribution Calibration
    - Explore observed attendance being lower than current estimates.
    - Add a lab-only factory policy / first-week boost prototype.
