@@ -198,7 +198,7 @@ Feature: Marketing and Release
     Then weeks 2 through 8 match their unboosted figures
 
   # [automated] TC04-000028. Behemoth boost applies regardless of commercial score.
-  # The slower decay rule is independent and only applies when score > 9.
+  # The slower decay rule is independent and only applies from score 9 and above.
   Scenario: Behemoth boost applies at all score levels
     When the user sets the commercial score to 5.0
     And the user enables the Behemoth studio policy

@@ -5,8 +5,8 @@ import { loadInstrumentedApp } from './helpers/legacyHarness.js';
  *
  * Behemoth carries two effects on two separate gates: the +25% boost rides on
  * the production budget the toggle stands for, so it is live whenever the toggle
- * is on, while the slower decay needs commercial > 9. Boutique only ever carries
- * slower decay, gated on artistic > 9.
+ * is on, while the slower decay needs commercial 9 and above. Boutique only ever
+ * carries slower decay, gated on artistic 9 and above (owner ruling 2026-10-01).
  *
  * A film can therefore sit in any combination of those states, and the point of
  * this line is to say which half is actually doing something. These pin the
@@ -45,7 +45,7 @@ describe('Distribution — studio policy status line', () => {
                 .toBe('Behemoth: +25% Boost + Slower Decay Active');
         });
 
-        test('above 9 it reports both halves', () => {
+        test('above the gate it reports both halves', () => {
             expect(describe_({ behemoth: true, boutique: false, commercialScore: 9.5, artisticScore: 0 }))
                 .toBe('Behemoth: +25% Boost + Slower Decay Active');
         });
@@ -74,7 +74,7 @@ describe('Distribution — studio policy status line', () => {
                 .toBe('Boutique: Slower Decay Active');
         });
 
-        test('above 9 the decay is reported active', () => {
+        test('above the gate the decay is reported active', () => {
             expect(describe_({ behemoth: false, boutique: true, commercialScore: 0, artisticScore: 9.5 }))
                 .toBe('Boutique: Slower Decay Active');
         });
