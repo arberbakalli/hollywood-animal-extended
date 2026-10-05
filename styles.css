@@ -101,6 +101,79 @@ h2 {
     border-color: var(--accent);
 }
 
+.testing-features-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.testing-features-link:hover,
+.testing-features-link:focus-visible {
+    background: var(--accent);
+    color: #111111;
+    outline: none;
+}
+
+.testing-features-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.testing-features-rule-grid,
+.testing-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.testing-rule-card,
+.testing-feature-card {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+}
+
+.testing-rule-kicker,
+.testing-feature-status {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: var(--accent);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.testing-rule-card strong,
+.testing-feature-card h4 {
+    display: block;
+    margin: 0 0 8px;
+    color: var(--text-main);
+    font-size: 1rem;
+}
+
+.testing-rule-card p,
+.testing-feature-card p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
 /* --- GLOBAL ELEMENT POOL CONTROL --- */
 .header-control-group {
     display: flex;
