@@ -768,7 +768,7 @@ gender button(s) render in the Age & Gender Appeal panel.**
 `getValidGenders()` in `src/analysis/ageRoleBreakdown.js` reads
 `GAME_DATA.tags[rawId].gender` directly (surfaced there by
 `src/data/dataLoaders.js`) and nowhere else — it does not read
-`data/age-role-compatibility.json`'s `locked_gender` at all. That field
+`data/AgeRoleCompatibility.json`'s `locked_gender` at all. That field
 still exists as a second, independently-displayed copy (used for nothing but
 its own presence in that file) and is kept in sync only as a courtesy: a
 regression test cross-checks it against `TagData.json` and fails if the two
@@ -784,7 +784,7 @@ change: every `gender` value is exactly `"M"`, `"F"`, `"U"`, or absent
 `ANTAGONIST_CRIMINAL_GANG`) — no malformed values, no case that falls
 through `getValidGenders()`'s three-way branch unhandled.
 
-`data/age-role-compatibility.json`'s `locked_gender` field (`"M"`, `"F"`, or
+`data/AgeRoleCompatibility.json`'s `locked_gender` field (`"M"`, `"F"`, or
 `null` for unisex) previously disagreed with `TagData.json`'s `gender` field
 on 37 entries — all `locked_gender: null` while `TagData.json` said they
 were locked, silently under-reporting the lock back when the panel still
@@ -884,3 +884,33 @@ interest in films that carry it. The game's own words (`localization/English.jso
 > (ranking, card pills, the out-of-date notice), `src/selectors/storyElementSelector.js`
 > (shared builder-row pills) and `src/library/exclusionStore.js` (excluding clears the state).
 > Pinned by `tests/freshness.test.js` and `tests/e2e/script-lab-freshness.spec.js`.
+
+---
+
+## 10. Pollux awards in a save file
+
+**Draft from save evidence, 2026-10-05. The owner confirms the wording.** Measured
+on 55 real saves (game 0.8.72EA). Full field list: `docs/POLLUX_SAVE_EDITOR.md`.
+
+- **The game year** is 1 January 1929 plus `stateJson.timePassed` days. It matched
+  the date in the file name of all 55 saves.
+- **The ceremony is on 1 March and is stored under its own year.** The 1940
+  ceremony judged 1939 films and is stored as `polluxHistory[1940]`; the films'
+  `polluxes` entries carry 1940 too.
+- **`prevYearsPolluxPretenders` holds the candidates of this year's ceremony.**
+  The player's films join it only when the nominations are announced, between
+  15 January and 1 March. A 15 January save holds no player film there.
+- **Before the ceremony, only `forceWinning` is changed.** The game picks the
+  winner itself. Writing `polluxHistory` early would record a ceremony that has
+  not run.
+- **After the ceremony, the result is rewritten in three places that must agree:**
+  `polluxHistory[year].winners`, the films' `polluxes`/`nominations`, and the
+  winning talents' `characters[].polluxes`. Only the three recorded nominees can win.
+- **Forcing several candidates gives the game the choice.** With all 17 player
+  candidates forced in 1940, the game picked among them by the nominee `Key`
+  (lowest wins). So the Pollux Fixer forces only the player's pick by default.
+
+> Enforced in `src/pollux/polluxSaveEditor.js`, UI in `src/ui/polluxSaveEditorView.js`.
+> Pinned by `tests/pollux-save-editor.test.js` and `tests/e2e/pollux-save-editor.spec.js`.
+> Not yet tested by loading a fixed save in the game, except the owner's 1940
+> `forceWinning` run.

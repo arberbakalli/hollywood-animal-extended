@@ -597,7 +597,7 @@
     }
   },
   "supportingCharacters": {
-    "SUPPORTING_CHARACTER_ANGRY_BOSS": {
+    "SUPPORTINGCHARACTER_ANGRY_BOSS": {
       "ratings": {
         "YOUNG": "Neutral",
         "MID": "Good",
@@ -606,7 +606,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_ANNOYING_SUITOR": {
+    "SUPPORTINGCHARACTER_ANNOYING_SUITOR": {
       "ratings": {
         "YOUNG": "Neutral",
         "MID": "Neutral",
@@ -615,7 +615,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_BROTHER_IN_ARMS": {
+    "SUPPORTINGCHARACTER_BROTHER_IN_ARMS": {
       "ratings": {
         "YOUNG": "Good",
         "MID": "Good",
@@ -624,7 +624,7 @@
       "locked_gender": "M",
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_BUTLER": {
+    "SUPPORTINGCHARACTER_BUTLER": {
       "ratings": {
         "YOUNG": "Bad",
         "MID": "Neutral",
@@ -633,7 +633,7 @@
       "locked_gender": "M",
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_DAMSEL_IN_DISTRESS": {
+    "SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS": {
       "ratings": {
         "YOUNG": "Good",
         "MID": "Good",
@@ -642,7 +642,7 @@
       "locked_gender": "F",
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_FEMME_FATALE": {
+    "SUPPORTINGCHARACTER_FEMME_FATALE": {
       "ratings": {
         "YOUNG": "Good",
         "MID": "Neutral",
@@ -651,7 +651,7 @@
       "locked_gender": "F",
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_LOVE_INTEREST": {
+    "SUPPORTINGCHARACTER_LOVE_INTEREST": {
       "ratings": {
         "YOUNG": "Good",
         "MID": "Neutral",
@@ -660,7 +660,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_MENTOR": {
+    "SUPPORTINGCHARACTER_MENTOR": {
       "ratings": {
         "YOUNG": "Bad",
         "MID": "Neutral",
@@ -669,7 +669,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_PARENT_FIGURE": {
+    "SUPPORTINGCHARACTER_PARENT_FIGURE": {
       "ratings": {
         "YOUNG": "Bad",
         "MID": "Neutral",
@@ -678,7 +678,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_PATRIARCH": {
+    "SUPPORTINGCHARACTER_PATRIARCH": {
       "ratings": {
         "YOUNG": "Neutral",
         "MID": "Good",
@@ -687,7 +687,7 @@
       "locked_gender": "M",
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_RIVAL": {
+    "SUPPORTINGCHARACTER_RIVAL": {
       "ratings": {
         "YOUNG": "Good",
         "MID": "Good",
@@ -696,7 +696,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_SHERIFF": {
+    "SUPPORTINGCHARACTER_SHERIFF": {
       "ratings": {
         "YOUNG": "Neutral",
         "MID": "Good",
@@ -705,7 +705,7 @@
       "locked_gender": "M",
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_SIDEKICK": {
+    "SUPPORTINGCHARACTER_SIDEKICK": {
       "ratings": {
         "YOUNG": "Good",
         "MID": "Good",
@@ -714,7 +714,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_STEPCHILD": {
+    "SUPPORTINGCHARACTER_STEPCHILD": {
       "ratings": {
         "YOUNG": "Good",
         "MID": "Neutral",
@@ -723,7 +723,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_STEPPARENT": {
+    "SUPPORTINGCHARACTER_STEPPARENT": {
       "ratings": {
         "YOUNG": "Neutral",
         "MID": "Good",
@@ -732,7 +732,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_STRICT_PARENT": {
+    "SUPPORTINGCHARACTER_STRICT_PARENT": {
       "ratings": {
         "YOUNG": "Bad",
         "MID": "Neutral",
@@ -741,7 +741,7 @@
       "locked_gender": null,
       "data_source": "verified"
     },
-    "SUPPORTING_CHARACTER_WIZARD": {
+    "SUPPORTINGCHARACTER_WIZARD": {
       "ratings": {
         "YOUNG": "Neutral",
         "MID": "Good",
