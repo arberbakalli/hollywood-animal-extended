@@ -4032,3 +4032,99 @@ option[data-selected-elsewhere="true"] {
     color: var(--accent);
     font-size: 0.9rem;
 }
+
+/* --- POLLUX FIXER --- */
+.pollux-warning {
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--accent);
+    border-left-width: 4px;
+    border-radius: var(--radius);
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.pollux-warning strong {
+    display: block;
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
+.pollux-warning code {
+    overflow-wrap: anywhere;
+    color: var(--text-main);
+}
+
+.pollux-field,
+.pollux-category {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.pollux-field label,
+.pollux-category label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pollux-field input[type="file"] {
+    color: var(--text-main);
+    max-width: 100%;
+}
+
+.pollux-status:empty { display: none; }
+.pollux-status { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+.pollux-status[data-tone="ok"] { color: var(--success); }
+.pollux-status[data-tone="error"] { color: var(--danger); }
+
+.pollux-state-note {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0 0 20px;
+}
+
+.pollux-category-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 20px;
+}
+
+.pollux-category select { width: 100%; min-width: 0; }
+.pollux-empty { margin: 0; min-height: 42px; display: flex; align-items: center; }
+
+.pollux-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 44px;
+    margin: 4px 0 20px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.pollux-check input { margin-top: 3px; accent-color: var(--accent); }
+.pollux-check input:disabled + span { color: var(--text-muted); }
+
+#polluxGenerateButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.pollux-result {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.pollux-result-summary { margin: 0 0 8px; color: var(--success); font-weight: 700; }
+.pollux-result-list { margin: 0 0 12px; padding-left: 20px; color: var(--text-main); }
+.pollux-download { color: var(--accent); }
+
+@media (max-width: 720px) {
+    .pollux-category-list { grid-template-columns: 1fr; }
+}

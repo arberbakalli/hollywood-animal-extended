@@ -91,6 +91,7 @@
         }
 
         setupCollapsibleSections();
+        if (global.HACPolluxSaveEditorView) global.HACPolluxSaveEditorView.setupPolluxSaveEditor();
         initializeSelectors('excluded');
 
         // Read before the restore below populates the DOM. A saved list without

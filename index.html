@@ -69,6 +69,10 @@
                 <span class="product-area-kicker">Marketing</span>
                 <span class="product-area-label">Marketing &amp; Release</span>
             </button>
+            <button id="tab-pollux-button" class="tab-btn product-area-btn" type="button" aria-pressed="false" data-tab="pollux">
+                <span class="product-area-kicker">Save file</span>
+                <span class="product-area-label">Pollux Fixer</span>
+            </button>
         </nav>
 
         <main id="app-content" class="container">
@@ -632,6 +636,47 @@
                 </div>
             </section>
 
+            <!-- PRODUCT AREA 4: POLLUX FIXER -->
+            <section id="tab-pollux" class="tab-content app-tab-panel hidden" aria-labelledby="tab-pollux-button" aria-hidden="true" hidden>
+                <div id="pollux-intro-panel" class="card">
+                    <h3>Pollux Fixer</h3>
+                    <p class="subtitle">Choose which of your films win the Pollux awards in a Hollywood Animal save. The file stays on your computer: it is read and rewritten in this browser and never uploaded.</p>
+                    <div id="pollux-backup-warning" class="pollux-warning" role="note">
+                        <strong>Back up your save first.</strong>
+                        Copy the original <code>.json</code> from
+                        <code>AppData\LocalLow\Weappy\Hollywood Animal\Saves\Profiles\0</code>
+                        before you replace it. This tool downloads a new file and does not change the original, but the game only reads the file you put back in that folder. Not tested in every game version.
+                    </div>
+                    <div id="pollux-file-field" class="pollux-field">
+                        <label for="polluxFileInput">Save file (.json)</label>
+                        <input id="polluxFileInput" type="file" accept=".json,application/json">
+                    </div>
+                    <p id="pollux-status" class="pollux-status" role="status" aria-live="polite"></p>
+                </div>
+
+                <div id="pollux-picks-panel" class="card hidden" hidden>
+                    <div class="card-header">
+                        <h3 id="pollux-picks-heading">Pick the winners</h3>
+                    </div>
+                    <div id="pollux-bucket-field" class="pollux-field">
+                        <label for="polluxBucketSelect">Nominee list</label>
+                        <select id="polluxBucketSelect" class="filter-select"></select>
+                    </div>
+                    <p id="pollux-state-note" class="pollux-state-note"></p>
+                    <div id="pollux-category-list" class="pollux-category-list"></div>
+                    <label id="pollux-force-all-field" class="pollux-check" for="polluxForceAllInput">
+                        <input id="polluxForceAllInput" type="checkbox">
+                        <span>Force all my nominees in each picked category. The game then chooses which of them wins, not you.</span>
+                    </label>
+                    <button id="polluxGenerateButton" class="analyze-btn" type="button">Make the fixed save</button>
+                    <div id="pollux-result" class="pollux-result hidden" hidden>
+                        <p id="pollux-result-summary" class="pollux-result-summary"></p>
+                        <ul id="pollux-result-list" class="pollux-result-list"></ul>
+                        <a id="polluxDownloadLink" class="pollux-download" href="#" download>Download again</a>
+                    </div>
+                </div>
+            </section>
+
         </main>
 
         <footer id="app-footer">
@@ -670,6 +715,8 @@
     <script src="src/marketing/audienceCompatibility.js"></script>
     <script src="src/analysis/ageRoleBreakdown.js"></script>
     <script src="src/ui/collapsibleSections.js"></script>
+    <script src="src/pollux/polluxSaveEditor.js"></script>
+    <script src="src/ui/polluxSaveEditorView.js"></script>
     <script src="src/app/appShell.js"></script>
     <script src="script.js"></script>
 </body>
