@@ -180,9 +180,10 @@ Native multiple selects retain stable editing heights.
 
 ## Phase 1 Corrections (2026-10-06)
 
-- Release Strategy now displays production week/demand values without a Factory
-  scenario. The Behemoth/Boutique decay warning remains because that behavior
-  still needs game evidence.
+- Release Strategy now displays production week/demand values, with an optional
+  owner-approved Factory week-one estimate (0-100%) and no Factory scenario or
+  difference columns. The Behemoth/Boutique decay warning remains because that
+  behavior still needs game evidence.
 - Advertiser Strategy compares campaign demographics and movie lean without
   scoring invisible sample elements or showing a static fit table. Exclusions
   elsewhere cannot erase campaign coverage here.
