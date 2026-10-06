@@ -169,3 +169,9 @@ Added:
   color via `data-genre` and `--tag-color`.
 - Playwright coverage in `tests/e2e/readability-hardening.spec.js` verifies the
   palette linkage without hardcoding individual hex values.
+
+Debugging note (from the removed `docs/LESSON_LEARNED_CSS_COLORS.md`): a CSS
+`color: ... !important` rule beats an inline `select.style.color`. When a
+colour does not show, set it by hand in DevTools first. If it works there,
+look for an `!important` override; if it does not, it is a native `<select>`
+limit, not a code bug.

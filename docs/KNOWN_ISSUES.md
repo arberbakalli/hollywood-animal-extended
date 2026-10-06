@@ -84,6 +84,9 @@ Once the data is in the file, the toggle works for them with no code change.
 their order and a notice says it is out of date. Keep the notice only, or offer
 a re-sort?
 
+**Not yet audited:** the freshness order after Show more pages the rest of a
+batch. (Moved from the removed `docs/BUG_HUNT_HANDOVER.md`, 2026-10-06.)
+
 **Test note:** TC01-000020 (Reset Locks hides results) never generates first, so
 it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 
@@ -232,6 +235,16 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 
 ## Architecture
 
+- **The audience "appeal" functions are reached by no app path** (found
+  2026-10-06). `src/marketing/scriptScoringEngine.js` scores artistic appeal as
+  the mean of a script's AF+AM weights and commercial appeal as the mean of
+  TF/TM/YF/YM. Only the `script.js` wrappers and
+  `tests/scriptScoringEngine.test.js` call them. Highest Artistic and Highest
+  Commercial rank by the movie-score bonus instead (`art`/`com` in
+  `src/generator/scriptGenerator.js`). Not a game rule: the owner decides later
+  whether to wire the functions up or remove them. (Recorded from the removed
+  `docs/FEATURES_1_5_IMPLEMENTATION.md`.)
+
 - `script.js` is now a ~510-line bridge layer rather than the ~2,000-line monolith this file used to
   describe: behaviour lives in 31 files under `src/` (counted 2026-09-28), each an IIFE exposing a `HAC*` namespace, which
   `script.js` re-exports as bare globals. Everything is still a **classic script** â€” they contain no
@@ -275,6 +288,9 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
     they declare globals a module scope would swallow â€” `data.js` uses a top-level `const GAME_DATA`,
     a global *lexical* binding that `globalThis` never exposes and that does not escape an `eval`.
     They are excluded from collection rather than reported as a misleading 0%.
+- `tools/grade-distribution.mjs` still fails with `HACAdvertiserMatcher is not
+  defined`. It loads only `data.js` and `script.js` (lines 32-33), from before
+  the code moved to `src/`. Repair it before using it for calibration.
 - Bare `npx jest` fails all suites. See `AGENTS.md` for the reason and the workaround.
 - There is still no committed formatter or npm `lint` script. A temporary Qodana setup was removed
   because the `qodana-js` linter needs a `QODANA_TOKEN` even for local native scans.
@@ -293,3 +309,10 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 - Scenarios in `tests/scenarios/*.feature` tagged `[verified]` or `[unverified]` are not automated.
   An `[unverified]` scenario describes behaviour nobody has watched â€” do not write a test from one
   without reproducing it first.
+- The negative control in `tests/e2e/script-lab.spec.js` (`addStyleTag` on
+  `#results-generator`) uses a raw CSS selector on purpose: it is a mutation
+  target, not a locator. It must stay in step with the `resultsSection` entry
+  in `tests/data/page-repository.json`.
+- The `[unverified]` scenario "Compatibility: switching to Graves preserves the
+  selection" is no longer in any `.feature` file. It was never observed. Re-add
+  it as `[unverified]` only if the owner wants it (owner, 2026-10-06).

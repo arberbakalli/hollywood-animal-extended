@@ -94,8 +94,50 @@ tags are recipe-gated rather than date-gated, so the feature needs a design
 decision on how to present a non-date unlock condition, not just a data pull.
 Not scoped yet — no data model, no UI mockup, no owner ruling on presentation.
 
-**Data location:** re-extract `parameters.Condition` per tag from
-`git show <pre-cleanup commit>:data/TagData.json` when picking this up, the
-same way `gender` was recovered — see `docs/GAME_RULES.md` §8 for the
-precedent.
+**Data location:** `extractedFilesFromGameSourceOfTruth/TagData.json` has
+`parameters.Condition` for all 250 tags (checked 2026-10-05); the app's
+`data/TagData.json` is a trimmed copy without it. A lab prototype is on
+`codex/testing-features-lab` ("Unlock Info").
 
+---
+
+## Award Targets
+
+**Raised:** Act 2 polish, 2026-10-03 (moved from the removed
+`docs/ACT2_POLISH_HANDOVER.md`).
+
+Let the player aim a film at one of the game's year-end lists: Box Office
+Success (highest box office receipts), Critical Acclaim (critics' ratings,
+influenced by artistic rating) and Fan Favorites (Kinomark rating, influenced by
+commercial rating). A lab prototype exists on `codex/testing-features-lab`.
+
+**Open decision:** replace the Highest Artistic / Highest Commercial buttons, or
+sit beside them as a separate target selector?
+
+---
+
+## Released-Film Tracker
+
+**Raised:** Act 2 polish, 2026-10-03 (moved from the removed
+`docs/ACT2_POLISH_HANDOVER.md`).
+
+Help the player see when repeated elements may become stale in the game. The
+tracker warns only; the freshness pill stays the per-element state the app
+uses. A lab prototype exists on `codex/testing-features-lab` ("idea still in
+baking").
+
+**Open decision:** count the last N released films, or ask for an in-game
+release date so the tracker can follow the game's 500-day window?
+
+---
+
+## Offline fallback dataset
+
+**Raised:** 2026-09-07 (moved from the removed `TODO.md`).
+
+`data.js` ships `tags: {}`. A failed data load fails visibly: a banner, a retry
+button, and `hollywood:failed` instead of `hollywood:ready`. That is the right
+default.
+
+**Open decision:** should the app bundle a fallback dataset so it degrades
+instead of stopping? A product call, not a bug.

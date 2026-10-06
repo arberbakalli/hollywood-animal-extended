@@ -181,6 +181,54 @@ test('scenario name', async ({ steps }) => {
 });
 ```
 
+### Two Habits That Keep a Test Honest
+
+**Assert a change, not a presence.** A happy-path test once had eight of nine
+assertions satisfied by the static HTML: the scoring engine could have been
+deleted and the test stayed green. `index.html` already ships `0.0 / 5.0`,
+`0.00` and `No conflicts found.`. Before asserting a value is present, check
+whether the untouched page already shows it.
+
+**Gate on the app's own signal.** `appShell.js` builds every selector context
+and only then binds listeners, so "the selector exists" never meant "the
+control is wired". Wait for `hollywood:ready`, not for a DOM side effect that
+appears early.
+
+### Page Repository and Steps API
+
+A spec names an element; `tests/data/page-repository.json` resolves the name
+to a selector at run time. A UI redesign then touches the repository, not the
+specs.
+
+```js
+await steps.on('generateButton', 'ScriptLab').click();        // a name
+// wrong: await steps.on('#generateScriptsButton', 'ScriptLab').click();
+```
+
+- Pages are PascalCase, elements camelCase. Anchor on a stable container
+  (`#inputs-genre-generator select.tag-selector`), never on an id built at run
+  time.
+- Gate on the panel *your* test uses. Each selector context starts separately
+  and `targeted` finishes last; gating on it made unrelated tests fail. Never
+  use a fixed sleep to wait for a condition.
+- `tests/fixtures/base.js` blocks Google Fonts. A pending stylesheet in
+  `<head>` delays app start, which once made the suite take 251 s with random
+  failures instead of 48 s green.
+- The Steps API has no `.expectVisible()` or `.expectText()`. Use
+  `verifyState('visible')`, `verifyText`, `verifyTextContains`, `verifyCount`
+  or `steps.expect(...)`; the full surface is in the package's
+  `api-reference.md`.
+- A test proves nothing until it has gone red for the right reason. The
+  negative control in `script-lab.spec.js` hides the results with
+  `addStyleTag` and the generation assertion must then fail.
+
+Before adding a test: it reflects a user goal; every element is named in the
+page repository; the behaviour was observed, not assumed; it fails when the
+feature breaks; and its scenario marker in `tests/scenarios/` says
+`[automated]`.
+
+(Moved from the removed `ACHILLES-LEARNING.md` and `TODO.md`, 2026-10-06.)
+
 ## When Tests Fail
 
 ### If a test is red and the code is correct:
@@ -271,4 +319,5 @@ Exclusion-refresh bugs only reproduce with the Starting Tags profile active. Fro
 ## Changelog
 
 - **2026-09-25**: Initial QA Framework consolidated from CLAUDE.md, AGENTS.md, GAME_RULES.md, and session working memory. Rules cover BDD/unit/negative-edge testing, first-run state, exact visuals, one-concern commits, both-suites verification, feature deletion parity, and [automated] citations.
+- **2026-10-06**: Added "Two Habits That Keep a Test Honest" and "Page Repository and Steps API", moved from `TODO.md` and `ACHILLES-LEARNING.md` when those files were removed.
 - **2026-09-28**: Rule (b) points at the spec that asserts exactly 193. Rule (c) widens the neon-green ban to the whole app. The patterns that let a broken feature pass are catalogued in `docs/TEST_QUALITY_GATE.md`, guarded by `tests/suite-honesty.test.js`.
