@@ -1,5 +1,6 @@
 import { LAB_STORAGE_KEY, finiteNumber, releaseCurve, calibrateAttendance, campaignCoverage,
-    rankGenreElements, AWARD_TARGETS, recentElementUse, validateRelease, unlockInfo } from './labModel.js';
+    rankGenreElements, AWARD_TARGETS, recentElementUse, validateRelease, unlockInfo,
+    rankPreservation, PRESERVATION_PARTS } from './labModel.js';
 
 const byId = id => document.getElementById(id);
 const selectedIds = id => [...byId(id).selectedOptions].map(option => option.value);
@@ -14,6 +15,8 @@ let journalWritable = true;
 let wired = false;
 let compatibilityRequest;
 let compatibilityLoaded = false;
+let ageRequest;
+let ageData = null;
 
 function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -232,6 +235,89 @@ async function renderGenreElements() {
     }
 }
 
+async function ensureAgeData() {
+    if (ageData) return;
+    if (!ageRequest) {
+        ageRequest = fetch('data/AgeRoleCompatibility.json').then(response => {
+            if (!response.ok) throw new Error(`Could not load age data (${response.status}).`);
+            return response.json();
+        }).then(data => { ageData = data; })
+            .finally(() => { ageRequest = null; });
+    }
+    await ageRequest;
+}
+
+function preservationCard(row) {
+    const card = element('article', undefined, 'lab-mini-card lab-preservation-card');
+    card.dataset.tagId = row.tag.id;
+    card.append(element('h4', `${row.rank}. ${row.tag.name}`));
+    paragraph(card, `${row.tag.category} · score ${Math.round(row.score)}`, 'lab-note');
+    paragraph(card, `Why this pick: ${row.reasons.join('; ') || 'a steady all-round choice'}.`);
+    paragraph(card, `Compatibility reach: ${row.strongLinks} strong link${row.strongLinks === 1 ? '' : 's'}, ${row.conflicts} conflict${row.conflicts === 1 ? '' : 's'}`);
+    paragraph(card, `Age durability: ${row.age.label}`);
+    paragraph(card, `Best used in: ${row.bestGenres.join(', ') || 'no genre scores 4 or more'}`);
+    paragraph(card, `Caveat: ${row.caveats.join(', ') || 'none'}`, row.caveats.length ? 'lab-note' : 'lab-positive');
+    return card;
+}
+
+async function renderPreservation() {
+    const output = byId('lab-preservation-result');
+    output.textContent = 'Loading pair and age data...';
+    try {
+        await Promise.all([ensureCompatibility(), ensureAgeData()]);
+        render('preservation', node => {
+            const first = byId('lab-preservation-genre-1').value;
+            const second = byId('lab-preservation-genre-2');
+            second.disabled = !first;
+            if (!first) second.value = '';
+            const genreIds = [first, second.value].filter(Boolean);
+            if (genreIds.length === 2 && genreIds[0] === genreIds[1]) throw new Error('Choose two different genres.');
+            const respect = byId('lab-preservation-respect-exclusions').checked;
+            const result = rankPreservation(tags, {
+                scorePair: (a, b) => HACCompatibilityEngine.getRawCompatibilityScore(a, b, GAME_DATA),
+                ageData, excludedIds: respect ? readStoredExcludedIds() : new Set(),
+                genreIds, preset: byId('lab-preservation-preset').value
+            });
+            const genreNames = result.genres.map(genre => genre.name).join(' + ');
+            paragraph(node, `${result.rows.length} story elements ranked with the ${result.preset} strategy${respect ? ', your excluded elements left out' : ', excluded elements included'}. `
+                + (genreNames ? `Links count only the ${result.poolSize} elements that fit ${genreNames} (4 or more).`
+                    : 'Links count every ranked element.'));
+            paragraph(node, `Weights: ${Object.entries(result.weights).map(([key, weight]) => `${PRESERVATION_PARTS[key]} ${weight}`).join(', ')}.`, 'lab-note');
+            if (!result.rows.length) {
+                paragraph(node, 'No story elements to rank. Untick "Leave out my excluded elements" or change your exclusions.', 'lab-note');
+                return;
+            }
+            const top = element('div', undefined, 'lab-card-grid');
+            top.id = 'lab-preservation-top';
+            result.top.forEach(row => top.append(preservationCard(row)));
+            node.append(element('h4', 'Top 5 to preserve'), top);
+            const perCategory = element('div', undefined, 'lab-card-grid');
+            perCategory.id = 'lab-preservation-categories';
+            result.bestByCategory.forEach(row => perCategory.append(preservationCard(row)));
+            node.append(element('h4', 'Best per category'), perCategory);
+            const unrated = result.rows.filter(row => !row.age.known).length;
+            if (unrated) paragraph(node, `${unrated} characters have no age data. They count as the average rated character until the data is found.`, 'lab-note');
+            const headers = ['Rank', 'Element', 'Category', 'Score', 'Strong links', 'Conflicts', 'Age'];
+            if (genreNames) headers.push('Genre fit / 5');
+            table(node, headers, result.rows.map(row => {
+                const rank = element('span', row.top ? `${row.rank} · Top 5` : String(row.rank), row.top ? 'lab-top-mark' : '');
+                const cells = [rank, row.tag.name, row.tag.category, String(Math.round(row.score)), row.strongLinks, row.conflicts, row.age.label];
+                if (genreNames) cells.push(element('span', row.genreFit.toFixed(1), row.genreFit >= 4 ? 'lab-positive' : row.genreFit < 2 ? 'lab-negative' : ''));
+                return cells;
+            }), 'Full ranking');
+        });
+    } catch (error) {
+        render('preservation', node => {
+            paragraph(node, error.message, 'lab-error');
+            const retry = element('button', 'Retry', 'analyze-btn secondary-btn');
+            retry.id = 'lab-preservation-retry';
+            retry.type = 'button';
+            retry.addEventListener('click', renderPreservation);
+            node.append(retry);
+        });
+    }
+}
+
 function renderAwards() {
     render('awards', output => {
         const cards = element('div', undefined, 'lab-card-grid');
@@ -321,6 +407,13 @@ function setup() {
     fillTags(byId('lab-tracker-tags'), tags, ['DETECTIVE', 'PROTAGONIST_COP']);
     fillTags(byId('lab-unlock-tag'), tags, [], true);
     fillTags(byId('lab-genre-primary'), tags.filter(tag => tag.category === 'Genre'), ['DRAMA']);
+    [['lab-preservation-genre-1', 'Any genre'], ['lab-preservation-genre-2', 'No second genre']].forEach(([id, label]) => {
+        const select = byId(id);
+        select.append(Object.assign(element('option', label), { value: '' }));
+        tags.filter(tag => tag.category === 'Genre').forEach(genre => {
+            select.append(Object.assign(element('option', genre.name), { value: genre.id }));
+        });
+    });
     const pairCategory = byId('lab-genre-element-category');
     const allStoryCategories = element('option', 'All story categories');
     allStoryCategories.value = '';
@@ -375,6 +468,7 @@ function setup() {
             byId(item.getAttribute('aria-controls')).hidden = !active;
         });
         if (tab.id === 'lab-tab-genres') renderGenreElements();
+        if (tab.id === 'lab-tab-preservation') renderPreservation();
     }
     tabs.forEach((tab, index) => {
         tab.addEventListener('click', () => activate(tab));
@@ -402,8 +496,13 @@ function setup() {
     byId('lab-genre-element-category').addEventListener('change', renderGenreElements);
     byId('lab-genre-element-rank').addEventListener('change', renderGenreElements);
     byId('lab-genre-element-search').addEventListener('input', renderGenreElements);
+    ['lab-preservation-preset', 'lab-preservation-genre-1', 'lab-preservation-genre-2', 'lab-preservation-respect-exclusions']
+        .forEach(id => byId(id).addEventListener('change', renderPreservation));
     window.addEventListener('storage', event => {
-        if (event.key === 'hac.excludedTags.v1') { renderGenres(); renderGenreElements(); }
+        if (event.key === 'hac.excludedTags.v1') {
+            renderGenres(); renderGenreElements();
+            if (!byId('lab-panel-preservation').hidden) renderPreservation();
+        }
     });
     byId('lab-release-form').addEventListener('submit', event => {
         event.preventDefault();
@@ -464,7 +563,7 @@ async function load() {
             name: localization.locStrings[localization.IdMap[id]] || id,
             category: item.type === 0 ? 'Genre' : item.type === 1 ? 'Setting' :
                 ({ SupportingCharacter: 'Supporting Character', Theme: 'Theme & Event' }[item.CategoryID] || item.CategoryID),
-            art: item.artValue, com: item.commercialValue, weights: weights[id] || {} }));
+            art: item.artValue, com: item.commercialValue, gender: item.gender, weights: weights[id] || {} }));
         GAME_DATA.tags = Object.fromEntries(tags.map(tag => [tag.id, tag]));
         byId('lab-load-status').textContent = 'Experimental features. Calibration tools do not predict profit.';
         if (!wired) { wired = true; setup(); }

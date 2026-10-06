@@ -27,6 +27,7 @@
                     <button id="lab-tab-awards" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-awards" aria-selected="false" tabindex="-1">Award Targets</button>
                     <button id="lab-tab-tracker" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-tracker" aria-selected="false" tabindex="-1">Released-Film Tracker</button>
                     <button id="lab-tab-unlocks" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-unlocks" aria-selected="false" tabindex="-1">Unlock Info</button>
+                    <button id="lab-tab-preservation" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-preservation" aria-selected="false" tabindex="-1">Element Preservation</button>
                     <button id="lab-tab-pollux" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-pollux" aria-selected="false" tabindex="-1">Pollux Fixer</button>
                 </nav>
                 <div>
@@ -112,6 +113,17 @@
                         <label for="lab-unlock-search">Find an element<input id="lab-unlock-search" type="search" placeholder="Search elements"></label>
                         <label for="lab-unlock-tag">Story element<select id="lab-unlock-tag" class="filter-select"></select></label></div>
                         <div id="lab-unlocks-result" class="lab-output" aria-live="polite"></div>
+                        </div>
+                    </section>
+                    <section id="lab-panel-preservation" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-preservation" tabindex="0" hidden>
+                        <div class="card lab-card">
+                        <h3>Element Preservation</h3><p class="subtitle lab-note">The Factory policy lets you keep five story elements Fresh forever, and the choice is permanent. This ranking is advice: its weights are the calculator's judgement, not a game rule.</p>
+                        <div class="lab-fields">
+                        <label for="lab-preservation-preset">Strategy<select id="lab-preservation-preset" class="filter-select"><option value="balanced">Balanced</option><option value="power">Power scorer</option><option value="career">Career stable</option></select></label>
+                        <label for="lab-preservation-genre-1">Genre 1<select id="lab-preservation-genre-1" class="filter-select"></select></label>
+                        <label for="lab-preservation-genre-2">Genre 2<select id="lab-preservation-genre-2" class="filter-select"></select></label></div>
+                        <div class="lab-toggles"><label for="lab-preservation-respect-exclusions"><input id="lab-preservation-respect-exclusions" type="checkbox" checked>Leave out my excluded elements</label></div>
+                        <div id="lab-preservation-result" class="lab-output" aria-live="polite"></div>
                         </div>
                     </section>
                     <section id="lab-panel-pollux" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-pollux" tabindex="0" hidden>

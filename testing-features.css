@@ -175,6 +175,10 @@
 .testing-features-page .lab-mini-card h4 { margin-top: 0; }
 .testing-features-page .lab-mini-card strong { color: var(--text-main); overflow-wrap: anywhere; }
 
+/* Element Preservation: compact top-5 cards and the Top 5 marker in the table. */
+.testing-features-page .lab-preservation-card p { margin: 4px 0; }
+.testing-features-page .lab-top-mark { color: var(--accent); font-weight: 800; white-space: nowrap; }
+
 .testing-features-page .lab-genre-name {
     display: inline-block;
     padding-left: 8px;
