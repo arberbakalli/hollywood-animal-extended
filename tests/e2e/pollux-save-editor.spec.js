@@ -183,7 +183,8 @@ test.describe('Pollux Fixer', () => {
         await expect(full).toHaveText(await option.innerText());
       }
       await expect(full).toBeVisible();
-      await expect(select).toHaveAttribute('aria-describedby', 'polluxPickText-BEST_FEMALE_ROLE');
+      await expect(full).toHaveAttribute('aria-hidden', 'true');
+      await expect(select).not.toHaveAttribute('aria-describedby', /.*/);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow).toBe(0);
     }

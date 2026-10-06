@@ -96,11 +96,12 @@
             });
             select.value = category.category in picks ? String(picks[category.category]) : NO_CHANGE;
             // A closed dropdown cuts a long pick; the full text sits below it.
+            // A visual mirror only: screen readers already read the value.
             const pickText = document.createElement('p');
             pickText.id = `polluxPickText-${category.category}`;
             pickText.className = 'pollux-pick-text';
+            pickText.setAttribute('aria-hidden', 'true');
             const showPick = () => { pickText.textContent = select.selectedOptions[0]?.textContent || ''; };
-            select.setAttribute('aria-describedby', pickText.id);
             select.addEventListener('change', showPick);
             showPick();
             row.append(label, select, pickText);
