@@ -304,6 +304,13 @@ An argument added in the wrong slot replaces `options` with a number and drops `
 
 `hideGravesEvaluationResults` hides exactly five panels. The list that reveals panels after evaluation must reveal the same five, or a panel missing from either list will show a placeholder or stale data.
 
+### Rewriting main Can Drop Commits
+
+On 2026-10-01 `main` was rewritten into a fresh initial commit and the bug-hunt
+commits had to be replayed by hand. Before any squash, reword or reset of
+`main`, check that it still contains the commits it held; after it, check
+again. (From the removed `docs/BUG_HUNT_HANDOVER.md`.)
+
 ### Starting Tags Profile Must Be Active to Reproduce Certain Bugs
 
 Exclusion-refresh bugs only reproduce with the Starting Tags profile active. From a clean ban list, the scenario passes with the defect present. This is how a bug survived multiple fixing attempts.

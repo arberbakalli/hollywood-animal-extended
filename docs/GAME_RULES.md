@@ -304,6 +304,11 @@ removed; near-duplicates stay. (Owner ruling 2026-10-06. One key,
 `HACScriptGenerationEngine.scriptSignature`, used by Script Lab and Build for
 Target; `tests/near-duplicate-results.test.js`.)
 
+Today the generator gives a genre set one fixed split (one genre 100%, a pair
+50/50, locked genres the player's split), so same-id results never differed
+by percentage in practice. The near-duplicates measured on 2026-10-05 differ in
+a Genre or Setting id, and this rule keeps them (review 2026-10-06).
+
 ### Highest Appeal respects the compatibility target
 
 Highest Artistic and Highest Commercial keep Target Average Compatibility: per
