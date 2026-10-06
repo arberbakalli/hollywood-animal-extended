@@ -46,8 +46,9 @@ Branch heads when this was logged. **The repository history was reset on
 2026-09-30 at 23:02** to one commit, "Initial commit: Hollywood Animal Extended
 Calculator" (`62e9c05`), and `main` on GitHub was replaced with it. The
 "Came in with" commits above (`60522dc`, `d6b9974`, `2bbb800`, `73a7ee8`) are
-from the old history, which survives only in `parked/act-2-polish`; the bugs were
-found on the old `main` at `375e90d`.
+from the old history. It survived only in `parked/act-2-polish`, which no longer
+exists in any clone checked on 2026-10-06 (owner: delete it), so those hashes
+cannot be looked up. The bugs were found on the old `main` at `375e90d`.
 
 | Branch | Head | Note |
 |---|---|---|
@@ -64,9 +65,12 @@ Marketing & Release and the Library. Everything fixed is on `main`, one commit
 per fix. Still open:
 
 **Owner task (2026-10-01): complete the gender-specific ratings.** The Age &
-Gender Appeal toggle does nothing for 38 of the 49 unisex characters, because
-`data/TagsToAgeCompatibilityData.json` holds gender-specific ratings for 29
-characters only; the rest fall back to one rating for both genders. Missing:
+  Gender Appeal toggle does nothing for 38 of the 49 unisex characters (39 with
+  `ANTAGONIST_REBELS`, a group with no gender field that also shows the
+  toggle and has no age data), because
+`data/TagsToAgeCompatibilityData.json` holds gender-specific ratings for 19
+real characters only (its other 10 entries are not in the game, see Data
+Correctness); the rest fall back to one rating for both genders. Missing:
 - Protagonist (13): HOPELESS_ROMANTIC, OUTCAST, WARRIOR, ACCIDENTAL_HERO,
   LAST_SURVIVOR, WAR_VETERAN, SHERIFFS_CONJOINED_TWINS,
   PARENT_IN_INVISIBLE_CLOTHES, WAYWARD_SOUL, RETIRED_LEGEND,
@@ -84,11 +88,31 @@ Once the data is in the file, the toggle works for them with no code change.
 their order and a notice says it is out of date. Keep the notice only, or offer
 a re-sort?
 
+**Not yet audited:** the freshness order after Show more pages the rest of a
+batch. (Moved from the removed `docs/BUG_HUNT_HANDOVER.md`, 2026-10-06.)
+
 **Test note:** TC01-000020 (Reset Locks hides results) never generates first, so
 it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 
 ## Data Correctness
 
+- **The starting pool may be one short** (found 2026-10-05, owner to check in a
+  new game). The game extract gives 58 elements the starting date, written two
+  ways: `DATE:>=1929` (50) and `DATE:>=01-01-1929` (8);
+  `GAME_DATA.starterWhitelist` in `data.js` has 57. The one
+  missing is `EVENTS_JOUSTING_TOURNAMENT` (Theme & Event). GAME_RULES "Starting
+  Tags" says 57 and 193 bans, and the tests pin 193, so nothing changes until
+  the owner confirms in the game. If Jousting Tournament is available from the
+  start, the rule becomes 58 / 192 and each test pinning 193 needs the owner's
+  approval by name.
+- Not yet analysed: whether perks or buildings change the age-group audience
+  effects. (From the removed `extractedFilesFromGameSourceOfTruth/PHASE_3_TODO.md`.)
+- **All full data files use the game ids** (checked 2026-10-06):
+  `TagCompatibilityData.json` (rows, columns, and every row complete),
+  `TagsAudienceWeights.json` and the game extract each hold exactly the 250
+  `TagData.json` ids; the English names contain all 250 (among 6,838 keys);
+  `GenrePairs.json` holds exactly the 11 genres, every row complete. Guarded by
+  `tests/data-ids.test.js`.
 - **`data/TagsToAgeCompatibilityData.json` holds 10 characters that are not in the
   game** (found 2026-10-05): `PROTAGONIST_FEMINIST_ACTIVIST`, `_HOUSEWIFE`,
   `_SCHOOLGIRL`, `_WEALTHY_WIDOW`, `_STREET_URCHIN`, `_RIGHTEOUS_ZEALOT`,
@@ -232,6 +256,19 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 
 ## Architecture
 
+- **`src/marketing/scriptScoringEngine.js` is reached by no app path** (found
+  2026-10-06). None of its eight exports is called by the app; only the
+  `script.js` wrappers (lines 348-377) and `tests/scriptScoringEngine.test.js`
+  use them (`audienceCompatibility.js` has its own private
+  `getCompatibilityElements`). It scores artistic appeal as the mean of a
+  script's AF+AM weights and commercial appeal as the mean of TF/TM/YF/YM. Its
+  planned UI never landed: top-3 Best Artistic / Best Commercial panels, and
+  supporting-character suggestions for audience gaps. Highest Artistic and Highest
+  Commercial rank by the movie-score bonus instead (`art`/`com` in
+  `src/generator/scriptGenerator.js`). Not a game rule: the owner decides later
+  whether to wire the functions up or remove them. (Recorded from the removed
+  `docs/FEATURES_1_5_IMPLEMENTATION.md`.)
+
 - `script.js` is now a ~510-line bridge layer rather than the ~2,000-line monolith this file used to
   describe: behaviour lives in 31 files under `src/` (counted 2026-09-28), each an IIFE exposing a `HAC*` namespace, which
   `script.js` re-exports as bare globals. Everything is still a **classic script** â€” they contain no
@@ -275,6 +312,16 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
     they declare globals a module scope would swallow â€” `data.js` uses a top-level `const GAME_DATA`,
     a global *lexical* binding that `globalThis` never exposes and that does not escape an `eval`.
     They are excluded from collection rather than reported as a misleading 0%.
+- The production browser check of 2026-09-28 is incomplete: deployed file
+  hashes matched HEAD, but the three-run timing benchmark timed out, so there is
+  no complete timing set. (From the removed `TODO.md`.)
+- The Google Fonts stylesheet in `index.html` `<head>` delays app start until
+  the CDN answers. The test fixture blocks it (251 s with random failures, then
+  48 s green), but real players wait on it too. (From the removed
+  `ACHILLES-LEARNING.md`.)
+- `tools/grade-distribution.mjs` still fails with `HACAdvertiserMatcher is not
+  defined`. It loads only `data.js` and `script.js` (lines 32-33), from before
+  the code moved to `src/`. Repair it before using it for calibration.
 - Bare `npx jest` fails all suites. See `AGENTS.md` for the reason and the workaround.
 - There is still no committed formatter or npm `lint` script. A temporary Qodana setup was removed
   because the `qodana-js` linter needs a `QODANA_TOKEN` even for local native scans.
@@ -293,3 +340,13 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 - Scenarios in `tests/scenarios/*.feature` tagged `[verified]` or `[unverified]` are not automated.
   An `[unverified]` scenario describes behaviour nobody has watched â€” do not write a test from one
   without reproducing it first.
+- The negative control in `tests/e2e/script-lab.spec.js` (`addStyleTag` on
+  `#results-generator`) uses a raw CSS selector on purpose: it is a mutation
+  target, not a locator. It must stay in step with the `resultsSection` entry
+  in `tests/data/page-repository.json`.
+- TC01-000029 (Library save and load round trip) checks that pinned scripts come
+  back, not that their exact content does. A stronger assertion is still due.
+  (From the removed `TODO.md`.)
+- The `[unverified]` scenario "Compatibility: switching to Graves preserves the
+  selection" is no longer in any `.feature` file. It was never observed. Re-add
+  it as `[unverified]` only if the owner wants it (owner, 2026-10-06).

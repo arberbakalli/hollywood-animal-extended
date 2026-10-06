@@ -287,12 +287,16 @@ h2 {
     margin-inline: auto;
 }
 
+/* Four tabs share one row, each as wide as its label: a fixed 210px minimum
+   wrapped the fourth tab alone, and equal shares wrapped the longest label. */
 .product-area-btn {
-    min-width: 210px;
-    padding: 12px 22px;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 12px 14px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 2px;
     border-radius: 8px;
     text-transform: none;
@@ -1767,14 +1771,16 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+/* Too narrow for four labels on one line: two rows of two, not three and one. */
+@media (min-width: 601px) and (max-width: 720px) {
+    .product-area-btn { flex-basis: calc(50% - 5px); }
+}
+
 @media (max-width: 600px) {
     .main-wrapper { padding: 20px 10px; }
     .card { padding: 15px; }
     .product-area-nav { align-items: stretch; }
-    .product-area-btn {
-        flex: 1 1 100%;
-        min-width: 0;
-    }
+    .product-area-btn { flex: 1 1 100%; }
     .product-mode-nav {
         display: grid;
         grid-template-columns: 1fr;
@@ -4163,13 +4169,21 @@ option[data-selected-elsewhere="true"] {
     margin: 0 0 20px;
 }
 
+/* One column: two columns left 344px, and a pick such as
+   "ROMANCE IN VALENTIMES (Farm Girl) - current winner" needs about 384px. */
 .pollux-category-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 20px;
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .pollux-category select { width: 100%; min-width: 0; }
+.pollux-pick-text {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
 .pollux-empty { margin: 0; min-height: 42px; display: flex; align-items: center; }
 
 .pollux-check {
@@ -4198,6 +4212,4 @@ option[data-selected-elsewhere="true"] {
 .pollux-result-list { margin: 0 0 12px; padding-left: 20px; color: var(--text-main); }
 .pollux-download { color: var(--accent); }
 
-@media (max-width: 720px) {
-    .pollux-category-list { grid-template-columns: 1fr; }
-}
+

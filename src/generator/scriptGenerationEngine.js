@@ -294,6 +294,13 @@
         };
     }
 
+    // One result per element set (owner ruling 2026-10-06, GAME_RULES.md):
+    // the same element ids are the same result, whatever the genre
+    // percentages. Script Lab and Build for Target both key on this.
+    function scriptSignature(tags) {
+        return (tags || []).map(tag => tag.id).sort().join('|');
+    }
+
     function buildScriptFromTags(tags, name) {
         const evaluation = calculateScriptEvaluation(tags);
 
@@ -421,6 +428,7 @@
         createScriptId,
         getCompatibleGenres,
         getRandomTagByCategory,
-        runGenerationAlgorithm
+        runGenerationAlgorithm,
+        scriptSignature
     };
 })(globalThis);

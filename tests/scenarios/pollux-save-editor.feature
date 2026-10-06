@@ -58,3 +58,23 @@ Feature: Pollux Fixer
     Given the screen is 375 pixels wide
     When the user loads a held-ceremony save
     Then the page does not scroll sideways
+
+  # [automated] TC35-000008. The fourth tab once wrapped onto its own row.
+  Scenario: The four product tabs share one row on desktop
+    Given the screen is 1280 or 1024 pixels wide
+    When the app opens
+    Then Script Lab, Script Evaluation, Marketing & Release and Pollux Fixer sit on one row
+    And no tab cuts its own text
+
+  # [automated] TC35-000009. A closed dropdown cuts a long film name.
+  Scenario: The full pick is shown under each category
+    Given a nominee with a long film name
+    When the user picks that nominee
+    Then the full pick is shown in full under the dropdown
+    And it changes when the pick changes
+
+  # [automated] TC35-000010. Sharing the row equally wrapped one label.
+  Scenario: Each product tab label stays on one line on desktop
+    Given the screen is 1280 or 1024 pixels wide
+    When the app opens
+    Then every product tab label is on one line
