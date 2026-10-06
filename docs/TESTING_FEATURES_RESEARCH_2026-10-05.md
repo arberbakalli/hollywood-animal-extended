@@ -83,6 +83,11 @@ is **near-duplicates**, not exact ones. Fixing it means a similarity rule.
 2. How much must two results differ: at least two story elements? No repeated
    supporting-character set within one result list?
 
+**Owner ruling 2026-10-06:** a genre-percentage difference alone is a
+duplicate; otherwise only exact duplicates are removed. One shared key now
+serves Script Lab and Build for Target (`docs/GAME_RULES.md`, "One result per
+element set"). One-element variants and repeated supporting-character sets stay.
+
 ## 4. Patterns worth acting on
 
 1. **One signature, three definitions.** Duplicate checks exist in

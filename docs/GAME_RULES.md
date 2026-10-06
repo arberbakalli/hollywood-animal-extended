@@ -294,6 +294,16 @@ more"), so the player sees what a high score costs in coherence. (Owner ruling
 2026-10-01. `clashWarningText` in `src/generator/scriptGenerator.js`;
 TC01-000049/50.)
 
+### One result per element set
+
+Two generated results with the same element ids are the same result, whatever
+their genre percentages: "Drama 60% / Comedy 40%" and "Drama 50% / Comedy 50%"
+with the same story elements count once, and the better one is kept. Any other
+difference, even a single story element, keeps both. Only exact duplicates are
+removed; near-duplicates stay. (Owner ruling 2026-10-06. One key,
+`HACScriptGenerationEngine.scriptSignature`, used by Script Lab and Build for
+Target; `tests/near-duplicate-results.test.js`.)
+
 ### Highest Appeal respects the compatibility target
 
 Highest Artistic and Highest Commercial keep Target Average Compatibility: per
