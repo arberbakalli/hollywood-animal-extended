@@ -50,12 +50,14 @@ header {
     margin-bottom: 30px;
 }
 
+/* Wraps when the controls do not fit beside the title (801-1100px), instead of
+   pushing the Testing Features link past the right edge. */
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 15px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 h1 {
