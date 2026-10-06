@@ -405,6 +405,18 @@ function setup() {
     window.addEventListener('storage', event => {
         if (event.key === 'hac.excludedTags.v1') { renderGenres(); renderGenreElements(); }
     });
+    byId('lab-release-form').addEventListener('submit', event => {
+        event.preventDefault();
+        renderRelease();
+    });
+    byId('lab-advertisers-form').addEventListener('submit', event => {
+        event.preventDefault();
+        renderAdvertisers();
+    });
+    byId('lab-calibration-form').addEventListener('submit', event => {
+        event.preventDefault();
+        renderCalibration();
+    });
     byId('lab-awards-form').addEventListener('input', renderAwards);
     byId('lab-awards-form').addEventListener('change', renderAwards);
     byId('lab-award-targets').addEventListener('change', renderAwards);
