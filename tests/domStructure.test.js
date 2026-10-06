@@ -191,8 +191,6 @@ describe('HTML structure', () => {
             'src/marketing/audienceCompatibility.js',
             'src/analysis/ageRoleBreakdown.js',
             'src/ui/collapsibleSections.js',
-            'src/pollux/polluxSaveEditor.js',
-            'src/ui/polluxSaveEditorView.js',
             'src/app/appShell.js',
             'script.js',
         ];

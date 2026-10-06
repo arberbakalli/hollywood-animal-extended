@@ -927,7 +927,8 @@ on 55 real saves (game 0.8.72EA). Full field list: `docs/POLLUX_SAVE_EDITOR.md`.
   candidates forced in 1940, the game picked among them by the nominee `Key`
   (lowest wins). So the Pollux Fixer forces only the player's pick by default.
 
-> Enforced in `src/pollux/polluxSaveEditor.js`, UI in `src/ui/polluxSaveEditorView.js`.
+> Enforced in `lab/polluxSaveEditor.js`, UI in `lab/polluxSaveEditorView.js`
+> (a Testing Features tab since 2026-10-06, not a main-app tab).
 > Pinned by `tests/pollux-save-editor.test.js` and `tests/e2e/pollux-save-editor.spec.js`.
 > Not yet tested by loading a fixed save in the game, except the owner's 1940
 > `forceWinning` run.

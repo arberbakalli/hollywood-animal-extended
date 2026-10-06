@@ -9,8 +9,8 @@ Feature: Pollux Fixer
   in the browser only. Save fields and year handling: docs/POLLUX_SAVE_EDITOR.md.
 
   Background:
-    Given the Hollywood Animal Calculator is open
-    And the user opens the Pollux Fixer tab
+    Given the Testing Features page is open
+    And the user opens the Pollux Fixer tab there
 
   # [automated] TC35-000001. The backup warning comes before the upload.
   Scenario: The tab warns to back up the save first
@@ -59,12 +59,19 @@ Feature: Pollux Fixer
     When the user loads a held-ceremony save
     Then the page does not scroll sideways
 
-  # [automated] TC35-000008. The fourth tab once wrapped onto its own row.
-  Scenario: The four product tabs share one row on desktop
+  # [automated] TC35-000008. A fourth tab once wrapped onto its own row.
+  Scenario: The three product tabs share one row on desktop
     Given the screen is 1280 or 1024 pixels wide
-    When the app opens
-    Then Script Lab, Script Evaluation, Marketing & Release and Pollux Fixer sit on one row
+    When the main app opens
+    Then Script Lab, Script Evaluation and Marketing & Release sit on one row
     And no tab cuts its own text
+
+  # [automated] TC35-000012. Owner, 2026-10-06: a save-file tool is a testing feature.
+  Scenario: Pollux Fixer lives in Testing Features, not the main app
+    When the main app opens
+    Then no product tab mentions Pollux
+    When the user opens Testing Features and its Pollux Fixer tab
+    Then the save file input is shown
 
   # [automated] TC35-000009. A closed dropdown cuts a long film name.
   Scenario: The full pick is shown under each category

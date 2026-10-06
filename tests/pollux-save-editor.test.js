@@ -80,7 +80,7 @@ const awardHolders = (people, year, code) => people
 let P;
 beforeAll(async () => {
     const context = createContext({ JSON, Date, Number, Map, Set, String, Object, Array, Error, Math, parseInt });
-    runInContext(await readFile(join(process.cwd(), 'src/pollux/polluxSaveEditor.js'), 'utf8'), context);
+    runInContext(await readFile(join(process.cwd(), 'lab/polluxSaveEditor.js'), 'utf8'), context);
     P = context.HACPolluxSaveEditor;
 });
 

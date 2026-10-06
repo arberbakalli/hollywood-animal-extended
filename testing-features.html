@@ -27,6 +27,7 @@
                     <button id="lab-tab-awards" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-awards" aria-selected="false" tabindex="-1">Award Targets</button>
                     <button id="lab-tab-tracker" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-tracker" aria-selected="false" tabindex="-1">Released-Film Tracker</button>
                     <button id="lab-tab-unlocks" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-unlocks" aria-selected="false" tabindex="-1">Unlock Info</button>
+                    <button id="lab-tab-pollux" class="product-mode-btn" type="button" role="tab" aria-controls="lab-panel-pollux" aria-selected="false" tabindex="-1">Pollux Fixer</button>
                 </nav>
                 <div>
                     <section id="lab-panel-release" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-release" tabindex="0">
@@ -113,6 +114,44 @@
                         <div id="lab-unlocks-result" class="lab-output" aria-live="polite"></div>
                         </div>
                     </section>
+                    <section id="lab-panel-pollux" class="lab-panel" role="tabpanel" aria-labelledby="lab-tab-pollux" tabindex="0" hidden>
+                        <div class="card lab-card">
+                        <h3>Pollux Fixer</h3>
+                        <p class="subtitle">Choose which of your films win the Pollux awards in a Hollywood Animal save. The file stays on your computer: it is read and rewritten in this browser and never uploaded.</p>
+                        <div id="pollux-backup-warning" class="pollux-warning" role="note">
+                            <strong>Back up your save first.</strong>
+                            Copy the original <code>.json</code> from
+                            <code>AppData\LocalLow\Weappy\Hollywood Animal\Saves\Profiles\0</code>
+                            before you replace it. This tool downloads a new file and does not change the original, but the game only reads the file you put back in that folder. Not tested in every game version.
+                        </div>
+                        <div id="pollux-file-field" class="pollux-field">
+                            <label for="polluxFileInput">Save file (.json)</label>
+                            <input id="polluxFileInput" type="file" accept=".json,application/json">
+                        </div>
+                        <p id="pollux-status" class="pollux-status" role="status" aria-live="polite"></p>
+                        </div>
+                        <div id="pollux-picks-panel" class="card lab-card hidden" hidden>
+                            <div class="card-header">
+                                <h3 id="pollux-picks-heading">Pick the winners</h3>
+                            </div>
+                            <div id="pollux-bucket-field" class="pollux-field">
+                                <label for="polluxBucketSelect">Nominee list</label>
+                                <select id="polluxBucketSelect" class="filter-select"></select>
+                            </div>
+                            <p id="pollux-state-note" class="pollux-state-note"></p>
+                            <div id="pollux-category-list" class="pollux-category-list"></div>
+                            <label id="pollux-force-all-field" class="pollux-check" for="polluxForceAllInput">
+                                <input id="polluxForceAllInput" type="checkbox">
+                                <span>Force all my nominees in each picked category. The game then chooses which of them wins, not you.</span>
+                            </label>
+                            <button id="polluxGenerateButton" class="analyze-btn" type="button">Make the fixed save</button>
+                            <div id="pollux-result" class="pollux-result hidden" hidden>
+                                <p id="pollux-result-summary" class="pollux-result-summary"></p>
+                                <ul id="pollux-result-list" class="pollux-result-list"></ul>
+                                <a id="polluxDownloadLink" class="pollux-download" href="#" download>Download again</a>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
         </main>
@@ -121,6 +160,8 @@
     <script src="data.js"></script>
     <script src="src/evaluation/compatibilityEngine.js"></script>
     <script src="src/marketing/distributionPlanner.js"></script>
+    <script src="lab/polluxSaveEditor.js"></script>
+    <script src="lab/polluxSaveEditorView.js"></script>
     <script type="module" src="lab/testingFeatures.js"></script>
 </body>
 </html>

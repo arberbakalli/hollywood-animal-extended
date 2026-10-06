@@ -42,9 +42,10 @@ function save({ held = false, playerNominated = true } = {}) {
 }
 
 async function openPollux(steps, page) {
-  await openHollywood(steps);
-  await page.locator('#tab-pollux-button').click();
-  await expect(page.locator('#tab-pollux')).toBeVisible();
+  await page.goto('/testing-features.html');
+  await expect(page.locator('#lab-workspace')).toBeVisible();
+  await page.locator('#lab-tab-pollux').click();
+  await expect(page.locator('#lab-panel-pollux')).toBeVisible();
 }
 
 const upload = (page, text, name = 'Autosave 15 04 1942 - STUDIO.json') =>
@@ -63,7 +64,7 @@ test.describe('Pollux Fixer', () => {
     await openPollux(steps, page);
     await expect(page.locator('#pollux-backup-warning')).toContainText('Back up your save first.');
     await expect(page.locator('#pollux-backup-warning')).toContainText('does not change the original');
-    await expect(page.locator('#tab-pollux')).toContainText('never uploaded');
+    await expect(page.locator('#lab-panel-pollux')).toContainText('never uploaded');
     await expect(page.locator('#pollux-picks-panel')).toBeHidden();
   });
 
@@ -148,20 +149,20 @@ test.describe('Pollux Fixer', () => {
     expect(overflow).toBe(0);
   });
 
-  // Four product tabs share one row on desktop; the Pollux tab once wrapped
+  // The product tabs share one row on desktop; a Pollux tab once wrapped
   // onto a second row alone because each tab kept a 210px minimum.
-  test('TC35-000008 the four product tabs share one row on desktop', async ({ steps, page }) => {
+  test('TC35-000008 the three product tabs share one row on desktop', async ({ steps, page }) => {
     for (const width of [1280, 1024]) {
       await page.setViewportSize({ width, height: 900 });
       await openHollywood(steps);
       const tabs = page.locator('#primary-tabs .product-area-btn');
-      await expect(tabs).toHaveCount(4);
+      await expect(tabs).toHaveCount(3);
       const boxes = await tabs.evaluateAll(nodes => nodes.map(node => ({
         top: Math.round(node.getBoundingClientRect().top),
         overflow: node.scrollWidth - node.clientWidth,
       })));
       expect(new Set(boxes.map(box => box.top)).size, `one row at ${width}px`).toBe(1);
-      expect(boxes.map(box => box.overflow)).toEqual([0, 0, 0, 0]);
+      expect(boxes.map(box => box.overflow)).toEqual([0, 0, 0]);
     }
   });
 
@@ -200,8 +201,19 @@ test.describe('Pollux Fixer', () => {
         const lineHeight = parseFloat(getComputedStyle(label).lineHeight);
         return Math.round(label.getBoundingClientRect().height / lineHeight);
       }));
-      expect(lines, `labels at ${width}px`).toEqual([1, 1, 1, 1]);
+      expect(lines, `labels at ${width}px`).toEqual([1, 1, 1]);
     }
+  });
+
+  // Owner, 2026-10-06: a save-file tool is a testing feature, not a product area.
+  test('TC35-000012 Pollux Fixer is a Testing Features tab, not a main-app tab', async ({ steps, page }) => {
+    await openHollywood(steps);
+    await expect(page.locator('#primary-tabs')).not.toContainText('Pollux');
+    await expect(page.locator('#polluxFileInput')).toHaveCount(0);
+    await openPollux(steps, page);
+    await expect(page.locator('#lab-tab-pollux')).toHaveText('Pollux Fixer');
+    await expect(page.locator('#lab-tab-pollux')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#polluxFileInput')).toBeVisible();
   });
 
   // Names come from each loaded save through one label template: the same

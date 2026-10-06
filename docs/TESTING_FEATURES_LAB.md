@@ -50,6 +50,7 @@ not approved changes to the main app's behavior.
 | Award Targets | Show Box Office Success, Critical Acclaim and Fan Favorites together; attach a movie idea, year, target and elements to a planning memo | Based on `docs/PARKED_FEATURES.md` "Award Targets"; no simulated award cutoff or prediction. |
 | Released-Film Tracker | Record films, dates and real elements; persist/reload journal, warn softly on repeats in 500 days, remove a chosen film | Idea still in debate. Separate `hac.testing-features.releases.v1` storage key. Unreadable saved data blocks writes rather than being overwritten. Calendar days may not map to game freshness pips. |
 | Unlock Info | Filter by category, search actual tags and distinguish starter, date, recipe, starting-recipe and Trash King policy unlock conditions | Starter facts from `GAME_DATA.starterWhitelist`; recovered conditions come from `extractedFilesFromGameSourceOfTruth/TagData.json`. Main `data/TagData.json` still does not carry those conditions. |
+| Pollux Fixer | Load a save, pick your own films as Pollux winners, download a fixed copy | Moved here from the main app on 2026-10-06 (owner). Rules: `docs/GAME_RULES.md` Pollux section; details: `docs/POLLUX_SAVE_EDITOR.md`. Not yet tested by loading a fixed save in the game. |
 
 ## Owner Feedback Applied (2026-10-05)
 
@@ -137,6 +138,7 @@ Lessons applied during this pass:
 | Award Targets | Lab planning tool | Decide whether goals remain notes or affect generation. |
 | Released-Film Tracker | Parked | Confirm the in-game freshness clock and whether a yearly slate is useful. |
 | Unlock Info | Lab reference | Confirm ambiguous date conditions and any quest/NPC gates before promotion. |
+| Pollux Fixer | Lab save-file tool | Load one fixed save in the game. |
 
 ## Isolation and Files
 

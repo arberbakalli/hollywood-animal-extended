@@ -224,7 +224,7 @@
     }
 
     function setupPolluxSaveEditor() {
-        if (wired || !byId('tab-pollux')) return;
+        if (wired || !byId('lab-panel-pollux')) return;
         wired = true;
         byId('polluxFileInput').addEventListener('change', readSelectedFile);
         byId('polluxBucketSelect').addEventListener('change', renderCategories);
@@ -235,4 +235,7 @@
         setupPolluxSaveEditor,
         loadText
     };
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupPolluxSaveEditor);
+    else setupPolluxSaveEditor();
 })(globalThis);

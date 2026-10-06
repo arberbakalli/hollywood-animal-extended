@@ -12,7 +12,7 @@ let P;
 let names;
 
 beforeAll(async () => {
-    await import('../src/pollux/polluxSaveEditor.js');
+    await import('../lab/polluxSaveEditor.js');
     P = globalThis.HACPolluxSaveEditor;
     names = JSON.parse(await readFile('data/CharacterNames.json', 'utf8'));
 });

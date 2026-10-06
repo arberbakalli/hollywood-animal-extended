@@ -107,9 +107,11 @@ The default is **force only the pick**. "Force all my nominees" is an option
 
 ## Files
 
-- `src/pollux/polluxSaveEditor.js`: pure logic, `HACPolluxSaveEditor`
-- `src/ui/polluxSaveEditorView.js`: the tab; `tests/e2e/pollux-save-editor.spec.js`
-  (TC35-000001..7) and `tests/scenarios/pollux-save-editor.feature`
+- The Pollux Fixer is a tab in Testing Features (`testing-features.html`), not
+  in the main app (owner, 2026-10-06; TC35-000012).
+- `lab/polluxSaveEditor.js`: pure logic, `HACPolluxSaveEditor`
+- `lab/polluxSaveEditorView.js`: the tab; `tests/e2e/pollux-save-editor.spec.js`
+  (TC35-000001..12) and `tests/scenarios/pollux-save-editor.feature`
 - `tests/pollux-save-editor.test.js`: 21 tests on synthetic saves with the real
   shapes. Eight planted defects (history written before the ceremony, BOM
   dropped, the old winner keeps its award, every nominee forced, the default
@@ -124,9 +126,10 @@ The default is **force only the pick**. "Force all my nominees" is an option
   second run changes nothing. The BOM is kept; the output is a few dozen
   characters shorter only because the game pretty-prints the outer wrapper.
 
-## Plan (approved 2026-10-05, built)
+## Plan (approved 2026-10-05, built; moved to Testing Features 2026-10-06)
 
-Goal: put the editor in the app.
+Goal: put the editor in the app. The paths below are the original plan; the
+files now live in `lab/` (see Files).
 
 1. `index.html`: one `<script src="src/pollux/polluxSaveEditor.js">` before
    `script.js`, and the module guard in `tests/domStructure.test.js` turns green
