@@ -62,8 +62,28 @@
             && JSON.stringify(a.talentIds || []) === JSON.stringify(b.talentIds || []);
     }
 
-    function describeBuckets(state) {
+    // One label shape for every save, like a format string: only the values
+    // (film, people, marks) come from the loaded save.
+    const OPTION_TEMPLATE = '{film} ({who}){marks}';
+
+    function formatLabel(template, values) {
+        return template.replace(/\{(\w+)\}/g, (_, key) => values[key] ?? '');
+    }
+
+    // A save stores a person as customName, or as ids into the game's name
+    // list (data/CharacterNames.json). Null when neither resolves.
+    function talentName(state, talentId, names, characters) {
+        const character = (characters || new Map((state.characters || []).map(c => [c.id, c]))).get(talentId);
+        if (!character) return null;
+        if (character.customName) return character.customName;
+        const first = names && names[String(character.firstNameId)];
+        const last = names && names[String(character.lastNameId)];
+        return first && last ? `${first} ${last}` : null;
+    }
+
+    function describeBuckets(state, names = null) {
         const owned = new Map(state.movies.map(movie => [movie.id, movie]));
+        const characters = new Map((state.characters || []).map(character => [character.id, character]));
         return BUCKETS.filter(key => state[key] && typeof state[key] === 'object').map(key => {
             const ceremonyYear = ceremonyYearOf(state, key);
             const record = ceremonyYear !== null ? (state.polluxHistory || {})[ceremonyYear] : null;
@@ -78,6 +98,7 @@
                     title: movieTitle(owned.get(candidate.movieId)) || `Movie ${candidate.movieId}`,
                     owned: owned.has(candidate.movieId),
                     talentIds: candidate.talentIds || [],
+                    people: (candidate.talentIds || []).map(id => talentName(state, id, names, characters) || `talent #${id}`),
                     roleTagId: candidate.roleTagId ?? null,
                     forceWinning: candidate.forceWinning === true,
                     recordedNominee: nominees.some(nominee => sameCandidate(nominee, candidate)),
@@ -187,6 +208,9 @@
         PolluxSaveError,
         parseSave,
         gameYear,
+        OPTION_TEMPLATE,
+        formatLabel,
+        talentName,
         describeBuckets,
         defaultPicks,
         applyWinners,

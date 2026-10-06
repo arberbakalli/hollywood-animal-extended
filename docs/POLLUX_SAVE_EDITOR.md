@@ -36,6 +36,7 @@ Measured on real saves (game version 0.8.72EA, 1939-1942):
 | movie `polluxes` | `[{ year, movId, category }]` | awards won, ceremony year, numeric category |
 | movie `nominations` | same | lost nominations; a winner is never also listed here |
 | `stateJson.characters[].polluxes` | same, on each talent in the winner's `talentIds` | talents carry the award too; no talent `nominations` were seen for 1942 |
+| `stateJson.characters[]` name | `customName` (usually null), `firstNameId`, `lastNameId` | a pick names its people: `customName`, else both ids looked up in `data/CharacterNames.json` (the game's English list, 1,141 names, from `StreamingAssets/Data/Localization/ENG/CHARACTER_NAMES.json`); else "talent #id" |
 | `stateJson.timePassed` | `"4762.00:00:00"` | days since 1 Jan 1929, gives the game year |
 
 ## Award-year handling
@@ -97,9 +98,10 @@ The default is **force only the pick**. "Force all my nominees" is an option
   `docs/GAME_RULES.md` section 10. Under CLAUDE.md section 4 they are not
   settled until the owner words them.
 - `moodShifts` and `PolluxVisitStatus` are left as they are.
-- People are shown as "talent #5007", not by name. A save's `characters[]`
-  entry has `customName` (usually null) and `firstNameId` / `lastNameId`, which
-  index a name table not yet found in the extracted files (checked 2026-10-06).
+- Every pick label comes from one template, `{film} ({who}){marks}`
+  (`OPTION_TEMPLATE`); the film and the people come from the loaded save, so
+  each save shows its own names (TC35-000011). Role nominees show the role, not
+  the actor (TC35-000007). The names are English only.
 - A closed dropdown can cut a long pick, so the full pick is printed under each
   one (TC35-000009); the categories are one column.
 

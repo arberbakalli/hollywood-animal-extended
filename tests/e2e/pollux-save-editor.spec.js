@@ -203,5 +203,26 @@ test.describe('Pollux Fixer', () => {
       expect(lines, `labels at ${width}px`).toEqual([1, 1, 1, 1]);
     }
   });
+
+  // Names come from each loaded save through one label template: the same
+  // talent id is a different person in another save (owner, 2026-10-06).
+  test('TC35-000011 picks name people from the loaded save, not talent ids', async ({ steps, page }) => {
+    await openPollux(steps, page);
+    const named = (first, last) => {
+      const data = JSON.parse(save({ held: true }).slice(1));
+      data.stateJson.characters.find(c => c.id === 20).firstNameId = first;
+      data.stateJson.characters.find(c => c.id === 20).lastNameId = last;
+      return '﻿' + JSON.stringify(data);
+    };
+    const script = page.locator('#polluxPick-BEST_SCRIPT');
+    await upload(page, named('124', '592'));
+    await expect(script.locator('option', { hasText: 'SHOOTING FOR THE STARS (Dennis Lawson)' })).toHaveCount(1);
+    await expect(script).not.toContainText('talent #20');
+    await upload(page, named('0', '400'), 'Autosave 16 04 1942 - STUDIO.json');
+    await expect(script.locator('option', { hasText: 'SHOOTING FOR THE STARS (John Smith)' })).toHaveCount(1);
+    await expect(script).not.toContainText('Dennis Lawson');
+    // A person the save does not name keeps the id.
+    await expect(script.locator('option', { hasText: 'FARM GIRL (talent #30)' })).toHaveCount(1);
+  });
 });
 

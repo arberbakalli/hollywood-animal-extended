@@ -78,3 +78,11 @@ Feature: Pollux Fixer
     Given the screen is 1280 or 1024 pixels wide
     When the app opens
     Then every product tab label is on one line
+
+  # [automated] TC35-000011. One label template; the values come from each save.
+  Scenario: Picks name the people of the loaded save
+    When the user loads a save whose script nominee has name ids for Dennis Lawson
+    Then the pick reads "SHOOTING FOR THE STARS (Dennis Lawson)"
+    When the user loads another save where the same talent id is John Smith
+    Then the pick reads "SHOOTING FOR THE STARS (John Smith)" and Dennis Lawson is gone
+    And a person the save does not name is still shown as "talent #id"

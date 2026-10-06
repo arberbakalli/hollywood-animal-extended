@@ -6,6 +6,8 @@
     let buckets = [];
     let downloadUrl = null;
     let wired = false;
+    let characterNames = null;
+    let namesRequest = null;
 
     const byId = id => document.getElementById(id);
     const editor = () => global.HACPolluxSaveEditor;
@@ -46,10 +48,29 @@
         return roleTagId ? ((tags && tags[roleTagId] && tags[roleTagId].name) || roleTagId) : null;
     }
 
+    // The game's name list, loaded once. Without it people stay "talent #id".
+    function loadCharacterNames() {
+        if (!namesRequest) {
+            namesRequest = fetch('data/CharacterNames.json')
+                .then(response => (response.ok ? response.json() : null))
+                .then(names => { characterNames = names; })
+                .catch(() => { characterNames = null; });
+        }
+        return namesRequest;
+    }
+
+    function peopleText(candidate) {
+        const named = candidate.people.some(person => !person.startsWith('talent #'));
+        return named ? candidate.people.join(', ') : `talent #${candidate.talentIds.join(', #')}`;
+    }
+
     function optionText(candidate) {
-        const who = roleName(candidate.roleTagId) || `talent #${candidate.talentIds.join(', #')}`;
         const marks = [candidate.currentWinner ? 'current winner' : null, candidate.forceWinning ? 'already marked to win' : null].filter(Boolean);
-        return `${candidate.title} (${who})${marks.length ? ` - ${marks.join(', ')}` : ''}`;
+        return editor().formatLabel(editor().OPTION_TEMPLATE, {
+            film: candidate.title,
+            who: roleName(candidate.roleTagId) || peopleText(candidate),
+            marks: marks.length ? ` - ${marks.join(', ')}` : '',
+        });
     }
 
     function currentBucket() {
@@ -131,7 +152,7 @@
     function loadText(text, name) {
         try {
             const parsed = editor().parseSave(text);
-            buckets = editor().describeBuckets(parsed.state);
+            buckets = editor().describeBuckets(parsed.state, characterNames);
             source = { text, name };
             setVisible(byId('pollux-picks-panel'), true);
             renderBuckets();
@@ -150,8 +171,8 @@
         if (!file) return;
         setStatus(`Reading ${file.name}...`, '');
         // readAsText drops the BOM while decoding; keep it so the download matches the original.
-        file.arrayBuffer()
-            .then(buffer => loadText(new TextDecoder('utf-8', { ignoreBOM: true }).decode(buffer), file.name))
+        Promise.all([file.arrayBuffer(), loadCharacterNames()])
+            .then(([buffer]) => loadText(new TextDecoder('utf-8', { ignoreBOM: true }).decode(buffer), file.name))
             .catch(() => setStatus('The browser could not read this file.', 'error'));
     }
 
