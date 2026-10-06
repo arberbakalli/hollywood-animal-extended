@@ -9,12 +9,16 @@ history. Not scoped, not scheduled — pick one up when ready.
 
 **Raised:** 2026-10-06, after the owner played for a week and returned.
 
-**Problem:** Elements can be set to Fresh/Stale/Rotten via pills in Build for Target, but there is no way to see at a glance which elements are in which state, and no way to reset all to Fresh. After a 7-day break, the player must cycle through each element manually to remember the state.
+**Problem:** In Script Lab, each story element can be set to Fresh, Stale or
+Rotten with the pill on its Locked Elements dropdown and on result cards. There
+is no way to see at a glance which elements are Stale or Rotten, and no way to
+reset all to Fresh. After a 7-day break the player must check each element one
+by one.
 
-**Needed:**
-- A freshness audit panel (all story elements + current state: Fresh / Stale / Rotten)
+**Idea:**
+- A freshness overview: every story element with its current state
 - A "reset all to Fresh" button
-- Quick reference badge on the Build for Target panel showing count by state (e.g., "3 Stale, 1 Rotten")
+- A count by state in Script Lab (for example "3 Stale, 1 Rotten")
 
 **Data location:** `hac.freshnessStates.v1` in browser storage (one entry per element); rules in `docs/GAME_RULES.md` section 9.
 
@@ -28,9 +32,11 @@ history. Not scoped, not scheduled — pick one up when ready.
 
 **Context:** Highest Commercial (pool 7) had 23 of 66 result pairs differing by only 1 element; Build for Target had one Supporting Character set repeat in 9 of 20 results. Question: how different must results be?
 
-**Why this choice:** Player may want to see multiple near-variants as proof of viability; shorter lists can feel restrictive.
+**Rule today:** `docs/GAME_RULES.md` "One result per element set": a different
+Genre or Setting is a different film, so near-duplicates stay.
 
-**Revisit:** If player feedback indicates near-duplicates feel like noise rather than options, revisit to Option 1 (at least 2 story elements differ, drop the lower-ranked).
+**Revisit:** If testers find near-duplicates noisy, the alternative is: drop a
+result that differs from a better one by a single story element.
 
 ---
 
@@ -125,8 +131,8 @@ Not scoped yet — no data model, no UI mockup, no owner ruling on presentation.
 
 **Data location:** `extractedFilesFromGameSourceOfTruth/TagData.json` has
 `parameters.Condition` for all 250 tags (checked 2026-10-05); the app's
-`data/TagData.json` is a trimmed copy without it. A lab prototype is on
-`codex/testing-features-lab` ("Unlock Info").
+`data/TagData.json` is a trimmed copy without it. A lab prototype is in
+Testing Features (`testing-features.html`, "Unlock Info").
 
 ---
 
@@ -138,7 +144,7 @@ Not scoped yet — no data model, no UI mockup, no owner ruling on presentation.
 Let the player aim a film at one of the game's year-end lists: Box Office
 Success (highest box office receipts), Critical Acclaim (critics' ratings,
 influenced by artistic rating) and Fan Favorites (Kinomark rating, influenced by
-commercial rating). A lab prototype exists on `codex/testing-features-lab`.
+commercial rating). A lab prototype is in Testing Features (`testing-features.html`).
 
 **Open decision:** replace the Highest Artistic / Highest Commercial buttons, or
 sit beside them as a separate target selector?
@@ -152,8 +158,8 @@ sit beside them as a separate target selector?
 
 Help the player see when repeated elements may become stale in the game. The
 tracker warns only; the freshness pill stays the per-element state the app
-uses. A lab prototype exists on `codex/testing-features-lab` ("idea still in
-baking").
+uses. A lab prototype is in Testing Features (`testing-features.html`, "idea
+still in baking").
 
 **Open decision:** count the last N released films, or ask for an in-game
 release date so the tracker can follow the game's 500-day window?
@@ -175,7 +181,7 @@ instead of stopping? A product call, not a bug.
 
 ## Element Affinity Graph Precomputation — PRIORITY: LOW
 
-Measurement baseline: 2-4ms per render (24K pair lookups, real data).
-Current performance is solid. Planned optimization for after codex lands.
-Data: measurement in `docs/TESTING_FEATURES_RESEARCH_2026-10-05.md` (section 4).
-Code: src/ module with tests.
+Measured: 2-4 ms per render (24,255 pair lookups, real data). Not built (owner
+ruling 2026-10-06): a precomputed edge list would save only those few ms. Build
+it when the owner schedules it, or when a lab view gets slow.
+Measurement: `docs/TESTING_FEATURES_RESEARCH_2026-10-05.md`.
