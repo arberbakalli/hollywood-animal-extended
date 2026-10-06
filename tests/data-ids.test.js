@@ -60,4 +60,23 @@ describe('every full data file uses the game ids', () => {
         expect(whitelist.filter(id => !ids.includes(id))).toEqual([]);
         expect(new Set(whitelist).size).toBe(whitelist.length);
     });
+
+    // The column union above stays the same when one cell is deleted; each row
+    // must score every partner (review 2026-10-06, data reviewer).
+    test('every TagCompatibilityData row scores every other element', async () => {
+        const { ids } = await reference();
+        const compat = await json('data/TagCompatibilityData.json');
+        const gaps = Object.entries(compat).flatMap(([row, scores]) =>
+            ids.filter(id => id !== row && !(id in scores)).map(id => `${row} -> ${id}`));
+        expect(gaps).toEqual([]);
+    });
+
+    test('every GenrePairs row scores every other genre', async () => {
+        const { genres } = await reference();
+        const pairs = await json('data/GenrePairs.json');
+        const gaps = Object.entries(pairs).flatMap(([row, scores]) =>
+            genres.filter(id => id !== row && !(id in scores)).map(id => `${row} -> ${id}`));
+        expect(gaps).toEqual([]);
+    });
 });
+
