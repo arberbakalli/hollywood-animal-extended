@@ -65,8 +65,9 @@ per fix. Still open:
 
 **Owner task (2026-10-01): complete the gender-specific ratings.** The Age &
 Gender Appeal toggle does nothing for 38 of the 49 unisex characters, because
-`data/TagsToAgeCompatibilityData.json` holds gender-specific ratings for 29
-characters only; the rest fall back to one rating for both genders. Missing:
+`data/TagsToAgeCompatibilityData.json` holds gender-specific ratings for 19
+real characters only (its other 10 entries are not in the game, see Data
+Correctness); the rest fall back to one rating for both genders. Missing:
 - Protagonist (13): HOPELESS_ROMANTIC, OUTCAST, WARRIOR, ACCIDENTAL_HERO,
   LAST_SURVIVOR, WAR_VETERAN, SHERIFFS_CONJOINED_TWINS,
   PARENT_IN_INVISIBLE_CLOTHES, WAYWARD_SOUL, RETIRED_LEGEND,
@@ -92,6 +93,19 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 
 ## Data Correctness
 
+- **The starting pool may be one short** (found 2026-10-05, owner to check in a
+  new game). The game extract gives 58 elements the starting condition
+  `DATE:>=1929`; `GAME_DATA.starterWhitelist` in `data.js` has 57. The one
+  missing is `EVENTS_JOUSTING_TOURNAMENT` (Theme & Event). GAME_RULES "Starting
+  Tags" says 57 and 193 bans, and the tests pin 193, so nothing changes until
+  the owner confirms in the game. If Jousting Tournament is available from the
+  start, the rule becomes 58 / 192 and each test pinning 193 needs the owner's
+  approval by name.
+- **All full data files use the game ids** (checked 2026-10-06):
+  `TagCompatibilityData.json` (rows and columns), `TagsAudienceWeights.json`,
+  the game extract and the English names each hold exactly the 250
+  `TagData.json` ids; `GenrePairs.json` holds exactly the 11 genres. Guarded by
+  `tests/data-ids.test.js`.
 - **`data/TagsToAgeCompatibilityData.json` holds 10 characters that are not in the
   game** (found 2026-10-05): `PROTAGONIST_FEMINIST_ACTIVIST`, `_HOUSEWIFE`,
   `_SCHOOLGIRL`, `_WEALTHY_WIDOW`, `_STREET_URCHIN`, `_RIGHTEOUS_ZEALOT`,
