@@ -5,6 +5,35 @@ history. Not scoped, not scheduled — pick one up when ready.
 
 ---
 
+## Freshness audit & reset — PRIORITY: MEDIUM
+
+**Raised:** 2026-10-06, after the owner played for a week and returned.
+
+**Problem:** Elements can be set to Fresh/Stale/Rotten via pills in Build for Target, but there is no way to see at a glance which elements are in which state, and no way to reset all to Fresh. After a 7-day break, the player must cycle through each element manually to remember the state.
+
+**Needed:**
+- A freshness audit panel (all story elements + current state: Fresh / Stale / Rotten)
+- A "reset all to Fresh" button
+- Quick reference badge on the Build for Target panel showing count by state (e.g., "3 Stale, 1 Rotten")
+
+**Data location:** `hac.freshnessStates.v1` in browser storage (one entry per element); rules in `docs/GAME_RULES.md` section 9.
+
+**Why parked:** UX design choice needed — where does the audit panel live (new tab? side panel?), and how prominent should the reset action be?
+
+---
+
+## Near-duplicate results dedup rule — PRODUCT NOTE
+
+**Decision:** 2026-10-06 — go with **Option 2: Exact duplicates only**. Keep current rule; one-element variants stay in results lists.
+
+**Context:** Highest Commercial (pool 7) had 23 of 66 result pairs differing by only 1 element; Build for Target had one Supporting Character set repeat in 9 of 20 results. Question: how different must results be?
+
+**Why this choice:** Player may want to see multiple near-variants as proof of viability; shorter lists can feel restrictive.
+
+**Revisit:** If player feedback indicates near-duplicates feel like noise rather than options, revisit to Option 1 (at least 2 story elements differ, drop the lower-ranked).
+
+---
+
 ## Marketing & Release realism pass — PRIORITY: HIGH
 
 **Raised:** 2026-10-03, after in-game release screenshots showed large gaps
