@@ -188,5 +188,19 @@ test.describe('Pollux Fixer', () => {
       expect(overflow).toBe(0);
     }
   });
+
+  // A wrapped label does not overflow, so TC35-000008 missed it: sharing the
+  // row equally wrapped "Marketing & Release" and made every tab 19px taller.
+  test('TC35-000010 each product tab label stays on one line on desktop', async ({ steps, page }) => {
+    for (const width of [1280, 1024]) {
+      await page.setViewportSize({ width, height: 900 });
+      await openHollywood(steps);
+      const lines = await page.locator('#primary-tabs .product-area-label').evaluateAll(labels => labels.map(label => {
+        const lineHeight = parseFloat(getComputedStyle(label).lineHeight);
+        return Math.round(label.getBoundingClientRect().height / lineHeight);
+      }));
+      expect(lines, `labels at ${width}px`).toEqual([1, 1, 1, 1]);
+    }
+  });
 });
 

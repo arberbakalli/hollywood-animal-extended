@@ -73,3 +73,8 @@ Feature: Pollux Fixer
     Then the full pick is shown in full under the dropdown
     And it changes when the pick changes
 
+  # [automated] TC35-000010. Sharing the row equally wrapped one label.
+  Scenario: Each product tab label stays on one line on desktop
+    Given the screen is 1280 or 1024 pixels wide
+    When the app opens
+    Then every product tab label is on one line
