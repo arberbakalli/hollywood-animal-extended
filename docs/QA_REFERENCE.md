@@ -47,6 +47,13 @@ This project uses three documents for QA governance:
   workers, and only **one Playwright process** may run at a time)
 - Domain rules: read `docs/GAME_RULES.md` before answering "should it be X or Y?"
 
+### Auditor skills
+
+Five user-level auditor skills enforce these rules: `test-assertions-auditor`,
+`feature-deletion-auditor`, `rule-change-auditor`, `banned-element-detector` and
+`test-quality-gate`. Each is one `SKILL.md` under `~/.claude/skills/<name>/`,
+outside this repository. (Moved from the removed `docs/SKILLS_REGISTRY.md`.)
+
 ## When You're Stuck
 
 1. **Test fails, cause unclear?** → Check [QA_FRAMEWORK.md](QA_FRAMEWORK.md), section on test markers and negative assertions. Then check [GAME_RULES.md](GAME_RULES.md) for what the rule actually is.

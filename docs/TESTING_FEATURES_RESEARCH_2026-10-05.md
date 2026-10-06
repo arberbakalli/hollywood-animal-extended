@@ -83,6 +83,17 @@ is **near-duplicates**, not exact ones. Fixing it means a similarity rule.
 2. How much must two results differ: at least two story elements? No repeated
    supporting-character set within one result list?
 
+**Owner ruling 2026-10-06:** a genre-percentage difference alone is a
+duplicate; otherwise only exact duplicates are removed. One shared key now
+serves Script Lab and Build for Target (`docs/GAME_RULES.md`, "One result per
+element set"). One-element variants and repeated supporting-character sets stay.
+
+**Correction (review 2026-10-06):** the table row above ("same story elements,
+only Genre/Setting/genre % differ") was not a percentage case. The generator
+gives a genre set one fixed split, so the 3 pairs differ in a Genre or Setting
+id and are still shown. Owner ruling 2026-10-06: they stay; a different Genre
+or Setting is a different film.
+
 ## 4. Patterns worth acting on
 
 1. **One signature, three definitions.** Duplicate checks exist in
@@ -98,6 +109,14 @@ is **near-duplicates**, not exact ones. Fixing it means a similarity rule.
    once. Build one edge list `{ a, b, score }` per data load, and every view
    (best partners, clashes, cross-genre count) becomes a filter and sort over
    it, instead of re-scoring on every render.
+
+   **Measured 2026-10-06, not built (owner):** the lab's genre-element ranking
+   takes 2-4 ms per render with real data (24,255 pair lookups in the
+   cross-genre mode; 105 successful Drama pairs, as on screen). A precomputed
+   edge list would save at most those milliseconds. Parked as low priority in
+   `docs/PARKED_FEATURES.md`. Note for a re-measure: open the Genre tab first,
+   because the lab loads the pair data lazily; a run before that scores against
+   empty data and reads 0 ms.
 3. **Derive, don't hand-type, game facts.** `starterWhitelist` drifted from the
    game data (section 1). Build it from `parameters.Condition`.
 4. **Count by data, not by sample.** The 0 vs 16 player candidates in the

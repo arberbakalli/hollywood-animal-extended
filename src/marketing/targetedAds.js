@@ -421,7 +421,7 @@
             const fillTags = fillWithinCategoryLimits(ranked, offset, slotsToFill, lockedCounts);
             if (fillTags.filter(isStoryElement).length !== slotsToFill) continue;
 
-            const signature = fillTags.map(tag => tag.id).sort().join('|');
+            const signature = HACScriptGenerationEngine.scriptSignature(fillTags);
             if (seen.has(signature)) continue;
             seen.add(signature);
 

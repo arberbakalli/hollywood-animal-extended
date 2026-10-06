@@ -93,9 +93,15 @@ The default is **force only the pick**. "Force all my nominees" is an option
   state 2 only. State 3, the history rewrite, has not been loaded in the game.
 - State 2 has no real save to test against: none of the 55 saves was made
   between the nomination announcement and 1 March. It rests on the owner's 1940 run.
-- The rules here (ceremony year, pick policy) are not in `docs/GAME_RULES.md`.
-  Under CLAUDE.md section 4 they are not settled until the owner adds them.
+- The rules here (ceremony year, pick policy) are only a draft in
+  `docs/GAME_RULES.md` section 10. Under CLAUDE.md section 4 they are not
+  settled until the owner words them.
 - `moodShifts` and `PolluxVisitStatus` are left as they are.
+- People are shown as "talent #5007", not by name. A save's `characters[]`
+  entry has `customName` (usually null) and `firstNameId` / `lastNameId`, which
+  index a name table not yet found in the extracted files (checked 2026-10-06).
+- A closed dropdown can cut a long pick, so the full pick is printed under each
+  one (TC35-000009); the categories are one column.
 
 ## Files
 

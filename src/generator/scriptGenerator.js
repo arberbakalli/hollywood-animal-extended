@@ -58,10 +58,7 @@
     }
 
     function scriptSetSignature(script) {
-        return (script.tags || [])
-            .map(tag => `${tag.id}:${Number(tag.percent ?? 1).toFixed(4)}`)
-            .sort()
-            .join('|');
+        return HACScriptGenerationEngine.scriptSignature(script.tags);
     }
 
     function keepBestUniqueScript(uniqueBySignature, candidate, isBetter) {
