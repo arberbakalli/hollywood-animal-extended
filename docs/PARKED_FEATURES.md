@@ -5,6 +5,44 @@ history. Not scoped, not scheduled — pick one up when ready.
 
 ---
 
+## Find the missing age data — PRIORITY: HIGH (owner data task)
+
+**Raised:** 2026-10-06, while building the lab's Element Preservation ranking.
+Until this data exists, those characters rank as neutral on age and carry a
+"No age data" flag.
+
+**What is missing** (exact ids in `docs/KNOWN_ISSUES.md`):
+- 18 characters with no age rating at all: the list under "18 character tags
+  have no Age & Gender Appeal rating data" (5 Protagonists, 8 Antagonists,
+  5 Supporting Characters).
+- 38 unisex characters with no male/female split: the list under "Owner task
+  (2026-10-01): complete the gender-specific ratings".
+
+**Already ruled out — do not retry:** deriving them from the game's own
+`StreamingAssets\Data\Configs\TagsToAgeCompatibilityData.json`. That file's
+8-value arrays are a different, unrelated dataset (proof in KNOWN_ISSUES).
+
+**Brief to paste to another agent:**
+
+> Research only, do not edit data files. Repo: hollywood-animal-extended. Find
+> the age-group appeal (Young / Mid / Old, and male vs female where the role is
+> unisex) for the story characters listed in `docs/KNOWN_ISSUES.md` under "18
+> character tags have no Age & Gender Appeal rating data" and "Owner task
+> (2026-10-01): complete the gender-specific ratings". Our format is
+> `data/AgeRoleCompatibility.json` (Good / Neutral / Bad per age group) and
+> `data/TagsToAgeCompatibilityData.json` (YOUNG_M ... OLD_F, about 0.5-4.5).
+> Do not use the game's `TagsToAgeCompatibilityData.json` arrays: they are
+> proven unrelated (see KNOWN_ISSUES). Look in other game files, the Hollywood
+> Animal wiki, Steam guides, community spreadsheets and Discord exports. For
+> each value report the source (link or file and line) and whether it is
+> observed in play or derived. Return one table: id, age group, gender, value,
+> source. Mark every id you could not find.
+
+When values come back, the owner approves them before they enter the data
+files; the lab ranking then uses them with no code change.
+
+---
+
 ## Freshness audit & reset — PRIORITY: MEDIUM
 
 **Raised:** 2026-10-06, after the owner played for a week and returned.

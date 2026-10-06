@@ -902,6 +902,26 @@ interest in films that carry it. The game's own words (`localization/English.jso
 > (shared builder-row pills) and `src/library/exclusionStore.js` (excluding clears the state).
 > Pinned by `tests/freshness.test.js` and `tests/e2e/script-lab-freshness.spec.js`.
 
+### Element Preservation (Factory policy; owner confirmed in play, 2026-10-06)
+
+- The Factory policy (`POLICY_CONVEYOR`) has a bonus: "Choose five story
+  elements that will remain fresh forever" (`POLICY_CONVEYOR_BONUS_3`). The game
+  calls it **Element Preservation**; a preserved element "will always remain
+  fresh thanks to the Factory policy" (`DEFENCE_TAG_TOOLTIP`).
+- **Five elements, and the choice is permanent.** The confirmation says the
+  player cannot replace them (`DEFENCE_*_TAG_CONFIRMATION`).
+- Only story elements can be preserved; Genre and Setting have no freshness.
+- Not found in the game data: which story categories the bonus accepts, and
+  whether the milestone "Release thirteen films in a calendar year"
+  (`POLICY_CONVEYOR_BONUS_3_MILE`) is what unlocks it.
+
+**The lab's Element Preservation ranking is advice, not a game rule.** It
+weighs pair reach, conflicts, slots per script, age durability, cast gender and
+the direct score bonus; the weights are the calculator's judgement, shown on
+the page. Characters with no age data count as neutral (the average of the rated
+characters) and are flagged "No age data" (owner, 2026-10-06). Enforced in
+`lab/labModel.js` (`rankPreservation`).
+
 ---
 
 ## 10. Pollux awards in a save file
