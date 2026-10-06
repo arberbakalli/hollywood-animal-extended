@@ -103,6 +103,14 @@ element set"). One-element variants and repeated supporting-character sets stay.
    once. Build one edge list `{ a, b, score }` per data load, and every view
    (best partners, clashes, cross-genre count) becomes a filter and sort over
    it, instead of re-scoring on every render.
+
+   **Measured 2026-10-06, not built (owner):** the lab's genre-element ranking
+   takes 2-4 ms per render with real data (24,255 pair lookups in the
+   cross-genre mode; 105 successful Drama pairs, as on screen). A precomputed
+   edge list would save at most those milliseconds. Parked as low priority in
+   `docs/PARKED_FEATURES.md`. Note for a re-measure: open the Genre tab first,
+   because the lab loads the pair data lazily; a run before that scores against
+   empty data and reads 0 ms.
 3. **Derive, don't hand-type, game facts.** `starterWhitelist` drifted from the
    game data (section 1). Build it from `parameters.Condition`.
 4. **Count by data, not by sample.** The 0 vs 16 player candidates in the

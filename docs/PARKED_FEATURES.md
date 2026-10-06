@@ -141,3 +141,12 @@ default.
 
 **Open decision:** should the app bundle a fallback dataset so it degrades
 instead of stopping? A product call, not a bug.
+
+---
+
+## Element Affinity Graph Precomputation — PRIORITY: LOW
+
+Measurement baseline: 2-4ms per render (24K pair lookups, real data).
+Current performance is solid. Planned optimization for after codex lands.
+Data: measurement in `docs/TESTING_FEATURES_RESEARCH_2026-10-05.md` (section 4).
+Code: src/ module with tests.
