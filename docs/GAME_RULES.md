@@ -307,7 +307,9 @@ Target; `tests/near-duplicate-results.test.js`.)
 Today the generator gives a genre set one fixed split (one genre 100%, a pair
 50/50, locked genres the player's split), so same-id results never differed
 by percentage in practice. The near-duplicates measured on 2026-10-05 differ in
-a Genre or Setting id, and this rule keeps them (review 2026-10-06).
+a Genre or Setting id, and this rule keeps them (review 2026-10-06). That is
+intended: a different Genre or Setting is a different film (owner ruling
+2026-10-06).
 
 ### Highest Appeal respects the compatibility target
 

@@ -46,8 +46,9 @@ Branch heads when this was logged. **The repository history was reset on
 2026-09-30 at 23:02** to one commit, "Initial commit: Hollywood Animal Extended
 Calculator" (`62e9c05`), and `main` on GitHub was replaced with it. The
 "Came in with" commits above (`60522dc`, `d6b9974`, `2bbb800`, `73a7ee8`) are
-from the old history, which survives only in `parked/act-2-polish`; the bugs were
-found on the old `main` at `375e90d`.
+from the old history. It survived only in `parked/act-2-polish`, which no longer
+exists in any clone checked on 2026-10-06 (owner: delete it), so those hashes
+cannot be looked up. The bugs were found on the old `main` at `375e90d`.
 
 | Branch | Head | Note |
 |---|---|---|

@@ -91,8 +91,8 @@ element set"). One-element variants and repeated supporting-character sets stay.
 **Correction (review 2026-10-06):** the table row above ("same story elements,
 only Genre/Setting/genre % differ") was not a percentage case. The generator
 gives a genre set one fixed split, so the 3 pairs differ in a Genre or Setting
-id and are still shown. Whether those count as duplicates is open for the
-owner.
+id and are still shown. Owner ruling 2026-10-06: they stay; a different Genre
+or Setting is a different film.
 
 ## 4. Patterns worth acting on
 
