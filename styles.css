@@ -287,9 +287,12 @@ h2 {
     margin-inline: auto;
 }
 
+/* Four tabs share one row: a 210px minimum each needs 870px, more than the
+   860px the 900px wrapper leaves, so the fourth tab wrapped alone. */
 .product-area-btn {
-    min-width: 210px;
-    padding: 12px 22px;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 12px 14px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -4163,13 +4166,21 @@ option[data-selected-elsewhere="true"] {
     margin: 0 0 20px;
 }
 
+/* One column: two columns left 344px, and a pick such as
+   "ROMANCE IN VALENTIMES (Farm Girl) - current winner" needs about 384px. */
 .pollux-category-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 20px;
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .pollux-category select { width: 100%; min-width: 0; }
+.pollux-pick-text {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
 .pollux-empty { margin: 0; min-height: 42px; display: flex; align-items: center; }
 
 .pollux-check {
@@ -4198,6 +4209,4 @@ option[data-selected-elsewhere="true"] {
 .pollux-result-list { margin: 0 0 12px; padding-left: 20px; color: var(--text-main); }
 .pollux-download { color: var(--accent); }
 
-@media (max-width: 720px) {
-    .pollux-category-list { grid-template-columns: 1fr; }
-}
+

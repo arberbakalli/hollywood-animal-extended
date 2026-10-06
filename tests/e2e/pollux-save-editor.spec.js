@@ -147,4 +147,46 @@ test.describe('Pollux Fixer', () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBe(0);
   });
+
+  // Four product tabs share one row on desktop; the Pollux tab once wrapped
+  // onto a second row alone because each tab kept a 210px minimum.
+  test('TC35-000008 the four product tabs share one row on desktop', async ({ steps, page }) => {
+    for (const width of [1280, 1024]) {
+      await page.setViewportSize({ width, height: 900 });
+      await openHollywood(steps);
+      const tabs = page.locator('#primary-tabs .product-area-btn');
+      await expect(tabs).toHaveCount(4);
+      const boxes = await tabs.evaluateAll(nodes => nodes.map(node => ({
+        top: Math.round(node.getBoundingClientRect().top),
+        overflow: node.scrollWidth - node.clientWidth,
+      })));
+      expect(new Set(boxes.map(box => box.top)).size, `one row at ${width}px`).toBe(1);
+      expect(boxes.map(box => box.overflow)).toEqual([0, 0, 0, 0]);
+    }
+  });
+
+  // A long pick is cut off inside a closed dropdown; the full text is shown
+  // under it, and it follows the choice.
+  test('TC35-000009 each category shows the full chosen pick, however long', async ({ steps, page }) => {
+    const longTitle = 'THE EXTRAORDINARILY LONG ROMANCE IN VALENTIMES';
+    for (const width of [1280, 375]) {
+      await page.setViewportSize({ width, height: 900 });
+      await openPollux(steps, page);
+      await upload(page, save({ held: true }).replace('SHOOTING FOR THE STARS', longTitle));
+      const select = page.locator('#polluxPick-BEST_FEMALE_ROLE');
+      const full = page.locator('#polluxPickText-BEST_FEMALE_ROLE');
+      await expect(full).toHaveText(await select.locator('option:checked').innerText());
+      // Switch between two picks, so the line must follow a real change.
+      for (const title of ['FARM GIRL', longTitle]) {
+        const option = select.locator('option', { hasText: title });
+        await select.selectOption({ label: await option.innerText() });
+        await expect(full).toHaveText(await option.innerText());
+      }
+      await expect(full).toBeVisible();
+      await expect(select).toHaveAttribute('aria-describedby', 'polluxPickText-BEST_FEMALE_ROLE');
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow).toBe(0);
+    }
+  });
 });
+
