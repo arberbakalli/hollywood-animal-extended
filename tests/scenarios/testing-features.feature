@@ -153,3 +153,9 @@ Feature: Experimental tools in Testing Features
     And Distribution Calibration remains usable
     When pairing data becomes available and I retry
     Then the story-element pairing table appears
+
+  # [automated] TC34-000024
+  Scenario: One selected advertiser is counted in the singular
+    Given one campaign advertiser is selected
+    When I compare the campaign
+    Then the summary reads "1 advertiser selected"

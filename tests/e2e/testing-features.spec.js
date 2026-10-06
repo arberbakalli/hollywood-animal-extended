@@ -323,3 +323,10 @@ test('TC34-000011 lab has unique IDs and fits mobile and desktop with no runtime
     expect(new Set(ids).size).toBe(ids.length);
     expect(errors).toEqual([]);
 });
+
+test('TC34-000024 one advertiser is counted in the singular', async ({ page }) => {
+    await page.locator('#lab-tab-advertisers').click();
+    const output = page.locator('#lab-advertisers-result');
+    await expect(output).toContainText('1 advertiser selected.');
+    await expect(output).not.toContainText('1 advertisers');
+});

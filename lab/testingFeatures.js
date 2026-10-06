@@ -113,7 +113,7 @@ function renderAdvertisers() {
         const names = values => values.map(value => GAME_DATA.demographics[value].name).join(', ') || 'None';
         const lean = byId('lab-advertisers-lean').selectedOptions[0].textContent;
         paragraph(output, `Movie lean: ${lean}. This planning choice does not change campaign coverage.`);
-        paragraph(output, `${coverage.selected.length} advertisers selected. Covered audiences: ${names(coverage.covered)}.`);
+        paragraph(output, `${coverage.selected.length} ${coverage.selected.length === 1 ? 'advertiser' : 'advertisers'} selected. Covered audiences: ${names(coverage.covered)}.`);
         paragraph(output, `Uncovered desired audiences: ${names(coverage.missing)}.`, coverage.missing.length ? 'lab-negative' : 'lab-positive');
         paragraph(output, `Additional audiences reached: ${names(coverage.spillover)}.`);
         paragraph(output, 'Audience overlap does not prove extra reach; profit, campaign cost and Kinomark impact remain unconfirmed.', 'lab-note');
