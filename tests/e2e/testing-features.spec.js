@@ -5,8 +5,8 @@ test.beforeEach(async ({ page }) => {
     await expect(page.locator('#lab-workspace')).toBeVisible();
 });
 
-test('TC34-000001 all eight prototypes are reachable with keyboard navigation and Main App returns home', async ({ page }) => {
-    const keys = ['release', 'advertisers', 'calibration', 'genres', 'diversity', 'awards', 'tracker', 'unlocks'];
+test('TC34-000001 all seven prototypes are reachable with keyboard navigation and Main App returns home', async ({ page }) => {
+    const keys = ['release', 'advertisers', 'calibration', 'genres', 'awards', 'tracker', 'unlocks'];
     await page.locator('#lab-tab-release').focus();
     for (const key of keys.slice(1)) {
         await page.keyboard.press('ArrowDown');
@@ -21,15 +21,18 @@ test('TC34-000001 all eight prototypes are reachable with keyboard navigation an
     await expect(page.locator('#testingFeaturesLink')).toBeVisible();
 });
 
-test('TC34-000002 Factory boost changes opening week while toggling off restores the baseline', async ({ page }) => {
+test('TC34-000002 optional Factory estimate changes week one and restores baseline when off', async ({ page }) => {
     await page.locator('#lab-release-behemoth').check();
     await page.locator('#lab-release-opening').check();
     const rows = page.locator('#lab-release-result tbody tr');
-    const laterBefore = await rows.allTextContents();
+    await expect(rows.first().locator('td').nth(1)).toHaveText('35,500');
+    await expect(rows).toHaveCount(8);
+    await expect(page.locator('#lab-release-result thead th')).toHaveText(['Week', 'Demand']);
+    const laterWeeks = (await rows.allTextContents()).slice(1);
     await page.locator('#lab-release-factory').check();
     await page.locator('#lab-release-boost').fill('39');
     await expect(rows.first().locator('td').nth(1)).toHaveText('49,345');
-    expect((await rows.allTextContents()).slice(1)).toEqual(laterBefore.slice(1));
+    expect((await rows.allTextContents()).slice(1)).toEqual(laterWeeks);
     await page.locator('#lab-release-factory').uncheck();
     await expect(rows.first().locator('td').nth(1)).toHaveText('35,500');
     await expect(page.locator('#lab-release-boost')).toBeDisabled();
@@ -43,7 +46,7 @@ test('TC34-000003 multiple advertisers expose audience gaps without claiming pro
     await expect(output).toContainText('2 advertisers selected');
     await expect(output).toContainText('Uncovered desired audiences: None');
     await expect(output).toContainText('Movie lean: Balanced');
-    await expect(output.locator('tbody tr')).toHaveCount(5);
+    await expect(output.locator('table')).toHaveCount(0);
     await expect(output).toContainText('profit, campaign cost and Kinomark impact remain unconfirmed');
 });
 
@@ -134,22 +137,30 @@ test('TC34-000012 genre element insight uses direct pair scores and exclusions',
     await expect(output.locator('tbody tr')).toHaveCount(0);
 });
 
-test('TC34-000013 advertiser sample honors the Script Lab exclusion store', async ({ page }) => {
+test('TC34-000013 campaign coverage remains available when a former sample element is excluded', async ({ page }) => {
     await page.evaluate(() => localStorage.setItem('hac.excludedTags.v1', JSON.stringify([{ id: 'DETECTIVE', category: 'Genre' }])));
     await page.locator('#lab-tab-advertisers').click();
-    await page.evaluate(() => {
-        const original = HACAdvertiserMatcher.getRecommendations;
-        HACAdvertiserMatcher.getRecommendations = input => {
-            window.__labSeenTags = input.tags.map(tag => tag.id);
-            return original(input);
-        };
-    });
     await page.locator('#lab-advertisers-lean').selectOption('1');
     const output = page.locator('#lab-advertisers-result');
-    expect(await page.evaluate(() => window.__labSeenTags)).toEqual(['PROTAGONIST_COP']);
-    await expect(output).toContainText('excluded sample elements hidden: Detective');
     await expect(output).toContainText('Movie lean: Artistic');
-    await expect(output.locator('tbody tr')).toHaveCount(5);
+    await expect(output).toContainText('Uncovered desired audiences: Young men');
+    await expect(output.locator('table')).toHaveCount(0);
+});
+
+test('TC34-000021 excluding old sample tags does not erase campaign coverage', async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('hac.excludedTags.v1', JSON.stringify([
+        { id: 'DETECTIVE', category: 'Genre' },
+        { id: 'PROTAGONIST_COP', category: 'Protagonist' }
+    ])));
+    await page.locator('#lab-tab-advertisers').click();
+    await page.locator('#lab-advertisers-lean').selectOption('1');
+    const output = page.locator('#lab-advertisers-result');
+    await expect(output).toContainText('Covered audiences:');
+    await expect(output).toContainText('Uncovered desired audiences: Young men');
+    await page.locator('#lab-agency-ARTMAG').check();
+    await expect(output).toContainText('Uncovered desired audiences: None');
+    await expect(page.locator('#lab-advertisers-tags')).toHaveCount(0);
+    await expect(output.locator('table')).toHaveCount(0);
 });
 
 test('TC34-000014 pair data loads once when the genre insight is opened', async ({ page }) => {
@@ -176,22 +187,6 @@ test('TC34-000015 failed pair data can be retried without blocking other tools',
     await page.unroute('**/data/TagCompatibilityData.json');
     await page.locator('#lab-genre-pair-retry').click();
     await expect(page.locator('#lab-genre-elements-result tbody tr')).toHaveCount(15);
-});
-
-test('TC34-000006 reordered candidates collapse while distinct scripts remain', async ({ page }) => {
-    await page.locator('#lab-tab-diversity').click();
-    const output = page.locator('#lab-diversity-result');
-    await expect(output).toContainText('2 unique scripts. 1 shuffled duplicates removed');
-    await page.locator('#lab-diversity-candidates').fill(JSON.stringify([['DETECTIVE'], ['DETECTIVE']]));
-    await page.getByRole('button', { name: 'Find Unique Scripts' }).click();
-    await expect(output.locator('.lab-script')).toHaveCount(1);
-    await expect(output).toContainText('change locked/excluded elements');
-    await page.locator('#lab-diversity-candidates').fill(JSON.stringify([['UNKNOWN']]));
-    await page.getByRole('button', { name: 'Find Unique Scripts' }).click();
-    await expect(output).toContainText('unknown element ID');
-    await expect(output.locator('.lab-script')).toHaveCount(0);
-    await page.locator('#lab-diversity-sample').click();
-    await expect(output.locator('.lab-script')).toHaveCount(2);
 });
 
 test('TC34-000007 award targets describe the selected metric without promising an award', async ({ page }) => {
@@ -228,6 +223,48 @@ test('TC34-000008 journal persists releases, warns about repeats and removes onl
     await expect(page.locator('#lab-tracker-result')).toContainText('No repeats detected');
 });
 
+test('TC34-000022 an award memo requires a target year', async ({ page }) => {
+    await page.locator('#lab-tab-awards').click();
+    await page.locator('#lab-award-film').fill('Festival western');
+    await page.locator('#lab-award-year').fill('');
+    const output = page.locator('#lab-awards-result');
+    await expect(output).toContainText(/target year/i);
+    await expect(output).not.toContainText('for ;');
+});
+
+test('TC34-000019 an unreadable release journal is not overwritten by a new film', async ({ page }) => {
+    const stored = JSON.stringify([
+        { title: 'Earlier film', date: '1941-04-21', tags: ['DETECTIVE'] },
+        { title: 'Unknown element film', date: '1941-04-21', tags: ['UNKNOWN_ELEMENT'] }
+    ]);
+    await page.evaluate(value => localStorage.setItem('hac.testing-features.releases.v1', value), stored);
+    await page.reload();
+    await expect(page.locator('#lab-workspace')).toBeVisible();
+    await page.locator('#lab-tab-tracker').click();
+    await expect(page.locator('#lab-load-status')).toContainText('could not be read');
+    await page.locator('#lab-tracker-title').fill('New film');
+    await page.locator('#lab-tracker-tags').selectOption('DETECTIVE');
+    await page.getByRole('button', { name: 'Record Release' }).click();
+    expect(await page.evaluate(() => localStorage.getItem('hac.testing-features.releases.v1'))).toBe(stored);
+    await expect(page.locator('#lab-tracker-result')).toContainText('cannot save');
+});
+
+test('TC34-000020 a failed storage write leaves the journal intact and reports the error', async ({ page }) => {
+    await page.locator('#lab-tab-tracker').click();
+    await page.evaluate(() => {
+        const original = Storage.prototype.setItem;
+        Storage.prototype.setItem = function (key, value) {
+            if (key === 'hac.testing-features.releases.v1') throw new DOMException('Storage full', 'QuotaExceededError');
+            return original.call(this, key, value);
+        };
+    });
+    await page.locator('#lab-tracker-title').fill('New film');
+    await page.locator('#lab-tracker-tags').selectOption('DETECTIVE');
+    await page.getByRole('button', { name: 'Record Release' }).click();
+    await expect(page.locator('#lab-tracker-result')).toContainText(/could not save/i);
+    expect(await page.evaluate(() => localStorage.getItem('hac.testing-features.releases.v1'))).toBeNull();
+});
+
 test('TC34-000009 unlock search shows starter, date and recipe conditions from recovered game data', async ({ page }) => {
     await page.locator('#lab-tab-unlocks').click();
     await page.locator('#lab-unlock-search').fill('wild west');
@@ -247,6 +284,13 @@ test('TC34-000009 unlock search shows starter, date and recipe conditions from r
     await expect(page.locator('#lab-unlocks-result')).toContainText('No elements match');
 });
 
+test('TC34-000023 unlock choices are grouped by story category', async ({ page }) => {
+    await page.locator('#lab-tab-unlocks').click();
+    await expect(page.locator('#lab-unlock-tag optgroup[label="Genre"]')).toBeAttached();
+    await expect(page.locator('#lab-unlock-tag optgroup[label="Setting"] option[value="WILD_WEST"]')).toBeAttached();
+    await expect(page.locator('#lab-unlock-tag optgroup[label="Protagonist"]')).toBeAttached();
+});
+
 test('TC34-000010 failed game data loading offers a working retry', async ({ page }) => {
     await page.route('**/data/GenrePairs.json', route => route.fulfill({ status: 503, body: 'unavailable' }));
     await page.reload();
@@ -258,7 +302,7 @@ test('TC34-000010 failed game data loading offers a working retry', async ({ pag
     await expect(page.locator('#lab-release-result tbody tr')).toHaveCount(8);
 });
 
-test('TC34-000011 lab has unique IDs and fits mobile and desktop with no runtime errors', async ({ page }) => {
+test('TC34-000011 lab has unique IDs and fits mobile and desktop with no runtime errors', async ({ page }, testInfo) => {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     for (const width of [390, 1280]) {
@@ -266,14 +310,14 @@ test('TC34-000011 lab has unique IDs and fits mobile and desktop with no runtime
         await page.reload();
         await expect(page.locator('#lab-workspace')).toBeVisible();
         await expect(page.locator('.lab-nav')).toHaveAttribute('aria-orientation', width < 761 ? 'horizontal' : 'vertical');
-        for (const key of ['release', 'advertisers', 'calibration', 'genres', 'diversity', 'awards', 'tracker', 'unlocks']) {
+        for (const key of ['release', 'advertisers', 'calibration', 'genres', 'awards', 'tracker', 'unlocks']) {
             await page.locator(`#lab-tab-${key}`).click();
             await expect(page.locator(`#lab-panel-${key}`)).toBeVisible();
             if (key === 'genres') await expect(page.locator('#lab-genre-elements-result tbody tr')).toHaveCount(15);
             expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-            await page.screenshot({ path: `output/playwright/testing-features-${key}-${width}.png`, fullPage: true });
+            await page.screenshot({ path: testInfo.outputPath(`testing-features-${key}-${width}.png`), fullPage: true });
         }
-        await page.screenshot({ path: `output/playwright/testing-features-${width}.png`, fullPage: true });
+        await page.screenshot({ path: testInfo.outputPath(`testing-features-${width}.png`), fullPage: true });
     }
     const ids = await page.locator('[id]').evaluateAll(nodes => nodes.map(node => node.id));
     expect(new Set(ids).size).toBe(ids.length);

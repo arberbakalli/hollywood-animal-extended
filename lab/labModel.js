@@ -30,21 +30,8 @@ export function campaignCoverage(agencies, selectedIds, wantedAudiences) {
         spillover: [...covered].filter(audience => !wantedAudiences.includes(audience)) };
 }
 
-export function uniqueScripts(candidates) {
-    if (!Array.isArray(candidates)) throw new Error('Candidates must be a JSON array of scripts.');
-    const seen = new Set();
-    const unique = [];
-    candidates.forEach((tags, index) => {
-        if (!Array.isArray(tags) || !tags.length || tags.some(id => typeof id !== 'string' || !id)) throw new Error(`Script ${index + 1} needs a nonempty array of element IDs.`);
-        if (new Set(tags).size !== tags.length) throw new Error(`Script ${index + 1} contains a repeated element.`);
-        const signature = JSON.stringify([...tags].sort());
-        if (!seen.has(signature)) { seen.add(signature); unique.push([...tags]); }
-    });
-    return { scripts: unique, removed: candidates.length - unique.length };
-}
-
 export function rankGenreElements(tags, selectedGenreId, scorePair, excludedIds = new Set(), category = '', rankBy = 'pairs', query = '') {
-    const genres = tags.filter(tag => tag.category === 'Genre');
+    const genres = tags.filter(tag => tag.category === 'Genre' && (!excludedIds.has(tag.id) || tag.id === selectedGenreId));
     const selectedIndex = genres.findIndex(tag => tag.id === selectedGenreId);
     if (selectedIndex < 0) throw new Error('Choose a genre.');
     const available = tags.filter(tag => tag.category !== 'Genre' && tag.category !== 'Setting' && !excludedIds.has(tag.id))
@@ -103,29 +90,34 @@ export function validateRelease(release, tagIds) {
     return { title: release.title.trim(), date: release.date, tags: [...release.tags] };
 }
 
-export function unlockInfo(id, starterIds, condition) {
+export function unlockInfo(id, starterIds, condition, recipe) {
     if (starterIds.includes(id)) return { kind: 'starter', text: 'Available at the start of a new game.' };
     const source = condition || '';
+    if (source === 'DATE:>=1929' || source === 'DATE:>=01-01-1929') {
+        return { kind: 'starter', text: 'Available at the start of a new game.' };
+    }
     const fullDate = /^DATE:(>=|>)(\d{2})-(\d{2})-(\d{4})$/.exec(source);
     if (fullDate) {
         const [, operator, day, month, year] = fullDate;
-        return { kind: 'date', text: `${operator === '>' ? 'Unlocks after' : 'Unlocks on or after'} ${year}-${month}-${day}.` };
+        if (Number(year) > 2100 || operator === '>') return { kind: 'unknown', text: 'Unlock timing unclear in game data.' };
+        return { kind: 'date', text: `Unlocks on or after ${year}-${month}-${day}.` };
     }
     const yearOnly = /^DATE:(>=|>)(\d{4})$/.exec(source);
     if (yearOnly) {
         const [, operator, year] = yearOnly;
-        return { kind: 'date', text: `${operator === '>' ? 'Unlocks after' : 'Unlocks in or after'} ${year}.` };
+        if (operator === '>' || Number(year) > 2100) return { kind: 'unknown', text: 'Unlock timing unclear in game data.' };
+        return { kind: 'date', text: `Unlocks in or after ${year}.` };
     }
-    const recipe = /^(RECIPE|RECIPE_START|RECIPE_TRASH):(.+)$/.exec(source);
-    if (recipe) {
-        const [, recipeType, ingredients] = recipe;
+    const recipeCondition = /^(RECIPE|RECIPE_START|RECIPE_TRASH):(.+)$/.exec(source);
+    if (recipeCondition) {
+        const [, recipeType, ingredients] = recipeCondition;
         const labels = {
             RECIPE: 'Unlocked through a story recipe.',
             RECIPE_START: 'Available through a starting recipe.',
             RECIPE_TRASH: 'Unlocked through the Trash King policy recipe.'
         };
         return { kind: recipeType === 'RECIPE_TRASH' ? 'trash-recipe' : 'recipe',
-            recipeType, text: labels[recipeType], requirements: ingredients.split(':') };
+            recipeType, text: labels[recipeType], requirements: recipe?.sourceTagIds?.length ? recipe.sourceTagIds : ingredients.split(':') };
     }
-    return { kind: 'unknown', text: 'Not in the starting pool. Unlock condition has not been recovered from the game files.' };
+    return { kind: 'unknown', text: 'Unlock timing unclear in game data.' };
 }

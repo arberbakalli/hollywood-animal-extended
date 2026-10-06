@@ -2,34 +2,41 @@ Feature: Experimental tools in Testing Features
   The player can explore parked ideas before they become main app behavior.
 
   # [automated] TC34-000001 TC34-000011
-  Scenario: The eight prototypes are accessible on desktop and mobile
+  Scenario: The seven prototypes are accessible on desktop and mobile
     Given I open Testing Features
-    When I navigate between the eight tools with the keyboard or their buttons
+    When I navigate between the seven tools with the keyboard or their buttons
     Then exactly one tool is visible
     And I can return to the main app
 
   # [automated] TC34-000002
-  Scenario: Factory calibration boosts opening week only
-    Given current opening-week demand is 35500 screenings
-    When I enable Factory and choose a 39% boost
-    Then the scenario shows 49345 screenings in week one
-    And later weeks retain the current demand
-    And disabling Factory restores the baseline
+  Scenario: An optional Factory estimate changes opening-week demand only
+    Given I set a 7.1 commercial rating with Behemoth and an opening ability
+    When I enable Factory and choose a 39% opening-week estimate
+    Then week one changes from 35500 to 49345 screening demand
+    And weeks two through eight retain their baseline demand
+    And switching Factory off restores week one to 35500
 
   # [automated] TC34-000003
   Scenario: A campaign shows desired audiences that remain uncovered
     Given I want young men and men and have selected NBG
     When I add Vien Pascal to the campaign
     Then no desired audience remains uncovered
-    And I see a compact top-five view of the existing fit grades
+    And no sample-script fit table is presented
     And profit and Kinomark impact remain explicitly unconfirmed
 
   # [automated] TC34-000013
-  Scenario: Advertiser fit does not use an excluded sample element
+  Scenario: Campaign coverage does not depend on excluded story elements
     Given Detective is excluded in Script Lab
-    When I compare the sample campaign with Artistic movie lean
-    Then Detective is listed as hidden from the sample script
-    And the live fit preview still shows five advertiser rows
+    When I compare the campaign with Artistic movie lean
+    Then movie lean and audience coverage remain visible
+    And no hidden sample script is scored
+
+  # [automated] TC34-000021
+  Scenario: Excluding every former sample tag does not erase campaign coverage
+    Given Detective and Cop are excluded in Script Lab
+    When I compare a campaign and add an advertiser serving young men
+    Then the desired audience gap closes
+    And no hidden sample selector or fit table appears
 
   # [automated] TC34-000004
   Scenario: Observed attendance is compared without inventing viewer counts
@@ -81,13 +88,6 @@ Feature: Experimental tools in Testing Features
     Then Damsel in Distress leads with successful matches in 9 genres
     And its direct Comedy score of 3 remains visible
 
-  # [automated] TC34-000006
-  Scenario: The unique-result guard rejects shuffled duplicates
-    Given I supply two candidate scripts containing the same elements in a different order
-    When I find unique scripts
-    Then only one remains
-    And an unknown element is rejected without leaving stale scripts visible
-
   # [automated] TC34-000007
   Scenario: Award planning shows all goals and records a movie idea
     Given I open Award Targets
@@ -105,6 +105,26 @@ Feature: Experimental tools in Testing Features
     When I remove the first film
     Then the second film remains and the rough repeat warning clears
 
+  # [automated] TC34-000019
+  Scenario: An unreadable release journal is never replaced by a new film
+    Given one stored release contains an unknown story element
+    When I try to record a new film
+    Then the original stored journal remains unchanged
+    And I see why the new film could not be saved
+
+  # [automated] TC34-000020
+  Scenario: A storage failure leaves the release journal unchanged
+    Given the browser cannot save the journal
+    When I record a film
+    Then I see a storage error
+    And the journal remains unchanged
+
+  # [automated] TC34-000022
+  Scenario: An award memo requires a target year
+    Given I attach a movie idea to Award Targets
+    When I clear its target year
+    Then I see a target-year error instead of an incomplete memo
+
   # [automated] TC34-000009
   Scenario: Recovered unlock conditions are shown without guessing
     Given I open Unlock Info
@@ -112,6 +132,11 @@ Feature: Experimental tools in Testing Features
     Then Wild West is identified as a starter element
     And Horror and WW2 Africa show their recovered date gates
     And Toxic Vigilante shows its Trash King policy recipe ingredients
+
+  # [automated] TC34-000023
+  Scenario: Unlock choices are grouped by story category
+    Given I open Unlock Info
+    Then I can browse Genre, Setting and Protagonist choices in separate groups
 
   # [automated] TC34-000010
   Scenario: Failed data loading can be retried

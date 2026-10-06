@@ -1,5 +1,5 @@
 import { LAB_STORAGE_KEY, finiteNumber, releaseCurve, calibrateAttendance, campaignCoverage,
-    uniqueScripts, rankGenreElements, AWARD_TARGETS, recentElementUse, validateRelease, unlockInfo } from './labModel.js';
+    rankGenreElements, AWARD_TARGETS, recentElementUse, validateRelease, unlockInfo } from './labModel.js';
 
 const byId = id => document.getElementById(id);
 const selectedIds = id => [...byId(id).selectedOptions].map(option => option.value);
@@ -10,6 +10,7 @@ let tags = [];
 let rawTags = {};
 let unlockTags = {};
 let releases = [];
+let journalWritable = true;
 let wired = false;
 let compatibilityRequest;
 let compatibilityLoaded = false;
@@ -55,7 +56,7 @@ function render(key, callback) {
     try { callback(output); } catch (error) { paragraph(output, error.message, 'lab-error'); }
 }
 
-function fillTags(select, list, selected = []) {
+function fillTags(select, list, selected = [], grouped = false) {
     select.replaceChildren();
     const appendOption = (parent, tag) => {
         const option = element('option', select.multiple ? tag.name : `${tag.name} (${tag.category})`);
@@ -63,7 +64,7 @@ function fillTags(select, list, selected = []) {
         option.selected = selected.includes(tag.id);
         parent.append(option);
     };
-    if (select.multiple) {
+    if (select.multiple || grouped) {
         GAME_DATA.categories.forEach(category => {
             const members = list.filter(tag => tag.category === category);
             if (!members.length) return;
@@ -99,33 +100,23 @@ function renderRelease() {
             }, byId('lab-release-factory').checked ? byId('lab-release-boost').value : 0);
         table(output, ['Week', 'Demand'], curve.map(row => [row.week, format(row.scenario)]));
         paragraph(output, 'This is demand only. The current calculator may still under-model slow later-week falloff when Behemoth, Boutique and strong audience targeting all line up.', 'lab-note');
-        paragraph(output, 'Factory stacking is illustrative. Attendance, revenue and capacity are not inferred from this curve.', 'lab-note');
+        paragraph(output, 'Factory boost is an adjustable lab estimate for week one, not a confirmed game formula.', 'lab-note');
     });
 }
 
 function renderAdvertisers() {
     render('advertisers', output => {
-        const excludedIds = readStoredExcludedIds();
-        const ids = selectedIds('lab-advertisers-tags').filter(id => !excludedIds.has(id));
-        if (!ids.length) throw new Error('All sample elements are excluded. Adjust Script Lab exclusions to compare this sample campaign.');
         const audiences = [...byId('lab-audiences').querySelectorAll('input:checked')].map(input => input.value);
         if (!audiences.length) throw new Error('Choose at least one desired audience.');
         const agencies = [...byId('lab-agencies').querySelectorAll('input:checked')].map(input => input.value);
         const coverage = campaignCoverage(GAME_DATA.adAgents, agencies, audiences);
-        const ranked = HACAdvertiserMatcher.getRecommendations({ tags: ids.map(id => GAME_DATA.tags[id]),
-            movieLean: Number(byId('lab-advertisers-lean').value) }).allScores;
         const names = values => values.map(value => GAME_DATA.demographics[value].name).join(', ') || 'None';
-        const hidden = selectedIds('lab-advertisers-tags').filter(id => excludedIds.has(id));
         const lean = byId('lab-advertisers-lean').selectedOptions[0].textContent;
-        paragraph(output, `Movie lean: ${lean}. Fit preview uses a small sample script; excluded sample elements hidden: ${namesFromIds(hidden)}.`);
+        paragraph(output, `Movie lean: ${lean}. This planning choice does not change campaign coverage.`);
         paragraph(output, `${coverage.selected.length} advertisers selected. Covered audiences: ${names(coverage.covered)}.`);
         paragraph(output, `Uncovered desired audiences: ${names(coverage.missing)}.`, coverage.missing.length ? 'lab-negative' : 'lab-positive');
         paragraph(output, `Additional audiences reached: ${names(coverage.spillover)}.`);
-        table(output, ['Advertiser', 'Fit / 5', 'Grade', 'Audiences', 'Campaign'], ranked.slice(0, 5).map(entry =>
-            [entry.agency.name, entry.score.toFixed(1), entry.grade, names(entry.agency.targets), agencies.includes(entry.agency.id) ? 'Selected' : 'Not selected']), 'Current app fit model, compact top five');
-        const suggestions = ranked.filter(entry => entry.score >= HACAdvertiserMatcher.ADVERTISER_WEAK_THRESHOLD && entry.agency.targets.some(audience => audiences.includes(audience)));
-        paragraph(output, `Campaign shortlist: ${suggestions.map(entry => entry.agency.name).join(', ') || 'No qualifying agencies'}.`);
-        paragraph(output, 'Shortlist uses existing fit and desired audiences. Overlap does not prove extra reach; profit, campaign cost and Kinomark impact remain unconfirmed.', 'lab-note');
+        paragraph(output, 'Audience overlap does not prove extra reach; profit, campaign cost and Kinomark impact remain unconfirmed.', 'lab-note');
     });
 }
 
@@ -241,36 +232,6 @@ async function renderGenreElements() {
     }
 }
 
-function detectiveExample() {
-    const base = ['DETECTIVE', 'THRILLER', 'MODERN_AMERICAN_CITY', 'PROTAGONIST_COP',
-        'ANTAGONIST_CRIMINAL_MASTERMIND', 'SUPPORTINGCHARACTER_VILLAINS_RIGHT_HAND',
-        'EVENTS_SHOOTOUT', 'THEME_SEARCH_KILLER', 'FINALE_ANTAGONIST_GETS_PUNISHED'];
-    // Use only IDs in this extract; a missing optional sample element is omitted.
-    const known = base.filter(id => GAME_DATA.tags[id]);
-    const variation = known.map(id => id === 'EVENTS_SHOOTOUT' ? 'EVENTS_BANK_ROBBERY' : id);
-    byId('lab-diversity-candidates').value = JSON.stringify([known, [...known].reverse(), variation], null, 2);
-    renderDiversity();
-}
-
-function renderDiversity() {
-    render('diversity', output => {
-        const result = uniqueScripts(JSON.parse(byId('lab-diversity-candidates').value));
-        result.scripts.forEach(script => {
-            if (script.some(id => !GAME_DATA.tags[id])) throw new Error('A candidate contains an unknown element ID.');
-        });
-        paragraph(output, `${result.scripts.length} unique scripts. ${result.removed} shuffled duplicates removed.`);
-        result.scripts.forEach((script, index) => {
-            const article = element('article', undefined, 'lab-script');
-            article.append(element('strong', `Script ${index + 1}`));
-            const list = element('ul');
-            script.forEach(id => list.append(element('li', GAME_DATA.tags[id].name)));
-            article.append(list);
-            output.append(article);
-        });
-        paragraph(output, 'All unique candidates in this batch are shown. To explore more combinations, lower your target or change locked/excluded elements. This does not prove the full search space is exhausted.', 'lab-note');
-    });
-}
-
 function renderAwards() {
     render('awards', output => {
         const cards = element('div', undefined, 'lab-card-grid');
@@ -286,6 +247,8 @@ function renderAwards() {
         const year = byId('lab-award-year').value;
         const remembered = selectedIds('lab-award-elements');
         const tracked = [...byId('lab-award-targets').querySelectorAll('input:checked')].map(input => AWARD_TARGETS[input.value].name);
+        if (title || remembered.length || tracked.length) finiteNumber(year, 'Target year', 1900, 2100);
+        if (year && !/^\d{4}$/.test(year)) throw new Error('Target year needs four digits.');
         paragraph(output, title || remembered.length || tracked.length
             ? `Plan memo: ${title || 'Untitled movie'} for ${year}; targets: ${tracked.join(', ') || 'undecided'}; elements: ${namesFromIds(remembered)}.`
             : 'Add a movie idea if you want this panel to act like a planning note.');
@@ -293,12 +256,18 @@ function renderAwards() {
 }
 
 function saveReleases(next) {
-    localStorage.setItem(LAB_STORAGE_KEY, JSON.stringify(next));
+    if (!journalWritable) throw new Error('Saved release journal cannot be read; cannot save until it is repaired. Original stored data was preserved.');
+    try { localStorage.setItem(LAB_STORAGE_KEY, JSON.stringify(next)); }
+    catch { throw new Error('Could not save the release journal. Existing data was left unchanged.'); }
     releases = next;
 }
 
 function renderTracker() {
     render('tracker', output => {
+        if (!journalWritable) {
+            paragraph(output, 'Saved release journal could not be read. New releases cannot be saved; original stored data was preserved.', 'lab-error');
+            return;
+        }
         const use = recentElementUse(releases, byId('lab-tracker-reference').value);
         if (!releases.length) { paragraph(output, 'No releases recorded.'); return; }
         table(output, ['Film', 'Release date', 'Elements', 'Action'], releases.map((release, index) => {
@@ -321,7 +290,7 @@ function refreshUnlockOptions() {
     const query = byId('lab-unlock-search').value.trim().toLowerCase();
     const previous = byId('lab-unlock-tag').value;
     fillTags(byId('lab-unlock-tag'), tags.filter(tag =>
-        (!category || tag.category === category) && tag.name.toLowerCase().includes(query)), [previous]);
+        (!category || tag.category === category) && tag.name.toLowerCase().includes(query)), [previous], true);
 }
 
 function renderUnlocks() {
@@ -329,15 +298,11 @@ function renderUnlocks() {
         const id = byId('lab-unlock-tag').value;
         if (!id) { paragraph(output, 'No elements match your search.'); return; }
         const condition = unlockTags[id]?.parameters?.Condition || rawTags[id]?.parameters?.Condition;
-        const info = unlockInfo(id, GAME_DATA.starterWhitelist, condition);
+        const info = unlockInfo(id, GAME_DATA.starterWhitelist, condition, unlockTags[id]?.recipe);
         output.append(element('h4', GAME_DATA.tags[id].name));
         paragraph(output, info.text);
         if (info.requirements) {
             paragraph(output, `Uses: ${info.requirements.map(value => GAME_DATA.tags[value]?.name || value).join(' + ')}.`);
-        }
-        if (condition) paragraph(output, `Source condition: ${condition}.`, 'lab-note');
-        if (info.kind === 'unknown') {
-            paragraph(output, 'Could be date-gated, recipe-gated or factory/research-gated. Need recovered game condition data before showing a year.', 'lab-note');
         }
     });
 }
@@ -348,11 +313,13 @@ function setup() {
         const saved = JSON.parse(localStorage.getItem(LAB_STORAGE_KEY) || '[]');
         if (!Array.isArray(saved)) throw new Error('Invalid release journal.');
         releases = saved.map(release => validateRelease(release, knownIds));
-    } catch { byId('lab-load-status').textContent = 'Game data loaded. Saved release journal could not be read; original stored data was preserved.'; }
-    fillTags(byId('lab-advertisers-tags'), tags, ['DETECTIVE', 'PROTAGONIST_COP']);
+    } catch {
+        journalWritable = false;
+        byId('lab-load-status').textContent = 'Game data loaded. Saved release journal could not be read; original stored data was preserved. New releases cannot be saved.';
+    }
     fillTags(byId('lab-award-elements'), tags, ['DETECTIVE', 'PROTAGONIST_COP']);
     fillTags(byId('lab-tracker-tags'), tags, ['DETECTIVE', 'PROTAGONIST_COP']);
-    fillTags(byId('lab-unlock-tag'), tags);
+    fillTags(byId('lab-unlock-tag'), tags, [], true);
     fillTags(byId('lab-genre-primary'), tags.filter(tag => tag.category === 'Genre'), ['DRAMA']);
     const pairCategory = byId('lab-genre-element-category');
     const allStoryCategories = element('option', 'All story categories');
@@ -420,7 +387,7 @@ function setup() {
             }
         });
     });
-    [['release', renderRelease], ['advertisers', renderAdvertisers], ['calibration', renderCalibration], ['diversity', renderDiversity]].forEach(([key, action]) => {
+    [['release', renderRelease], ['advertisers', renderAdvertisers], ['calibration', renderCalibration]].forEach(([key, action]) => {
         byId(`lab-${key}-form`).addEventListener('submit', event => { event.preventDefault(); action(); });
     });
     byId('lab-release-form').addEventListener('input', () => {
@@ -436,10 +403,8 @@ function setup() {
     byId('lab-genre-element-rank').addEventListener('change', renderGenreElements);
     byId('lab-genre-element-search').addEventListener('input', renderGenreElements);
     window.addEventListener('storage', event => {
-        if (event.key === 'hac.excludedTags.v1') { renderGenres(); renderGenreElements(); renderAdvertisers(); }
+        if (event.key === 'hac.excludedTags.v1') { renderGenres(); renderGenreElements(); }
     });
-    byId('lab-diversity-sample').addEventListener('click', detectiveExample);
-    byId('lab-diversity-candidates').addEventListener('input', () => byId('lab-diversity-result').replaceChildren());
     byId('lab-awards-form').addEventListener('input', renderAwards);
     byId('lab-awards-form').addEventListener('change', renderAwards);
     byId('lab-award-targets').addEventListener('change', renderAwards);
@@ -466,7 +431,7 @@ function setup() {
         ['screenings', 'attendance', 'prediction', 'ads'].forEach((name, index) => { byId(`lab-calibration-${name}`).value = values[index]; });
         renderCalibration();
     }));
-    renderRelease(); renderAdvertisers(); renderCalibration(); renderGenres(); detectiveExample(); renderAwards(); renderTracker(); renderUnlocks();
+    renderRelease(); renderAdvertisers(); renderCalibration(); renderGenres(); renderAwards(); renderTracker(); renderUnlocks();
 }
 
 async function load() {
@@ -490,7 +455,7 @@ async function load() {
             art: item.artValue, com: item.commercialValue, weights: weights[id] || {} }));
         GAME_DATA.tags = Object.fromEntries(tags.map(tag => [tag.id, tag]));
         byId('lab-load-status').textContent = 'Experimental features. Calibration tools do not predict profit.';
-        if (!wired) { setup(); wired = true; }
+        if (!wired) { wired = true; setup(); }
         byId('lab-workspace').hidden = false;
     } catch (error) {
         byId('lab-load-status').textContent = `${error.message} Retry loading to continue.`;

@@ -38,18 +38,17 @@ If a prototype changes shared modules, it is still isolated by the branch.
 
 ## Implemented Prototypes (2026-10-05)
 
-All eight panels are usable at `testing-features.html`. They are experiments,
+Seven panels are usable at `testing-features.html`. They are experiments,
 not approved changes to the main app's behavior.
 
 | Panel | Demoable behavior | Evidence / limitation |
 | --- | --- | --- |
-| Release Strategy Lab | Show eight weeks of demand only; toggle Behemoth, Boutique, opening ability and Factory; adjust Factory percentage | Calls `HACDistributionPlanner.weeklyDemandFor`. Factory is illustrative, week one only; 0-100 input range is a sandbox range, not a verified game limit. Owner feedback says real Behemoth/Boutique + good audience targeting may decay much slower than the current calculator. |
-| Advertiser Strategy | Keep movie lean, desired audiences and campaign advertiser selection; show compact top-five fit preview and audience gaps | Calls `HACAdvertiserMatcher.getRecommendations`, with agencies from `data.js`. The ugly all-elements selector was removed from the visible UI. Coverage is a union of listed demographics, not measured reach. No profit estimate. The tool counts stored Script Lab exclusions when its sample elements are hidden. |
+| Release Strategy Lab | Show eight weeks of demand; toggle Behemoth, Boutique, opening ability and optional Factory estimate | Calls `HACDistributionPlanner.weeklyDemandFor` for the baseline. A user-set 0-100% Factory estimate adjusts week one only; this range is a lab control, not a verified game limit. Owner feedback says real Behemoth/Boutique + good audience targeting may decay much slower than the current calculator. |
+| Advertiser Strategy | Keep movie lean, desired audiences and campaign advertiser selection; show audience gaps | Coverage is a union of listed agency demographics, not measured reach. No hidden sample script, fit table or profit estimate. Main-app recommendations remain separate. |
 | Distribution Calibration | Load the owner's 1-ad / 4-ad observations or enter another observation; compare occupied screening equivalents with a supplied demand estimate | Screenings multiplied by attendance is an equivalent, not viewers. Predicted demand is editable: 35,500 uses the existing calculator for 7.1 commercial, Behemoth and opening ability; 34,000 is the owner's reported game suggestion. Observations alone cannot identify causes. |
 | Genre Synergy | Choose a primary genre; inspect all ten alternatives, change second share, see best commercial/artistic pair summaries, and explore story-element pairings | Bonuses come from `GenrePairs.json`; direct story-element scores come from `TagCompatibilityData.json` through the production pair-score function. The 2.5 MB compatibility file loads only when this panel opens. At 50/50 the existing engine's data-order tie break applies. |
-| Unique Result Guard | Inspect a Detective candidate batch or paste JSON IDs; collapse reshuffled copies, keep distinct sets and reject malformed/unknown IDs | Rejected as a standalone player-facing feature. Its rule belongs inside generated result lists in Script Lab, Marketing and maybe Graves. Lab inspector compares element IDs only; production also includes genre percentages in its signature. |
 | Award Targets | Show Box Office Success, Critical Acclaim and Fan Favorites together; attach a movie idea, year, target and elements to a planning memo | Based on `ACT2_POLISH_HANDOVER.md`; no simulated award cutoff or prediction. |
-| Released-Film Tracker | Record films, dates and real elements; persist/reload journal, warn softly on repeats in 500 days, remove a chosen film | Idea still in debate. Separate `hac.testing-features.releases.v1` storage key. Warns only; no production freshness writes. Calendar days may not map to game freshness pips. |
+| Released-Film Tracker | Record films, dates and real elements; persist/reload journal, warn softly on repeats in 500 days, remove a chosen film | Idea still in debate. Separate `hac.testing-features.releases.v1` storage key. Unreadable saved data blocks writes rather than being overwritten. Calendar days may not map to game freshness pips. |
 | Unlock Info | Filter by category, search actual tags and distinguish starter, date, recipe, starting-recipe and Trash King policy unlock conditions | Starter facts from `GAME_DATA.starterWhitelist`; recovered conditions come from `extractedFilesFromGameSourceOfTruth/TagData.json`. Main `data/TagData.json` still does not carry those conditions. |
 
 ## Owner Feedback Applied (2026-10-05)
@@ -133,22 +132,21 @@ Lessons applied during this pass:
 | --- | --- | --- |
 | Distribution Calibration | Production candidate | Preserve the distinction between screening equivalents and viewers. |
 | Genre Synergy and pairing insight | Production candidate | Owner reviews placement and the exploratory 15-row limit. |
-| Release Strategy | Lab calibration tool | Recover Factory stacking and later-week demand behavior. |
-| Advertiser Strategy | Change shape | Recover reach, costs and Kinomark effects; keep the compact fit view. |
-| Unique Result Guard | Helper inside generated results | Reuse existing dedup where it already runs; inspect any remaining result lists before changing them. |
+| Release Strategy | Lab calibration tool | Recover Factory range/stacking and later-week demand behavior before promotion. |
+| Advertiser Strategy | Change shape | Recover reach, costs and Kinomark effects before claiming a profitable mix. |
 | Award Targets | Lab planning tool | Decide whether goals remain notes or affect generation. |
 | Released-Film Tracker | Parked | Confirm the in-game freshness clock and whether a yearly slate is useful. |
-| Unlock Info | Parked for data recovery | Recover date and recipe/factory conditions from game files. |
+| Unlock Info | Lab reference | Confirm ambiguous date conditions and any quest/NPC gates before promotion. |
 
 ## Isolation and Files
 
-- `testing-features.html`: isolated page and accessible eight-panel navigation.
+- `testing-features.html`: isolated page and accessible seven-panel navigation.
 - `testing-features.css`: scoped to `.testing-features-page`; shared CSS untouched.
 - `lab/testingFeatures.js`: page wiring, real-data loading, safe text rendering.
 - `lab/labModel.js`: small pure operations for the lab, imported by its unit tests.
 - `tests/testing-features.test.js`: inputs, calibration, campaign coverage,
-  uniqueness, journal boundaries and starter facts.
-- `tests/e2e/testing-features.spec.js`: TC34-000001 through TC34-000018.
+  journal boundaries and unlock facts.
+- `tests/e2e/testing-features.spec.js`: TC34 lab behavior tests.
 
 The lab uses ESM on its own page. Its modules intentionally live outside `src/`:
 the existing `domStructure` guard reserves that tree for modules loaded by
@@ -164,10 +162,10 @@ Lab CSS keeps the app's dark surfaces, commercial gold and artistic lavender.
 Genre reference labels use a lighter text tint for contrast and an exact-palette
 left marker. Shared palette tokens are unchanged. Tables scroll within their
 own wrapper on narrow screens; labels are not broken mid-word to force a fit.
-Native multiple selects and the JSON editor retain stable editing heights.
+Native multiple selects retain stable editing heights.
 
-1. Extract the actual Factory boost and stacking formula, including building
-   eligibility; choose the final slider range only from evidence.
+1. Extract the actual Factory boost and stacking formula separately before
+   considering a future distribution feature; do not infer it from this lab.
 2. Establish advertiser reach, costs, satisfaction and Kinomark effects before
    claiming an optimal profitable mix. Grade and audience fit alone cannot do it.
 3. Recover the game's viewers/occupancy model; do not multiply production demand
@@ -178,8 +176,44 @@ Native multiple selects and the JSON editor retain stable editing heights.
    a rolling film count. Its warning must not silently set freshness.
 6. Confirm whether any recipe gates are also quest/NPC-gated in another source
    file. The current lab shows only recovered `TagData.json` conditions.
-7. Review the genre reference placement and percentages-aware diversity UI
-   before promoting either into Script Lab.
+7. Review the genre reference placement before promoting it into Script Lab.
+
+## Phase 1 Corrections (2026-10-06)
+
+- Release Strategy now displays production week/demand values without a Factory
+  scenario. The Behemoth/Boutique decay warning remains because that behavior
+  still needs game evidence.
+- Advertiser Strategy compares campaign demographics and movie lean without
+  scoring invisible sample elements or showing a static fit table. Exclusions
+  elsewhere cannot erase campaign coverage here.
+- The rejected Unique Result Guard tab and its lab-only helper were removed.
+  Script Lab and Build for Target already deduplicate generated sets in their
+  production result paths. `tests/generator-unique-results.test.js` protects
+  Script Lab set-level uniqueness. Build for Target still needs an equally
+  direct set-level regression; its current tests only check distinct tags
+  within a combination. TC34-000006 and its lab scenario were retired; no
+  production dedup code was changed.
+- An unreadable release journal now blocks new writes and preserves the
+  original localStorage value. Storage-write failure reports an error.
+- Cross-genre counts omit excluded genres. Award memos reject invalid years.
+  Unlock choices are grouped by category; recovered date and recipe conditions
+  are shown without raw source strings. Odd date forms remain explicitly unclear.
+- The full 145 KB recovered tag extract stays loaded once with the other lab
+  data so Unlock Info can show all 250 known conditions without a second fetch.
+  The 58 starting conditions in that extract differ from the main app's
+  57-element starting whitelist; the lab does not change the main-app rule.
+
+## Factory Estimate Restored (2026-10-06)
+
+Owner chose to keep Factory as a lab experiment despite its unknown game range.
+The switch enables a 0-100% slider; the selected percentage changes week-one
+screening demand only. Turning it off restores the production baseline. The
+table still has only Week and Demand columns, and no factory estimate changes
+the main app's distribution calculation. TC34-000002 and the lab model tests
+cover the toggle, range examples and unchanged later weeks.
+
+The verification record below documents the earlier eight-panel build; it is
+historical, not the current lab state.
 
 ## Verification Record (2026-10-05)
 
@@ -212,7 +246,7 @@ assertions. The final QA pass strengthened the later-week, best-genre and award
 memo assertions; no production test expectation was changed.
 
 The implementation is ready for owner review, not automatic production
-promotion. The eight-feature decision table above and open product decisions
+promotion. The seven-feature decision table above and open product decisions
 remain the handoff checklist. Claude can investigate missing game data in a
 separate worktree; production formulas must not be inferred from these lab
 observations.

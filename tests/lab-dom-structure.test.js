@@ -38,9 +38,9 @@ describe('Testing Features lab structure', () => {
     test('lab panels are main-app cards and the nav uses main-app pills', async () => {
         const html = await read('testing-features.html');
         const panels = [...html.matchAll(/<section id="lab-panel-[a-z]+"[^>]*>\s*<div class="card lab-card">/g)];
-        expect(panels).toHaveLength(8);
+        expect(panels).toHaveLength(7);
         const tabs = [...html.matchAll(/<button id="lab-tab-[a-z]+" class="product-mode-btn"/g)];
-        expect(tabs).toHaveLength(8);
+        expect(tabs).toHaveLength(7);
     });
 
     test('the lab stylesheet uses colour tokens, not a private palette', async () => {

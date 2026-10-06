@@ -64,7 +64,6 @@
 .testing-features-page input[type="date"],
 .testing-features-page input[type="search"],
 .testing-features-page input:not([type]),
-.testing-features-page textarea,
 .testing-features-page select[multiple] {
     width: 100%;
     box-sizing: border-box;
@@ -82,15 +81,14 @@
 }
 
 .testing-features-page input:focus,
-.testing-features-page textarea:focus,
 .testing-features-page select:focus { outline: none; border-color: var(--accent); }
 
 .testing-features-page .lab-fields .filter-select { width: 100%; min-width: 0; letter-spacing: normal; text-transform: none; font-weight: 400; }
 .testing-features-page select[multiple] { min-height: 160px; }
 .testing-features-page select[multiple] optgroup { color: var(--accent); }
 .testing-features-page select[multiple] option { color: var(--text-main); padding: 4px 8px; }
-.testing-features-page textarea { min-height: 180px; font-family: monospace; font-size: 0.85rem; resize: vertical; }
 .testing-features-page input[type="range"] { width: 100%; accent-color: var(--accent); }
+.testing-features-page .lab-factory-boost-label { flex-direction: row; gap: 6px; }
 
 .testing-features-page fieldset {
     margin: 16px 0;
@@ -125,7 +123,6 @@
 /* Release switches reuse the Distribution Calculator switches. */
 .testing-features-page .lab-switches { justify-content: flex-start; flex-wrap: wrap; gap: 16px 24px; margin: 8px 0 16px; }
 
-.testing-features-page form > label[for="lab-release-boost"] { flex-direction: row; gap: 6px; }
 .testing-features-page .product-mode-nav { margin: 0 0 8px; }
 
 .testing-features-page .lab-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 0; }
@@ -156,7 +153,7 @@
     border: 1px solid var(--accent);
     border-left-width: 4px;
     border-radius: var(--radius);
-    background: rgba(212, 175, 55, 0.08);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
     color: var(--text-main);
     line-height: 1.5;
 }
@@ -196,8 +193,7 @@
 .testing-features-page .lab-pair-stat { display: flex; align-items: baseline; gap: 8px; color: var(--text-muted); font-size: 0.9rem; }
 .testing-features-page .lab-pair-stat strong { font-size: 1.1rem; }
 
-.testing-features-page .lab-script { padding: 12px 0; border-bottom: 1px solid var(--border); }
-.testing-features-page .lab-script ul { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; list-style: none; }
+.testing-features-page #testing-features-footer { color: var(--text-muted); }
 
 @media (max-width: 760px) {
     .testing-features-page .lab-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }

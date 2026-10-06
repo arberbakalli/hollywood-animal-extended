@@ -1,19 +1,26 @@
 import { beforeAll, describe, expect, test } from '@jest/globals';
 import { loadLegacyScript } from './helpers/legacyHarness.js';
-import { releaseCurve, calibrateAttendance, campaignCoverage, uniqueScripts, recentElementUse,
+import { releaseCurve, calibrateAttendance, campaignCoverage, recentElementUse,
     validateRelease, unlockInfo, finiteNumber, rankGenreElements } from '../lab/labModel.js';
 
 let app;
 beforeAll(async () => { app = await loadLegacyScript(); });
 
-describe('lab release calibration uses the production curve', () => {
-    test.each([[0, 35500], [11, 39405], [39, 49345], [100, 71000]])('Factory %s%% changes opening week only', (boost, expected) => {
+describe('lab release strategy uses the production demand curve', () => {
+    test('Behemoth and opening ability use production demand for every week', () => {
         const demand = app.evaluate('HACDistributionPlanner.weeklyDemandFor');
-        const curve = releaseCurve(demand, 7.1, { behemoth: true, openingMultiplier: 2 }, boost);
+        const curve = demand(7.1, { artisticScore: 5.9, behemoth: true, openingMultiplier: 2 });
+        expect(curve[0]).toBe(35500);
+        expect(curve).toHaveLength(8);
+        expect(curve.slice(1).every(value => Number.isFinite(value))).toBe(true);
+    });
+    test.each([[0, 35500], [11, 39405], [39, 49345], [100, 71000]])
+    ('optional Factory estimate of %s%% changes opening week only', (boost, expected) => {
+        const demand = app.evaluate('HACDistributionPlanner.weeklyDemandFor');
+        const curve = releaseCurve(demand, 7.1, { artisticScore: 5.9, behemoth: true, openingMultiplier: 2 }, boost);
         expect(curve[0].baseline).toBe(35500);
         expect(curve[0].scenario).toBe(expected);
         expect(curve.slice(1).every(row => row.scenario === row.baseline)).toBe(true);
-        expect(curve).toHaveLength(8);
     });
     test('zero attendance reports no ratio rather than Infinity', () => {
         expect(calibrateAttendance(49896, 0, 35500)).toEqual({ occupiedEquivalent: 0, gap: 35500, ratio: null });
@@ -42,19 +49,17 @@ describe('lab campaign compares real agency audiences', () => {
     });
 });
 
-describe('lab candidate inspector', () => {
-    test('removes reordered tag sets and retains a distinct combination without mutating input', () => {
-        const candidates = [['DETECTIVE', 'PROTAGONIST_COP'], ['PROTAGONIST_COP', 'DETECTIVE'], ['DRAMA', 'PROTAGONIST_COP']];
-        const before = JSON.stringify(candidates);
-        expect(uniqueScripts(candidates)).toEqual({ scripts: [candidates[0], candidates[2]], removed: 1 });
-        expect(JSON.stringify(candidates)).toBe(before);
-    });
-    test.each([{}, [['DETECTIVE', 'DETECTIVE']], [[]], [[{}]]])('rejects invalid candidates %j', candidates => {
-        expect(() => uniqueScripts(candidates)).toThrow();
-    });
-});
-
 describe('lab genre element pairings', () => {
+    test('excluded genres do not inflate cross-genre success counts', () => {
+        const genres = ['ACTION', 'COMEDY', 'DRAMA'].map(id => ({ id, name: id, category: 'Genre' }));
+        const cowboy = { id: 'PROTAGONIST_COWBOY', name: 'Cowboy', category: 'Protagonist' };
+        const score = (genre, tag) => tag.id === cowboy.id && genre.id !== 'DRAMA' ? 5 : 1;
+        const result = rankGenreElements([...genres, cowboy], 'ACTION', score, new Set(['COMEDY']));
+        expect(result.genreCount).toBe(2);
+        expect(result.rows[0].strongAcrossGenres).toBe(1);
+        expect(result.rows[0].unsuccessfulAcrossGenres).toBe(1);
+    });
+
     test('uses the production pair score, reports cross-genre counts and respects exclusions', async () => {
         await app.ensureCompatibilityLoaded();
         const scorePair = (genre, tag) => app.evaluate('HACCompatibilityEngine.getRawCompatibilityScore')(genre, tag, app.GAME_DATA);
@@ -98,6 +103,25 @@ describe('lab genre element pairings', () => {
 });
 
 describe('lab release journal and unlock facts', () => {
+    test.each(['DATE:>=1929', 'DATE:>=01-01-1929'])
+    ('the game starting-date condition %s identifies a starter element', condition => {
+        expect(unlockInfo('TAG_ONLY_IN_EXTRACT', [], condition).kind).toBe('starter');
+    });
+
+    test('recipe ingredients come from the recovered recipe record', () => {
+        const recipe = { sourceTagIds: ['PROTAGONIST_CLUMSY_OAF', 'THEME_AVENGING_LOVED_ONES'] };
+        const info = unlockInfo('PROTAGONIST_TOXIC_VIGILANTE', [], 'RECIPE_TRASH:WRONG_SOURCE', recipe);
+        expect(info.kind).toBe('trash-recipe');
+        expect(info.requirements).toEqual(recipe.sourceTagIds);
+    });
+
+    test.each(['DATE:1950', 'DATE:>1950', 'DATE:<1929', 'DATE:>=01-01-3000'])
+    ('uncertain game condition %s stays visibly uncertain', condition => {
+        const info = unlockInfo('UNKNOWN_TAG', [], condition);
+        expect(info.kind).toBe('unknown');
+        expect(info.text).toMatch(/unclear/i);
+    });
+
     test('includes the 500-day boundary and excludes older/future releases', () => {
         const reference = '1941-04-21';
         const dateAtAge = age => new Date(Date.parse(`${reference}T00:00:00Z`) - age * 86400000).toISOString().slice(0, 10);
