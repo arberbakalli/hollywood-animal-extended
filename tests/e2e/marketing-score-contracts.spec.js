@@ -23,8 +23,13 @@ for (const [commercial, artistic, lean, sparkScore] of [
     // with the app's established +0.25 / -0.20 specialist adjustment.
     await expect(cards.filter({ has: page.locator('.adv-name', { hasText: /^Spark$/ }) })
       .locator('.score-value')).toHaveText(sparkScore);
-    const [leanBox, cardBox] = await Promise.all([leanDisplay.boundingBox(), cards.first().boundingBox()]);
-    expect(cardBox.y).toBeGreaterThanOrEqual(leanBox.y + leanBox.height);
+    // Both boxes in one frame: Analyze smooth-scrolls, and two separate reads
+    // mid-scroll disagree (owner-approved measurement change, 2026-10-06).
+    const { leanBottom, cardTop } = await page.evaluate(() => ({
+      leanBottom: document.getElementById('movieLeanDisplay').getBoundingClientRect().bottom,
+      cardTop: document.querySelector('.advertiser-card').getBoundingClientRect().top,
+    }));
+    expect(cardTop).toBeGreaterThanOrEqual(leanBottom);
   });
 }
 
