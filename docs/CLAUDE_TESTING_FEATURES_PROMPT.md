@@ -19,9 +19,8 @@ Read these first:
 - `docs/TESTING_FEATURES_LAB.md`
 - `docs/COLOR_PALETTE.md`
 - `docs/PARKED_FEATURES.md`
-- `docs/ACT2_POLISH_HANDOVER.md`
 - `docs/MARKETING_RELEASE_INVESTIGATION.md`
-- `tests/TEST_COVERAGE_ROADMAP.md`
+- `docs/TEST_QUALITY_GATE.md`
 
 ## Working Rules
 
