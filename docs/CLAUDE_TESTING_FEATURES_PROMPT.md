@@ -1,8 +1,7 @@
 # Claude Prompt: Testing Features Lab
 
-You are working in `hollywood-animal-extended` on the experimental branch:
-
-`codex/testing-features-lab`
+You are working in `hollywood-animal-extended` on an explicitly named feature
+branch. Keep experimental work on that branch until the owner asks to merge.
 
 ## Mission
 
@@ -37,7 +36,7 @@ Read these first:
 
 ## Feature Priorities
 
-Update 2026-10-06: seven prototypes now exist. Inspect the implementation
+Update 2026-10-08: nine prototypes now exist. Inspect the implementation
 and `docs/TESTING_FEATURES_LAB.md` before adding more. Lab-only ESM modules live
 in `lab/`, not `src/`, because the main-page module guard owns that tree.
 `testing-features.css` is scoped to the lab page. No production module or
@@ -45,8 +44,9 @@ existing executable test was changed for these prototypes.
 
 Available tools: Release Strategy Lab, Advertiser Strategy, Distribution
 Calibration, Genre Synergy, Award Targets, Released-Film
-Tracker, Unlock Info. Their focused suite is
-`tests/e2e/testing-features.spec.js`; pure lab tests are
+Tracker, Unlock Info, Element Preservation, Pollux Fixer. Their focused suite is
+`tests/e2e/testing-features.spec.js` (Element Preservation: `tests/e2e/element-preservation.spec.js`,
+Pollux Fixer: `tests/e2e/pollux-save-editor.spec.js`); pure lab tests are
 `tests/testing-features.test.js`.
 
 Owner feedback applied on 2026-10-05:

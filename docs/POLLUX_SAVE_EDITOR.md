@@ -1,8 +1,9 @@
 # Pollux Save Editor
 
-Status 2026-10-05: built in the app as the "Pollux Fixer" tab (plan approved by
-the owner). Uncommitted in `../hollywood-animal-extended-gate`. It has not been
-tested by loading a fixed save in the game.
+Status 2026-10-06: built in the app as the "Pollux Fixer" tab inside
+`testing-features.html`. The editor has been tested against uploaded save-file
+fixtures in the browser; loading a fixed save back into the game remains a
+manual verification step.
 
 Two defects only a real browser showed, both fixed and pinned:
 - `FileReader.readAsText` drops the BOM while decoding, so the download lost it.
@@ -131,16 +132,14 @@ The default is **force only the pick**. "Force all my nominees" is an option
 Goal: put the editor in the app. The paths below are the original plan; the
 files now live in `lab/` (see Files).
 
-1. `index.html`: one `<script src="src/pollux/polluxSaveEditor.js">` before
-   `script.js`, and the module guard in `tests/domStructure.test.js` turns green
-   again. It is red now, because the module is not yet loaded. (Alternative if
-   the owner prefers: move the module out of `src/` until the UI is approved.)
-2. New `src/ui/polluxSaveEditorView.js`: file input, `FileReader.readAsText`,
-   bucket choice, one select per category (player films only), the
+1. `testing-features.html`: the Pollux Fixer tab, file input, nominee bucket
+   choice, one select per category and backup warning.
+2. `lab/polluxSaveEditorView.js`: byte-preserving file read, bucket choice,
+  one select per category (player films only), the
    force-pick/force-all option, and the download through a `Blob` and an object URL.
-3. `index.html` markup: a "Pollux Fixer" panel, under its own nav entry in the
-   same style as the other tabs. A backup warning sits above the upload, and the
-   three save states are explained in plain words.
+3. The Pollux Fixer markup lives in `testing-features.html`, under its own lab
+   navigation entry. A backup warning sits above the upload, and the three save
+   states are explained in plain words.
 4. `styles.css`: panel styles using the existing tokens. Checked at desktop
    width and 375px.
 5. `docs/GAME_RULES.md`: a short Pollux section with the ceremony-year rule and
