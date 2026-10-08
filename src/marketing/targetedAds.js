@@ -332,7 +332,7 @@
     // combination something the player can actually build.
     // Antagonist and Finale are optional normal picks: the free fill takes them
     // by score like any other story element, one each at most.
-    const TARGETED_MANDATORY_CATEGORIES = HACScriptRules.requiredCategories;
+    const TARGETED_MANDATORY_CATEGORIES = ['Genre', 'Setting', 'Protagonist'];
 
     function isStoryElement(tag) {
         return HACGravesAnalysis.isStoryElement(tag);
