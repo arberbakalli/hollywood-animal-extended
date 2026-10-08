@@ -301,11 +301,15 @@
             });
     }
 
+    // Genres split evenly in the same 5% steps a player can build
+    // (GAME_RULES.md section 1): three genres score as 35/30/30, not 1/3 each.
     function withCompatibilityWeights(tags) {
         const genreCount = tags.filter(tag => tag.category === 'Genre').length;
+        const shares = HACGenreMix.splitGenrePercent(100, new Array(genreCount).fill(1));
+        let genreIndex = 0;
         return tags.map(tag => ({
             ...tag,
-            percent: tag.category === 'Genre' ? 1 / genreCount : 1.0
+            percent: tag.category === 'Genre' ? shares[genreIndex++] / 100 : 1.0
         }));
     }
 

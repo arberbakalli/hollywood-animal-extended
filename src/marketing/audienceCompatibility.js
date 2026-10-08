@@ -9,12 +9,18 @@
     // disagree again — see docs/GAME_RULES.md "Audience compatibility score
     // scale" for why this is 5 bands rather than the full 11-point reference
     // scale.
+    // Owner ruling 2026-10-08: these ranges are the rule; the legend text is
+    // checked against `legend` by tests/audience-bands-rule.test.js.
+    const AUDIENCE_BANDS = Object.freeze([
+        { label: 'Excellent', className: 'excellent', inBand: s => s >= 4.0, legend: 'Excellent (+4.0 or more)' },
+        { label: 'Good', className: 'good', inBand: s => s >= 1.0, legend: 'Good (+1.0 to +3.9)' },
+        { label: 'Neutral', className: 'neutral', inBand: s => s > -1.0, legend: 'Neutral (above -1.0, below +1.0)' },
+        { label: 'Bad', className: 'bad', inBand: s => s >= -3.0, legend: 'Bad (-1.0 to -3.0)' },
+        { label: 'Disastrous', className: 'disastrous', inBand: () => true, legend: 'Disastrous (below -3.0)' }
+    ]);
+
     function getScoreBand(score) {
-        if (score >= 4.0) return { label: 'Excellent', className: 'excellent' };
-        if (score >= 1.0) return { label: 'Good', className: 'good' };
-        if (score > -1.0) return { label: 'Neutral', className: 'neutral' };
-        if (score >= -3.0) return { label: 'Bad', className: 'bad' };
-        return { label: 'Disastrous', className: 'disastrous' };
+        return AUDIENCE_BANDS.find(band => band.inBand(score));
     }
 
     function getScoreLabel(score) {
@@ -184,6 +190,7 @@
     global.HACAudienceCompatibility = {
         setupCompatibilityListeners,
         updateCompatibilityDisplay,
+        AUDIENCE_BANDS,
         getScoreLabel,
         getScoreClass
     };

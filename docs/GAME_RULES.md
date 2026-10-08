@@ -89,13 +89,25 @@ game's (owner ruling 2026-09-29):
 percentage, with one taking whatever remains up to 100%. Two is a common mix, not
 a limit.
 
-**Each genre holds at least 5%, in steps of 5.** Eleven genres is therefore ten
-at 5% plus one at 50%. The Genre + button stops at 11 rows in every context
-(there are exactly 11 genres), and works again when a row is removed.
+**Genre shares (owner rulings 2026-09-30 and 2026-10-08):**
 
-> Owner ruling 2026-09-30 (audit item Q12). The extracted game file sets
-> `min_genre_fraction: 0.1`, which would cap a script at 10 genres; the owner
-> ruled 5% and eleven. If the game ever refuses a 5% share, that value is why.
+- One genre holds 100%.
+- Two to eleven genres each hold at least 5%, in steps of 5, and always sum to
+  100%. Two genres range from 5/95 to 95/5; eleven range from nine at 10% and
+  two at 5% to ten at 5% and one at 50%. Adding or removing a genre re-splits
+  the others to keep 100%.
+- The Genre + button stops at 11 rows in every context (there are exactly 11
+  genres), and works again when a row is removed.
+- Every builder uses the same split (`splitGenrePercent`). Build for Target
+  splits evenly in these steps: three genres score as 35/35/30, not 1/3 each.
+
+**Genre pairing (owner ruling 2026-10-08):** a genre counts in a pairing only
+at 35% or more, so at most two genres are in effect; a third or later genre
+cannot reach the threshold.
+
+> The extracted game file's `min_genre_fraction: 0.1` is **not** a minimum
+> share. What it controls is not mapped yet; disregard it until it is (owner,
+> 2026-10-08).
 > Floor: `GENRE_PERCENT_MIN` in `src/selectors/genreMix.js`. Row cap:
 > `MAX_GENRE_ROWS` in `src/selectors/storyElementSelector.js`, pinned by
 > TC06-000009. Before this ruling the + button added rows without limit.
@@ -674,17 +686,23 @@ a review of the source.
   weighted average is never below its own minimum. So every row scores its worst
   pair. Found by the 2026-09-29 audit; open question whether the game intends the
   weights to matter. The 3.0 default is pinned in `tests/scoring-rule-edges.test.js`.
+  **The share does weight the total score:** each row adds `finalRowScore x share`
+  (`compatibilityEngine.js`), so a 5% genre adds less to the total (and the movie
+  score estimate) than a 95% one. Average Fit, the verdict and Conflicts are not
+  affected.
+  **Owner's expected model, 2026-10-08, unconfirmed:** a genre adds its pairing
+  value only at 35% or more (so at most two genres), and a single genre adds its
+  own artistic and commercial value. To be checked with the genre-pairing lab
+  feature against the extracted game data before the scoring changes.
 - **Genre tie-break** (same file, `genresByShare`): when two genres hold the
   same share, the one earlier in the game's genre list (the data file order)
   counts as the larger. Before 2026-09-30 the input order decided, so the same
   script scored differently by row order (54 of 55 pairs at 50/50). The order
   makes scores stable; whether the game breaks ties this way is not confirmed.
-- **Genre-pair bonus** (same file): it applies only when the second genre holds
-  at least 35%. The code also checks that the top two make up 70%, but that is
-  implied: genres are sorted by share, so a second genre at 35% puts the top two
-  at 70% or more. Pinned at 35/35/30 in `tests/scoring-rule-edges.test.js`.
-- **Genre mix steps** (`src/selectors/genreMix.js`): shares move in 5% steps,
-  with 5% as the smallest share.
+- **Genre-pair bonus** (same file): the 35% threshold is now the owner's ruling
+  (section 1, "Genre pairing"). The code also checks that the top two make up
+  70%, which is implied by the 35% rule. Pinned at 35/35/30 in
+  `tests/scoring-rule-edges.test.js`.
 - **Striking Image / Artistic Ability** (`src/marketing/distributionPlanner.js`):
   ×2 on weeks 1–4 whenever either toggle is on. The game strings tie each to
   which rating is higher.
@@ -694,8 +712,14 @@ a review of the source.
   pre-release, halved by Factory Policy; 4 weeks of release; 4 weeks
   post-release only at commercial ≥ 9.0. The studio policies gate from 9 and
   above too (owner ruling 2026-10-01, section 4).
-- **Target audiences** (same file): high interest from 0.67, moderate above
-  0.33, normalised with a factor of 3.0 (`RELEASE_MAGIC_NUMBER`).
+- **Target audience numbers** (`src/evaluation/gravesAnalysis.js`): high interest
+  from 0.67, a target above 0.33, normalised with a factor of 3.0
+  (`RELEASE_MAGIC_NUMBER`). That Graves and Marketing share one model is the
+  owner's ruling (section 2, "One audience model"); these numbers are not.
+- **Screenings demand** (owner hypothesis, 2026-10-08, unconfirmed): closer to
+  the average of the commercial and artistic scores x 2 than the current curve.
+  Being measured with the Distribution Calibration lab feature; not used by the
+  main app.
 - **Advertiser grades** (`src/marketing/advertiserMatcher.js`): A+ from 3.33,
   A 2.83, B+ 2.58, B 2.33, C+ 2.13, C 1.94, D 1.50, F below that, plus an
   adjustment for the movie's lean. Pinned in `tests/advertisers.test.js`.
@@ -766,11 +790,17 @@ groups scores into **5** visible bands, matching its legend exactly:
 
 | Band | Range | CSS class |
 |---|---|---|
-| Excellent | +4.0 to +5.0 | `excellent` |
-| Good | +1.0 to +3.9 | `good` |
-| Neutral | 0.0 | `neutral` |
-| Bad | -1.0 to -3.9 | `bad` |
-| Disastrous | -4.0 to -5.0 | `disastrous` |
+| Excellent | +4.0 or more | `excellent` |
+| Good | +1.0 to below +4.0 | `good` |
+| Neutral | above -1.0, below +1.0 | `neutral` |
+| Bad | -3.0 to -1.0 | `bad` |
+| Disastrous | below -3.0 | `disastrous` |
+
+> Owner ruling 2026-10-08: these ranges are the rule, with no gaps. Scores
+> blended by genre share are not whole numbers, so "Neutral 0.0" was not
+> enough. The one table is `AUDIENCE_BANDS` in
+> `src/marketing/audienceCompatibility.js`; the legend in `index.html` must
+> match it (`tests/audience-bands-rule.test.js`).
 
 `getScoreLabel` and `getScoreClass` (`src/marketing/audienceCompatibility.js`)
 both derive from one shared `getScoreBand` function using these exact 5
@@ -779,9 +809,8 @@ other or with the legend again. Neither function ever returns a label from
 the 11-point scale that has no matching band here: +3 "Very Good" shows as
 Good, and -3 "Very Bad" shows as Bad.
 
-For whole-number scores the code matches the table exactly. Between integers it
-cuts at -3.0, not -4.0: `getScoreBand` sends anything below -3.0 to Disastrous.
-Every weight is a whole number today, so the difference never shows.
+(Until 2026-10-08 this table said Neutral 0.0 and Disastrous -4.0 to -5.0,
+while the code cut at -1.0 and -3.0; the code's ranges are now the rule.)
 
 **This 5-band grouping is a coarser view of the 11-point scale above, not a
 contradiction of it.** The legend and CSS only define 5 colors today.
@@ -945,8 +974,10 @@ interest in films that carry it. The game's own words (`localization/English.jso
 - **Five elements, and the choice is permanent.** The confirmation says the
   player cannot replace them (`DEFENCE_*_TAG_CONFIRMATION`).
 - Only story elements can be preserved; Genre and Setting have no freshness.
-- Not found in the game data: which story categories the bonus accepts, and
-  whether the milestone "Release thirteen films in a calendar year"
+- All five story categories can be preserved: Protagonist, Antagonist,
+  Supporting Character, Theme & Event and Finale (owner, from play,
+  2026-10-08).
+- Not found in the game data: whether the milestone "Release thirteen films in a calendar year"
   (`POLICY_CONVEYOR_BONUS_3_MILE`) is what unlocks it.
 
 **The lab's Element Preservation ranking is advice, not a game rule.** It
