@@ -243,7 +243,7 @@
                         <h3>Submit Script</h3>
                         <button id="resetGravesButton" class="reset-btn" type="button" data-reset-context="graves">Reset</button>
                     </div>
-                    <p class="subtitle">Select the script elements you want Colman Graves to judge.</p>
+                    <p class="subtitle">Locked Elements: select the story elements you want Colman Graves to judge.</p>
 
                     <div id="selectors-container-graves" class="tag-selector-grid"></div>
 
@@ -428,7 +428,7 @@
                         <h3>Build Your Script</h3>
                         <button id="resetAdvertisersButton" class="reset-btn" type="button" data-reset-context="advertisers">Reset</button>
                     </div>
-                    <p class="subtitle">Select tags manually or use the search bar above. Add multiple genres to adjust their influence.</p>
+                    <p class="subtitle">Locked Elements: select tags manually or use the search bar above. Add multiple genres to adjust their influence.</p>
                     <div id="selectors-container-advertisers" class="tag-selector-grid"></div>
                     <div id="advertisers-actions" class="action-area">
                         <div id="advertisersFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
@@ -594,7 +594,7 @@
                     <!-- Story Elements Range -->
                     <!-- Tag Builder -->
                     <div class="targeted-tag-builder">
-                        <div class="targeted-field-label">Lock Elements (Optional)</div>
+                        <div class="targeted-field-label">Locked Elements (Optional)</div>
                         <p class="subtitle targeted-field-help">Anything you pick here appears in every combination. Leave it empty to let the search choose freely.</p>
                         <div id="selectors-container-targeted" class="tag-selector-grid"></div>
                     </div>
@@ -655,6 +655,7 @@
     <script src="src/selectors/selectorExclusions.js"></script>
     <script src="src/selectors/storyElementSelector.js"></script>
     <script src="src/generator/availabilityFilter.js"></script>
+                    <script src="src/rules/scriptCategories.js"></script>
     <script src="src/evaluation/compatibilityEngine.js"></script>
     <script src="src/evaluation/movieScoreEstimator.js"></script>
     <script src="src/generator/scriptGenerationEngine.js"></script>

@@ -86,11 +86,7 @@ describe('category lists match GAME_RULES.md section 1', () => {
     });
 
     test('Build for Target seeds Genre, Setting and Protagonist', async () => {
-        const source = await readFile('src/marketing/targetedAds.js', 'utf8');
-        const match = source.match(/const TARGETED_MANDATORY_CATEGORIES = \[([^\]]*)\]/);
-        expect(match).not.toBeNull();
-
-        expect(idsIn(match[1]).sort())
+        expect([...h.evaluate('HACScriptRules.requiredCategories')].sort())
             .toEqual(['Genre', 'Protagonist', 'Setting']);
     });
 });
