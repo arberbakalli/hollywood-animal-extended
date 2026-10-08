@@ -277,7 +277,7 @@ describe('bug hunt 2026-09-30', () => {
                     const story = h.call('HACGravesAnalysis.storyElementsOf', tags).length;
                     if (story !== budget) problems.push(`${at}: ${story} story elements`);
                     if (count('Genre') < 1) problems.push(`${at}: no Genre`);
-                    SINGLE.filter(category => count(category) !== 1)
+                    SINGLE.filter(category => (['Antagonist', 'Finale'].includes(category) ? count(category) > 1 : count(category) !== 1))
                         .forEach(category => problems.push(`${at}: ${count(category)} ${category}`));
                     if (new Set(tags.map(tag => tag.id)).size !== tags.length) problems.push(`${at}: duplicate element`);
                     clashes(tags, new Set()).forEach(clash => problems.push(`${at}: ${clash}`));

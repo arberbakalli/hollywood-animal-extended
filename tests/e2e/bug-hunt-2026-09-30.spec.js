@@ -448,10 +448,11 @@ test.describe('Bug hunt 2026-09-30', () => {
     await page.locator('#generateScriptsButton').click();
     await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5, { timeout: 20000 });
 
-    // Three locked Supporting Characters at pool 5 leave no room for the
-    // Protagonist, Antagonist and Finale, so Generate refuses (TC01-000034).
+    // Five locked Supporting Characters at pool 5 leave no room for the
+    // Protagonist, so Generate refuses (TC01-000034).
     const rows = page.locator('#inputs-supporting-character-generator select.tag-selector');
-    const picks = ['SUPPORTINGCHARACTER_SIDEKICK', 'SUPPORTINGCHARACTER_LOVE_INTEREST', 'SUPPORTINGCHARACTER_ANGRY_BOSS'];
+    const picks = ['SUPPORTINGCHARACTER_SIDEKICK', 'SUPPORTINGCHARACTER_LOVE_INTEREST', 'SUPPORTINGCHARACTER_ANGRY_BOSS',
+      'SUPPORTINGCHARACTER_MENTOR', 'SUPPORTINGCHARACTER_RIVAL'];
     for (let i = 0; i < picks.length; i++) {
       if (i > 0) await page.locator('#add-supporting-character-generator-button').click();
       await rows.first().selectOption(picks[i]);

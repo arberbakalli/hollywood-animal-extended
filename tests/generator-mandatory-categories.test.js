@@ -2,23 +2,20 @@ import { describe, test, expect, beforeAll, afterEach } from '@jest/globals';
 import { loadInstrumentedApp } from './helpers/legacyHarness.js';
 
 /**
- * Every generated script needs a Protagonist, an Antagonist and a Finale
- * (docs/GAME_RULES.md §1, "Category capacity"). They spend the story-element
- * budget like any other pick.
+ * Every generated script needs a Protagonist; Antagonist and Finale are optional
+ * (docs/GAME_RULES.md section 1, owner ruling 2026-10-08). The Protagonist
+ * spends the story-element budget like any other pick.
  *
- * The generator only added them while the count was below the target, so
- * locks could use up every slot first: 3 locked Supporting Characters at a
- * target of 5 produced scripts with no Finale, every time. Graves then rejects
- * a script missing its Protagonist.
- *
- * Owner ruling 2026-09-28: reserve their slots, and when the locks leave too
- * few, refuse with a message that says what is missing and how to make room.
+ * Locks could use up every slot before the Protagonist was added, and Graves
+ * rejects a script missing its Protagonist. The generator reserves its slot,
+ * and when the locks leave none, refuses with a message that says how to make
+ * room. (Until 2026-10-08 this file also required Antagonist and Finale; that
+ * was wrong.)
  */
-describe('generated scripts always carry Protagonist, Antagonist and Finale', () => {
+describe('generated scripts always carry a Protagonist', () => {
     let h;
     let feedback;
 
-    const MANDATORY = ['Protagonist', 'Antagonist', 'Finale'];
     const tagsOf = (category) => Object.values(h.GAME_DATA.tags)
         .filter(tag => tag.category === category)
         .map(tag => ({ id: tag.id, category, percent: 1.0 }));
@@ -68,50 +65,51 @@ describe('generated scripts always carry Protagonist, Antagonist and Finale', ()
     }
 
     describe('the engine reserves the mandatory slots', () => {
-        test('locks that fit exactly still leave room for all three, within the budget', () => {
+        test('locks that fit leave room for the Protagonist, within the budget', () => {
             const locked = tagsOf('Supporting Character').slice(0, 2);
 
             for (let run = 0; run < 20; run++) {
                 const script = h.call('HACScriptGenerator.runGenerationAlgorithm', 4, 5, locked, []);
-                MANDATORY.forEach(category => expect(categoriesIn(script)).toContain(category));
+                expect(categoriesIn(script)).toContain('Protagonist');
+                ['Antagonist', 'Finale'].forEach(category =>
+                    expect(script.tags.filter(t => t.category === category).length).toBeLessThanOrEqual(1));
                 expect(h.call('HACGravesAnalysis.storyElementsOf', script.tags)).toHaveLength(5);
             }
         });
 
-        test('locks never displace a mandatory category, even when called directly', () => {
+        test('locks never displace the Protagonist, even when called directly', () => {
             const locked = tagsOf('Supporting Character').slice(0, 3);
 
             for (let run = 0; run < 20; run++) {
                 const script = h.call('HACScriptGenerator.runGenerationAlgorithm', 4, 5, locked, []);
-                MANDATORY.forEach(category => expect(categoriesIn(script)).toContain(category));
+                expect(categoriesIn(script)).toContain('Protagonist');
             }
         });
     });
 
     describe('Generate refuses locks that leave no room for them', () => {
-        test('3 locked Supporting Characters at a target of 5 are refused, naming the fix', async () => {
-            installGeneratorDom({ locked: tagsOf('Supporting Character').slice(0, 3) });
+        test('5 locked Supporting Characters at a target of 5 are refused, naming the fix', async () => {
+            installGeneratorDom({ locked: tagsOf('Supporting Character').slice(0, 5) });
             globalThis.generatedScriptsCache = 'untouched';
 
             await h.callAsync('HACScriptGenerator.generateScripts');
 
             expect(globalThis.generatedScriptsCache).toBe('untouched');
-            expect(feedback.textContent).toContain('Every script needs a Protagonist, an Antagonist and a Finale');
+            expect(feedback.textContent).toContain('Every script needs a Protagonist.');
             expect(feedback.textContent).toContain('Remove 1 locked element or raise the score target');
         });
 
-        test('a locked Protagonist plus 4 fillers leaves no room for the other two', async () => {
+        test('a locked Protagonist plus 4 fillers is a full legal script and generates', async () => {
             installGeneratorDom({
                 locked: [...tagsOf('Protagonist').slice(0, 1), ...tagsOf('Supporting Character').slice(0, 4)],
             });
-            globalThis.generatedScriptsCache = 'untouched';
 
             await h.callAsync('HACScriptGenerator.generateBestScoreScripts', 'artistic');
 
-            expect(globalThis.generatedScriptsCache).toBe('untouched');
-            expect(feedback.textContent).toContain('leaving no room for the Antagonist and Finale');
-            expect(feedback.textContent).toContain('Remove 2 locked elements');
-        });
+            expect(feedback.textContent).toBe('');
+            expect(Array.isArray(globalThis.generatedScriptsCache)).toBe(true);
+            expect(globalThis.generatedScriptsCache.length).toBeGreaterThan(0);
+        }, 20000);
 
         test('at the highest score target the message does not suggest raising it', async () => {
             // Target 10 needs all ten slots (GAME_RULES.md section 1), so ten locks fill them.
@@ -119,18 +117,18 @@ describe('generated scripts always carry Protagonist, Antagonist and Finale', ()
 
             await h.callAsync('HACScriptGenerator.generateScripts');
 
-            expect(feedback.textContent).toContain('Remove 3 locked elements.');
+            expect(feedback.textContent).toContain('Remove 1 locked element.');
             expect(feedback.textContent).not.toContain('raise the score target');
         });
 
-        test('a Finale that every exclusion removes is refused before generating', async () => {
-            installGeneratorDom({ excluded: tagsOf('Finale') });
+        test('a Protagonist that every exclusion removes is refused before generating', async () => {
+            installGeneratorDom({ excluded: tagsOf('Protagonist') });
             globalThis.generatedScriptsCache = 'untouched';
 
             await h.callAsync('HACScriptGenerator.generateScripts');
 
             expect(globalThis.generatedScriptsCache).toBe('untouched');
-            expect(feedback.textContent).toContain('A script needs at least one available Finale');
+            expect(feedback.textContent).toContain('A script needs at least one available Protagonist');
         });
 
         test('locks that fit are not refused', async () => {
@@ -141,7 +139,7 @@ describe('generated scripts always carry Protagonist, Antagonist and Finale', ()
             expect(feedback.textContent).toBe('');
             expect(Array.isArray(globalThis.generatedScriptsCache)).toBe(true);
             globalThis.generatedScriptsCache.forEach(script =>
-                MANDATORY.forEach(category => expect(categoriesIn(script)).toContain(category)));
+                expect(categoriesIn(script)).toContain('Protagonist'));
         }, 20000);
     });
 });

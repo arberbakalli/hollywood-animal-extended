@@ -327,10 +327,12 @@
         return HACGravesBestMatchesEngine.isCategoryFull(category, counts, MULTI_SELECT_CATEGORIES);
     }
 
-    // Every script the game accepts carries at least one of each of these.
-    // Seeding them first is what makes a suggested combination something the
-    // player can actually build, rather than a pile of high-scoring themes.
-    const TARGETED_MANDATORY_CATEGORIES = ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale'];
+    // Every script the game accepts carries at least one of each of these
+    // (GAME_RULES.md section 1). Seeding them first is what makes a suggested
+    // combination something the player can actually build.
+    // Antagonist and Finale are optional normal picks: the free fill takes them
+    // by score like any other story element, one each at most.
+    const TARGETED_MANDATORY_CATEGORIES = HACScriptRules.requiredCategories;
 
     function isStoryElement(tag) {
         return HACGravesAnalysis.isStoryElement(tag);

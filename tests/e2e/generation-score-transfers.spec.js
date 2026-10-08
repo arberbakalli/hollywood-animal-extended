@@ -76,8 +76,11 @@ for (const [mode, button] of MODES) {
       expect(script.tags.find(tag => tag.id === 'ACTION').percent).toBe(0.8);
       expect(script.tags.find(tag => tag.id === 'COMEDY').percent).toBe(0.2);
       expect(script.tags.filter(tag => tag.id === 'PROTAGONIST_COWBOY')).toHaveLength(1);
-      for (const category of ['Setting', 'Protagonist', 'Antagonist', 'Finale']) {
+      for (const category of ['Setting', 'Protagonist']) {
         expect(script.tags.filter(tag => tag.category === category)).toHaveLength(1);
+      }
+      for (const category of ['Antagonist', 'Finale']) {
+        expect(script.tags.filter(tag => tag.category === category).length).toBeLessThanOrEqual(1);
       }
       for (const field of ['commercial', 'artistic']) {
         expect(Number.isFinite(script.scores[field])).toBe(true);

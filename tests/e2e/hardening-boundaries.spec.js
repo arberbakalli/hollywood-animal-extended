@@ -117,8 +117,11 @@ for (const [mode, button] of [
         expect(script.tags.some(tag => tag.id === 'PROTAGONIST_COWBOY')).toBe(true);
         expect(script.banned).toEqual([]);
         expect(script.storyCount).toBe(storyCount);
-        for (const category of ['Setting', 'Protagonist', 'Antagonist', 'Finale']) {
+        for (const category of ['Setting', 'Protagonist']) {
           expect(script.tags.filter(tag => tag.category === category)).toHaveLength(1);
+        }
+        for (const category of ['Antagonist', 'Finale']) {
+          expect(script.tags.filter(tag => tag.category === category).length).toBeLessThanOrEqual(1);
         }
         expect(script.tags.filter(tag => tag.category === 'Genre').length).toBeGreaterThanOrEqual(1);
         for (const score of [script.scores.commercial, script.scores.artistic, script.stats.avgComp,
@@ -138,7 +141,7 @@ for (const [mode, button] of [
   }
 }
 
-for (const category of ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale']) {
+for (const category of ['Genre', 'Setting', 'Protagonist']) {
   test(`TC22-000008 Build for Target refuses scripts when every ${category} is banned`, async ({ steps, page }) => {
     await openHollywood(steps);
     await page.evaluate(category => {

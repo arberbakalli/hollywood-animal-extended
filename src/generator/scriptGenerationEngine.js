@@ -352,26 +352,32 @@
             }
         }
 
-        // Reserved before any filler, whatever the locks hold (GAME_RULES.md §1).
-        // prepareGenerationInputs refuses locks that leave no room for these,
-        // so reserving them never pushes a script past its target.
-        const scoringMandatory = ["Protagonist", "Antagonist", "Finale"];
-        scoringMandatory.forEach(cat => {
-            if (!categoriesPresent.has(cat)) {
-                const randomTag = getRandomTagByCategory(cat, currentTags, excludedIds);
-                if (randomTag) {
-                    currentTags.push(randomTag);
-                    categoriesPresent.add(cat);
-                }
+        // The Protagonist is required and reserved whatever the locks hold;
+        // prepareGenerationInputs refuses locks that leave it no room.
+        if (!categoriesPresent.has("Protagonist")) {
+            const protagonist = getRandomTagByCategory("Protagonist", currentTags, excludedIds);
+            if (protagonist) {
+                currentTags.push(protagonist);
+                categoriesPresent.add("Protagonist");
             }
-        });
+        }
 
-        const fillerCats = ["Supporting Character", "Theme & Event"];
+        // Antagonist and Finale are optional normal picks, one each at most,
+        // competing with the other story categories (GAME_RULES.md section 1).
+        const fillerCats = ["Supporting Character", "Theme & Event", "Antagonist", "Finale"]
+            .filter(cat => !categoriesPresent.has(cat) || cat === "Supporting Character" || cat === "Theme & Event");
         while (getScoringElementCount(currentTags) < targetCount) {
             const randCat = fillerCats[Math.floor(Math.random() * fillerCats.length)];
+            if ((randCat === "Antagonist" || randCat === "Finale") && categoriesPresent.has(randCat)) {
+                fillerCats.splice(fillerCats.indexOf(randCat), 1);
+                if (fillerCats.length === 0) break;
+                continue;
+            }
             const randomTag = getRandomTagByCategory(randCat, currentTags, excludedIds);
-            if (randomTag) currentTags.push(randomTag);
-            else {
+            if (randomTag) {
+                currentTags.push(randomTag);
+                categoriesPresent.add(randCat);
+            } else {
                 fillerCats.splice(fillerCats.indexOf(randCat), 1);
                 if (fillerCats.length === 0) break;
             }

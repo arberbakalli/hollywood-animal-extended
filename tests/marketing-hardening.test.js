@@ -32,7 +32,7 @@ describe('Marketing cross-feature contracts', () => {
         expect(scores).toEqual([...scores].sort((a, b) => b - a));
     });
 
-    test.each(['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale'])(
+    test.each(['Genre', 'Setting', 'Protagonist'])(
         'excluding every %s yields no incomplete Build for Target script', category => {
             const available = Object.values(h.GAME_DATA.tags).filter(tag => tag.category !== category);
             expect(available.length).toBeGreaterThan(0);

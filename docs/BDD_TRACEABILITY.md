@@ -21,9 +21,13 @@ file is the fast lookup for agents before editing tests or product code.
   `tests/scoringCore.test.js`
 - Exclusions in the first-run state (Starting Tags applied, exactly 193 bans):
   `tests/e2e/exclusion-starting-tags.spec.js`
-- Mandatory Protagonist/Antagonist/Finale slots reserved against locks:
+- Required categories (Genre, Setting, Protagonist; Antagonist and Finale
+  optional normal picks), the Protagonist slot reserved against locks:
+  `tests/required-categories-rule.test.js`,
+  `tests/protagonist-only-required.test.js`,
   `tests/generator-mandatory-categories.test.js`,
-  `tests/e2e/script-lab.spec.js` (TC01-000034)
+  `tests/e2e/script-lab.spec.js` (TC01-000034),
+  `tests/e2e/protagonist-only-required.spec.js` (TC01-000055)
 - Max Element Pool clamped to 5-10:
   `tests/element-pool-clamp.test.js`,
   `tests/e2e/slider-syncing.spec.js` (TC10-000008, TC10-000009)
@@ -148,7 +152,7 @@ cross-feature contracts live in `tests/scenarios/product-hardening.feature`.
   `tests/e2e/hardening-boundaries.spec.js` (TC22-000007),
   `tests/e2e/generation-score-transfers.spec.js` (TC24-000001, 002),
   `tests/e2e/product-hardening.spec.js` (TC20-000001, 002).
-- Insufficient available elements and mandatory-category slots:
+- Insufficient available elements and the required-category slots:
   `tests/generation-pool-hardening.test.js`, `tests/marketing-hardening.test.js`,
   TC20-000003 and TC22-000008/009.
 - Complete evaluation versus partial Best Matches seeds, swaps at a full pool,

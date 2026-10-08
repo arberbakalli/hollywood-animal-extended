@@ -29,6 +29,17 @@ A script is:
 - **exactly one Setting**
 - **5 to 10 story elements** — the Max Element Pool
 
+**Required in every script: Genre, Setting, Protagonist.**
+
+Antagonist and Finale are optional. A script with neither is a legal script;
+the game's own tutorial says "not every film needs an antagonist"
+(`TUTORIAL_NEED_FOR_ANTAGONIST`). The Protagonist is the only required story
+element, so it is the only one that reserves a slot against the locks.
+
+> Owner ruling 2026-10-08, from play. The sentence above is the one statement
+> of this rule; `tests/required-categories-rule.test.js` fails if any code list
+> or any other sentence in this file disagrees with it.
+
 **Story elements are everything except Genre and Setting.** Genre and Setting are
 context: they occupy no budget. A script's total width is therefore the budget
 plus its context, never a fixed number.
@@ -105,20 +116,33 @@ come from what the player chose.
 | Theme & Event | unlimited |
 | Setting, Protagonist, Antagonist, Finale | one each |
 
-Protagonist, Antagonist and Finale are mandatory and **do** spend the budget.
+The Protagonist spends the story-element budget like any other pick.
 
-**Script Lab reserves a slot for each of them.** Locked elements can never push
-one out. When the locks leave fewer free slots than the mandatory categories
-still missing, Generate refuses and says which are missing and how many locks
-to remove (or to raise the score target, when that adds a slot). A category the
-exclusions empty completely is refused the same way, before generating.
+**Script Lab reserves a slot for the Protagonist.** Locked elements can never
+push it out. When the locks fill every slot and none is a Protagonist, Generate
+refuses and says how many locks to remove (or to raise the score target, when
+that adds a slot). A required category the exclusions empty completely is
+refused the same way, before generating. Antagonist and Finale never cause a
+refusal.
 
-> Owner ruling 2026-09-28. The generator added them only while the count was
-> below target, so 3 locked Supporting Characters at a target of 5 produced
-> scripts with no Finale every time. Enforced in `prepareGenerationInputs`
-> (`src/generator/scriptGenerator.js`) and `runGenerationAlgorithm`
-> (`src/generator/scriptGenerationEngine.js`). Pinned by
-> `tests/generator-mandatory-categories.test.js` and TC01-000034.
+**Antagonist and Finale are normal picks** (owner ruling 2026-10-08). They are
+not reserved: Script Lab and Build for Target fill the free slots from
+Supporting Character, Theme & Event, Antagonist and Finale alike, one Antagonist
+and one Finale at most. A generated script may carry neither.
+
+> **Corrected 2026-10-08 (owner): Antagonist and Finale are not mandatory.**
+> This file wrongly said "Protagonist, Antagonist and Finale are mandatory" from
+> 2026-09-28 until 2026-10-08, labelled as an owner ruling. The real defect
+> then was locks pushing out the Protagonist (Graves rejects that script); the
+> fix over-reached and reserved Antagonist and Finale too, and that over-reach
+> was written here as the rule. It contradicted the Colman Graves sentence
+> above, and it refused five locked Theme & Event elements at pool 6 instead of
+> finding them a Protagonist. Enforced in `prepareGenerationInputs`
+> (`src/generator/scriptGenerator.js`), `runGenerationAlgorithm`
+> (`src/generator/scriptGenerationEngine.js`) and `fillWithinCategoryLimits`
+> (`src/marketing/targetedAds.js`). Pinned by
+> `tests/protagonist-only-required.test.js`,
+> `tests/required-categories-rule.test.js`, TC01-000034 and TC01-000055.
 
 This is **one rule in one place**: `isCategoryFull` in
 `src/evaluation/gravesBestMatchesEngine.js`, driven by `MULTI_SELECT_CATEGORIES`

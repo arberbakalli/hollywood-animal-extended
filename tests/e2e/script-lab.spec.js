@@ -127,7 +127,6 @@ test.describe('Script Lab — generator', () => {
     expect(cards.length).toBeGreaterThan(0);
     for (const categories of cards) {
       expect(categories).toContain('Protagonist');
-      expect(categories).toContain('Antagonist');
       const ranks = categories.map(category => order.indexOf(category));
       expect(ranks).not.toContain(-1);
       expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
@@ -137,26 +136,27 @@ test.describe('Script Lab — generator', () => {
   // Given a supporting character is locked
   // When scripts are generated
   // Then every rendered script card keeps that locked pick
-  // Given three Supporting Characters are locked at the default target of 5
+  // Given five Supporting Characters are locked at the default target of 5
   // When the user generates
-  // Then generation is refused, naming the mandatory categories and the fix,
-  // instead of quietly producing scripts with no Finale
-  test('TC01-000034 locks that leave no room for a Finale are refused with a way out', async ({ steps, page }) => {
+  // Then generation is refused, naming the Protagonist and the fix,
+  // instead of producing scripts with no Protagonist (GAME_RULES.md section 1)
+  test('TC01-000034 locks that leave no room for the Protagonist are refused with a way out', async ({ steps, page }) => {
     // Add-row inserts the new, empty row first, so each pick goes into row 0.
     const rows = page.locator('#inputs-supporting-character-generator select.tag-selector');
-    const picks = [SIDEKICK, 'SUPPORTINGCHARACTER_LOVE_INTEREST', 'SUPPORTINGCHARACTER_ANGRY_BOSS'];
+    const picks = [SIDEKICK, 'SUPPORTINGCHARACTER_LOVE_INTEREST', 'SUPPORTINGCHARACTER_ANGRY_BOSS',
+      'SUPPORTINGCHARACTER_MENTOR', 'SUPPORTINGCHARACTER_RIVAL'];
     for (let i = 0; i < picks.length; i++) {
       if (i > 0) await steps.on('addLockedSupportingCharacterRow', 'ScriptLab').click();
       await rows.first().focus();
       await rows.first().selectOption(picks[i]);
     }
-    await expect(rows).toHaveCount(3);
+    await expect(rows).toHaveCount(5);
     expect((await rows.evaluateAll(selects => selects.map(s => s.value))).sort()).toEqual([...picks].sort());
 
     await steps.on('generateButton', 'ScriptLab').click();
 
     await steps.on('feedbackMessage', 'ScriptLab')
-      .verifyTextContains('Every script needs a Protagonist, an Antagonist and a Finale');
+      .verifyTextContains('Every script needs a Protagonist.');
     await steps.on('feedbackMessage', 'ScriptLab')
       .verifyTextContains('Remove 1 locked element or raise the score target');
     await steps.on('resultsSection', 'ScriptLab').verifyState('hidden');

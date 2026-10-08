@@ -503,3 +503,19 @@ Feature: Script Lab
     Then there are 11 Genre rows and the button is disabled
     When the user removes one Genre row
     Then the button works again
+
+  # [automated] TC01-000055, tests/e2e/protagonist-only-required.spec.js. Owner ruling 2026-10-08:
+  # only Genre, Setting and Protagonist are required; Antagonist and Finale are optional.
+  Scenario: Locked themes leave room only for a Protagonist, and Generate finds one
+    Given Max Element Pool is 6
+    And five Theme & Event elements are locked
+    When the user generates
+    Then every script keeps the five themes and adds exactly one Protagonist
+    And no message asks for an Antagonist or a Finale
+
+  # [automated] TC01-000034, tests/e2e/script-lab.spec.js. Owner ruling 2026-10-08.
+  Scenario: Locks that leave no room for the Protagonist are refused with a way out
+    Given five Supporting Characters are locked at the default target of 5
+    When the user generates
+    Then generation is refused with "Every script needs a Protagonist."
+    And the message says "Remove 1 locked element or raise the score target"

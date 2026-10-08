@@ -46,7 +46,7 @@ Feature: Consistent scripts across generation, evaluation and marketing
     And Max Element Pool is <pool>
     When the player uses <mode>
     Then every result retains Cowboy and has exactly <pool> story elements
-    And every result contains Genre, Setting, Protagonist, Antagonist and Finale
+    And every result contains Genre, Setting and Protagonist, and at most one Antagonist and one Finale
     And no result contains an excluded element
     And all movie scores are finite
     And results are ordered by <ranking>
@@ -110,8 +110,6 @@ Feature: Consistent scripts across generation, evaluation and marketing
       | Genre       |
       | Setting     |
       | Protagonist |
-      | Antagonist  |
-      | Finale      |
 
   # [automated] TC22-000009, tests/e2e/hardening-boundaries.spec.js.
   Scenario: Fully locked story slots still leave room for context

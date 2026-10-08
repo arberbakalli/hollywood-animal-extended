@@ -169,10 +169,12 @@
         return gap > 0 || (gap === 0 && scoreGap > 0);
     }
 
-    // What Colman Graves needs before it will evaluate a script.
-    const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist"];
-    // What every generated script carries; these spend the story-element budget.
-    const MANDATORY_STORY_CATEGORIES = ["Protagonist", "Antagonist", "Finale"];
+    // What the game requires of every script (GAME_RULES.md section 1).
+    const REQUIRED_SCRIPT_CATEGORIES = HACScriptRules.requiredCategories;
+    // The only required category that spends the story-element budget.
+    const MANDATORY_STORY_CATEGORIES = HACScriptRules.mandatoryStoryCategories;
+    // Optional, one each at most; normal picks that compete for free slots.
+    const OPTIONAL_STORY_CATEGORIES = HACScriptRules.optionalStoryCategories;
 
     function formatCategoryList(categories) {
         if (categories.length <= 1) return categories.join('');
@@ -247,8 +249,7 @@
         const excludedTags = getGeneratorExcludedTags();
         const excludedIds = new Set(excludedTags.map(t => t.id));
 
-        const generatedCategories = [...new Set([...REQUIRED_SCRIPT_CATEGORIES, ...MANDATORY_STORY_CATEGORIES])];
-        const missingRequiredCategories = generatedCategories.filter(category =>
+        const missingRequiredCategories = REQUIRED_SCRIPT_CATEGORIES.filter(category =>
             !Object.values(GAME_DATA.tags).some(tag =>
                 tag.category === category &&
                 !excludedIds.has(tag.id) &&
@@ -276,21 +277,19 @@
             return null;
         }
 
-        // Reserve a slot for each mandatory category the locks do not cover.
+        // Reserve a slot for the Protagonist when the locks do not cover it.
+        // Antagonist and Finale are optional and never refuse a script.
         const unlockedMandatory = MANDATORY_STORY_CATEGORIES.filter(category =>
             !fixedTags.some(tag => tag.category === category));
         const freeSlots = targetCount - scoringFixed.length;
         if (unlockedMandatory.length > freeSlots) {
             const surplus = unlockedMandatory.length - freeSlots;
             const missing = formatCategoryList(unlockedMandatory);
-            const room = freeSlots === 0
-                ? `fill all ${targetCount} slots, leaving no room for the ${missing}`
-                : `leave room for ${freeSlots} more, but the ${missing} need ${unlockedMandatory.length}`;
             const remedy = `Remove ${surplus} locked element${surplus === 1 ? '' : 's'}`;
             const canRaiseTarget = getRequiredElementCount(targetScoreInput + 1) > targetCount;
             showFeedbackMessage(
                 'generatorFeedbackMessage',
-                `Every script needs a Protagonist, an Antagonist and a Finale. Your ${scoringFixed.length} locked story elements ${room}. ${remedy}${canRaiseTarget ? ' or raise the score target' : ''}.`
+                `Every script needs a ${missing}. Your ${scoringFixed.length} locked story elements fill all ${targetCount} slots, leaving no room for the ${missing}. ${remedy}${canRaiseTarget ? ' or raise the score target' : ''}.`
             );
             return null;
         }
@@ -307,13 +306,16 @@
             return null;
         }
 
+        const fixedIds = new Set(fixedTags.map(tag => tag.id));
         const remainingMandatory = MANDATORY_STORY_CATEGORIES.filter(category =>
             !fixedTags.some(tag => tag.category === category)).length;
-        const fixedIds = new Set(fixedTags.map(tag => tag.id));
+        const optionalSingles = OPTIONAL_STORY_CATEGORIES.filter(category =>
+            !fixedTags.some(tag => tag.category === category) &&
+            Object.values(GAME_DATA.tags).some(tag => tag.category === category && !excludedIds.has(tag.id))).length;
         const availableFillers = Object.values(GAME_DATA.tags).filter(tag =>
             (tag.category === 'Supporting Character' || tag.category === 'Theme & Event') &&
             !excludedIds.has(tag.id) && !fixedIds.has(tag.id)).length;
-        if (scoringFixed.length + remainingMandatory + availableFillers < targetCount) {
+        if (scoringFixed.length + remainingMandatory + optionalSingles + availableFillers < targetCount) {
             showFeedbackMessage('generatorFeedbackMessage',
                 `Not enough available story elements to fill ${targetCount} slots. Remove exclusions or lower the score target.`);
             return null;
