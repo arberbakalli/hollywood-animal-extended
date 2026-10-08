@@ -170,11 +170,11 @@
     }
 
     // What the game requires of every script (GAME_RULES.md section 1).
-    const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist"];
+    const REQUIRED_SCRIPT_CATEGORIES = HACScriptRules.requiredCategories;
     // The only required category that spends the story-element budget.
-    const MANDATORY_STORY_CATEGORIES = ["Protagonist"];
+    const MANDATORY_STORY_CATEGORIES = HACScriptRules.mandatoryStoryCategories;
     // Optional, one each at most; normal picks that compete for free slots.
-    const OPTIONAL_STORY_CATEGORIES = ["Antagonist", "Finale"];
+    const OPTIONAL_STORY_CATEGORIES = HACScriptRules.optionalStoryCategories;
 
     function formatCategoryList(categories) {
         if (categories.length <= 1) return categories.join('');

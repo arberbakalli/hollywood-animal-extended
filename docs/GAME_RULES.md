@@ -37,8 +37,10 @@ the game's own tutorial says "not every film needs an antagonist"
 element, so it is the only one that reserves a slot against the locks.
 
 > Owner ruling 2026-10-08, from play. The sentence above is the one statement
-> of this rule; `tests/required-categories-rule.test.js` fails if any code list
-> or any other sentence in this file disagrees with it.
+> of this rule. In code it lives once, in `src/rules/scriptCategories.js`
+> (`HACScriptRules`): Script Lab, the generation engine and Build for Target
+> read their lists from it and keep no copy. `tests/required-categories-rule.test.js`
+> fails if that file, a consumer, or any other sentence in this file disagrees.
 
 **Story elements are everything except Genre and Setting.** Genre and Setting are
 context: they occupy no budget. A script's total width is therefore the budget

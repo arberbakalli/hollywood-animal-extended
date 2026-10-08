@@ -51,13 +51,22 @@ describe('required script categories: one rule, every copy agrees', () => {
     });
 
     test('the code lists match the rule', async () => {
+        // The one runtime list (src/rules/scriptCategories.js) matches the rule...
+        const h = await loadLegacyScript();
+        expect([...h.evaluate('HACScriptRules.requiredCategories')]).toEqual(required);
+        expect([...h.evaluate('HACScriptRules.mandatoryStoryCategories')]).toEqual(['Protagonist']);
+        expect([...h.evaluate('HACScriptRules.optionalStoryCategories')]).toEqual(OPTIONAL);
+
+        // ...and every consumer reads it instead of keeping its own copy.
         const generator = await readFile('src/generator/scriptGenerator.js', 'utf8');
         const targeted = await readFile('src/marketing/targetedAds.js', 'utf8');
-        const read = (source, name) => list(source.match(new RegExp(`const ${name} = \\[([^\\]]*)\\]`))[1]);
-        expect(read(generator, 'REQUIRED_SCRIPT_CATEGORIES')).toEqual(required);
-        expect(read(targeted, 'TARGETED_MANDATORY_CATEGORIES')).toEqual(required);
-        expect(read(generator, 'MANDATORY_STORY_CATEGORIES')).toEqual(['Protagonist']);
-        expect(read(generator, 'OPTIONAL_STORY_CATEGORIES')).toEqual(OPTIONAL);
+        const engine = await readFile('src/generator/scriptGenerationEngine.js', 'utf8');
+        expect(generator).toMatch(/const REQUIRED_SCRIPT_CATEGORIES = HACScriptRules\.requiredCategories;/);
+        expect(generator).toMatch(/const MANDATORY_STORY_CATEGORIES = HACScriptRules\.mandatoryStoryCategories;/);
+        expect(generator).toMatch(/const OPTIONAL_STORY_CATEGORIES = HACScriptRules\.optionalStoryCategories;/);
+        expect(targeted).toMatch(/const TARGETED_MANDATORY_CATEGORIES = HACScriptRules\.requiredCategories;/);
+        expect(engine).toMatch(/HACScriptRules\.mandatoryStoryCategories\.forEach/);
+        expect(engine).toMatch(/const optionalSingles = HACScriptRules\.optionalStoryCategories;/);
     });
 
     test('no source list named mandatory or required holds Antagonist or Finale, and no message demands them', async () => {

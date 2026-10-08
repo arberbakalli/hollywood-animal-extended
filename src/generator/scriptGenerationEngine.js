@@ -354,21 +354,23 @@
 
         // The Protagonist is required and reserved whatever the locks hold;
         // prepareGenerationInputs refuses locks that leave it no room.
-        if (!categoriesPresent.has("Protagonist")) {
-            const protagonist = getRandomTagByCategory("Protagonist", currentTags, excludedIds);
-            if (protagonist) {
-                currentTags.push(protagonist);
-                categoriesPresent.add("Protagonist");
+        HACScriptRules.mandatoryStoryCategories.forEach(cat => {
+            if (categoriesPresent.has(cat)) return;
+            const randomTag = getRandomTagByCategory(cat, currentTags, excludedIds);
+            if (randomTag) {
+                currentTags.push(randomTag);
+                categoriesPresent.add(cat);
             }
-        }
+        });
 
         // Antagonist and Finale are optional normal picks, one each at most,
         // competing with the other story categories (GAME_RULES.md section 1).
-        const fillerCats = ["Supporting Character", "Theme & Event", "Antagonist", "Finale"]
-            .filter(cat => !categoriesPresent.has(cat) || cat === "Supporting Character" || cat === "Theme & Event");
+        const optionalSingles = HACScriptRules.optionalStoryCategories;
+        const fillerCats = ["Supporting Character", "Theme & Event",
+            ...optionalSingles.filter(cat => !categoriesPresent.has(cat))];
         while (getScoringElementCount(currentTags) < targetCount) {
             const randCat = fillerCats[Math.floor(Math.random() * fillerCats.length)];
-            if ((randCat === "Antagonist" || randCat === "Finale") && categoriesPresent.has(randCat)) {
+            if (optionalSingles.includes(randCat) && categoriesPresent.has(randCat)) {
                 fillerCats.splice(fillerCats.indexOf(randCat), 1);
                 if (fillerCats.length === 0) break;
                 continue;
