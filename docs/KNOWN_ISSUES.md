@@ -96,15 +96,11 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 
 ## Data Correctness
 
-- **The starting pool may be one short** (found 2026-10-05, owner to check in a
-  new game). The game extract gives 58 elements the starting date, written two
-  ways: `DATE:>=1929` (50) and `DATE:>=01-01-1929` (8);
-  `GAME_DATA.starterWhitelist` in `data.js` has 57. The one
-  missing is `EVENTS_JOUSTING_TOURNAMENT` (Theme & Event). GAME_RULES "Starting
-  Tags" says 57 and 193 bans, and the tests pin 193, so nothing changes until
-  the owner confirms in the game. If Jousting Tournament is available from the
-  start, the rule becomes 58 / 192 and each test pinning 193 needs the owner's
-  approval by name.
+- **Resolved 2026-10-08: the starting pool was one short.** The game extract
+  gives 58 elements the starting date (`DATE:>=1929` 50, `DATE:>=01-01-1929` 8);
+  `GAME_DATA.starterWhitelist` had 57, missing `EVENTS_JOUSTING_TOURNAMENT`.
+  The owner confirmed it in a new game; the list now has 58 and a fresh
+  exclusion list 192 bans (GAME_RULES "Starting Tags").
 - Not yet analysed: whether perks or buildings change the age-group audience
   effects. (From the removed `extractedFilesFromGameSourceOfTruth/PHASE_3_TODO.md`.)
 - **All full data files use the game ids** (checked 2026-10-06):

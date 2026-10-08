@@ -1,6 +1,8 @@
 import { describe, test, expect, beforeAll, afterEach } from '@jest/globals';
 import { loadInstrumentedApp, loadScoringModules, round } from './helpers/legacyHarness.js';
 import { tag } from './helpers/gameTestBuilders.js';
+import { readFile } from 'node:fs/promises';
+import { STARTING_DECK_SIZE, STARTING_BAN_COUNT } from './fixtures/startingDeck.js';
 
 /**
  * Golden-master characterisation of the scoring core in script.js.
@@ -203,26 +205,15 @@ describe('getRequiredElementCount', () => {
 });
 
 describe('generator availability', () => {
-    test('starter whitelist matches verified in-game starting deck', () => {
-        expect(h.GAME_DATA.starterWhitelist).toEqual([
-            'ACTION', 'COMEDY', 'DRAMA', 'ROMANCE', 'ADVENTURE', 'DETECTIVE', 'HISTORICAL', 'THRILLER',
-            'FANTASY_KINGDOM', 'MODERN_AMERICAN_CITY', 'MODERN_AMERICAN_TOWN', 'TROPICAL_ISLAND', 'WILD_WEST',
-            'PROTAGONIST_CLUMSY_OAF', 'PROTAGONIST_COP', 'PROTAGONIST_COWBOY', 'PROTAGONIST_DARING_ADVENTURER',
-            'PROTAGONIST_DETECTIVE', 'PROTAGONIST_HOPELESS_ROMANTIC', 'PROTAGONIST_KNIGHT', 'PROTAGONIST_WORKING_MAN',
-            'ANTAGONIST_BANDIT', 'ANTAGONIST_CRIMINAL_MASTERMIND', 'ANTAGONIST_EVIL_MONSTER',
-            'ANTAGONIST_EVIL_WITCH', 'ANTAGONIST_MURDERER', 'ANTAGONIST_SERIAL_KILLER', 'ANTAGONIST_TRIBAL_CHIEF',
-            'SUPPORTINGCHARACTER_ANGRY_BOSS', 'SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS', 'SUPPORTINGCHARACTER_FEMME_FATALE',
-            'SUPPORTINGCHARACTER_LOVE_INTEREST', 'SUPPORTINGCHARACTER_MENTOR', 'SUPPORTINGCHARACTER_RIVAL',
-            'SUPPORTINGCHARACTER_SIDEKICK', 'SUPPORTINGCHARACTER_STRICT_PARENT',
-            'EVENTS_ANCIENT_PUZZLE', 'THEME_AVENGING_LOVED_ONES', 'EVENTS_BANK_ROBBERY',
-            'THEME_LOVE_TRIANGLE', 'EVENTS_PRISON_BREAK', 'THEME_SEARCH_KILLER', 'EVENTS_SHOOTOUT',
-            'THEME_SLAPSTICK_MAYHEM', 'THEME_STRUGGLE_FOR_BETTER_LIFE', 'THEME_TREASURE_HUNT',
-            'THEME_UNREQUITED_LOVE', 'THEME_WINNING_THE_BELOVED',
-            'FINALE_ANTAGONIST_GETS_KILLED', 'FINALE_ANTAGONIST_GETS_PUNISHED', 'FINALE_ANTAGONIST_REPENTS',
-            'FINALE_PROTAGONIST_DIES_HEROICALLY', 'FINALE_PROTAGONIST_FINDS_TREASURE',
-            'FINALE_PROTAGONIST_GETS_CHANCE_FOR_BETTER_LIFE', 'FINALE_PROTAGONIST_OVERCAME_SELFDOUBT',
-            'FINALE_PROTAGONIST_RESCUES_HOSTAGE', 'FINALE_SWEETHEARTS_STAY_TOGETHER'
-        ]);
+    // The game file is the source (owner confirmed 58 in a new game, 2026-10-08).
+    test('starter whitelist matches verified in-game starting deck', async () => {
+        const extract = JSON.parse(await readFile('extractedFilesFromGameSourceOfTruth/TagData.json', 'utf8'));
+        const startingInGame = Object.entries(extract)
+            .filter(([, tag]) => ['DATE:>=1929', 'DATE:>=01-01-1929'].includes(tag.parameters?.Condition))
+            .map(([id]) => id);
+        expect(h.GAME_DATA.starterWhitelist).toHaveLength(STARTING_DECK_SIZE);
+        expect([...h.GAME_DATA.starterWhitelist].sort()).toEqual(startingInGame.sort());
+        expect(Object.keys(h.GAME_DATA.tags).length - h.GAME_DATA.starterWhitelist.length).toBe(STARTING_BAN_COUNT);
     });
 
 test('excluded elements are the shared source of truth for every script builder', () => {

@@ -18,23 +18,23 @@ Tests operate across three layers:
 3. **Negative and Edge Tests**: Tests that explicitly check rejection paths, boundary conditions, and error states. Examples:
    - Scripts with fewer than 5 or more than 10 story elements are refused with exact counts
    - Banned elements are immediately unavailable in dropdowns after restore (no reload needed)
-   - First-run exclusion list must contain exactly 193 bans, never 192 or 194
+   - First-run exclusion list must contain exactly 192 bans (250 minus the 58-element starting deck)
    - Genre supports up to 11 rows; each row must represent at least 5% appeal
 
-### Rule (b): First-Run State — 193 Bans from 57-Element Pool
+### Rule (b): First-Run State — 192 Bans from 58-Element Pool
 
 - **250 total elements** in GAME_DATA
-- **57 elements** in GAME_DATA.starterWhitelist (the Starting Tags whitelist)
-- **193 elements** are banned on first visit
-- Count is exact. Other counts (e.g., 192, 194) signal a bug
+- **58 elements** in GAME_DATA.starterWhitelist (the Starting Tags whitelist; the one source)
+- **192 elements** are banned on first visit
+- Count is exact. Other counts (e.g., 191, 193) signal a bug
 - On first visit, the app applies Starting Tags automatically
 - After that, it restores the player's saved exclusion list
-- "Apply Starting Tags" resets to exactly 193 and replaces custom bans
+- "Apply Starting Tags" resets to exactly 192 and replaces custom bans
 
 **Implementation guards:**
 - `src/generator/availabilityFilter.js` — filter enforces this pool
 - `src/selectors/storyElementSelector.js` — dropdown rendering respects bans
-- `tests/e2e/exclusion-starting-tags.spec.js` — applies Starting Tags and waits for exactly 193,
+- `tests/e2e/exclusion-starting-tags.spec.js` — applies Starting Tags and waits for exactly 192,
   then exercises the exclusion rules in that state
 - `tests/e2e/exclusion-dropdown-refresh.spec.js` — ban and lift propagation per category
 
@@ -263,7 +263,7 @@ Domain rules are defined in `docs/GAME_RULES.md` and are the source of truth for
 - Script shape and element budget (Genre uncapped, others capped per category)
 - Scoring thresholds and distribution (weeks 1-8, Behemoth toggle, decay gates)
 - Studio policies (Holiday release, factory policy)
-- Exclusion rules (193 Starting Tags bans, restoration timing)
+- Exclusion rules (192 Starting Tags bans, restoration timing)
 
 **Before answering "should it be X or Y?":**
 1. Read `docs/GAME_RULES.md`

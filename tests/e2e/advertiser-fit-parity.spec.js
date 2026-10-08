@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 const SCRIPT = [
   ['genre', 'ACTION'], ['setting', 'WILD_WEST'],
@@ -10,7 +11,7 @@ const SCRIPT = [
 test('TC25-000001 the same balanced script has the same fit and grade for each agency in both Marketing views', async ({ steps, page }) => {
   await openHollywood(steps);
   await page.locator('#applyStartingTagsButton').click();
-  await expect(page.locator('#excluded-count')).toHaveText('193');
+  await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
   await steps.on('marketTab', 'Navigation').click();
   for (const [category, id] of SCRIPT) {
     const select = page.locator(`#inputs-${category}-advertisers select.tag-selector`);

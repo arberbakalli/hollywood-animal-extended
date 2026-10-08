@@ -64,14 +64,14 @@ try {
         await firstVisitPage.goto(baseURL, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
         const coldBootMs = await waitForBoot(firstVisitPage);
         const readyTimestamp = await firstVisitPage.evaluate(() => performance.now());
-        await firstVisitPage.waitForFunction(() => document.querySelector('#excluded-count')?.textContent.trim() === '193');
+        await firstVisitPage.waitForFunction(() => document.querySelector('#excluded-count')?.textContent.trim() === String(Object.keys(GAME_DATA.tags).length - GAME_DATA.starterWhitelist.length));
         const exclusionsReadyAfterBootMs = Math.round(await firstVisitPage.evaluate(start => performance.now() - start, readyTimestamp));
         const firstVisit = await inspectPage(firstVisitPage);
 
         await firstVisitPage.reload({ waitUntil: 'domcontentloaded' });
         const warmBootMs = await waitForBoot(firstVisitPage);
         const warmReadyTimestamp = await firstVisitPage.evaluate(() => performance.now());
-        await firstVisitPage.waitForFunction(() => document.querySelector('#excluded-count')?.textContent.trim() === '193');
+        await firstVisitPage.waitForFunction(() => document.querySelector('#excluded-count')?.textContent.trim() === String(Object.keys(GAME_DATA.tags).length - GAME_DATA.starterWhitelist.length));
         const warmExclusionsReadyAfterBootMs = Math.round(await firstVisitPage.evaluate(start => performance.now() - start, warmReadyTimestamp));
         const warmVisit = await inspectPage(firstVisitPage);
         await firstVisitContext.close();
@@ -93,7 +93,7 @@ try {
             const beforeManualApply = await inspectPage(manualPage);
             const startedAt = await manualPage.evaluate(() => performance.now());
             await manualPage.locator('#applyStartingTagsButton').click();
-            await manualPage.waitForFunction(() => document.querySelector('#excluded-count')?.textContent.trim() === '193');
+            await manualPage.waitForFunction(() => document.querySelector('#excluded-count')?.textContent.trim() === String(Object.keys(GAME_DATA.tags).length - GAME_DATA.starterWhitelist.length));
             manualApplyMs = Math.round(await manualPage.evaluate(start => performance.now() - start, startedAt));
             const afterManualApply = await inspectPage(manualPage);
             manualLongTasks = afterManualApply.longTasks;

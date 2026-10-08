@@ -19,7 +19,7 @@ file is the fast lookup for agents before editing tests or product code.
   `tests/e2e/exclusion-dropdown-refresh.spec.js`,
   `tests/exclusion-store.test.js`,
   `tests/scoringCore.test.js`
-- Exclusions in the first-run state (Starting Tags applied, exactly 193 bans):
+- Exclusions in the first-run state (Starting Tags applied, exactly 192 bans):
   `tests/e2e/exclusion-starting-tags.spec.js`
 - Required categories (Genre, Setting, Protagonist; Antagonist and Finale
   optional normal picks), the Protagonist slot reserved against locks:

@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 const MODES = [
   ['standard', '#generateScriptsButton'],
@@ -90,7 +91,7 @@ test.describe('generation and transfer score integrity', () => {
     test(`TC20-000002 ${mode}: starting-pool generation keeps locks, bans and age roles distinct`, async ({ steps, page }) => {
       await openHollywood(steps);
       await page.locator('#applyStartingTagsButton').click();
-      await expect(page.locator('#excluded-count')).toHaveText('193');
+      await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
       for (const [category, id] of STARTER_SCRIPT) await selectTag(page, category, id);
       const roles = page.locator('.age-role-row .age-role-role-name');
       await expect(roles).toHaveCount(3);
@@ -167,7 +168,7 @@ test.describe('generation and transfer score integrity', () => {
 });
 
 test.describe('product rule boundaries', () => {
-  test('TC20-000006 first visit seeds exactly the complement of the 57 starting elements', async ({ browser, baseURL }) => {
+  test('TC20-000006 first visit seeds exactly the complement of the 58 starting elements', async ({ browser, baseURL }) => {
     const context = await browser.newContext();
     try {
       await context.route(/fonts\.(googleapis|gstatic)\.com/, route => route.abort());
@@ -177,13 +178,13 @@ test.describe('product rule boundaries', () => {
       });
       await page.goto(baseURL);
       await page.waitForFunction(() => window.readyForTest);
-      await expect(page.locator('#excluded-count')).toHaveText('193');
+      await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
       const sets = await page.evaluate(() => ({
         banned: collectTagInputs('excluded').map(tag => tag.id).sort(),
         expected: Object.keys(GAME_DATA.tags).filter(id => !GAME_DATA.starterWhitelist.includes(id)).sort(),
       }));
       expect(sets.banned).toEqual(sets.expected);
-      expect(sets.banned).toHaveLength(193);
+      expect(sets.banned).toHaveLength(STARTING_BAN_COUNT);
     } finally {
       await context.close();
     }
@@ -273,7 +274,7 @@ test.describe('product rule boundaries', () => {
     test(`TC20-000011 Starting Tags Build for Target fills ${pool} story slots and keeps all bans`, async ({ steps, page }) => {
       await openHollywood(steps);
       await page.locator('#applyStartingTagsButton').click();
-      await expect(page.locator('#excluded-count')).toHaveText('193');
+      await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
       await page.locator('#globalElementPoolInput').fill(String(pool));
       await page.locator('#globalElementPoolInput').blur();
       await steps.on('marketTab', 'Navigation').click();

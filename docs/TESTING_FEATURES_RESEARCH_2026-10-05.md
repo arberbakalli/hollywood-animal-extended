@@ -31,7 +31,8 @@ The main app therefore treats one starting element as locked: Apply Starting
 Tags bans it (`src/app/appShell.js:357-366`). **Owner decides:** this conflicts
 with `docs/GAME_RULES.md:538-541`, which fixes the starting pool at 57 and the
 fresh ban list at 193. Following the game data makes them 58 and 192. Not fixed
-here: it changes a written rule and the main app.
+here: it changes a written rule and the main app. (Resolved 2026-10-08: the
+owner confirmed Jousting Tournament in a new game; the main app now has 58 / 192.)
 
 ## 2. Release Strategy: the decay is under-modelled
 

@@ -567,7 +567,7 @@
             }
         });
         // Bulk exclusion/profile creation refreshes once after all rows exist.
-        // Scheduling a full category scan per inserted row makes a 193-ban batch
+        // Scheduling a full category scan per inserted row makes a Starting Tags batch
         // quadratic and blocks the main thread for several seconds.
         const selectorsContainer = document.getElementById(`selectors-container-${context}`);
         if (!selectorsContainer?.classList.contains('is-batching')) {

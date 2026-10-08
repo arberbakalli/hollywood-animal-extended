@@ -86,8 +86,8 @@
 
     // Starting Tags seed the ban list once, on a player's genuine first run.
     // The marker is deliberately NOT "is the stored list empty": a player who
-    // resets every ban has an empty list on purpose and must not have the 193
-    // starter bans pushed back over it on their next visit.
+    // resets every ban has an empty list on purpose and must not have the
+    // Starting Tags bans pushed back over it on their next visit.
     const SEEDED_KEY = 'hac.startingTagsSeeded.v1';
 
     function hasSeededStartingTags() {
@@ -135,8 +135,8 @@
         return saved.length;
     }
 
-    // One save per turn of the event loop: the Starting Tags profile inserts 193
-    // rows in a single pass and each would otherwise serialise the whole list.
+    // One save per turn of the event loop: the Starting Tags profile inserts all its
+    // ban rows in a single pass and each would otherwise serialise the whole list.
     let pendingSave = null;
     function scheduleSave() {
         if (pendingSave !== null) return;

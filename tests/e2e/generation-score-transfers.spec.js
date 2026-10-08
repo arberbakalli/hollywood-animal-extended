@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 const MODES = [
   ['standard', '#generateScriptsButton'],
@@ -46,7 +47,7 @@ for (const [mode, button] of MODES) {
   test(`TC24-000001 ${mode}: pool nine preserves partial locks, bans and movie scores through both transfers`, async ({ steps, page }) => {
     await openHollywood(steps);
     await page.locator('#applyStartingTagsButton').click();
-    await expect(page.locator('#excluded-count')).toHaveText('193');
+    await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
     for (const [category, id] of [
       ['genre', 'ACTION'], ['genre', 'COMEDY'], ['protagonist', 'PROTAGONIST_COWBOY'],
     ]) await lockTag(page, category, id);

@@ -52,14 +52,14 @@ Feature: Script Lab
   Scenario: A first visit excludes exactly the unavailable starting elements
     Given a fresh browser with no saved exclusions
     When the player opens Script Lab
-    Then the exclusion counter reads 193
-    And the excluded elements are exactly those outside the 57-element starting deck
+    Then the exclusion counter reads 192
+    And the excluded elements are exactly those outside the 58-element starting deck
 
   # [automated] TC22-000006, tests/e2e/hardening-boundaries.spec.js.
   Scenario: Starting exclusions alone leave Age and Gender Appeal empty
     Given no role is locked
     When the player applies Starting Tags
-    Then the exclusion counter reads 193
+    Then the exclusion counter reads 192
     And Age and Gender Appeal shows its empty state with no role rows
 
   # [automated] TC20-000007, tests/e2e/product-hardening.spec.js.
@@ -241,7 +241,7 @@ Feature: Script Lab
     Given the user has applied the Starting Tags profile
     When the user loads a profile with an empty entry, an unknown element or a wrong category
     Then a message says the profile is invalid
-    And the 193 bans are unchanged in storage and on screen
+    And the 192 bans are unchanged in storage and on screen
 
   # [automated] TC09-000025.
   Scenario: A saved exclusion profile loads back after the bans are reset

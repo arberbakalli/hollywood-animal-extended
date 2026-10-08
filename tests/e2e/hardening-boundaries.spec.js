@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 async function pick(page, category, id, context) {
   const group = page.locator(`#inputs-${category}-${context}`);
@@ -82,10 +83,10 @@ test('TC22-000005 a persisted Setting ban is unavailable in Graves immediately a
   await expect(page.locator('#gravesExclusionSummary')).toContainText('1');
 });
 
-test('TC22-000006 193 starting bans without locks leave the age panel empty', async ({ steps, page }) => {
+test('TC22-000006 the starting bans without locks leave the age panel empty', async ({ steps, page }) => {
   await openHollywood(steps);
   await page.locator('#applyStartingTagsButton').click();
-  await expect(page.locator('#excluded-count')).toHaveText('193');
+  await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
   await expect(page.locator('.age-role-row')).toHaveCount(0);
   await expect(page.locator('.age-role-empty-state')).toBeVisible();
 });
@@ -99,7 +100,7 @@ for (const [mode, button] of [
     test(`TC22-000007 ${mode} partial-seed generation at pool ${pool} preserves constraints and ranking`, async ({ steps, page }) => {
       await openHollywood(steps);
       await page.locator('#applyStartingTagsButton').click();
-      await expect(page.locator('#excluded-count')).toHaveText('193');
+      await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
       await pick(page, 'protagonist', 'PROTAGONIST_COWBOY', 'generator');
       await page.locator('#globalElementPoolInput').fill(String(pool));
       await page.locator('#globalElementPoolInput').press('Tab');

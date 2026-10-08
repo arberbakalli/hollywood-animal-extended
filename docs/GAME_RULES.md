@@ -578,17 +578,25 @@ place to go stale.
 A new game in Hollywood Animal does not give you every story element. You start
 with a small pool and unlock the rest as you play. The app models that as bans.
 
-- **250** elements in total, **57** in the starting pool
-  (`GAME_DATA.starterWhitelist`, `data.js`), so **193 bans**. Not 192, not 194.
-- On a player's first visit the app applies Starting Tags itself, so a fresh
-  exclusion list reads **193**. After that it restores the player's saved list
-  and never re-seeds it.
-- A count other than 193 on a fresh browser is a bug. On a browser that has
-  used the app before, it is that player's saved list; Apply Starting Tags
-  resets it to 193 and replaces any custom bans.
+**Starting deck: 58 of 250 elements, so 192 bans.**
+
+- The one source is the list `GAME_DATA.starterWhitelist` in `data.js`. The
+  counts follow from it: 250 elements in total, 58 in the starting pool, so a
+  fresh exclusion list reads 192. Never type the counts into code; derive them
+  from the list.
+- On a player's first visit the app applies Starting Tags itself. After that
+  it restores the player's saved list and never re-seeds it.
+- A different count on a fresh browser is a bug. On a browser that has used the
+  app before, it is that player's saved list; Apply Starting Tags resets it to
+  the starting deck and replaces any custom bans.
 
 Per category, starting / total: Genre 8/11, Setting 5/29, Protagonist 8/43,
-Antagonist 7/34, Supporting Character 8/22, Theme & Event 12/81, Finale 9/30.
+Antagonist 7/34, Supporting Character 8/22, Theme & Event 13/81, Finale 9/30.
+
+> Owner confirmed in a new game, 2026-10-08: Jousting Tournament
+> (`EVENTS_JOUSTING_TOURNAMENT`) is available from the start. The game extract
+> gives the same 58 elements the starting date. Until then the list had 57 and
+> the rule said 193 bans.
 
 **Bans are not script content.** A feature that reads "the selected roles" reads
 the script (Locked Elements, the `generator` context), never the excluded list.

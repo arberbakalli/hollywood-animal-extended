@@ -43,6 +43,14 @@ files; the lab ranking then uses them with no code change.
 
 ---
 
+## Trash element indicator and low-priority cleanup — PRIORITY: SOON (owner, 2026-10-08)
+
+Plan and game-file evidence: `docs/parked/LOW_PRIORITY_AND_TRASH_PLAN.md`. The game
+marks 15 trash elements; the owner approves that list before any code. The
+Rating Limit trash row is parked.
+
+---
+
 ## Freshness audit & reset — PRIORITY: MEDIUM
 
 **Raised:** 2026-10-06, after the owner played for a week and returned.

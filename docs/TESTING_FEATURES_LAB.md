@@ -205,8 +205,8 @@ Native multiple selects retain stable editing heights.
   are shown without raw source strings. Odd date forms remain explicitly unclear.
 - The full 145 KB recovered tag extract stays loaded once with the other lab
   data so Unlock Info can show all 250 known conditions without a second fetch.
-  The 58 starting conditions in that extract differ from the main app's
-  57-element starting whitelist; the lab does not change the main-app rule.
+  The 58 starting conditions in that extract match the main app's
+  58-element starting whitelist (owner confirmed 2026-10-08).
 
 ## Factory Estimate Restored (2026-10-06)
 
