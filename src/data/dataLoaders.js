@@ -56,6 +56,8 @@
                     art: parseFloat(data.artValue || 0),
                     com: parseFloat(data.commercialValue || 0),
                     gender: data.gender,
+                    // GAME_RULES section 11: the game file's own Rules field is the one source.
+                    trash: String(data.rules || '').split(',').map(part => part.trim()).includes('TRASH'),
                     weights: parseWeights(weightDataRaw[tagId])
                 };
             }

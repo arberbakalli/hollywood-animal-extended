@@ -118,7 +118,9 @@ recipe (Trash Pit: "Create trash elements"):
 
 ## 3. Priority Order
 
-1. ~~Approve the Trash Element list~~ Done 2026-10-09 (GAME_RULES section 11). Next: build the label from the game file's `TRASH` rule.
+1. ~~Approve the Trash Element list~~ Done 2026-10-09 (GAME_RULES section 11).
+   ~~Build the label~~ Done 2026-10-09 (TC39-000001..3). Next: the score or
+   cap effect, after the owner's Trash King playthrough.
 2. Strengthen the Script Library round-trip assertion.
 3. Repair the grade-distribution measurement tool.
 4. Decide the unused script-scoring engine's fate.

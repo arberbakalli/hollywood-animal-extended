@@ -621,7 +621,8 @@
             const tagClass = t.category === 'Genre' ? `genre-${toDomId(t.id)}` : '';
             const freshnessPill = HACFreshness.hasFreshness(t.category) ? HACFreshness.pillHtml(t.id) : '';
             const isBanned = bannedIds.has(t.id);
-            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${tagClass} ${isFixed ? 'tag-fixed' : ''} ${isBanned ? 'tag-banned' : ''}">${tagName} <small>${t.category}</small>${freshnessPill}</span>`;
+            const trashBadge = HACTrashElements.badgeHtml(t.id);
+            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${tagClass} ${isFixed ? 'tag-fixed' : ''} ${isBanned ? 'tag-banned' : ''}">${tagName} <small>${t.category}</small>${freshnessPill}${trashBadge}</span>`;
         });
 
         const isOptimized = scriptObj.optimizedFor === 'artistic' || scriptObj.optimizedFor === 'commercial';

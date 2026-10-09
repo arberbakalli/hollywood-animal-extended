@@ -1081,9 +1081,19 @@ other. All 15 are recipes created in the Trash Pit.
 | Antagonist (6) | Killer Toaster, Rapist Robot, Robber with a Thousand Penises, Demon Possessed by a Schoolgirl, Headless Dwarven Hypnotists, Cannibal Women's Book Club | `ANTAGONIST_TOASTER_KILLER`, `ANTAGONIST_ROBOT_RAPIST`, `ANTAGONIST_ROBBER_WITH_A_HUNDRED_DICKS`, `ANTAGONIST_SCHOOLGIRL_POSSESSED_DEMON`, `ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS`, `ANTAGONIST_WOMENS_BOOK_CLUB_OF_CANNIBALS` |
 | Theme & Event (2) | Wizard War, Survival Tournament | `THEME_WAR_WITH_SORCERERS`, `EVENTS_SURVIVAL_TOURNAMENT` |
 
-- **One source:** the game file's `TRASH` rule, not a typed list. A future
-  "Trash element" label derives from it (plan:
-  `docs/parked/LOW_PRIORITY_AND_TRASH_PLAN.md`).
+- **One source:** the game file's `TRASH` rule, not a typed list.
+  `data/TagData.json` copies that `rules` value verbatim onto the 15 elements;
+  the loader turns it into `GAME_DATA.tags[id].trash`.
+
+**The "Trash element" label (owner ruling 2026-10-09).** A trash element shows
+a small "Trash element" label wherever the freshness pill shows: Script Lab
+Locked Elements rows and generated or pinned script cards, Colman Graves,
+Analyze Script and Build for Target. In a dropdown row it sits on its own line
+under the box. It is **informative only**: no click action, no score effect, and
+not a freshness state. The dropdown text is unchanged (no "(Trash)" suffix:
+that would be a second name for the element). The circle is a placeholder icon.
+Enforced in `HACTrashElements` (`src/generator/scriptGenerationEngine.js`);
+pinned by `tests/trash-badge.test.js` and TC39-000001..3.
 - `PROTAGONIST_СORNLIMBED_ROMANTIC` starts with a Cyrillic "С" (U+0421) in the
   game's own id; keep it exactly (see "One id, one spelling").
 

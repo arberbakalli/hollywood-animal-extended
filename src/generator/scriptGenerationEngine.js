@@ -222,6 +222,51 @@
         freshnessStore().subscribe(id => syncPills(id));
     }
 
+    // ---- Trash elements (GAME_RULES section 11) ----------------------------
+    // An informative label shown beside the freshness pill. It has no click
+    // action and no score effect; GAME_DATA.tags[id].trash comes from the game
+    // file's TRASH rule.
+    const TRASH_LABEL = 'Trash element';
+
+    function isTrash(id) {
+        const tag = id && typeof GAME_DATA !== 'undefined' ? GAME_DATA.tags[id] : null;
+        return Boolean(tag && tag.trash);
+    }
+
+    function badgeHtml(id) {
+        if (!isTrash(id)) return '';
+        return `<span class="trash-badge" data-role="trash-badge" data-tag-id="${id}" title="${tagName(id)} is a trash element"><span class="trash-badge-icon" aria-hidden="true"></span>${TRASH_LABEL}</span>`;
+    }
+
+    function createBadge() {
+        const badge = document.createElement('span');
+        badge.className = 'trash-badge';
+        badge.dataset.role = 'trash-badge';
+        badge.hidden = true;
+        return badge;
+    }
+
+    function renderBadge(badge, id) {
+        if (!badge) return;
+        if (!isTrash(id)) {
+            badge.hidden = true;
+            delete badge.dataset.tagId;
+            return;
+        }
+        badge.hidden = false;
+        badge.dataset.tagId = id;
+        badge.title = `${tagName(id)} is a trash element`;
+        if (!badge.firstChild) {
+            const icon = document.createElement('span');
+            icon.className = 'trash-badge-icon';
+            icon.setAttribute('aria-hidden', 'true');
+            badge.appendChild(icon);
+            badge.appendChild(document.createTextNode(TRASH_LABEL));
+        }
+    }
+
+    global.HACTrashElements = { TRASH_LABEL, isTrash, badgeHtml, createBadge, renderBadge };
+
     global.HACFreshness = {
         FRESHNESS_STATES,
         FRESHNESS_CATEGORIES,

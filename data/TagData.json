@@ -214,49 +214,56 @@
     "artValue": 0.05,
     "commercialValue": 0.3,
     "CategoryID": "Protagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "PROTAGONIST_SHERIFFS_CONJOINED_TWINS": {
     "type": 2,
     "artValue": -0.3,
     "commercialValue": 0.5,
     "CategoryID": "Protagonist",
-    "gender": "U"
+    "gender": "U",
+    "rules": "TRASH, UNETHICAL"
   },
   "PROTAGONIST_СORNLIMBED_ROMANTIC": {
     "type": 2,
     "artValue": -0.2,
     "commercialValue": 0.2,
     "CategoryID": "Protagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "PROTAGONIST_PARENT_IN_INVISIBLE_CLOTHES": {
     "type": 2,
     "artValue": -0.1,
     "commercialValue": 0.1,
     "CategoryID": "Protagonist",
-    "gender": "U"
+    "gender": "U",
+    "rules": "TRASH, UNETHICAL"
   },
   "PROTAGONIST_VAMPIRE_SHIT-SUCKER": {
     "type": 2,
     "artValue": -0.8,
     "commercialValue": 0.4,
     "CategoryID": "Protagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "PROTAGONIST_GIRL_WITH_A_SWEARING_VAGINA_WITH_TURRET_SYNDROME": {
     "type": 2,
     "artValue": -0.7,
     "commercialValue": 0.2,
     "CategoryID": "Protagonist",
-    "gender": "F"
+    "gender": "F",
+    "rules": "TRASH, UNETHICAL"
   },
   "PROTAGONIST_LOVELACE_WITH_POISONOUS_BALLS": {
     "type": 2,
     "artValue": -0.3,
     "commercialValue": 0.2,
     "CategoryID": "Protagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "PROTAGONIST_WAYWARD_SOUL": {
     "type": 2,
@@ -616,42 +623,48 @@
     "artValue": -0.2,
     "commercialValue": 0.3,
     "CategoryID": "Antagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "ANTAGONIST_ROBOT_RAPIST": {
     "type": 2,
     "artValue": -0.7,
     "commercialValue": 0.2,
     "CategoryID": "Antagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "ANTAGONIST_ROBBER_WITH_A_HUNDRED_DICKS": {
     "type": 2,
     "artValue": -0.9,
     "commercialValue": 0.3,
     "CategoryID": "Antagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "ANTAGONIST_SCHOOLGIRL_POSSESSED_DEMON": {
     "type": 2,
     "artValue": -0.5,
     "commercialValue": 0.2,
     "CategoryID": "Antagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS": {
     "type": 2,
     "artValue": -0.3,
     "commercialValue": 0.2,
     "CategoryID": "Antagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "ANTAGONIST_WOMENS_BOOK_CLUB_OF_CANNIBALS": {
     "type": 2,
     "artValue": -0.3,
     "commercialValue": 0.4,
     "CategoryID": "Antagonist",
-    "gender": "M"
+    "gender": "M",
+    "rules": "TRASH, UNETHICAL"
   },
   "ANTAGONIST_OLD_FRIEND_ENEMY": {
     "type": 2,
@@ -842,7 +855,8 @@
     "type": 2,
     "artValue": -0.4,
     "commercialValue": 0.3,
-    "CategoryID": "Theme"
+    "CategoryID": "Theme",
+    "rules": "TRASH, UNETHICAL"
   },
   "THEME_PROTECTING_THE_WITNESS": {
     "type": 2,
@@ -1148,7 +1162,8 @@
     "type": 2,
     "artValue": -0.3,
     "commercialValue": 0.5,
-    "CategoryID": "Theme"
+    "CategoryID": "Theme",
+    "rules": "TRASH, UNETHICAL"
   },
   "EVENTS_THRILLING_CHASE": {
     "type": 2,

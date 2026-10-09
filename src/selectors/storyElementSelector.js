@@ -312,6 +312,7 @@
             }
             const freshnessPill = row.querySelector(':scope > .freshness-pill');
             if (freshnessPill) HACFreshness.renderPill(freshnessPill, select.value);
+            HACTrashElements.renderBadge(row.querySelector(':scope > .trash-badge'), select.value);
 
             select.querySelectorAll('option').forEach(option => {
                 option.classList.remove('strong-fit-option');
@@ -415,6 +416,7 @@
         selectElement.value = tagId;
         const freshnessPill = selectElement.parentElement?.querySelector(':scope > .freshness-pill');
         if (freshnessPill) HACFreshness.renderPill(freshnessPill, tagId);
+        HACTrashElements.renderBadge(selectElement.parentElement?.querySelector(':scope > .trash-badge'), tagId);
     }
 
     function populateSelectOptions(selectElement, category, tags) {
@@ -542,6 +544,12 @@
             row.appendChild(freshnessPill);
             HACFreshness.renderPill(freshnessPill, select.value);
         }
+        // Trash label (GAME_RULES section 11): same rows as freshness, on its own line.
+        const trashBadge = freshnessPill ? HACTrashElements.createBadge() : null;
+        if (trashBadge) {
+            row.appendChild(trashBadge);
+            HACTrashElements.renderBadge(trashBadge, select.value);
+        }
 
         function updateGenreColor() {
             if (category === 'Genre') {
@@ -560,6 +568,7 @@
             refreshSelectorVisualHints(context);
             updateGenreColor();
             if (freshnessPill) HACFreshness.renderPill(freshnessPill, select.value);
+            if (trashBadge) HACTrashElements.renderBadge(trashBadge, select.value);
 
             if (context === 'excluded') {
                 updateExcludedCount();
