@@ -151,6 +151,7 @@
             list.forEach(entry => {
                 const force = entry === candidate || (forceAllOwned && owned.has(entry.movieId));
                 if (force && entry.forceWinning !== true) { entry.forceWinning = true; summary.forced++; }
+                else if (!force && entry.forceWinning === true) entry.forceWinning = false;
             });
             summary.winners.push({ category, movieId: candidate.movieId, title: movieTitle(allMovies.get(candidate.movieId)) || `Movie ${candidate.movieId}` });
 
@@ -176,8 +177,10 @@
             }
             (candidate.talentIds || []).forEach(id => {
                 const person = people.get(id);
-                if (person && !hasAward(person.polluxes, year, code)) {
-                    person.polluxes = [...(person.polluxes || []), { year, movId: candidate.movieId, category: code }];
+                if (person) {
+                    const award = (person.polluxes || []).find(entry => entry && entry.year === year && entry.category === code);
+                    if (award) award.movId = candidate.movieId;
+                    else person.polluxes = [...(person.polluxes || []), { year, movId: candidate.movieId, category: code }];
                 }
             });
             record.winners[category] = { ...candidate, forceWinning: true };

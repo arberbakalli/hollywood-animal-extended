@@ -114,11 +114,11 @@ recipe (Trash Pit: "Create trash elements"):
   files. **Parked (owner, 2026-10-08)**; the badge stays informative only.
 - Two of the 15 disagree on gender (`KNOWN_ISSUES.md`, parked until played).
 
-**Owner to approve:** the 15-element list above as rule data.
+**Approved:** the owner verified the 15-element list in play on 2026-10-09; it is now `docs/GAME_RULES.md` section 11.
 
 ## 3. Priority Order
 
-1. Approve the 15-element Trash Element list above (evidence gathered).
+1. ~~Approve the Trash Element list~~ Done 2026-10-09 (GAME_RULES section 11). Next: build the label from the game file's `TRASH` rule.
 2. Strengthen the Script Library round-trip assertion.
 3. Repair the grade-distribution measurement tool.
 4. Decide the unused script-scoring engine's fate.

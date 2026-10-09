@@ -150,6 +150,12 @@
             return;
         }
 
+        const overPool = HACScriptGenerator.poolLimitRefusal(storyElements.length);
+        if (overPool) {
+            showFeedbackMessage('gravesFeedbackMessage', overPool, 'accent');
+            return;
+        }
+
         renderColmanGravesResults(calculateScriptEvaluation(selectedTags));
     }
 

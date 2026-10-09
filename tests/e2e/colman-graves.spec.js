@@ -420,6 +420,9 @@ test.describe('Script Evaluation — Colman Graves', () => {
 
   test('TC03-000027 every Swap Suggestion matches the category of the slot it replaces', async ({ steps, page }) => {
     await buildMultiSupportingScript(steps);
+    // Evaluate follows the Max Element Pool (GAME_RULES section 2).
+    await page.locator('#globalElementPoolInput').fill('6');
+    await page.locator('#globalElementPoolInput').press('Tab');
     await steps.on('evaluateButton', 'ColmanGraves').click();
     await steps.on('resultsSection', 'ColmanGraves').verifyState('visible');
 
@@ -649,6 +652,69 @@ test.describe('Script Evaluation — Colman Graves', () => {
     await expect.poll(() => rows.count()).toBeGreaterThan(10);
     const afterClick = await rows.evaluateAll(items => items.map(item => item.textContent));
     expect(afterClick.slice(0, firstPage.length)).toEqual(firstPage);
+    const total = firstPage.length + remainingBefore;
+    let visible = afterClick.length;
+    while (visible < total) {
+      await expect(showMore).toHaveText(`Show more suggestions (${total - visible} more available)`);
+      const previous = await rows.allTextContents();
+      await showMore.click();
+      visible = Math.min(visible + 10, total);
+      await expect(rows).toHaveCount(visible);
+      expect((await rows.allTextContents()).slice(0, previous.length)).toEqual(previous);
+    }
+    await expect(showMore).toHaveCount(0);
+  });
+
+  test('TC03-000061 suggestions retain successful, common, unsuccessful order across every page', async ({ steps, page }) => {
+    // Action alone has no unsuccessful candidates. Cowboy supplies all three
+    // real bands, so ordering cannot pass with the weakest band missing.
+    await steps.selectDropdown('protagonistSelect', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE, value: 'PROTAGONIST_COWBOY',
+    });
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE, value: '0',
+    });
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+    const rows = page.locator('#gravesBestMatchesList [data-role="graves-best-match"]');
+    await expect(rows).toHaveCount(10);
+    const showMore = page.locator('#graves-show-more-btn');
+    const total = 10 + Number((await showMore.textContent()).match(/\((\d+) more available\)/)[1]);
+    for (let count = 10; count < total; count += 10) {
+      await showMore.click();
+      await expect(rows).toHaveCount(Math.min(count + 10, total));
+    }
+    const bands = await rows.evaluateAll(items => items.map(item => item.dataset.band));
+    const order = ['successful', 'common', 'unsuccessful'];
+    expect([...new Set(bands)]).toEqual(order);
+    expect(bands.map(band => order.indexOf(band)))
+      .toEqual(bands.map(band => order.indexOf(band)).sort((a, b) => a - b));
+  });
+
+  test('TC03-000060 additions include the full available pool and omit a globally excluded tag', async ({ steps, page }) => {
+    await steps.on('buildTab', 'Navigation').click();
+    await steps.selectDropdown('excludedSettingSelect', 'ScriptLab', {
+      type: DropdownSelectType.VALUE, value: 'WILD_WEST',
+    });
+    await steps.on('evaluateTab', 'Navigation').click();
+    await steps.selectDropdown('genreSelect', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE, value: 'ACTION',
+    });
+    await steps.selectDropdown('minimumFitFilter', 'ColmanGraves', {
+      type: DropdownSelectType.VALUE, value: '0',
+    });
+    await steps.on('generateBestMatchesButton', 'ColmanGraves').click();
+    const rows = page.locator('#gravesBestMatchesList [data-role="graves-best-match"]');
+    await expect(rows).toHaveCount(10);
+    // Read the data inventory, not the candidate-generation implementation.
+    const expected = await page.evaluate(() => Object.keys(GAME_DATA.tags)
+      .filter(id => id !== 'ACTION' && id !== 'WILD_WEST').sort());
+    for (let count = 10; count < expected.length; count += 10) {
+      await page.locator('#graves-show-more-btn').click();
+      await expect(rows).toHaveCount(Math.min(count + 10, expected.length));
+    }
+    expect((await rows.evaluateAll(items => items.map(item => item.dataset.tagId))).sort()).toEqual(expected);
+    await expect(page.locator('#graves-show-more-btn')).toHaveCount(0);
+    await expect(page.getByRole('checkbox', { name: /starting tags only/i })).toHaveCount(0);
   });
 
   // TC03-000014 removed: it drove the starting-tags-only checkbox, which no
@@ -768,6 +834,9 @@ test.describe('Script Evaluation — Colman Graves', () => {
     // 5 themes + Protagonist + Antagonist + Supporting Character + Finale = 9
     // story elements, carried by 11 tags once Genre and Setting are counted.
     await buildScriptWithThemes(steps, page, 5);
+    // Evaluate follows the Max Element Pool (GAME_RULES section 2).
+    await page.locator('#globalElementPoolInput').fill('9');
+    await page.locator('#globalElementPoolInput').press('Tab');
 
     await steps.on('evaluateButton', 'ColmanGraves').click();
 

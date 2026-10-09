@@ -279,3 +279,86 @@ describe('after the ceremony', () => {
 test('names the download after the original file', () => {
     expect(P.fixedFileName('Autosave 15 01 1942 - STUDIO.json')).toBe('Autosave 15 01 1942 - STUDIO.pollux-fixed.json');
 });
+
+describe('editing an already-fixed save', () => {
+    test.each([
+        { forceAllOwned: false, bom: false },
+        { forceAllOwned: false, bom: true },
+        { forceAllOwned: true, bom: false },
+        { forceAllOwned: true, bom: true },
+    ])('re-upload replaces the earlier forced picks ($forceAllOwned), preserving BOM ($bom) and unrelated data', ({ forceAllOwned, bom }) => {
+        const save = saveBeforeCeremony();
+        save.stateJson.prevYearsPolluxPretenders.BEST_SCRIPT.push(candidate('BEST_SCRIPT', PLAYER_B, 77));
+        const original = text(save, bom);
+        const first = P.parseSave(original);
+        P.applyWinners(first.state, 'prevYearsPolluxPretenders', { BEST_SCRIPT: 1 }, { forceAllOwned });
+
+        const uploaded = P.serializeSave(first.root, first.hadBom);
+        const second = P.parseSave(uploaded);
+        const expected = JSON.parse(uploaded.replace(/^\uFEFF/, ''));
+        expected.stateJson.prevYearsPolluxPretenders.BEST_SCRIPT[1].forceWinning = false;
+        expected.stateJson.prevYearsPolluxPretenders.BEST_SCRIPT[2].forceWinning = true;
+        P.applyWinners(second.state, 'prevYearsPolluxPretenders', { BEST_SCRIPT: 2 });
+
+        expect(second.state.prevYearsPolluxPretenders.BEST_SCRIPT.map(c => c.forceWinning)).toEqual([false, false, true]);
+        expect(second.root).toEqual(expected);
+        expect(second.state.polluxHistory[1942]).toBeUndefined();
+        const output = P.serializeSave(second.root, second.hadBom);
+        expect(output.charCodeAt(0) === 0xFEFF).toBe(bom);
+        expect(output).not.toMatch(/[\r\n]/);
+        expect(P.parseSave(output).root).toEqual(expected);
+        P.applyWinners(second.state, 'prevYearsPolluxPretenders', { BEST_SCRIPT: 2 });
+        expect(P.serializeSave(second.root, second.hadBom)).toBe(output);
+        expect(text(save, bom)).toBe(original);
+    });
+
+    test.each([false, true])('an existing rival force flag is cleared when forceAllOwned is %s', forceAllOwned => {
+        const save = saveBeforeCeremony();
+        const list = save.stateJson.prevYearsPolluxPretenders.BEST_SCRIPT;
+        list[0].forceWinning = true;
+        list.push(candidate('BEST_SCRIPT', PLAYER_B, 77));
+        P.applyWinners(save.stateJson, 'prevYearsPolluxPretenders', { BEST_SCRIPT: 1 }, { forceAllOwned });
+        expect(list.map(c => c.forceWinning)).toEqual([false, true, forceAllOwned]);
+    });
+
+    test('moving a held award between player films with the same talent updates every movie credit', () => {
+        const parsed = P.parseSave(text(saveAfterCeremony(), true));
+        const state = parsed.state;
+        P.applyWinners(state, 'prevYearsPolluxPretenders', { BEST_SCRIPT: 1 });
+        const replacement = candidate('BEST_SCRIPT', PLAYER_B, 20);
+        state.prevYearsPolluxPretenders.BEST_SCRIPT.push(replacement);
+        state.polluxHistory[1942].nominees.BEST_SCRIPT.push({ Key: '12.000', Value: { ...replacement } });
+        const newMovie = state.movies.find(m => m.id === PLAYER_B);
+        newMovie.nominations.push({ year: 1942, movId: PLAYER_B, category: 0 });
+        const writer = state.characters.find(c => c.id === 20);
+        const otherAwards = [{ year: 1941, movId: PLAYER_A, category: 0 }, { year: 1942, movId: PLAYER_A, category: 1 }];
+        writer.polluxes.push(...otherAwards);
+        writer.polluxes[0].customField = 'preserve award metadata';
+        const untouched = {
+            nextBucket: structuredClone(state.thisYearsPolluxPretenders),
+            priorHistory: structuredClone(state.polluxHistory[1941]),
+            nominees: structuredClone(state.polluxHistory[1942].nominees),
+            otherWinners: Object.entries(state.polluxHistory[1942].winners).filter(([key]) => key !== 'BEST_SCRIPT'),
+        };
+
+        P.applyWinners(state, 'prevYearsPolluxPretenders', { BEST_SCRIPT: 2 });
+        expect(state.polluxHistory[1942].winners.BEST_SCRIPT).toEqual({ ...replacement, forceWinning: true });
+        expect(awardHolders([...state.movies, ...state.competitorMovies], 1942, 0)).toEqual([PLAYER_B]);
+        expect(newMovie.polluxes).toContainEqual({ year: 1942, movId: PLAYER_B, category: 0 });
+        expect(newMovie.nominations).not.toContainEqual({ year: 1942, movId: PLAYER_B, category: 0 });
+        expect(state.movies.find(m => m.id === PLAYER_A).nominations).toContainEqual({ year: 1942, movId: PLAYER_A, category: 0 });
+        expect(writer.polluxes).toEqual([
+            { year: 1942, movId: PLAYER_B, category: 0, customField: 'preserve award metadata' }, ...otherAwards,
+        ]);
+        expect(state.thisYearsPolluxPretenders).toEqual(untouched.nextBucket);
+        expect(state.polluxHistory[1941]).toEqual(untouched.priorHistory);
+        expect(state.polluxHistory[1942].nominees).toEqual(untouched.nominees);
+        expect(Object.entries(state.polluxHistory[1942].winners).filter(([key]) => key !== 'BEST_SCRIPT')).toEqual(untouched.otherWinners);
+        const once = P.serializeSave(parsed.root, parsed.hadBom);
+        expect(once.charCodeAt(0)).toBe(0xFEFF);
+        expect(once).not.toMatch(/[\r\n]/);
+        expect(P.parseSave(once).state.characters.find(c => c.id === 20).polluxes).toEqual(writer.polluxes);
+        P.applyWinners(state, 'prevYearsPolluxPretenders', { BEST_SCRIPT: 2 });
+        expect(P.serializeSave(parsed.root, parsed.hadBom)).toBe(once);
+    });
+});

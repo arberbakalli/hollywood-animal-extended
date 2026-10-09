@@ -1,6 +1,6 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
 
-// Owner report 2026-09-30: after a Swap, the Submit Script builder showed
+// Owner report 2026-09-30: after a Swap, the Colman Graves Locked Elements builder (formerly "Submit Script") showed
 // Treasure Hunt and Long Journey, and Evil Transformation was gone. It was
 // never reproduced. Owner request 2026-10-01: make it a test, for every
 // category that holds several picks, so a row can never vanish unnoticed.

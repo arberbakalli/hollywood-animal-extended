@@ -188,6 +188,14 @@
         return HACAppShell.clampPoolSize(input.value, slider ? slider.value : undefined);
     }
 
+    // Every builder that takes a finished script follows the Max Element Pool
+    // (GAME_RULES section 2): one check, one message.
+    function poolLimitRefusal(storyElementCount) {
+        const pool = getMaxElementPoolSize();
+        if (storyElementCount <= pool) return null;
+        return `Max Element Pool is set to ${pool}, but you selected ${storyElementCount}. Raise it in the header or remove a tag (Genre and Setting do not count).`;
+    }
+
     function setupMovieScoreSliderSync() {
         const genScoreSlider = document.getElementById('genScoreSlider');
         const genScoreInput = document.getElementById('genScoreInput');
@@ -759,6 +767,7 @@
         buildScriptStats,
         buildScriptFromTags,
         createScriptCardHTML,
-        getMaxElementPoolSize
+        getMaxElementPoolSize,
+        poolLimitRefusal
     };
 })(globalThis);

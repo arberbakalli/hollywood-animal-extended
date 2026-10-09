@@ -95,6 +95,23 @@ Executing guards added for these:
 
 ## Current Baseline
 
+Measured 2026-10-09 on `main` (base `9fb1cac`) with the rule-compliance audit
+fixes applied, uncommitted (`docs/audits/RULE_COMPLIANCE_AUDIT.md`):
+
+- Jest (`npm test -- --runInBand`): **66 suites, 796 tests, all passing; 10
+  snapshots unchanged** (includes the 2026-10-09 trash-elements and names guards).
+- Playwright, full suite on an isolated port (4198), one run at a time:
+  **418 tests, all passing.** Earlier full runs the same week saw page-reload
+  timeouts in lab specs when Google Fonts stalled; those are network, not
+  product, failures.
+- Coverage was not re-measured.
+
+A green suite certifies the assertions it contains, not every BDD scenario's
+meaning: the marker guard checks that each cited id is a real test
+declaration, not that the test proves every Then-step.
+
+## Earlier Baselines
+
 Measured 2026-09-28 on branch `claude/review-followups`:
 
 - Jest (`npm test`): **40 suites, 471 tests; 470 pass, 1 fails.** The failure is

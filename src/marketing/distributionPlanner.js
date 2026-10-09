@@ -124,7 +124,7 @@
     }
 
     // Audience demand per week, in screenings, before any theatre capacity is
-    // considered. The extracted game-file grid uses Commercial only: week 1 is
+    // considered. The accepted community-model grid uses Commercial only: week 1 is
     // score * 2 * 1000, week 2 is score * 1 * 1000, then each later week keeps
     // 80% of the previous week (or slower, if a studio policy qualifies).
     //

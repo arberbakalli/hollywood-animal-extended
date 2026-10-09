@@ -163,6 +163,7 @@
         { "elementName": "resetButton", "selector": { "css": "#resetAdvertisersButton" } },
         { "elementName": "allTagSelects", "selector": { "css": "#selectors-container-advertisers select.tag-selector" } },
         { "elementName": "genreSelect", "selector": { "css": "#inputs-genre-advertisers select.tag-selector" } },
+        { "elementName": "protagonistSelect", "selector": { "css": "#inputs-protagonist-advertisers select.tag-selector" } },
         { "elementName": "supportingCharacterSelect", "selector": { "css": "#inputs-supporting-character-advertisers select.tag-selector" } },
         { "elementName": "themeEventSelect", "selector": { "css": "#inputs-theme-event-advertisers select.tag-selector" } },
         { "elementName": "feedbackMessage", "selector": { "css": "#advertisersFeedbackMessage" } },

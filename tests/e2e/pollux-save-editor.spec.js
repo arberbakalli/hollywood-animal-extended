@@ -60,6 +60,57 @@ async function downloadFixed(page) {
 }
 
 test.describe('Pollux Fixer', () => {
+  for (const forceAll of [false, true]) {
+    test(`TC35-000013 re-uploading a ${forceAll ? 'force-all' : 'single-winner'} save honors a new single pick`, async ({ steps, page }) => {
+      await openPollux(steps, page);
+      await upload(page, save());
+      await expect(page.locator('#polluxPick-BEST_SCRIPT')).toBeVisible();
+      await page.locator('#polluxForceAllInput').setChecked(forceAll);
+      const first = await downloadFixed(page);
+      expect(first.state.prevYearsPolluxPretenders.BEST_SCRIPT.map(c => c.forceWinning))
+        .toEqual([false, true, forceAll]);
+
+      await upload(page, first.text, first.name);
+      await expect(page.locator('#pollux-status')).toHaveText(`Loaded ${first.name}, game year 1942.`);
+      await page.locator('#polluxForceAllInput').uncheck();
+      const newPick = page.locator('#polluxPick-BEST_SCRIPT option').filter({ hasText: /^FARM GIRL \(talent #30\)/ });
+      await expect(newPick).toHaveCount(1);
+      await page.locator('#polluxPick-BEST_SCRIPT').selectOption(await newPick.getAttribute('value'));
+      const fixed = await downloadFixed(page);
+      expect(fixed.state.prevYearsPolluxPretenders.BEST_SCRIPT.map(c => c.forceWinning)).toEqual([false, false, true]);
+      expect(fixed.state.polluxHistory).toEqual(first.state.polluxHistory);
+      expect(fixed.state.movies).toEqual(first.state.movies);
+      expect(fixed.state.thisYearsPolluxPretenders).toEqual(first.state.thisYearsPolluxPretenders);
+      expect(fixed.text.charCodeAt(0)).toBe(0xFEFF);
+      expect(fixed.text).not.toMatch(/\n/);
+      expect((await downloadFixed(page)).text).toBe(fixed.text);
+    });
+  }
+
+  test('TC35-000014 changing films for the same winning writer updates every award mirror', async ({ steps, page }) => {
+    await openPollux(steps, page);
+    await upload(page, save({ held: true }));
+    const first = await downloadFixed(page);
+    const root = JSON.parse(first.text.slice(1));
+    root.stateJson.prevYearsPolluxPretenders.BEST_SCRIPT[2].talentIds = [20];
+    root.stateJson.polluxHistory[1942].nominees.BEST_SCRIPT[2].Value.talentIds = [20];
+    await upload(page, '\uFEFF' + JSON.stringify(root), first.name);
+    await expect(page.locator('#pollux-status')).toHaveText(`Loaded ${first.name}, game year 1942.`);
+    await page.locator('#polluxPick-BEST_SCRIPT').selectOption({ label: 'FARM GIRL (talent #20)' });
+    const fixed = await downloadFixed(page);
+    const isScriptAward = a => a.year === 1942 && a.category === CODE.BEST_SCRIPT;
+    const award = { year: 1942, movId: PLAYER_B, category: CODE.BEST_SCRIPT };
+    expect(fixed.state.polluxHistory[1942].winners.BEST_SCRIPT.movieId).toBe(PLAYER_B);
+    expect(fixed.state.movies.find(m => m.id === PLAYER_A).polluxes.filter(isScriptAward)).toEqual([]);
+    expect(fixed.state.movies.find(m => m.id === PLAYER_B).polluxes.filter(isScriptAward)).toEqual([award]);
+    expect(fixed.state.characters.find(c => c.id === 20).polluxes.filter(isScriptAward)).toEqual([award]);
+    expect(fixed.state.movies.find(m => m.id === PLAYER_B).nominations.filter(isScriptAward)).toEqual([]);
+    expect(fixed.state.polluxHistory[1942].nominees).toEqual(root.stateJson.polluxHistory[1942].nominees);
+    expect(fixed.state.polluxHistory[1941]).toEqual(root.stateJson.polluxHistory[1941]);
+    expect(fixed.text.charCodeAt(0)).toBe(0xFEFF);
+    expect(fixed.text).not.toMatch(/\n/);
+  });
+
   test('TC35-000001 the tab warns to back up the save before any file is chosen', async ({ steps, page }) => {
     await openPollux(steps, page);
     await expect(page.locator('#pollux-backup-warning')).toContainText('Back up your save first.');

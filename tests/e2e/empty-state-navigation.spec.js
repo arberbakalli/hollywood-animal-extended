@@ -61,7 +61,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       await steps.on('lockedSectionToggle', 'ScriptLab').verifyState('visible');
     });
 
-    // Market tab navigation works
+    // Marketing tab navigation works
     test('TC08-000007 marketing tab remains accessible', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('marketTab', 'Navigation').click();

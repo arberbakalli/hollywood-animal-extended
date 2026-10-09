@@ -15,6 +15,7 @@
     "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "devDependencies": {
+    "@babel/parser": "^7.29.8",
     "@civitas-cerebrum/element-interactions": "^0.3.9",
     "@jest/globals": "^29.7.0",
     "@playwright/test": "^1.63.0",

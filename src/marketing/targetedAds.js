@@ -49,7 +49,7 @@
             advertiserContainer.innerHTML = agenciesHtml;
         }
 
-        // Initialize tag selectors for Targeted Ads
+        // Initialize tag selectors for Build for Target
         initializeSelectors('targeted');
 
         document.querySelectorAll('.targeted-advertiser-checkbox')
@@ -97,8 +97,9 @@
         const maxElements = getTargetedElementBudget();
         const storyElementTags = scoringElementsOf(selectedTags);
 
-        if (storyElementTags.length > maxElements) {
-            showFeedbackMessage('targetedFeedbackMessage', `Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`, 'accent');
+        const overPool = HACScriptGenerator.poolLimitRefusal(storyElementTags.length);
+        if (overPool) {
+            showFeedbackMessage('targetedFeedbackMessage', overPool, 'accent');
             return;
         }
 

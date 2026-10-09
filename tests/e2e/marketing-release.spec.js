@@ -23,7 +23,7 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await steps.on('marketTab', 'Navigation').click();
   });
 
-  // Given the Market tab is open
+  // Given the Marketing tab is open
   // Then the distribution calculator is available before any analysis
   test('TC04-000001 the distribution calculator is shown before any analysis', async ({ steps }) => {
     await steps.on('panel', 'MarketingRelease').verifyState('visible');
@@ -52,20 +52,39 @@ test.describe('Marketing and Release — distribution calculator', () => {
     expect(week1).toBeGreaterThan(week8);
   });
 
-  test('TC04-000004 screening projections follow the extracted commercial-only grid', async ({ steps }) => {
+  for (const [score, expected] of [
+    [5, [10000, 5000, 4000, 3200, 2560, 2048, 1638, 1310]],
+    [10, [20000, 10000, 8000, 6400, 5120, 4096, 3276, 2621]],
+  ]) {
+  test(`TC04-000004 screening projections follow the accepted commercial-only grid at score ${score}`, async ({ steps }) => {
+    await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', score);
     const values = await steps.getAll('weekCards', 'MarketingRelease', { extractAttribute: 'data-demand' });
-
-    expect(values.map(Number)).toEqual([
-      10000,
-      5000,
-      4000,
-      3200,
-      2560,
-      2048,
-      1638,
-      1310,
-    ]);
+    expect(values.map(Number)).toEqual(expected);
   });
+  }
+
+  // The app rounds weeks 1-4 up and weeks 5-8 down, after multipliers.
+  // Score 9 opens the slower-decay gate; the 25% boost has no score gate.
+  for (const [score, expected] of [
+    [5, [12500, 6250, 5000, 4000, 3200, 2560, 2048, 1638]],
+    [8, [20000, 10000, 8000, 6400, 5120, 4096, 3276, 2621]],
+    [8.9, [22250, 11125, 8900, 7120, 5696, 4556, 3645, 2916]],
+    [9, [22500, 11250, 9563, 8129, 6908, 5872, 4991, 4242]],
+    [10, [25000, 12500, 10625, 9032, 7676, 6525, 5546, 4714]],
+  ]) {
+    test(`TC04-000041 Behemoth boosts all eight weeks with the score-${score} decay gate`, async ({ steps }) => {
+      await steps.setSliderValue('commercialScoreSlider', 'MarketingRelease', score);
+      const readDemand = async () => (await steps.getAll('weekCards', 'MarketingRelease', {
+        extractAttribute: 'data-demand',
+      })).map(Number);
+      const before = await readDemand();
+      await steps.on('behemothToggle', 'MarketingRelease').check();
+      await expect.poll(readDemand).toEqual(expected);
+      expect(expected[1]).toBe(before[1] * 1.25);
+      await steps.on('behemothToggle', 'MarketingRelease').uncheck();
+      await expect.poll(readDemand).toEqual(before);
+    });
+  }
 
   // Given the user raises the target commercial score
   // Then the calculator echoes it and recalculates
@@ -376,6 +395,17 @@ test.describe('Marketing and Release — distribution calculator', () => {
     await expect(legend).toContainText('High Interest');
     await expect(legend).toContainText('Moderate Interest');
     await expect(page.locator('#targetAudienceDisplay .audience-pill').first()).toBeVisible();
+
+    // A known one-element fixture also checks the actual classification, not
+    // just the static legend. Cowboy weights: YM 5, YF 2, TM 5, TF 3, AM 4, AF 1.
+    await steps.on('resetButton', 'MarketingRelease').click();
+    await steps.selectDropdown('protagonistSelect', 'MarketingRelease', {
+      type: DropdownSelectType.VALUE, value: 'PROTAGONIST_COWBOY',
+    });
+    await steps.on('analyzeScriptButton', 'MarketingRelease').click();
+    await expect(page.locator('#targetAudienceDisplay .pill-best')).toHaveText(['Young men', 'Boys']);
+    await expect(page.locator('#targetAudienceDisplay .pill-moderate')).toHaveText(['Men', 'Girls']);
+    await expect(page.locator('#targetAudienceDisplay .audience-pill')).toHaveCount(4);
   });
 
   test('TC04-000028 studio policy status names active gates', async ({ steps, page }) => {

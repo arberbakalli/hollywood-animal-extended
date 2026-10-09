@@ -34,6 +34,31 @@ Feature: Pollux Fixer
     Then only the second pick is marked to win in that category
     And no history is written for the ceremony
 
+  # [automated] TC35-000013. Re-upload the downloaded file, not the pristine original.
+  Scenario Outline: A new single pick replaces forced winners from an earlier edit
+    Given the user previously downloaded a save with <previous_picks> marked to win
+    When the user uploads that downloaded save before its ceremony
+    And chooses a different script nominee with force-all switched off
+    Then only the newly chosen nominee is marked to win Best Script
+    And ceremony history and movie awards remain unchanged
+    And the download preserves the BOM and stays on one line
+    And generating again gives the same save
+
+    Examples:
+      | previous_picks            |
+      | one player nominee        |
+      | all player-owned nominees |
+
+  # [automated] TC35-000014. Both nominees share the same writer.
+  Scenario: Moving Best Script to another film updates the shared writer's credit
+    Given a held ceremony whose Best Script winner shares a writer with another player nominee
+    When the user uploads that save and selects the other film for Best Script
+    Then ceremony history, the winning film and the writer credit the new winning film
+    And the old winning film no longer holds that award
+    And the new winning film no longer holds a nomination for that award
+    And recorded nominees and previous-year history are unchanged
+    And the download preserves the BOM and stays on one line
+
   # [automated] TC35-000004. Player films join the list when nominations are announced.
   Scenario: A save from before the nominations has nothing to pick
     When the user loads a save in which none of their films is a nominee yet

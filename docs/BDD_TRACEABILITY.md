@@ -96,7 +96,7 @@ file is the fast lookup for agents before editing tests or product code.
   freshness, freshest-first generation, freshness-first ranking
   (GAME_RULES section 9):
   `tests/freshness.test.js`
-- Script Lab, Colman Graves, Marketing Analyze Script, and Build for Target
+- Script Lab, Colman Graves, Analyze Script (Marketing & Release), and Build for Target
   pills, one state everywhere, exclusion reset, out-of-date notice, Generate
   and Highest Artistic ranking, pill layout on desktop and phone:
   `tests/e2e/script-lab-freshness.spec.js`,
@@ -104,7 +104,7 @@ file is the fast lookup for agents before editing tests or product code.
 
 ## Build For Target
 
-- Panel controls, no-filter search, audience/ad agency filters, optional tags,
+- Panel controls, no-filter search, audience/advertiser filters, optional tags,
   reset, rank order:
   `tests/e2e/marketing-release.spec.js`
 - Generator category cardinality, genre uncap, budget width, duplicate tags:
@@ -135,14 +135,15 @@ When adding or editing a scenario, update this file if the behavior belongs to
 one of these product areas. If no test protects it yet, keep the scenario
 `[verified]` or `[unverified]` until a real assertion exists.
 
-## Local Hardening Coverage Pending Integration
+## Integrated Hardening Coverage
 
 The owner approved the fifteen Script Lab scenario corrections and the Graves /
 Build for Target setup corrections on 2026-09-29, retaining separate scenarios
-for starting availability and combination width. Those edits are applied in
-`codex/hardening`; the executable backlog guard is unchanged. New confirmed
-cross-feature contracts live in `tests/scenarios/product-hardening.feature`.
-`.arber/HARDENING_BDD_REVIEW_PACKET.md` records the review and assertion evidence.
+for starting availability and combination width. The scenarios and tests listed
+below are present on `main` at audit baseline `9fb1cac`; they are not pending
+branch integration. Confirmed cross-feature contracts live in
+`tests/scenarios/product-hardening.feature`. The historical approval packet was
+`.arber/HARDENING_BDD_REVIEW_PACKET.md`; it is not a required current file.
 
 - Scoring-data readiness and retry, positive and legitimate-zero scores:
   `tests/scoring-readiness.test.js`, `tests/generation-score-integrity.test.js`,

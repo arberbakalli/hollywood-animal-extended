@@ -181,11 +181,11 @@ Feature: Script Evaluation — Colman Graves
   # [automated] TC03-000031. The first page holds ten suggestions; pagination
   # pins the page size and the cap against the shipped paginateRows().
   Scenario: Only the first ten suggestions are listed
-    Given the user has evaluated a script
+    Given Action is selected as a seed and Minimum Fit is Any
     When the user generates best matches
     Then the first ten suggestions are listed
 
-  # [automated] TC03-000031. The page fills in band order, so a conflicted candidate can never
+  # [automated] TC03-000061. The page fills in band order, so a conflicted candidate can never
   # push a clean one onto page two. Band ordering is enforced by pagination logic.
   Scenario: Stronger suggestions fill the first page before weaker ones
     Given more than ten suggestions qualify
@@ -203,7 +203,7 @@ Feature: Script Evaluation — Colman Graves
   # [automated] TC03-000031. Watched in the app on 2026-09-19 with Action
   # seeded, then pinned by Playwright: the panel opens with 10 rows, the Show
   # more label names remaining suggestions, and the next page preserves the
-  # first ten rows.
+  # first ten rows. The test exhausts all pages and checks the control disappears.
   Scenario: The Show more control names how many suggestions remain
     Given more than ten suggestions qualify
     When the user generates best matches
@@ -323,13 +323,14 @@ Feature: Script Evaluation — Colman Graves
     When the user generates Best Additions and nothing is found at any threshold
     Then the minimum fit control still reads "4.0+"
 
-  # [automated] TC03-000031. Best Matches additions are not limited to the Starting Tags deck.
+  # [automated] TC03-000060. Best Matches additions are not limited to the Starting Tags deck.
   # Single source of truth is Script Lab exclusions.
   Scenario: All available tags are shown in Best Matches suggestions
-    Given the user has evaluated a script
+    Given Action is selected as a seed and Minimum Fit is Any
+    And Wild West is globally excluded in Script Lab
     When the user generates best matches
     Then no "Starting tags only" checkbox is visible
-    And all non-excluded tags from their categories are eligible for suggestion
+    And every other non-excluded tag is listed after revealing all suggestions
 
   # [automated] BUG-001 and BUG-003. Search fields must not disappear while the user is typing
   # or after a search has no matches.

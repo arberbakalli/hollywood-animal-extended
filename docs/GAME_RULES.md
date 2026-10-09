@@ -21,6 +21,43 @@ forbids a legal choice because it is a bad one; it shows why it is bad.
 
 ---
 
+## Names: one name per thing
+
+Docs, tests, scenarios and comments use the **screen name**, exactly as
+`index.html` shows it. Code keeps older internal names; the right column maps
+them, so nobody invents a third name. Owner ruling 2026-10-09. Guarded by
+`tests/ui-names.test.js`: every screen name below must appear in `index.html`,
+and the retired names listed under the table must not come back.
+
+| Screen name | Where on screen | Code name |
+|---|---|---|
+| Script Lab | tab "Build" | `generator` context, `src/generator/` |
+| Locked Elements | Script Lab, Colman Graves, Analyze Script | contexts `generator`, `graves`, `advertisers` |
+| Locked Elements (Optional) | Build for Target | context `targeted` |
+| Excluded Elements | Script Lab | context `excluded` |
+| Generate Scripts | Script Lab button | `generateScripts` |
+| Script Evaluation | tab "Evaluate" | `src/evaluation/` |
+| Colman Graves | Script Evaluation panel | `graves` |
+| Evaluate Script | Colman Graves button | `evaluateColmanGravesScript` |
+| Best Matches | Colman Graves panel | `gravesBestMatches.js` |
+| Best Additions | Best Matches mode | `additions` |
+| Swap Suggestions | Best Matches mode | `swaps` |
+| Pairwise | Best Matches mode | `pairwise` |
+| Marketing & Release | tab "Marketing" | `src/marketing/` |
+| Analyze Script | Marketing & Release mode and button | `advertisers` context, `analyzeMovie` |
+| Build for Target | Marketing & Release mode | `targeted` context, `targetedAds.js` |
+| Find Top Combinations | Build for Target button | `searchForTargetCombinations` |
+| Distribution Calculator | Analyze Script results | `distributionPlanner.js` |
+| Max Element Pool | header control | `globalElementPoolInput` |
+| Script Library | Script Lab panel | `scriptLibrary.js` |
+| Testing Features | header link | `testing-features.html`, `lab/` |
+
+Retired names (do not use): Submit Script, Build Your Script, Lock Elements
+(Optional), Market tab, Targeted Ads, Marketing Analyze. Quoting one in dated
+history is allowed when the line says "formerly".
+
+---
+
 ## 1. What a script is
 
 A script is:
@@ -47,7 +84,8 @@ context: they occupy no budget. A script's total width is therefore the budget
 plus its context, never a fixed number.
 
 Colman Graves accepts a script only when Genre, Setting and Protagonist are all
-present *and* the story-element count is between 5 and 10.
+present *and* the story-element count is at least 5 and no more than the Max
+Element Pool (at most 10; section 2).
 
 > **The rule is one function:** `isStoryElement` / `storyElementsOf` in
 > `src/evaluation/gravesAnalysis.js`. Every caller delegates to it.
@@ -83,7 +121,7 @@ game's (owner ruling 2026-09-29):
 > `tests/invariant-lists.test.js`, TC01-000038 and
 > `tests/audience-compatibility-render.test.js`.
 
-### Genre is uncapped
+### Genre has no artificial one- or two-genre cap
 
 **Minimum one, maximum eleven.** A script can carry every genre, split by
 percentage, with one taking whatever remains up to 100%. Two is a common mix, not
@@ -125,7 +163,7 @@ come from what the player chose.
 
 | Category | Holds |
 |---|---|
-| Genre | unlimited (minimum one) |
+| Genre | 1-11 distinct genres; no duplicate selections |
 | Supporting Character | unlimited |
 | Theme & Event | unlimited |
 | Setting, Protagonist, Antagonist, Finale | one each |
@@ -259,6 +297,16 @@ Slapstick Comedy's colour is a placeholder until the owner sees it in the game.
 | Pairwise | Yes, on the **Add button only** | Rows still list; Add is disabled |
 | Swap Suggestions | **No** | A swap trades within a category, so the count cannot change |
 | Build for Target | Yes | Combination = budget in story elements, plus context; never a pair below 2.0 |
+| Evaluate Script (Colman Graves) | Yes | Refuses more story elements than the pool; still needs at least 5 |
+| Analyze Script (Marketing & Release) | Yes | Refuses more story elements than the pool; one element is enough |
+
+**Every builder follows the Max Element Pool** (owner ruling 2026-10-09):
+Evaluate Script and Analyze Script refuse a script with more story elements than
+the pool, with the same message as Build for Target ("Max Element Pool is set to
+N, but you selected M ..."). Raise the pool to evaluate or analyze a bigger
+script. One check: `poolLimitRefusal` in `src/generator/scriptGenerator.js`.
+Until 2026-10-09 Evaluate accepted any 5-10 regardless of the pool. Pinned by
+TC20-000008, TC20-000012 and TC20-000013.
 
 A complete 5-element script sits at its budget, so Best Additions lists no
 story element: raise the pool, or swap. It still lists Genres, which spend no
@@ -291,7 +339,7 @@ after Find, the cards are hidden and a notice asks for a new Find.
 
 ### Evaluate results never outlive the script
 
-When the Submit Script builder changes after Evaluate Script (a dropdown, a
+When the Colman Graves Locked Elements builder changes after Evaluate Script (a dropdown, a
 remove button, Reset, a Genre share, a search pick, a Library load, or a Best
 Matches Add or Swap), the five Evaluate panels are hidden and a notice says
 "Script changed. Press Evaluate Script to update." A change that leaves the
@@ -550,10 +598,10 @@ Behemoth is off — that line describes the policy's decay gate, not the baselin
 
 > Enforced in: `src/marketing/distributionPlanner.js`.
 
-### Marketing Analyze needs one element, of any kind
+### Analyze Script needs one element, of any kind
 
-Analyze runs on whatever the player selects, from a single element to a full
-script (owner ruling 2026-09-29). It does not require a Genre: one element is
+Analyze runs on whatever the player selects, from a single element up to the
+Max Element Pool (owner rulings 2026-09-29 and 2026-10-09). It does not require a Genre: one element is
 enough to rank the Recommended Advertisers for it. With nothing selected it asks
 for at least one tag (`analyzeMovie`, `src/marketing/marketingPlanner.js`).
 
@@ -938,7 +986,7 @@ interest in films that carry it. The game's own words (`localization/English.jso
   place that shows that element.
 - **Scope: shared story-element UI.** Pills appear wherever the calculator lets
   the player select or inspect story elements: Script Lab locked rows,
-  generated or pinned script cards, Colman Graves, Marketing Analyze Script,
+  generated or pinned script cards, Colman Graves, Marketing & Release's Analyze Script,
   and Build for Target. These all read and write the same saved state.
 - **Generation reads freshness; score tools display it.** Script generation uses
   the state to fill free slots and rank results. Colman Graves and Marketing
@@ -1017,3 +1065,32 @@ on 55 real saves (game 0.8.72EA). Full field list: `docs/POLLUX_SAVE_EDITOR.md`.
 > Pinned by `tests/pollux-save-editor.test.js` and `tests/e2e/pollux-save-editor.spec.js`.
 > Not yet tested by loading a fixed save in the game, except the owner's 1940
 > `forceWinning` run.
+
+---
+
+## 11. Trash elements
+
+**Owner verified in play, 2026-10-09; the game file marks the same 15.** Every
+element whose `parameters.Rules` contains `TRASH` in
+`extractedFilesFromGameSourceOfTruth/TagData.json` is a trash element, and no
+other. All 15 are recipes created in the Trash Pit.
+
+| Category | Trash elements | Ids |
+|---|---|---|
+| Protagonist (7) | Toxic Revenger, Siamese Twin Sheriffs, Romantic with Popcorn Limbs, Parent in Invisible Clothes, Shit-Sucking Vampire, Girl with a Talking Vagina with Tourette Syndrome, Womanizer with Poisoned Balls | `PROTAGONIST_TOXIC_VIGILANTE`, `PROTAGONIST_SHERIFFS_CONJOINED_TWINS`, `PROTAGONIST_СORNLIMBED_ROMANTIC`, `PROTAGONIST_PARENT_IN_INVISIBLE_CLOTHES`, `PROTAGONIST_VAMPIRE_SHIT-SUCKER`, `PROTAGONIST_GIRL_WITH_A_SWEARING_VAGINA_WITH_TURRET_SYNDROME`, `PROTAGONIST_LOVELACE_WITH_POISONOUS_BALLS` |
+| Antagonist (6) | Killer Toaster, Rapist Robot, Robber with a Thousand Penises, Demon Possessed by a Schoolgirl, Headless Dwarven Hypnotists, Cannibal Women's Book Club | `ANTAGONIST_TOASTER_KILLER`, `ANTAGONIST_ROBOT_RAPIST`, `ANTAGONIST_ROBBER_WITH_A_HUNDRED_DICKS`, `ANTAGONIST_SCHOOLGIRL_POSSESSED_DEMON`, `ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS`, `ANTAGONIST_WOMENS_BOOK_CLUB_OF_CANNIBALS` |
+| Theme & Event (2) | Wizard War, Survival Tournament | `THEME_WAR_WITH_SORCERERS`, `EVENTS_SURVIVAL_TOURNAMENT` |
+
+- **One source:** the game file's `TRASH` rule, not a typed list. A future
+  "Trash element" label derives from it (plan:
+  `docs/parked/LOW_PRIORITY_AND_TRASH_PLAN.md`).
+- `PROTAGONIST_СORNLIMBED_ROMANTIC` starts with a Cyrillic "С" (U+0421) in the
+  game's own id; keep it exactly (see "One id, one spelling").
+
+**Not settled (owner to check on a Trash King playthrough):**
+- A trash film appears to change the movie's commercial and artistic score or
+  its cap. The game's Rating Limit tooltip has a row "One or more trash
+  elements" (`MARKS_CAP_TOOLTIP_TABLE_ROW_TRASHTAGS`); its numbers are not in
+  the text files.
+- The Trash King bonus "Use two trash elements per film"
+  (`POLICY_TRASH_BONUS_1_1`) implies one per film otherwise. Not observed yet.

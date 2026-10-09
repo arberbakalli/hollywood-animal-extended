@@ -79,10 +79,14 @@ Feature: Script Lab
     And evaluation results stay hidden
 
   # [automated] TC20-000008 (count 10), tests/e2e/product-hardening.spec.js.
-  Scenario: Ten story elements can be evaluated while the generation pool is five
+  # Owner ruling 2026-10-09: Evaluate follows the Max Element Pool.
+  Scenario: Ten story elements are refused at pool five and evaluated at pool ten
     Given Max Element Pool is five
     And Colman Graves is open with Genre, Setting and ten story elements including Protagonist selected
     When the player evaluates the script
+    Then feedback says Max Element Pool is set to 5, but you selected 10
+    And evaluation results stay hidden
+    When the player raises Max Element Pool to ten and evaluates again
     Then evaluation results appear
     And the score-cap description counts ten story elements
     And the results contain neither NaN nor Infinity
@@ -519,3 +523,19 @@ Feature: Script Lab
     When the user generates
     Then generation is refused with "Every script needs a Protagonist."
     And the message says "Remove 1 locked element or raise the score target"
+
+  # [automated] TC20-000012, tests/e2e/pool-limit-builders.spec.js. Owner ruling 2026-10-09.
+  Scenario: Evaluate Script follows the Max Element Pool
+    Given Colman Graves holds six story elements
+    When Max Element Pool is five and the player evaluates
+    Then feedback says Max Element Pool is set to 5, but you selected 6
+    When Max Element Pool is six and the player evaluates
+    Then evaluation results appear
+
+  # [automated] TC20-000013, tests/e2e/pool-limit-builders.spec.js. Owner ruling 2026-10-09.
+  Scenario: Analyze Script follows the Max Element Pool
+    Given Analyze Script holds six story elements
+    When Max Element Pool is six and the player analyzes
+    Then the marketing results appear
+    When Max Element Pool is five and the player analyzes
+    Then feedback says Max Element Pool is set to 5, but you selected 6

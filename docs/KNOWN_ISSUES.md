@@ -330,9 +330,11 @@ it passes vacuously. TC01-000051 covers the real case; TC01-000020 is unchanged.
 - The Jest harness stubs `document` with null-returning selectors, so it exercises no DOM wiring.
   That gap is now covered by the Playwright suite rather than by manual checking, but it means a
   Jest-only run still proves nothing about the interface.
-- Coverage is smoke-level by choice: the E2E suite asserts that flows complete and render, not that
-  any score is numerically correct, so tuning the maths will not turn it red. The golden-master Jest
-  snapshots are what pin the numbers.
+- E2E coverage includes numerical contracts, not only smoke checks: TC04-000004
+  pins the distribution grid, TC22 boundary cases pin pool/policy behavior, and
+  TC23-000001 pins advertiser fit. These protect the app's accepted model; they
+  do not prove unconfirmed game formulas. Golden-master Jest snapshots also
+  detect scoring changes, without establishing independent game accuracy.
 - Scenarios in `tests/scenarios/*.feature` tagged `[verified]` or `[unverified]` are not automated.
   An `[unverified]` scenario describes behaviour nobody has watched â€” do not write a test from one
   without reproducing it first.

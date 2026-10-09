@@ -201,7 +201,7 @@ test.describe('product rule boundaries', () => {
   });
 
   for (const count of [4, 10]) {
-    test(`TC20-000008 Graves counts ${count} story elements independently of a pool of five`, async ({ steps, page }) => {
+    test(`TC20-000008 Graves counts ${count} story elements against the Max Element Pool`, async ({ steps, page }) => {
       await openHollywood(steps);
       await page.locator('#tab-evaluate-button').click();
       const script = count === 4 ? STARTER_SCRIPT.filter(([category]) => category !== 'theme-event') : STARTER_SCRIPT;
@@ -217,6 +217,12 @@ test.describe('product rule boundaries', () => {
         await expect(page.locator('#gravesFeedbackMessage')).toContainText('You selected 4');
         await expect(page.locator('#results-graves')).toBeHidden();
       } else {
+        // Owner ruling 2026-10-09: Evaluate follows the pool, so ten are refused at five.
+        await expect(page.locator('#gravesFeedbackMessage')).toContainText('Max Element Pool is set to 5, but you selected 10');
+        await expect(page.locator('#results-graves')).toBeHidden();
+        await page.locator('#globalElementPoolInput').fill('10');
+        await page.locator('#globalElementPoolInput').press('Tab');
+        await page.locator('#evaluateGravesButton').click();
         await expect(page.locator('#results-graves')).toBeVisible();
         await expect(page.locator('#gravesScoreCapLabel')).toContainText('10 Scoring Elements');
         await expect(page.locator('#results-graves')).not.toContainText(/NaN|Infinity/);

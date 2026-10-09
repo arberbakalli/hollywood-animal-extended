@@ -9,7 +9,7 @@ Feature: Build for Target
 
   Background:
     Given the Hollywood Animal Calculator is open
-    And the Market tab is selected
+    And the Marketing tab is selected
     And the Build for Target mode is active
 
   # [automated] TC05-000001.

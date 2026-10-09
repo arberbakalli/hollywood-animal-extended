@@ -88,16 +88,9 @@
             return;
         }
 
-        // Validate max element pool (matching Build for Target validation)
-        const maxElements = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
-            ? HACScriptGenerator.getMaxElementPoolSize()
-            : 10;
-        // Delegate to canonical story-element filter
-        const storyElementTags = typeof HACGravesAnalysis !== 'undefined' && HACGravesAnalysis.storyElementsOf
-            ? HACGravesAnalysis.storyElementsOf(tagInputs)
-            : tagInputs;
-        if (storyElementTags.length > maxElements) {
-            refuse(`Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`);
+        const overPool = HACScriptGenerator.poolLimitRefusal(HACGravesAnalysis.storyElementsOf(tagInputs).length);
+        if (overPool) {
+            refuse(overPool);
             return;
         }
 
