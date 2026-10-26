@@ -4,72 +4,101 @@
     // Holiday Release lists the best option plus this many minus one alternatives.
     const SHOWN_HOLIDAY_COUNT = 4;
 
+    /* ---------------------------------------------------------------------
+       Results that no longer match their inputs (owner ruling 2026-10-01,
+       the same rule as Evaluate). The analysis reads the elements and both
+       scores. Analyze moves the live distribution calculator into its
+       results, so hiding them hands the calculator back to its own place;
+       a refused Analyze used to hide it until the next good one. */
+    let analyzedSignature = null;
+
+    function advertiserInputSignature() {
+        const container = document.getElementById('selectors-container-advertisers');
+        const picks = container && typeof container.querySelectorAll === 'function'
+            ? Array.from(container.querySelectorAll('[data-role="tag-selector-row"]')).map(row => {
+                const value = row.querySelector('select.tag-selector')?.value;
+                if (!value) return null;
+                const share = row.querySelector('.percent-input');
+                return share ? `${value}@${share.value}` : value;
+            }).filter(Boolean).sort()
+            : [];
+        return [...picks, '|',
+            HACScoreFormatting.readMovieScoreInput('comScoreInput'),
+            HACScoreFormatting.readMovieScoreInput('artScoreInput')].join(',');
+    }
+
+    function setAnalysisStaleNotice(visible) {
+        const notice = document.getElementById('advertisers-stale-notice');
+        if (!notice || !notice.classList) return;
+        if (visible) notice.classList.remove('hidden');
+        else notice.classList.add('hidden');
+    }
+
+    function hideAdvertiserResults() {
+        const distCard = document.getElementById('dist-wrapper');
+        const anchor = document.getElementById('dist-calc-anchor');
+        if (distCard && anchor && distCard.parentElement !== anchor) {
+            anchor.appendChild(distCard);
+            distCard.classList.remove('distribution-card--in-results');
+        }
+        document.getElementById('results-advertisers')?.classList.add('hidden');
+    }
+
+    function checkAnalysisCurrent() {
+        const results = document.getElementById('results-advertisers');
+        if (analyzedSignature === null || !results || results.classList.contains('hidden')) return;
+        if (advertiserInputSignature() === analyzedSignature) return;
+        analyzedSignature = null;
+        hideAdvertiserResults();
+        setAnalysisStaleNotice(true);
+    }
+
+    function watchAdvertiserInputs() {
+        const container = document.getElementById('selectors-container-advertisers');
+        if (container) {
+            ['change', 'input'].forEach(type => container.addEventListener(type, checkAnalysisCurrent));
+            new MutationObserver(checkAnalysisCurrent).observe(container, { childList: true, subtree: true });
+        }
+        ['comScoreInput', 'comScoreSlider', 'artScoreInput', 'artScoreSlider'].forEach(id => {
+            const control = document.getElementById(id);
+            if (control) ['change', 'input'].forEach(type => control.addEventListener(type, checkAnalysisCurrent));
+        });
+    }
+
     async function analyzeMovie() {
         clearFeedbackMessage('advertisersFeedbackMessage');
+        setAnalysisStaleNotice(false);
+        analyzedSignature = null;
         try {
             await HACDataLoaders.ensureScoringDataLoaded();
         } catch (error) {
-            document.getElementById('results-advertisers')?.classList.add('hidden');
+            hideAdvertiserResults();
             showFeedbackMessage('advertisersFeedbackMessage', `Could not load scoring data. ${error.message}`);
             return;
         }
         const tagInputs = collectTagInputs('advertisers');
+        // A refusal never leaves the previous analysis beside its message, as
+        // Evaluate already does (audit 2026-09-30).
+        const refuse = message => {
+            hideAdvertiserResults();
+            showFeedbackMessage('advertisersFeedbackMessage', message, 'accent');
+        };
         if(tagInputs.length === 0) {
-            showFeedbackMessage('advertisersFeedbackMessage', 'Please select at least one tag.', 'accent');
+            refuse('Please select at least one tag.');
             return;
         }
 
-        // Validate max element pool (matching Build for Target validation)
-        const maxElements = typeof HACScriptGenerator !== 'undefined' && HACScriptGenerator.getMaxElementPoolSize
-            ? HACScriptGenerator.getMaxElementPoolSize()
-            : 10;
-        // Delegate to canonical story-element filter
-        const storyElementTags = typeof HACGravesAnalysis !== 'undefined' && HACGravesAnalysis.storyElementsOf
-            ? HACGravesAnalysis.storyElementsOf(tagInputs)
-            : tagInputs;
-        if (storyElementTags.length > maxElements) {
-            showFeedbackMessage('advertisersFeedbackMessage', `Max Element Pool is set to ${maxElements}, but you selected ${storyElementTags.length}. Raise it in the header or remove a tag (Genre and Setting do not count).`, 'accent');
+        const overPool = HACScriptGenerator.poolLimitRefusal(HACGravesAnalysis.storyElementsOf(tagInputs).length);
+        if (overPool) {
+            refuse(overPool);
             return;
         }
 
-        const inputCom = parseFloat(document.getElementById('comScoreInput').value) || 0;
-        const inputArt = parseFloat(document.getElementById('artScoreInput').value) || 0;
+        const inputCom = HACScoreFormatting.readMovieScoreInput('comScoreInput');
+        const inputArt = HACScoreFormatting.readMovieScoreInput('artScoreInput');
 
-        let tagAffinity = { "YM": 0, "YF": 0, "TM": 0, "TF": 0, "AM": 0, "AF": 0 };
-        tagInputs.forEach(item => {
-            const tagData = GAME_DATA.tags[item.id];
-            if(!tagData) return;
-            const multiplier = item.percent;
-            for(let demo in tagAffinity) {
-                if(tagData.weights[demo]) {
-                    tagAffinity[demo] += (tagData.weights[demo] * multiplier);
-                }
-            }
-        });
-
-        let minVal = Number.MAX_VALUE;
-        for (let demo in tagAffinity) {
-            if (tagAffinity[demo] < minVal) minVal = tagAffinity[demo];
-        }
-        if (minVal < 1.0) {
-            const liftAmount = 1.0 - minVal;
-            for (let demo in tagAffinity) {
-                tagAffinity[demo] += liftAmount;
-            }
-        }
-
-        let totalSum = 0;
-        for (let demo in tagAffinity) totalSum += tagAffinity[demo];
-        const RELEASE_MAGIC_NUMBER = 3.0;
-        let baselineScores = {};
-        for(let demo in tagAffinity) {
-            if (totalSum === 0) {
-                baselineScores[demo] = 0;
-            } else {
-                let normalized = (tagAffinity[demo] / totalSum) * RELEASE_MAGIC_NUMBER;
-                baselineScores[demo] = Math.min(1.0, Math.max(0, normalized));
-            }
-        }
+        // The one audience model, shared with Graves (owner ruling 2026-10-01).
+        const baselineScores = HACGravesAnalysis.audienceShares(tagInputs);
 
         const normalizedArt = inputArt / 10.0;
         const normalizedCom = inputCom / 10.0;
@@ -108,8 +137,8 @@
             });
         }
 
-        const THRESHOLD_GOOD = 0.67;
-        const THRESHOLD_BAD = 0.33;
+        const THRESHOLD_GOOD = HACGravesAnalysis.AUDIENCE_HIGH_FROM;
+        const THRESHOLD_BAD = HACGravesAnalysis.AUDIENCE_TARGET_ABOVE;
 
         const targetAudiences = demoGrades.filter(d => d.score > THRESHOLD_BAD);
         const highInterestIds = demoGrades.filter(d => d.score >= THRESHOLD_GOOD).map(d => d.id);
@@ -232,6 +261,7 @@
 
         document.getElementById('results-advertisers').classList.remove('hidden');
         document.getElementById('results-advertisers').scrollIntoView({ behavior: 'smooth' });
+        analyzedSignature = advertiserInputSignature();
     }
 
     function displayAdvertiserRecommendations(recommendations) {
@@ -376,7 +406,9 @@
         if (!holiday || !holiday.bonuses || !targetIds || targetIds.length === 0) return 0;
 
         const total = targetIds.reduce((sum, id) => sum + (holiday.bonuses[id] || 0), 0);
-        return total / targetIds.length;
+        // The tenth the row shows ("+18.3%"), so the grid applies exactly
+        // what the label says (owner ruling 2026-10-01).
+        return Number((total / targetIds.length).toFixed(1));
     }
 
     // Pre-release is the only stretch Factory Policy shortens; release is fixed by
@@ -450,20 +482,22 @@
             const resultsSection = document.getElementById('results-advertisers');
             if (!resultsSection || resultsSection.classList.contains('hidden')) return;
 
-            const comInput = document.getElementById('comScoreInput');
-            renderCampaignDuration(parseFloat(comInput && comInput.value) || 0);
+            renderCampaignDuration(HACScoreFormatting.readMovieScoreInput('comScoreInput'));
         });
     }
 
     // Initialize factory policy listener on DOM ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', setupFactoryPolicyListener);
+        document.addEventListener('DOMContentLoaded', watchAdvertiserInputs);
     } else {
         setupFactoryPolicyListener();
+        watchAdvertiserInputs();
     }
 
     global.HACMarketingPlanner = {
         analyzeMovie,
+        checkAnalysisCurrent,
         displayAdvertiserRecommendations,
         holidayBonusFor,
         syncHolidayRowStates,

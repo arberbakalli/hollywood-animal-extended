@@ -18,23 +18,23 @@ Tests operate across three layers:
 3. **Negative and Edge Tests**: Tests that explicitly check rejection paths, boundary conditions, and error states. Examples:
    - Scripts with fewer than 5 or more than 10 story elements are refused with exact counts
    - Banned elements are immediately unavailable in dropdowns after restore (no reload needed)
-   - First-run exclusion list must contain exactly 193 bans, never 192 or 194
+   - First-run exclusion list must contain exactly 192 bans (250 minus the 58-element starting deck)
    - Genre supports up to 11 rows; each row must represent at least 5% appeal
 
-### Rule (b): First-Run State — 193 Bans from 57-Element Pool
+### Rule (b): First-Run State — 192 Bans from 58-Element Pool
 
 - **250 total elements** in GAME_DATA
-- **57 elements** in GAME_DATA.starterWhitelist (the Starting Tags whitelist)
-- **193 elements** are banned on first visit
-- Count is exact. Other counts (e.g., 192, 194) signal a bug
+- **58 elements** in GAME_DATA.starterWhitelist (the Starting Tags whitelist; the one source)
+- **192 elements** are banned on first visit
+- Count is exact. Other counts (e.g., 191, 193) signal a bug
 - On first visit, the app applies Starting Tags automatically
 - After that, it restores the player's saved exclusion list
-- "Apply Starting Tags" resets to exactly 193 and replaces custom bans
+- "Apply Starting Tags" resets to exactly 192 and replaces custom bans
 
 **Implementation guards:**
 - `src/generator/availabilityFilter.js` — filter enforces this pool
 - `src/selectors/storyElementSelector.js` — dropdown rendering respects bans
-- `tests/e2e/exclusion-starting-tags.spec.js` — applies Starting Tags and waits for exactly 193,
+- `tests/e2e/exclusion-starting-tags.spec.js` — applies Starting Tags and waits for exactly 192,
   then exercises the exclusion rules in that state
 - `tests/e2e/exclusion-dropdown-refresh.spec.js` — ban and lift propagation per category
 
@@ -181,6 +181,54 @@ test('scenario name', async ({ steps }) => {
 });
 ```
 
+### Two Habits That Keep a Test Honest
+
+**Assert a change, not a presence.** A happy-path test once had eight of nine
+assertions satisfied by the static HTML: the scoring engine could have been
+deleted and the test stayed green. `index.html` already ships `0.0 / 5.0`,
+`0.00` and `No conflicts found.`. Before asserting a value is present, check
+whether the untouched page already shows it.
+
+**Gate on the app's own signal.** `appShell.js` builds every selector context
+and only then binds listeners, so "the selector exists" never meant "the
+control is wired". Wait for `hollywood:ready`, not for a DOM side effect that
+appears early.
+
+### Page Repository and Steps API
+
+A spec names an element; `tests/data/page-repository.json` resolves the name
+to a selector at run time. A UI redesign then touches the repository, not the
+specs.
+
+```js
+await steps.on('generateButton', 'ScriptLab').click();        // a name
+// wrong: await steps.on('#generateScriptsButton', 'ScriptLab').click();
+```
+
+- Pages are PascalCase, elements camelCase. Anchor on a stable container
+  (`#inputs-genre-generator select.tag-selector`), never on an id built at run
+  time.
+- Gate on the panel *your* test uses. Each selector context starts separately
+  and `targeted` finishes last; gating on it made unrelated tests fail. Never
+  use a fixed sleep to wait for a condition.
+- `tests/fixtures/base.js` blocks Google Fonts. A pending stylesheet in
+  `<head>` delays app start, which once made the suite take 251 s with random
+  failures instead of 48 s green.
+- The Steps API has no `.expectVisible()` or `.expectText()`. Use
+  `verifyState('visible')`, `verifyText`, `verifyTextContains`, `verifyCount`
+  or `steps.expect(...)`; the full surface is in the package's
+  `api-reference.md`.
+- A test proves nothing until it has gone red for the right reason. The
+  negative control in `script-lab.spec.js` hides the results with
+  `addStyleTag` and the generation assertion must then fail.
+
+Before adding a test: it reflects a user goal; every element is named in the
+page repository; the behaviour was observed, not assumed; it fails when the
+feature breaks; and its scenario marker in `tests/scenarios/` says
+`[automated]`.
+
+(Moved from the removed `ACHILLES-LEARNING.md` and `TODO.md`, 2026-10-06.)
+
 ## When Tests Fail
 
 ### If a test is red and the code is correct:
@@ -215,7 +263,7 @@ Domain rules are defined in `docs/GAME_RULES.md` and are the source of truth for
 - Script shape and element budget (Genre uncapped, others capped per category)
 - Scoring thresholds and distribution (weeks 1-8, Behemoth toggle, decay gates)
 - Studio policies (Holiday release, factory policy)
-- Exclusion rules (193 Starting Tags bans, restoration timing)
+- Exclusion rules (192 Starting Tags bans, restoration timing)
 
 **Before answering "should it be X or Y?":**
 1. Read `docs/GAME_RULES.md`
@@ -256,6 +304,13 @@ An argument added in the wrong slot replaces `options` with a number and drops `
 
 `hideGravesEvaluationResults` hides exactly five panels. The list that reveals panels after evaluation must reveal the same five, or a panel missing from either list will show a placeholder or stale data.
 
+### Rewriting main Can Drop Commits
+
+On 2026-10-01 `main` was rewritten into a fresh initial commit and the bug-hunt
+commits had to be replayed by hand. Before any squash, reword or reset of
+`main`, check that it still contains the commits it held; after it, check
+again. (From the removed `docs/BUG_HUNT_HANDOVER.md`.)
+
 ### Starting Tags Profile Must Be Active to Reproduce Certain Bugs
 
 Exclusion-refresh bugs only reproduce with the Starting Tags profile active. From a clean ban list, the scenario passes with the defect present. This is how a bug survived multiple fixing attempts.
@@ -271,4 +326,5 @@ Exclusion-refresh bugs only reproduce with the Starting Tags profile active. Fro
 ## Changelog
 
 - **2026-09-25**: Initial QA Framework consolidated from CLAUDE.md, AGENTS.md, GAME_RULES.md, and session working memory. Rules cover BDD/unit/negative-edge testing, first-run state, exact visuals, one-concern commits, both-suites verification, feature deletion parity, and [automated] citations.
+- **2026-10-06**: Added "Two Habits That Keep a Test Honest" and "Page Repository and Steps API", moved from `TODO.md` and `ACHILLES-LEARNING.md` when those files were removed.
 - **2026-09-28**: Rule (b) points at the spec that asserts exactly 193. Rule (c) widens the neon-green ban to the whole app. The patterns that let a broken feature pass are catalogued in `docs/TEST_QUALITY_GATE.md`, guarded by `tests/suite-honesty.test.js`.

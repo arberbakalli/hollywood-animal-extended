@@ -26,10 +26,10 @@ Feature: Exclusion Dropdown Refresh
   Scenario: TC09-000002 Colman Graves dropdowns filter correctly after applying starting tags
     Given the Script Evaluation tab is selected
     When the user clicks "Apply Starting Tags"
-    Then the Submit Script section Finale dropdown shows only available items
-    And the Submit Script section Setting dropdown shows only available items
-    And the Submit Script section Antagonist dropdown shows only available items
-    And the Submit Script section Protagonist dropdown shows only available items
+    Then the Colman Graves Locked Elements section Finale dropdown shows only available items
+    And the Colman Graves Locked Elements section Setting dropdown shows only available items
+    And the Colman Graves Locked Elements section Antagonist dropdown shows only available items
+    And the Colman Graves Locked Elements section Protagonist dropdown shows only available items
 
   # [automated] — TC09-000003
   Scenario: TC09-000003 Marketing & Release dropdowns filter correctly after applying starting tags
@@ -44,7 +44,7 @@ Feature: Exclusion Dropdown Refresh
     When the user opens the Finale dropdown
     And notes which items are disabled
     And switches to the Script Evaluation tab
-    And opens the Colman Graves Submit Script Finale dropdown
+    And opens the Colman Graves Locked Elements Finale dropdown
     Then the same items are disabled in the Graves context
 
   # A ban made by hand has to reach the builders the same instant the profile

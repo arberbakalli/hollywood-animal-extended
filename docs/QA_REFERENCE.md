@@ -25,16 +25,16 @@ This project uses three documents for QA governance:
 
 ### 1. [docs/GAME_RULES.md](GAME_RULES.md)
 **Product rules** — what the game and app do, not how.
-- Starting Tags: exactly 250 elements, 57 whitelisted, 193 banned on first visit
+- Starting Tags: exactly 250 elements, 58 whitelisted, 192 banned on first visit
 - Distribution formula: Week 1 = commercial score × 2 × 1,000; subsequent weeks decay at 0.8 (or 0.85/0.90 with policies)
-- Studio policies: Behemoth (>9 commercial) and Boutique (>9 artistic) gates
+- Studio policies: Behemoth (commercial 9 and above) and Boutique (artistic 9 and above) gates
 - Graves evaluation scoring and compatibility matrix rules
 
 ### 2. [docs/QA_FRAMEWORK.md](QA_FRAMEWORK.md)
 **QA process & assertion patterns** — how to verify the rules work.
 - Three test layers: BDD scenarios, unit tests, negative/edge tests
 - [automated] vs [verified] vs [unverified] marker audit rules
-- First-run state reproducibility (193 bans, fixture pre-seeding)
+- First-run state reproducibility (192 bans, fixture pre-seeding)
 - Exact visuals policy (no color assertions unless owner-ruled)
 - Autonomous actions without approval (test writing, audits, runs)
 - Actions requiring approval (deletions, rule changes, main pushes)
@@ -46,6 +46,13 @@ This project uses three documents for QA governance:
 - Running the suite: `npm test` (Jest) and `npm run test:e2e` (Playwright; the config runs 4
   workers, and only **one Playwright process** may run at a time)
 - Domain rules: read `docs/GAME_RULES.md` before answering "should it be X or Y?"
+
+### Auditor skills
+
+Five user-level auditor skills enforce these rules: `test-assertions-auditor`,
+`feature-deletion-auditor`, `rule-change-auditor`, `banned-element-detector` and
+`test-quality-gate`. Each is one `SKILL.md` under `~/.claude/skills/<name>/`,
+outside this repository. (Moved from the removed `docs/SKILLS_REGISTRY.md`.)
 
 ## When You're Stuck
 

@@ -3,6 +3,10 @@
 
     const OPTIMIZED_RESULT_COUNT = 12;
     const INITIAL_OPTIMIZED_VISIBLE_COUNT = 3;
+    // One click makes a list to page through, rather than a new random five
+    // per click (owner ruling 2026-09-30).
+    const STANDARD_RESULT_COUNT = 15;
+    const STANDARD_VISIBLE_COUNT = 5;
     let generatorResultsState = {
         scripts: [],
         visibleCount: 0,
@@ -31,16 +35,38 @@
                     updateSliderTrack(slider);
                 }
             });
+            // Leaving the box settles it on the value the planners use, as the
+            // pool box does (TC10-000008).
+            input.addEventListener('change', (e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && (val > 10 || val < 0)) {
+                    e.target.value = Math.min(10, Math.max(0, val));
+                    e.target.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
             updateSliderTrack(slider);
         });
     }
 
     // Must agree with HACAppShell.targetScoreToPoolSize (GAME_RULES.md section 1).
     function getRequiredElementCount(targetScore) {
-        if (targetScore >= 10) return 10;
-        if (targetScore === 9) return 9;
-        if (targetScore >= 6) return targetScore - 1;
-        return 5;
+        return Math.min(10, Math.max(5, targetScore));
+    }
+
+    function getGenerationElementCount(targetScore) {
+        return Math.max(getRequiredElementCount(targetScore), getMaxElementPoolSize());
+    }
+
+    function scriptSetSignature(script) {
+        return HACScriptGenerationEngine.scriptSignature(script.tags);
+    }
+
+    function keepBestUniqueScript(uniqueBySignature, candidate, isBetter) {
+        const signature = scriptSetSignature(candidate);
+        const existing = uniqueBySignature.get(signature);
+        if (!existing || isBetter(candidate, existing)) {
+            uniqueBySignature.set(signature, candidate);
+        }
     }
 
     function updateRequiredElementDisplay(targetScore) {
@@ -85,7 +111,7 @@
         genScoreInput.addEventListener('input', (e) => {
             let val = parseInt(e.target.value);
             if(val > 10) val = 10;
-            if(val < 6) val = 6;
+            if(val < 5) val = 5;
             if(!isNaN(val)) {
                 genScoreSlider.value = val;
                 updateScoreDisplay(val);
@@ -143,10 +169,12 @@
         return gap > 0 || (gap === 0 && scoreGap > 0);
     }
 
-    // What Colman Graves needs before it will evaluate a script.
-    const REQUIRED_SCRIPT_CATEGORIES = ["Genre", "Setting", "Protagonist"];
-    // What every generated script carries; these spend the story-element budget.
-    const MANDATORY_STORY_CATEGORIES = ["Protagonist", "Antagonist", "Finale"];
+    // What the game requires of every script (GAME_RULES.md section 1).
+    const REQUIRED_SCRIPT_CATEGORIES = HACScriptRules.requiredCategories;
+    // The only required category that spends the story-element budget.
+    const MANDATORY_STORY_CATEGORIES = HACScriptRules.mandatoryStoryCategories;
+    // Optional, one each at most; normal picks that compete for free slots.
+    const OPTIONAL_STORY_CATEGORIES = HACScriptRules.optionalStoryCategories;
 
     function formatCategoryList(categories) {
         if (categories.length <= 1) return categories.join('');
@@ -158,6 +186,14 @@
         if (!input) return 10;
         const slider = document.getElementById('globalElementPoolSlider');
         return HACAppShell.clampPoolSize(input.value, slider ? slider.value : undefined);
+    }
+
+    // Every builder that takes a finished script follows the Max Element Pool
+    // (GAME_RULES section 2): one check, one message.
+    function poolLimitRefusal(storyElementCount) {
+        const pool = getMaxElementPoolSize();
+        if (storyElementCount <= pool) return null;
+        return `Max Element Pool is set to ${pool}, but you selected ${storyElementCount}. Raise it in the header or remove a tag (Genre and Setting do not count).`;
     }
 
     function setupMovieScoreSliderSync() {
@@ -187,7 +223,7 @@
 
         genScoreInput.addEventListener('input', () => {
             const scoreVal = parseInt(genScoreInput.value);
-            if (scoreVal >= 6 && scoreVal <= 10) {
+            if (scoreVal >= 5 && scoreVal <= 10) {
                 updatePoolFromScore(scoreVal);
             }
         });
@@ -211,16 +247,17 @@
         const targetComp = parseFloat(document.getElementById('genCompInput').value);
         const targetScoreInput = parseInt(document.getElementById('genScoreInput').value);
 
-        // Map Movie Score to Required Scoring Elements (Excluding Genre AND Setting)
-        const targetCount = getRequiredElementCount(targetScoreInput);
+        // Generate the Max Element Pool, never fewer than the target needs
+        // (GAME_RULES.md section 1). The two controls are synced, so they differ
+        // only at pool 8: its target of 8 needs 7, and 8 was unreachable.
+        const targetCount = getGenerationElementCount(targetScoreInput);
 
         // Get Fixed Tags
         const fixedTags = collectTagInputs('generator');
         const excludedTags = getGeneratorExcludedTags();
         const excludedIds = new Set(excludedTags.map(t => t.id));
 
-        const generatedCategories = [...new Set([...REQUIRED_SCRIPT_CATEGORIES, ...MANDATORY_STORY_CATEGORIES])];
-        const missingRequiredCategories = generatedCategories.filter(category =>
+        const missingRequiredCategories = REQUIRED_SCRIPT_CATEGORIES.filter(category =>
             !Object.values(GAME_DATA.tags).some(tag =>
                 tag.category === category &&
                 !excludedIds.has(tag.id) &&
@@ -248,21 +285,19 @@
             return null;
         }
 
-        // Reserve a slot for each mandatory category the locks do not cover.
+        // Reserve a slot for the Protagonist when the locks do not cover it.
+        // Antagonist and Finale are optional and never refuse a script.
         const unlockedMandatory = MANDATORY_STORY_CATEGORIES.filter(category =>
             !fixedTags.some(tag => tag.category === category));
         const freeSlots = targetCount - scoringFixed.length;
         if (unlockedMandatory.length > freeSlots) {
             const surplus = unlockedMandatory.length - freeSlots;
             const missing = formatCategoryList(unlockedMandatory);
-            const room = freeSlots === 0
-                ? `fill all ${targetCount} slots, leaving no room for the ${missing}`
-                : `leave room for ${freeSlots} more, but the ${missing} need ${unlockedMandatory.length}`;
             const remedy = `Remove ${surplus} locked element${surplus === 1 ? '' : 's'}`;
             const canRaiseTarget = getRequiredElementCount(targetScoreInput + 1) > targetCount;
             showFeedbackMessage(
                 'generatorFeedbackMessage',
-                `Every script needs a Protagonist, an Antagonist and a Finale. Your ${scoringFixed.length} locked story elements ${room}. ${remedy}${canRaiseTarget ? ' or raise the score target' : ''}.`
+                `Every script needs a ${missing}. Your ${scoringFixed.length} locked story elements fill all ${targetCount} slots, leaving no room for the ${missing}. ${remedy}${canRaiseTarget ? ' or raise the score target' : ''}.`
             );
             return null;
         }
@@ -279,13 +314,16 @@
             return null;
         }
 
+        const fixedIds = new Set(fixedTags.map(tag => tag.id));
         const remainingMandatory = MANDATORY_STORY_CATEGORIES.filter(category =>
             !fixedTags.some(tag => tag.category === category)).length;
-        const fixedIds = new Set(fixedTags.map(tag => tag.id));
+        const optionalSingles = OPTIONAL_STORY_CATEGORIES.filter(category =>
+            !fixedTags.some(tag => tag.category === category) &&
+            Object.values(GAME_DATA.tags).some(tag => tag.category === category && !excludedIds.has(tag.id))).length;
         const availableFillers = Object.values(GAME_DATA.tags).filter(tag =>
             (tag.category === 'Supporting Character' || tag.category === 'Theme & Event') &&
             !excludedIds.has(tag.id) && !fixedIds.has(tag.id)).length;
-        if (scoringFixed.length + remainingMandatory + availableFillers < targetCount) {
+        if (scoringFixed.length + remainingMandatory + optionalSingles + availableFillers < targetCount) {
             showFeedbackMessage('generatorFeedbackMessage',
                 `Not enough available story elements to fill ${targetCount} slots. Remove exclusions or lower the score target.`);
             return null;
@@ -296,101 +334,112 @@
 
     async function generateScripts() {
         const inputs = await prepareGenerationInputs();
-        if (!inputs) return;
+        if (!inputs) {
+            // A refusal never leaves the previous results beside its message,
+            // as Evaluate already does (audit 2026-09-30).
+            document.getElementById('results-generator')?.classList.add('hidden');
+            return;
+        }
 
         const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
 
-        const generatedBatch = [];
+        const uniqueBySignature = new Map();
         // The locks set how fresh a script can be; a slot stops early only once
         // it is that fresh, or a Stale hit on the target would end the search
         // before a Fresh one had a chance.
         const freshnessFloor = HACFreshness.freshnessRank(HACFreshness.scriptFreshness(fixedTags).state);
 
-        // Generate 5 Output Slots
-        for(let i=0; i<5; i++) {
-            let bestCandidate = null;
-            const MAX_ATTEMPTS = 50;
+        for(let attempt = 0; attempt < STANDARD_RESULT_COUNT * 50; attempt++) {
+            const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
 
-            for(let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-                const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
+            keepBestUniqueScript(uniqueBySignature, candidate, (next, current) =>
+                fresherOrBetter(next, current, next.stats.avgComp - current.stats.avgComp)
+            );
 
-                if (!bestCandidate || fresherOrBetter(candidate, bestCandidate, candidate.stats.avgComp - bestCandidate.stats.avgComp)) {
-                    bestCandidate = candidate;
-                }
-
-                const asFreshAsLocks = HACFreshness.freshnessRank(HACFreshness.scriptFreshness(bestCandidate.tags).state) <= freshnessFloor;
-                if (asFreshAsLocks && bestCandidate.stats.avgComp >= targetComp && parseFloat(bestCandidate.stats.movieScore) > 0) {
-                    break;
-                }
+            const ready = Array.from(uniqueBySignature.values()).filter(script => {
+                const asFreshAsLocks = HACFreshness.freshnessRank(HACFreshness.scriptFreshness(script.tags).state) <= freshnessFloor;
+                return asFreshAsLocks && script.stats.avgComp >= targetComp && parseFloat(script.stats.movieScore) > 0;
+            });
+            if (ready.length >= STANDARD_RESULT_COUNT) {
+                break;
             }
-
-            generatedBatch.push(bestCandidate);
         }
 
-        const ranked = HACFreshness.rankByFreshness(generatedBatch, (a, b) => {
+        const ranked = HACFreshness.rankByFreshness(Array.from(uniqueBySignature.values()), (a, b) => {
             const scoreA = parseFloat(a.stats.movieScore);
             const scoreB = parseFloat(b.stats.movieScore);
             if (scoreA !== scoreB) return scoreB - scoreA;
             return b.stats.avgComp - a.stats.avgComp;
-        });
+        }).slice(0, STANDARD_RESULT_COUNT);
 
         generatedScriptsCache = ranked;
         hideFreshnessNotice();
-        renderGeneratedScripts(ranked);
+        renderGeneratedScripts(ranked, {
+            resultLimit: STANDARD_RESULT_COUNT,
+            visibleCount: STANDARD_VISIBLE_COUNT,
+            pageSize: STANDARD_VISIBLE_COUNT
+        });
     }
 
     async function generateBestScoreScripts(scoreKind) {
         const inputs = await prepareGenerationInputs();
-        if (!inputs) return;
+        if (!inputs) {
+            // A refusal never leaves the previous results beside its message,
+            // as Evaluate already does (audit 2026-09-30).
+            document.getElementById('results-generator')?.classList.add('hidden');
+            return;
+        }
 
         const { targetComp, targetCount, fixedTags, excludedTags } = inputs;
-        const generatedBatch = [];
+        const uniqueBySignature = new Map();
 
         // Map scoreKind to bonus property: 'artistic' -> 'art', 'commercial' -> 'com'
         const bonusKey = scoreKind === 'artistic' ? 'art' : 'com';
+        // Highest Appeal respects Target Average Compatibility (owner ruling
+        // 2026-10-01): a candidate at or above it beats a higher bonus below
+        // it. Compared on the tenth shown, as every Average Fit label is.
+        const meetsTarget = script => Number(script.stats.avgComp.toFixed(1)) >= targetComp;
 
-        for (let i = 0; i < OPTIMIZED_RESULT_COUNT; i++) {
-            let bestCandidate = null;
-            const maxAttempts = 35;
+        for (let attempt = 0; attempt < OPTIMIZED_RESULT_COUNT * 35; attempt++) {
+            const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
 
-            for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                const candidate = runGenerationAlgorithm(targetComp, targetCount, fixedTags, excludedTags);
+            // Calculate bonuses for this candidate
+            const evaluation = HACScriptEvaluation.calculateScriptEvaluation(candidate.tags);
+            const candidateBonus = evaluation.bonuses[bonusKey];
+            const candidateWithBonus = {
+                ...candidate,
+                _bonus: candidateBonus,
+                _evaluation: evaluation,
+                optimizedFor: scoreKind,
+                compatTarget: targetComp
+            };
 
-                // Calculate bonuses for this candidate
-                const evaluation = HACScriptEvaluation.calculateScriptEvaluation(candidate.tags);
-                const candidateBonus = evaluation.bonuses[bonusKey];
-
-                if (!bestCandidate) {
-                    bestCandidate = { ...candidate, _bonus: candidateBonus, _evaluation: evaluation };
-                } else {
-                    const existingBonus = bestCandidate._bonus;
-                    const scoreGap = candidateBonus !== existingBonus
-                        ? candidateBonus - existingBonus
-                        : candidate.stats.avgComp - bestCandidate.stats.avgComp;
-                    if (fresherOrBetter(candidate, bestCandidate, scoreGap)) {
-                        bestCandidate = { ...candidate, _bonus: candidateBonus, _evaluation: evaluation };
-                    }
-                }
-            }
-
-            if (bestCandidate) {
-                bestCandidate.optimizedFor = scoreKind;
-                generatedBatch.push(bestCandidate);
-            }
+            keepBestUniqueScript(uniqueBySignature, candidateWithBonus, (next, current) => {
+                const targetGap = Number(meetsTarget(next)) - Number(meetsTarget(current));
+                const scoreGap = targetGap !== 0
+                    ? targetGap
+                    : next._bonus !== current._bonus
+                        ? next._bonus - current._bonus
+                        : next.stats.avgComp - current.stats.avgComp;
+                return fresherOrBetter(next, current, scoreGap);
+            });
         }
 
-        // Freshness first, then bonus (highest first), then average compatibility
-        const ranked = HACFreshness.rankByFreshness(generatedBatch, (a, b) => {
+        // Freshness first, then the target, then bonus (highest first), then
+        // average compatibility
+        const ranked = HACFreshness.rankByFreshness(Array.from(uniqueBySignature.values()), (a, b) => {
+            if (meetsTarget(a) !== meetsTarget(b)) return Number(meetsTarget(b)) - Number(meetsTarget(a));
             if (b._bonus !== a._bonus) {
                 return b._bonus - a._bonus;
             }
             return b.stats.avgComp - a.stats.avgComp;
-        });
+        }).slice(0, OPTIMIZED_RESULT_COUNT);
 
         generatedScriptsCache = ranked;
         hideFreshnessNotice();
         renderGeneratedScripts(ranked, {
             mode: scoreKind,
+            resultLimit: OPTIMIZED_RESULT_COUNT,
             visibleCount: INITIAL_OPTIMIZED_VISIBLE_COUNT
         });
     }
@@ -408,6 +457,8 @@
     }
 
     function renderGeneratedScripts(scripts, options = {}) {
+        setGeneratorStaleNotice(false);
+        setGeneratorUniquenessNotice(scripts.length, options.resultLimit);
         const container = document.getElementById('generatorResultsList');
         container.innerHTML = '';
         document.getElementById('results-generator').classList.remove('hidden');
@@ -415,6 +466,8 @@
         generatorResultsState = {
             scripts,
             visibleCount: options.visibleCount || scripts.length,
+            pageSize: options.pageSize || INITIAL_OPTIMIZED_VISIBLE_COUNT,
+            resultLimit: options.resultLimit || scripts.length,
             mode: options.mode || 'standard'
         };
 
@@ -431,7 +484,7 @@
             button.type = 'button';
             button.className = 'analyze-btn secondary-btn generated-show-more-btn';
             button.dataset.role = 'generated-show-more-button';
-            const toShow = Math.min(INITIAL_OPTIMIZED_VISIBLE_COUNT, scripts.length - generatorResultsState.visibleCount);
+            const toShow = Math.min(generatorResultsState.pageSize, scripts.length - generatorResultsState.visibleCount);
             const remainingAfter = scripts.length - (generatorResultsState.visibleCount + toShow);
             button.textContent = `Show ${toShow} More (${remainingAfter} remaining)`;
             button.addEventListener('click', showMoreGeneratedScripts);
@@ -439,11 +492,63 @@
         }
     }
 
+    // GAME_RULES.md section 5: no context ever holds a banned element. Taking
+    // the element out of a generated script would leave a script of the wrong
+    // size with the wrong score, so the results are hidden and the player is
+    // asked to generate again (audit 2026-09-30). A lifted ban invalidates
+    // nothing, and saved Library scripts are the player's own, so neither
+    // hides anything.
+    function setGeneratorStaleNotice(visible) {
+        const notice = document.getElementById('generator-stale-notice');
+        if (!notice || !notice.classList) return;
+        if (visible) notice.classList.remove('hidden');
+        else notice.classList.add('hidden');
+    }
+
+    function checkGeneratedAgainstBans() {
+        const results = document.getElementById('results-generator');
+        if (!results || results.classList.contains('hidden')) return;
+        const banned = getGeneratorExcludedIds();
+        const holdsBan = (generatorResultsState.scripts || []).some(script =>
+            script.tags.some(tag => banned.has(tag.id)));
+        if (!holdsBan) return;
+        results.classList.add('hidden');
+        setGeneratorStaleNotice(true);
+    }
+
+    // Redraws the current results without losing the page the user is on.
+    // Pinning used to call renderGeneratedScripts with no options, which
+    // showed all 15 and removed Show more (audit 2026-09-30).
+    function refreshGeneratedScripts() {
+        if (!generatorResultsState.scripts.length) return;
+        renderGeneratedScripts(generatorResultsState.scripts, {
+            mode: generatorResultsState.mode,
+            pageSize: generatorResultsState.pageSize,
+            resultLimit: generatorResultsState.resultLimit,
+            visibleCount: generatorResultsState.visibleCount
+        });
+    }
+
     function showMoreGeneratedScripts() {
         renderGeneratedScripts(generatorResultsState.scripts, {
             mode: generatorResultsState.mode,
-            visibleCount: Math.min(generatorResultsState.visibleCount + INITIAL_OPTIMIZED_VISIBLE_COUNT, generatorResultsState.scripts.length)
+            pageSize: generatorResultsState.pageSize,
+            resultLimit: generatorResultsState.resultLimit,
+            visibleCount: Math.min(generatorResultsState.visibleCount + generatorResultsState.pageSize, generatorResultsState.scripts.length)
         });
+    }
+
+    function setGeneratorUniquenessNotice(resultCount, resultLimit) {
+        const notice = document.getElementById('generatorUniquenessNotice');
+        if (!notice) return;
+        if (!resultLimit || resultCount >= resultLimit) {
+            notice.textContent = '';
+            notice.classList.add('hidden');
+            return;
+        }
+
+        notice.textContent = `Only ${resultCount} unique option${resultCount === 1 ? '' : 's'} match these locks and targets. Lower the target score or compatibility, or change locked/excluded elements to see more.`;
+        notice.classList.remove('hidden');
     }
 
     function createScriptId() {
@@ -456,6 +561,27 @@
 
     function buildScriptFromTags(tags, name) {
         return HACScriptGenerationEngine.buildScriptFromTags(tags, name);
+    }
+
+    // Owner ruling 2026-10-01: Script Lab shows every result, but a card whose
+    // script holds an Unsuccessful pair (< 2.0) names it, so the player sees
+    // the score-versus-coherence trade-off. The worst pair is named, in game
+    // category order; any others are counted.
+    function clashWarningText(tags) {
+        const order = tag => GAME_DATA.categories.indexOf(tag.category);
+        const known = tags.map(t => GAME_DATA.tags[t.id]).filter(Boolean).sort((a, b) => order(a) - order(b));
+        const clashes = [];
+        for (let a = 0; a < known.length; a++) {
+            for (let b = a + 1; b < known.length; b++) {
+                const score = getRawCompatibilityScore(known[a], known[b]);
+                if (score < HACGravesBestMatchesEngine.CONFLICT_PAIR_THRESHOLD) clashes.push({ x: known[a], y: known[b], score });
+            }
+        }
+        if (clashes.length === 0) return '';
+        clashes.sort((p, q) => p.score - q.score);
+        const worst = clashes[0];
+        const more = clashes.length > 1 ? ` and ${clashes.length - 1} more` : '';
+        return `Clash: ${worst.x.name} × ${worst.y.name} (${worst.score.toFixed(1)})${more}`;
     }
 
     function createScriptCardHTML(scriptObj, isPinnedSection) {
@@ -475,6 +601,10 @@
         let tagsHtml = '';
         const fixedInputs = collectTagInputs('generator');
         const fixedIds = new Set(fixedInputs.map(t => t.id));
+        // A pinned script keeps an element banned after it was saved; it is
+        // highlighted so the player can remove the pin or lift the ban (owner
+        // ruling 2026-10-01). Generated cards hide on such a ban instead.
+        const bannedIds = isPinnedSection ? getGeneratorExcludedIds() : new Set();
         const sortedTags = [...scriptObj.tags].sort((a, b) => {
             let idxA = GAME_DATA.categories.indexOf(a.category);
             let idxB = GAME_DATA.categories.indexOf(b.category);
@@ -490,7 +620,9 @@
             const categoryClass = categoryToElementSlug(t.category);
             const tagClass = t.category === 'Genre' ? `genre-${toDomId(t.id)}` : '';
             const freshnessPill = HACFreshness.hasFreshness(t.category) ? HACFreshness.pillHtml(t.id) : '';
-            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${tagClass} ${isFixed ? 'tag-fixed' : ''}">${tagName} <small>${t.category}</small>${freshnessPill}</span>`;
+            const isBanned = bannedIds.has(t.id);
+            const trashBadge = HACTrashElements.badgeHtml(t.id);
+            tagsHtml += `<span class="gen-tag-chip ${categoryClass} ${tagClass} ${isFixed ? 'tag-fixed' : ''} ${isBanned ? 'tag-banned' : ''}">${tagName} <small>${t.category}</small>${freshnessPill}${trashBadge}</span>`;
         });
 
         const isOptimized = scriptObj.optimizedFor === 'artistic' || scriptObj.optimizedFor === 'commercial';
@@ -546,6 +678,16 @@
         // Editable Name Input (Only if in pinned section). The name is typed by
         // the player or read from a shared file, so it is set as a property
         // below, never interpolated into the markup.
+        const clashWarning = clashWarningText(scriptObj.tags);
+        const bannedNames = scriptObj.tags.filter(t => bannedIds.has(t.id)).map(t => GAME_DATA.tags[t.id]?.name || t.id);
+        const bannedWarning = bannedNames.length
+            ? `Banned: ${bannedNames.join(', ')}. Remove the pin or lift the ban.`
+            : '';
+        const shownFit = Number(scriptObj.stats.avgComp.toFixed(1));
+        const belowTarget = Number.isFinite(scriptObj.compatTarget) && shownFit < scriptObj.compatTarget
+            ? `Avg Fit ${shownFit.toFixed(1)} is below your ${scriptObj.compatTarget.toFixed(1)} target.`
+            : '';
+
         const nameInputHtml = isPinnedSection
             ? `<input type="text" class="script-name-input"
                id="${cardScope}-name-${scriptDomId}"
@@ -561,6 +703,9 @@
                         ${scoreBadgesHtml}
                     </div>
                     <div id="${cardScope}-freshness-${scriptDomId}" class="gen-freshness-status hidden" data-role="script-freshness-status"></div>
+                    ${clashWarning ? `<div id="${cardScope}-clash-${scriptDomId}" class="best-match-warning gen-clash-warning" data-role="script-clash-warning">${clashWarning}</div>` : ''}
+                    ${belowTarget ? `<div id="${cardScope}-below-target-${scriptDomId}" class="gen-below-target" data-role="script-below-target">${belowTarget}</div>` : ''}
+                    ${bannedWarning ? `<div id="${cardScope}-banned-${scriptDomId}" class="best-match-warning gen-banned-warning" data-role="script-banned-warning">${bannedWarning}</div>` : ''}
                 </div>
                 <button id="${cardScope}-pin-${scriptDomId}" class="pin-btn ${pinClass}" type="button" title="${pinTitle}" data-role="script-pin-button">
                     ${isActuallyPinned ? '★' : '☆'}
@@ -595,7 +740,9 @@
         div.querySelector('.pin-btn')?.addEventListener('click', event => togglePin(scriptObj.uniqueId, event));
         div.querySelector('[data-role="script-graves-button"]')?.addEventListener('click', () => transferScriptToContext(scriptObj.uniqueId, 'graves'));
         div.querySelector('[data-role="script-transfer-button"]')?.addEventListener('click', () => transferScriptToContext(scriptObj.uniqueId, 'advertisers'));
-        div.querySelector('.script-name-input')?.addEventListener('keyup', event => updateScriptName(scriptObj.uniqueId, event.target.value));
+        // input, not keyup: a paste, drag-drop or autofill fires no key event,
+        // and the name never reached the library file (audit 2026-09-30).
+        div.querySelector('.script-name-input')?.addEventListener('input', event => updateScriptName(scriptObj.uniqueId, event.target.value));
         div.querySelector('.script-name-input')?.addEventListener('click', event => event.stopPropagation());
 
         return div;
@@ -604,6 +751,7 @@
     global.HACScriptGenerator = {
         setupScoreSync,
         getRequiredElementCount,
+        getGenerationElementCount,
         updateRequiredElementDisplay,
         REQUIRED_SCRIPT_CATEGORIES,
         setupGeneratorControls,
@@ -613,11 +761,14 @@
         getCompatibleGenres,
         getRandomTagByCategory,
         renderGeneratedScripts,
+        refreshGeneratedScripts,
+        checkGeneratedAgainstBans,
         showMoreGeneratedScripts,
         createScriptId,
         buildScriptStats,
         buildScriptFromTags,
         createScriptCardHTML,
-        getMaxElementPoolSize
+        getMaxElementPoolSize,
+        poolLimitRefusal
     };
 })(globalThis);

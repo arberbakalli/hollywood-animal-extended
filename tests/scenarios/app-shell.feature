@@ -10,6 +10,20 @@ Feature: App Shell
   Background:
     Given the Hollywood Animal Calculator is open
 
+  # [automated] TC38-000001, tests/e2e/builder-headings.spec.js.
+  Scenario Outline: Builders share their selection heading on desktop and mobile
+    Given the screen is <width> pixels wide
+    Then Script Lab starts with a five-story-element hint excluding Genre and Setting
+    When the user visits Build, Evaluate, Analyze Script and Build for Target
+    Then every selection heading says Locked Elements
+    And Build for Target also says Optional
+    And the headings fit the screen
+
+    Examples:
+      | width |
+      | 1280  |
+      | 390   |
+
   # [automated] TC00-000001. Primary tabs are the entry points for Build, Evaluate and Market.
   Scenario Outline: Primary product tabs switch visible panels
     When the user opens the <tab> tab

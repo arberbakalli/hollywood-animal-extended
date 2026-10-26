@@ -20,8 +20,11 @@ describe.each(['custom', 'starting'])('%s generation score integrity', profile =
             expect(h.call('HACGravesAnalysis.storyElementsOf', script.tags)).toHaveLength(count);
             expect(new Set(script.tags.map(tag => tag.id)).size).toBe(script.tags.length);
             expect(script.tags.some(tag => bannedIds.has(tag.id))).toBe(false);
-            for (const category of ['Setting', 'Protagonist', 'Antagonist', 'Finale']) {
+            for (const category of ['Setting', 'Protagonist']) {
                 expect(script.tags.filter(tag => tag.category === category)).toHaveLength(1);
+            }
+            for (const category of ['Antagonist', 'Finale']) {
+                expect(script.tags.filter(tag => tag.category === category).length).toBeLessThanOrEqual(1);
             }
             expect(script.tags.filter(tag => tag.category === 'Genre').length).toBeGreaterThanOrEqual(1);
             for (const lock of locks) expect(script.tags).toContainEqual(lock);

@@ -222,6 +222,51 @@
         freshnessStore().subscribe(id => syncPills(id));
     }
 
+    // ---- Trash elements (GAME_RULES section 11) ----------------------------
+    // An informative label shown beside the freshness pill. It has no click
+    // action and no score effect; GAME_DATA.tags[id].trash comes from the game
+    // file's TRASH rule.
+    const TRASH_LABEL = 'Trash element';
+
+    function isTrash(id) {
+        const tag = id && typeof GAME_DATA !== 'undefined' ? GAME_DATA.tags[id] : null;
+        return Boolean(tag && tag.trash);
+    }
+
+    function badgeHtml(id) {
+        if (!isTrash(id)) return '';
+        return `<span class="trash-badge" data-role="trash-badge" data-tag-id="${id}" title="${tagName(id)} is a trash element"><span class="trash-badge-icon" aria-hidden="true"></span>${TRASH_LABEL}</span>`;
+    }
+
+    function createBadge() {
+        const badge = document.createElement('span');
+        badge.className = 'trash-badge';
+        badge.dataset.role = 'trash-badge';
+        badge.hidden = true;
+        return badge;
+    }
+
+    function renderBadge(badge, id) {
+        if (!badge) return;
+        if (!isTrash(id)) {
+            badge.hidden = true;
+            delete badge.dataset.tagId;
+            return;
+        }
+        badge.hidden = false;
+        badge.dataset.tagId = id;
+        badge.title = `${tagName(id)} is a trash element`;
+        if (!badge.firstChild) {
+            const icon = document.createElement('span');
+            icon.className = 'trash-badge-icon';
+            icon.setAttribute('aria-hidden', 'true');
+            badge.appendChild(icon);
+            badge.appendChild(document.createTextNode(TRASH_LABEL));
+        }
+    }
+
+    global.HACTrashElements = { TRASH_LABEL, isTrash, badgeHtml, createBadge, renderBadge };
+
     global.HACFreshness = {
         FRESHNESS_STATES,
         FRESHNESS_CATEGORIES,
@@ -294,6 +339,13 @@
         };
     }
 
+    // One result per element set (owner ruling 2026-10-06, GAME_RULES.md):
+    // the same element ids are the same result, whatever the genre
+    // percentages. Script Lab and Build for Target both key on this.
+    function scriptSignature(tags) {
+        return (tags || []).map(tag => tag.id).sort().join('|');
+    }
+
     function buildScriptFromTags(tags, name) {
         const evaluation = calculateScriptEvaluation(tags);
 
@@ -345,26 +397,34 @@
             }
         }
 
-        // Reserved before any filler, whatever the locks hold (GAME_RULES.md §1).
-        // prepareGenerationInputs refuses locks that leave no room for these,
-        // so reserving them never pushes a script past its target.
-        const scoringMandatory = ["Protagonist", "Antagonist", "Finale"];
-        scoringMandatory.forEach(cat => {
-            if (!categoriesPresent.has(cat)) {
-                const randomTag = getRandomTagByCategory(cat, currentTags, excludedIds);
-                if (randomTag) {
-                    currentTags.push(randomTag);
-                    categoriesPresent.add(cat);
-                }
+        // The Protagonist is required and reserved whatever the locks hold;
+        // prepareGenerationInputs refuses locks that leave it no room.
+        HACScriptRules.mandatoryStoryCategories.forEach(cat => {
+            if (categoriesPresent.has(cat)) return;
+            const randomTag = getRandomTagByCategory(cat, currentTags, excludedIds);
+            if (randomTag) {
+                currentTags.push(randomTag);
+                categoriesPresent.add(cat);
             }
         });
 
-        const fillerCats = ["Supporting Character", "Theme & Event"];
+        // Antagonist and Finale are optional normal picks, one each at most,
+        // competing with the other story categories (GAME_RULES.md section 1).
+        const optionalSingles = HACScriptRules.optionalStoryCategories;
+        const fillerCats = ["Supporting Character", "Theme & Event",
+            ...optionalSingles.filter(cat => !categoriesPresent.has(cat))];
         while (getScoringElementCount(currentTags) < targetCount) {
             const randCat = fillerCats[Math.floor(Math.random() * fillerCats.length)];
+            if (optionalSingles.includes(randCat) && categoriesPresent.has(randCat)) {
+                fillerCats.splice(fillerCats.indexOf(randCat), 1);
+                if (fillerCats.length === 0) break;
+                continue;
+            }
             const randomTag = getRandomTagByCategory(randCat, currentTags, excludedIds);
-            if (randomTag) currentTags.push(randomTag);
-            else {
+            if (randomTag) {
+                currentTags.push(randomTag);
+                categoriesPresent.add(randCat);
+            } else {
                 fillerCats.splice(fillerCats.indexOf(randCat), 1);
                 if (fillerCats.length === 0) break;
             }
@@ -421,6 +481,7 @@
         createScriptId,
         getCompatibleGenres,
         getRandomTagByCategory,
-        runGenerationAlgorithm
+        runGenerationAlgorithm,
+        scriptSignature
     };
 })(globalThis);

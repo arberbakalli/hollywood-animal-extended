@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 /**
  * Exclusions must survive a reload intact.
@@ -126,7 +127,7 @@ test.describe('Exclusion persistence', () => {
 
   // A player who saved bans before the seeded marker existed has a list in
   // storage and no marker. The first-run gate read the marker alone, so it
-  // treated that visit as a first run and wrote the 193 starter bans over the
+  // treated that visit as a first run and wrote the starter bans over the
   // player's own list.
   test('TC09-000023 a saved ban list survives a visit without the seeded marker', async ({ browser, baseURL }) => {
     const saved = [
@@ -186,7 +187,7 @@ test.describe('Exclusion persistence', () => {
   test('TC09-000024 an invalid exclusion profile leaves the current bans intact', async ({ steps, page }) => {
     await applyStartingTags(steps, page);
     const before = await storedCount(page);
-    expect(before).toBe(193);
+    expect(before).toBe(STARTING_BAN_COUNT);
 
     const invalidProfiles = [
       { exclusions: [{ id: 'DRAMA', category: 'Genre' }, null] },

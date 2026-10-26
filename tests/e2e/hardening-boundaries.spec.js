@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 async function pick(page, category, id, context) {
   const group = page.locator(`#inputs-${category}-${context}`);
@@ -11,14 +12,17 @@ async function pick(page, category, id, context) {
   await empty.first().selectOption(id);
 }
 
-test('TC22-000001 commercial nine keeps ordinary decay from week two with Behemoth enabled', async ({ steps, page }) => {
+// Owner ruling 2026-10-01, edit approved: the decay gate opens from 9, so
+// week 3 falls at 0.85: 9000 x 0.85 x 1.25 = 9562.5, rounded up because the
+// opening window (indexes below 4) rounds up.
+test('TC22-000001 commercial nine slows the decay from week three with Behemoth enabled', async ({ steps, page }) => {
   await openHollywood(steps);
   await steps.on('marketTab', 'Navigation').click();
   await page.locator('#comScoreInput').fill('9');
   await page.locator('#behemothToggle').check();
   await expect(page.locator('#dist-week-1-value')).toHaveAttribute('data-demand', '22500');
   await expect(page.locator('#dist-week-2-value')).toHaveAttribute('data-demand', '11250');
-  await expect(page.locator('#dist-week-3-value')).toHaveAttribute('data-demand', '9000');
+  await expect(page.locator('#dist-week-3-value')).toHaveAttribute('data-demand', '9563');
 });
 
 test('TC22-000002 week eight gets the Behemoth lift only while the toggle is on', async ({ steps, page }) => {
@@ -79,10 +83,10 @@ test('TC22-000005 a persisted Setting ban is unavailable in Graves immediately a
   await expect(page.locator('#gravesExclusionSummary')).toContainText('1');
 });
 
-test('TC22-000006 193 starting bans without locks leave the age panel empty', async ({ steps, page }) => {
+test('TC22-000006 the starting bans without locks leave the age panel empty', async ({ steps, page }) => {
   await openHollywood(steps);
   await page.locator('#applyStartingTagsButton').click();
-  await expect(page.locator('#excluded-count')).toHaveText('193');
+  await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
   await expect(page.locator('.age-role-row')).toHaveCount(0);
   await expect(page.locator('.age-role-empty-state')).toBeVisible();
 });
@@ -96,7 +100,7 @@ for (const [mode, button] of [
     test(`TC22-000007 ${mode} partial-seed generation at pool ${pool} preserves constraints and ranking`, async ({ steps, page }) => {
       await openHollywood(steps);
       await page.locator('#applyStartingTagsButton').click();
-      await expect(page.locator('#excluded-count')).toHaveText('193');
+      await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
       await pick(page, 'protagonist', 'PROTAGONIST_COWBOY', 'generator');
       await page.locator('#globalElementPoolInput').fill(String(pool));
       await page.locator('#globalElementPoolInput').press('Tab');
@@ -109,13 +113,16 @@ for (const [mode, button] of [
         storyCount: HACGravesAnalysis.storyElementsOf(script.tags).length,
         bonuses: HACScriptEvaluation.calculateScriptEvaluation(script.tags).bonuses,
       })));
-      expect(scripts).toHaveLength(mode === 'standard' ? 5 : 12);
+      expect(scripts).toHaveLength(mode === 'standard' ? 15 : 12);
       for (const script of scripts) {
         expect(script.tags.some(tag => tag.id === 'PROTAGONIST_COWBOY')).toBe(true);
         expect(script.banned).toEqual([]);
         expect(script.storyCount).toBe(storyCount);
-        for (const category of ['Setting', 'Protagonist', 'Antagonist', 'Finale']) {
+        for (const category of ['Setting', 'Protagonist']) {
           expect(script.tags.filter(tag => tag.category === category)).toHaveLength(1);
+        }
+        for (const category of ['Antagonist', 'Finale']) {
+          expect(script.tags.filter(tag => tag.category === category).length).toBeLessThanOrEqual(1);
         }
         expect(script.tags.filter(tag => tag.category === 'Genre').length).toBeGreaterThanOrEqual(1);
         for (const score of [script.scores.commercial, script.scores.artistic, script.stats.avgComp,
@@ -135,7 +142,7 @@ for (const [mode, button] of [
   }
 }
 
-for (const category of ['Genre', 'Setting', 'Protagonist', 'Antagonist', 'Finale']) {
+for (const category of ['Genre', 'Setting', 'Protagonist']) {
   test(`TC22-000008 Build for Target refuses scripts when every ${category} is banned`, async ({ steps, page }) => {
     await openHollywood(steps);
     await page.evaluate(category => {

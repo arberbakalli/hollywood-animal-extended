@@ -156,12 +156,11 @@ These bugs were found and fixed by reading the running app, not the tests. None 
 1. **Excluded Elements silently inert.** 194 banned tags sat in the DOM while 0 reached the
    generator: a UI class aborted on a null container, so the exclusion set stayed empty, and the
    caller tested whether the manager object existed rather than whether it held anything.
-2. **Two disagreeing score tables.** Help text promised 4/6/8/9/10 elements for target scores 6–10
-   while the generator used 5/7/8/9/9. Now one function, `getRequiredElementCount`, feeds both.
-   A third table, the movie-score cap in `movieScoreEstimator.js`, is now owner-ruled
-   (5-6 → 7, 7-8 → 8, 9 → 9, 10 → 10; `docs/GAME_RULES.md` section 1).
-   Target 9 requires nine elements and target 10 requires ten. Pool 8 targets 8,
-   so its reverse mapping is deliberately asymmetric: target 8 requires seven.
+2. **Two disagreeing score tables.** The old target-to-pool mapping disagreed with
+   the generator. Max Element Pool and Target Movie Score now move one to one from
+   5 to 10, and generation fills exactly that many story slots. The separate game
+   Rating Limit table caps movie scores at 6 for 5-6 elements, 8 for 7-8, 9 for
+   9, and 10 for 10 (`docs/GAME_RULES.md` section 1).
 3. **`requestIdleCallback` in a hidden tab.** Chrome suspends idle callbacks in background tabs and
    ignores the timeout guarantee, so tabbing away during the Starting Tags load left the list
    permanently empty. Replaced with `setTimeout(fn, 0)`, which keeps the paint opportunity without

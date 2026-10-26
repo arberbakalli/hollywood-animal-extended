@@ -26,19 +26,89 @@ async function textContrast(locator) {
   });
 }
 
+async function categoryBorderMatchesPalette(locator) {
+  return locator.evaluate(element => {
+    const group = element.closest('.category-group');
+    if (!group) return false;
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--category-color)';
+    group.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    return getComputedStyle(element).borderTopColor === paletteColor;
+  });
+}
+
+async function selectorTextMatchesPalette(locator) {
+  return locator.evaluate(element => {
+    const group = element.closest('.category-group');
+    if (!group) return false;
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--category-color)';
+    group.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    return getComputedStyle(element).color === paletteColor;
+  });
+}
+
+async function categoryOptionsMatchPalette(locator) {
+  return locator.evaluate(element => {
+    const group = element.closest('.category-group');
+    if (!group) return false;
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--category-color)';
+    group.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    return Array.from(element.querySelectorAll('option:not(:first-child)')).every(option =>
+      getComputedStyle(option).color === paletteColor
+    );
+  });
+}
+
+async function genreSelectorMatchesSelectedPalette(locator) {
+  return locator.evaluate(element => {
+    if (!element.dataset.genre) return false;
+    const probe = document.createElement('span');
+    probe.dataset.genre = element.dataset.genre;
+    probe.style.color = 'var(--tag-color)';
+    document.body.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    const style = getComputedStyle(element);
+    return style.color === paletteColor && style.borderTopColor === paletteColor;
+  });
+}
+
+async function genreOptionsMatchPalette(locator) {
+  return locator.evaluate(element => Array.from(element.querySelectorAll('option[class*="genre-"]')).every(option => {
+    const probe = document.createElement('span');
+    probe.className = option.className;
+    probe.style.color = 'var(--tag-color)';
+    document.body.appendChild(probe);
+    const paletteColor = getComputedStyle(probe).color;
+    probe.remove();
+    return getComputedStyle(option).color === paletteColor;
+  }));
+}
+
 for (const width of [390, 1280]) {
   test(`TC21-000001 ${width}px: genre text remains readable and stable when a dropdown gains focus`, async ({ steps, page }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     await openHollywood(steps);
     const select = page.locator('#inputs-genre-generator select.tag-selector');
+    expect(await categoryBorderMatchesPalette(select), `genre placeholder border uses category palette at ${width}px`).toBe(true);
+    expect(await selectorTextMatchesPalette(select), `genre placeholder text uses category palette at ${width}px`).toBe(true);
     await select.focus();
     const genres = await select.locator('option[value]:not([value=""])').evaluateAll(options => options.map(option => option.value));
     expect(genres).toHaveLength(11);
+    expect(await genreOptionsMatchPalette(select), `genre options use documented palette at ${width}px`).toBe(true);
     for (const genre of genres) {
       await select.selectOption(genre);
       await select.blur();
       const restingColor = await select.evaluate(node => getComputedStyle(node).color);
-      expect(await textContrast(select), `${genre} text contrast at ${width}px`).toBeGreaterThanOrEqual(4.5);
+      expect(await genreSelectorMatchesSelectedPalette(select), `${genre} selected text and border use documented palette at ${width}px`).toBe(true);
       await select.focus();
       await expect(select).toHaveCSS('color', restingColor);
       const remove = select.locator('..').locator('.remove-btn');
@@ -48,10 +118,12 @@ for (const width of [390, 1280]) {
     }
     for (const category of ['setting', 'protagonist', 'antagonist', 'supporting-character', 'theme-event', 'finale']) {
       const picker = page.locator(`#inputs-${category}-generator select.tag-selector`);
-      expect(await textContrast(picker), `${category} placeholder contrast`).toBeGreaterThanOrEqual(4.5);
+      expect(await categoryBorderMatchesPalette(picker), `${category} placeholder border uses category palette`).toBe(true);
+      expect(await selectorTextMatchesPalette(picker), `${category} placeholder text uses category palette`).toBe(true);
       await picker.focus();
+      expect(await categoryOptionsMatchPalette(picker), `${category} options use category palette`).toBe(true);
       await picker.selectOption({ index: 1 });
-      expect(await textContrast(picker), `${category} selected text contrast`).toBeGreaterThanOrEqual(4.5);
+      expect(await selectorTextMatchesPalette(picker), `${category} selected text uses category palette`).toBe(true);
     }
     await select.selectOption('DRAMA');
     await page.screenshot({ path: testInfo.outputPath(`genre-${width}.png`), fullPage: true });

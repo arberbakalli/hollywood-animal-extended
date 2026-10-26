@@ -52,14 +52,14 @@ Feature: Script Lab
   Scenario: A first visit excludes exactly the unavailable starting elements
     Given a fresh browser with no saved exclusions
     When the player opens Script Lab
-    Then the exclusion counter reads 193
-    And the excluded elements are exactly those outside the 57-element starting deck
+    Then the exclusion counter reads 192
+    And the excluded elements are exactly those outside the 58-element starting deck
 
   # [automated] TC22-000006, tests/e2e/hardening-boundaries.spec.js.
   Scenario: Starting exclusions alone leave Age and Gender Appeal empty
     Given no role is locked
     When the player applies Starting Tags
-    Then the exclusion counter reads 193
+    Then the exclusion counter reads 192
     And Age and Gender Appeal shows its empty state with no role rows
 
   # [automated] TC20-000007, tests/e2e/product-hardening.spec.js.
@@ -79,10 +79,14 @@ Feature: Script Lab
     And evaluation results stay hidden
 
   # [automated] TC20-000008 (count 10), tests/e2e/product-hardening.spec.js.
-  Scenario: Ten story elements can be evaluated while the generation pool is five
+  # Owner ruling 2026-10-09: Evaluate follows the Max Element Pool.
+  Scenario: Ten story elements are refused at pool five and evaluated at pool ten
     Given Max Element Pool is five
     And Colman Graves is open with Genre, Setting and ten story elements including Protagonist selected
     When the player evaluates the script
+    Then feedback says Max Element Pool is set to 5, but you selected 10
+    And evaluation results stay hidden
+    When the player raises Max Element Pool to ten and evaluates again
     Then evaluation results appear
     And the score-cap description counts ten story elements
     And the results contain neither NaN nor Infinity
@@ -121,11 +125,12 @@ Feature: Script Lab
     And each contains one Genre and one Setting outside the story budget
 
   # [automated] TC22-000001, tests/e2e/hardening-boundaries.spec.js.
-  Scenario: Commercial nine gets the Behemoth boost without slower decay
+  # Owner ruling 2026-10-01: the decay gate opens from 9 and above.
+  Scenario: Commercial nine gets the Behemoth boost and the slower decay
     Given commercial score is 9.0 in Marketing and Release
     When the player enables Behemoth
     Then week two demand is 11250 screenings
-    And week three demand is 9000 screenings
+    And week three demand is 9563 screenings
 
   # [automated] TC22-000002, tests/e2e/hardening-boundaries.spec.js.
   Scenario: Behemoth increases week-eight demand only while enabled
@@ -240,7 +245,7 @@ Feature: Script Lab
     Given the user has applied the Starting Tags profile
     When the user loads a profile with an empty entry, an unknown element or a wrong category
     Then a message says the profile is invalid
-    And the 193 bans are unchanged in storage and on screen
+    And the 192 bans are unchanged in storage and on screen
 
   # [automated] TC09-000025.
   Scenario: A saved exclusion profile loads back after the bans are reset
@@ -397,18 +402,19 @@ Feature: Script Lab
     When the user raises the target movie score
     Then the required story elements hint updates
 
-  # [automated] TC01-000016. Regression: the hint used the movie score itself as the story
-  # element count, so score 7 showed 7. From 9 up the game's Rating Limit table
-  # makes the count equal the score (docs/GAME_RULES.md section 1).
+  # [automated] TC01-000016. The hint shows the story element count the target
+  # asks for, one to one from 5 to 10 (owner ruling 2026-10-01,
+  # docs/GAME_RULES.md section 1).
   Scenario Outline: Target movie score shows the correct story element count
     When the user sets the target movie score to <movie_score>
     Then the required story elements hint says "~<story_elements> Story Elements"
 
     Examples:
       | movie_score | story_elements |
-      | 6           | 5              |
-      | 7           | 6              |
-      | 8           | 7              |
+      | 5           | 5              |
+      | 6           | 6              |
+      | 7           | 7              |
+      | 8           | 8              |
       | 9           | 9              |
       | 10          | 10             |
 
@@ -450,7 +456,7 @@ Feature: Script Lab
 
   # [automated] tests/e2e/script-lab.spec.js TC01-000029. Watched in the app
   # 2026-09-22 before automating: pin 1, reload, library empties to 0, load the
-  # saved file, back to 1 with "Loaded 1 scripts."
+  # saved file, back to 1 with "Loaded 1 script."
   #
   # The reload is the scenario, not staging for it. `pinnedScripts` is an
   # in-memory array with no persistence, unlike the exclusion list, so a refresh
@@ -468,3 +474,68 @@ Feature: Script Lab
     When the user loads that file back
     Then the pinned script is restored
     And a message says how many scripts were loaded
+
+  # [automated] TC01-000041, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Max Element Pool 8 generates 8 story elements
+    Given the Max Element Pool is 8
+    When the user generates scripts
+    Then every generated script has 8 story elements
+
+  # [automated] TC01-000042, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: One Generate Scripts click makes a unique list to page through
+    When the user generates scripts
+    Then 5 scripts are shown
+    When the user clicks Show more twice
+    Then up to 15 unique scripts are shown, and the first 5 did not change
+
+  # [automated] tests/generator-unique-results.test.js. Owner ruling 2026-10-03:
+  # same tags in a shuffled display order are one suggestion, not variety.
+  Scenario: Generated script suggestions are unique by tag set
+    When the generator finds the same tags in a different order
+    Then only one generated suggestion is shown for that tag set
+    And the page explains that locked targets can leave fewer unique options
+
+  # [automated] TC01-000043 and TC26-000003, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Max Element Pool and Target Movie Score move together, one to one
+    When the user walks either control from 5 to 10, one step at a time
+    Then at every step the pool, the target and the "Requires ~N" help show the same N
+    And Generate builds exactly N story elements
+
+  # [automated] TC06-000009, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: The Genre + button stops at 11 rows
+    When the user clicks the Genre + button well past eleven rows
+    Then there are 11 Genre rows and the button is disabled
+    When the user removes one Genre row
+    Then the button works again
+
+  # [automated] TC01-000055, tests/e2e/protagonist-only-required.spec.js. Owner ruling 2026-10-08:
+  # only Genre, Setting and Protagonist are required; Antagonist and Finale are optional.
+  Scenario: Locked themes leave room only for a Protagonist, and Generate finds one
+    Given Max Element Pool is 6
+    And five Theme & Event elements are locked
+    When the user generates
+    Then every script keeps the five themes and adds exactly one Protagonist
+    And no message asks for an Antagonist or a Finale
+
+  # [automated] TC01-000034, tests/e2e/script-lab.spec.js. Owner ruling 2026-10-08.
+  Scenario: Locks that leave no room for the Protagonist are refused with a way out
+    Given five Supporting Characters are locked at the default target of 5
+    When the user generates
+    Then generation is refused with "Every script needs a Protagonist."
+    And the message says "Remove 1 locked element or raise the score target"
+
+  # [automated] TC20-000012, tests/e2e/pool-limit-builders.spec.js. Owner ruling 2026-10-09.
+  Scenario: Evaluate Script follows the Max Element Pool
+    Given Colman Graves holds six story elements
+    When Max Element Pool is five and the player evaluates
+    Then feedback says Max Element Pool is set to 5, but you selected 6
+    When Max Element Pool is six and the player evaluates
+    Then evaluation results appear
+
+  # [automated] TC20-000013, tests/e2e/pool-limit-builders.spec.js. Owner ruling 2026-10-09.
+  Scenario: Analyze Script follows the Max Element Pool
+    Given Analyze Script holds six story elements
+    When Max Element Pool is six and the player analyzes
+    Then the marketing results appear
+    When Max Element Pool is five and the player analyzes
+    Then feedback says Max Element Pool is set to 5, but you selected 6

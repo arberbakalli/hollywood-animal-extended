@@ -7,29 +7,37 @@
     }
 
     function getMovieScoreCap(scoringCount) {
-        // Game's Rating Limit table (2026-09-28):
-        // 9 elements → 9, 10 elements → 10 (not 9 → 10)
+        // Game's Rating Limit table, as the owner read it 2026-09-30:
+        // under 5 and 5-6 -> 6, 7-8 -> 8, 9 -> 9, 10 -> 10.
         if (scoringCount === 10) return 10;
         if (scoringCount === 9) return 9;
         if (scoringCount >= 7) return 8;
-        if (scoringCount >= 5) return 7;
         return 6;
     }
 
     // Script column of the same table (GAME_RULES.md section 1). Every row's
     // movie limit is distinct, so it alone picks the row.
-    const SCRIPT_LIMIT_BY_MOVIE_LIMIT = { 6: 5, 7: 6, 8: 7, 9: 8, 10: 10 };
+    const SCRIPT_LIMIT_BY_MOVIE_LIMIT = { 6: 5, 8: 7, 9: 8, 10: 10 };
 
     function getScriptQualityCap(movieLimit) {
         return SCRIPT_LIMIT_BY_MOVIE_LIMIT[movieLimit];
+    }
+
+    // Movie scores carry one decimal. A score is stored at the tenth the
+    // screen shows (the same toFixed(1) as HACScoreFormatting.formatMovieScore,
+    // which loads later), so a stored 8.910000000000002 can no longer sit
+    // behind a displayed 8.9. That mismatch made TC24-000001 fail about one
+    // run in 24 (2026-09-30).
+    function toShownTenth(value) {
+        return Number(value.toFixed(1));
     }
 
     function calculateMovieScores(matrix, bonuses, tags) {
         const scoringCount = tags ? getScoringElementCount(tags) : 0;
         const tagCap = getMovieScoreCap(scoringCount);
         const maxGameScore = 9.9;
-        const commercial = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore));
-        const artistic = Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore));
+        const commercial = toShownTenth(Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.com) * maxGameScore)));
+        const artistic = toShownTenth(Math.min(tagCap, Math.max(0, (matrix.totalScore + bonuses.art) * maxGameScore)));
 
         return { commercial, artistic, tagCap, scoringCount };
     }

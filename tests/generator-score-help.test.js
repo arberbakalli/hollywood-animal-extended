@@ -11,7 +11,7 @@ describe('Script Lab required-element help', () => {
     afterEach(() => h.resetBrowserState());
 
     test.each([
-        [6, 5], [7, 6], [8, 7], [9, 9], [10, 10],
+        [6, 6], [7, 7], [8, 8], [9, 9], [10, 10],
     ])('target %p displays its required minimum of %p story elements', (target, required) => {
         const display = { innerText: 'previous help' };
         const accessedIds = [];

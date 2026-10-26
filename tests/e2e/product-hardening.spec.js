@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 const MODES = [
   ['standard', '#generateScriptsButton'],
@@ -48,7 +49,8 @@ test.describe('generation and transfer score integrity', () => {
 
       await page.locator(button).click();
       const cards = page.locator('#generatorResultsList .gen-card');
-      await expect(cards).toHaveCount(mode === 'standard' ? 5 : 3);
+      await expect(cards).toHaveCount(1, { timeout: 15000 });
+      await expect(page.locator('#generatorUniquenessNotice')).toContainText('Only 1 unique option');
       await expect(cards.first()).not.toContainText(/NaN|Infinity/);
       const generated = await page.evaluate(() => generatedScriptsCache.map(script => ({
         tags: script.tags, scores: script.scores, stats: script.stats
@@ -89,14 +91,15 @@ test.describe('generation and transfer score integrity', () => {
     test(`TC20-000002 ${mode}: starting-pool generation keeps locks, bans and age roles distinct`, async ({ steps, page }) => {
       await openHollywood(steps);
       await page.locator('#applyStartingTagsButton').click();
-      await expect(page.locator('#excluded-count')).toHaveText('193');
+      await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
       for (const [category, id] of STARTER_SCRIPT) await selectTag(page, category, id);
       const roles = page.locator('.age-role-row .age-role-role-name');
       await expect(roles).toHaveCount(3);
       await expect(roles).toHaveText(['Cowboy', 'Bandit', 'Sidekick']);
 
       await page.locator(button).click();
-      await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(mode === 'standard' ? 5 : 3);
+      await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(1, { timeout: 15000 });
+      await expect(page.locator('#generatorUniquenessNotice')).toContainText('Only 1 unique option');
       const scripts = await page.evaluate(() => generatedScriptsCache.map(script => ({
         ids: script.tags.map(tag => tag.id),
         banned: script.tags.filter(tag => getGeneratorExcludedIds().has(tag.id)).map(tag => tag.id),
@@ -139,7 +142,8 @@ test.describe('generation and transfer score integrity', () => {
     await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(0);
     await page.unroute('**/data/TagCompatibilityData.json');
     await page.locator('#generateScriptsButton').click();
-    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(5);
+    await expect(page.locator('#generatorResultsList .gen-card')).toHaveCount(1, { timeout: 15000 });
+    await expect(page.locator('#generatorUniquenessNotice')).toContainText('Only 1 unique option');
     await expect(page.locator('#generatorResultsList')).not.toContainText(/NaN|Infinity/);
   });
 
@@ -158,13 +162,13 @@ test.describe('generation and transfer score integrity', () => {
     await expect(firstCard.locator('.gen-badge-val').nth(1)).toHaveText('0.40');
     await firstCard.locator('.gen-header').click();
     await firstCard.locator('[data-role="script-graves-button"]').click();
-    await expect(page.locator('#gravesTotalComScore')).toHaveText('7.0');
-    await expect(page.locator('#gravesTotalArtScore')).toHaveText('7.0');
+    await expect(page.locator('#gravesTotalComScore')).toHaveText('6.0');
+    await expect(page.locator('#gravesTotalArtScore')).toHaveText('6.0');
   });
 });
 
 test.describe('product rule boundaries', () => {
-  test('TC20-000006 first visit seeds exactly the complement of the 57 starting elements', async ({ browser, baseURL }) => {
+  test('TC20-000006 first visit seeds exactly the complement of the 58 starting elements', async ({ browser, baseURL }) => {
     const context = await browser.newContext();
     try {
       await context.route(/fonts\.(googleapis|gstatic)\.com/, route => route.abort());
@@ -174,13 +178,13 @@ test.describe('product rule boundaries', () => {
       });
       await page.goto(baseURL);
       await page.waitForFunction(() => window.readyForTest);
-      await expect(page.locator('#excluded-count')).toHaveText('193');
+      await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
       const sets = await page.evaluate(() => ({
         banned: collectTagInputs('excluded').map(tag => tag.id).sort(),
         expected: Object.keys(GAME_DATA.tags).filter(id => !GAME_DATA.starterWhitelist.includes(id)).sort(),
       }));
       expect(sets.banned).toEqual(sets.expected);
-      expect(sets.banned).toHaveLength(193);
+      expect(sets.banned).toHaveLength(STARTING_BAN_COUNT);
     } finally {
       await context.close();
     }
@@ -197,7 +201,7 @@ test.describe('product rule boundaries', () => {
   });
 
   for (const count of [4, 10]) {
-    test(`TC20-000008 Graves counts ${count} story elements independently of a pool of five`, async ({ steps, page }) => {
+    test(`TC20-000008 Graves counts ${count} story elements against the Max Element Pool`, async ({ steps, page }) => {
       await openHollywood(steps);
       await page.locator('#tab-evaluate-button').click();
       const script = count === 4 ? STARTER_SCRIPT.filter(([category]) => category !== 'theme-event') : STARTER_SCRIPT;
@@ -213,6 +217,12 @@ test.describe('product rule boundaries', () => {
         await expect(page.locator('#gravesFeedbackMessage')).toContainText('You selected 4');
         await expect(page.locator('#results-graves')).toBeHidden();
       } else {
+        // Owner ruling 2026-10-09: Evaluate follows the pool, so ten are refused at five.
+        await expect(page.locator('#gravesFeedbackMessage')).toContainText('Max Element Pool is set to 5, but you selected 10');
+        await expect(page.locator('#results-graves')).toBeHidden();
+        await page.locator('#globalElementPoolInput').fill('10');
+        await page.locator('#globalElementPoolInput').press('Tab');
+        await page.locator('#evaluateGravesButton').click();
         await expect(page.locator('#results-graves')).toBeVisible();
         await expect(page.locator('#gravesScoreCapLabel')).toContainText('10 Scoring Elements');
         await expect(page.locator('#results-graves')).not.toContainText(/NaN|Infinity/);
@@ -270,7 +280,7 @@ test.describe('product rule boundaries', () => {
     test(`TC20-000011 Starting Tags Build for Target fills ${pool} story slots and keeps all bans`, async ({ steps, page }) => {
       await openHollywood(steps);
       await page.locator('#applyStartingTagsButton').click();
-      await expect(page.locator('#excluded-count')).toHaveText('193');
+      await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
       await page.locator('#globalElementPoolInput').fill(String(pool));
       await page.locator('#globalElementPoolInput').blur();
       await steps.on('marketTab', 'Navigation').click();

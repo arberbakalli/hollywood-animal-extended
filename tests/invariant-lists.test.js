@@ -85,12 +85,10 @@ describe('category lists match GAME_RULES.md section 1', () => {
             .toEqual(['Genre', 'Supporting Character', 'Theme & Event']);
     });
 
-    test('Build for Target seeds Genre, Setting, Protagonist, Antagonist and Finale', async () => {
+    test('Build for Target seeds Genre, Setting and Protagonist', async () => {
+        expect([...h.evaluate('HACScriptRules.requiredCategories')].sort())
+            .toEqual(['Genre', 'Protagonist', 'Setting']);
         const source = await readFile('src/marketing/targetedAds.js', 'utf8');
-        const match = source.match(/const TARGETED_MANDATORY_CATEGORIES = \[([^\]]*)\]/);
-        expect(match).not.toBeNull();
-
-        expect(idsIn(match[1]).sort())
-            .toEqual(['Antagonist', 'Finale', 'Genre', 'Protagonist', 'Setting']);
+        expect(source).toMatch(/const TARGETED_MANDATORY_CATEGORIES = HACScriptRules\.requiredCategories;/);
     });
 });

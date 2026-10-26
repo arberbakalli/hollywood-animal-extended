@@ -31,13 +31,15 @@ describe('Graves conflicts', () => {
     });
 
     describe('gravesConflictSeverity', () => {
+        // Owner ruling 2026-10-01, edit approved: 1.0 is severe (the spoiler
+        // line); it used to be the first serious value.
         test('grades the worst band as severe', () => {
             expect(severity(0)).toBe('severe');
             expect(severity(0.9)).toBe('severe');
+            expect(severity(1.0)).toBe('severe');
         });
 
         test('grades the middle band as serious', () => {
-            expect(severity(1.0)).toBe('serious');
             expect(severity(1.49)).toBe('serious');
         });
 

@@ -39,9 +39,10 @@ describe('Evaluate Script story-element bounds', () => {
         h.resetBrowserState();
     });
 
-    async function evaluate(selectors) {
+    async function evaluate(selectors, pool) {
         return h.evaluate(`(async () => {
             const selectors = ${JSON.stringify(selectors)};
+            const pool = ${JSON.stringify(pool ?? null)};
             const feedback = { textContent: '', className: '', classList: { add() {}, remove() {} } };
             const generic = { classList: { add() {}, remove() {} }, scrollIntoView() {} };
             const container = { querySelectorAll: (s) => (s === '.tag-selector' ? selectors : []) };
@@ -53,6 +54,7 @@ describe('Evaluate Script story-element bounds', () => {
             document = {
                 getElementById(id) {
                     if (id === 'gravesFeedbackMessage') return feedback;
+                    if (pool && (id === 'globalElementPoolInput' || id === 'globalElementPoolSlider')) return { value: String(pool) };
                     if (id === 'selectors-container-graves') return container;
                     if (id === 'selectors-container-excluded') return { querySelectorAll: () => [] };
                     if (id === 'inputs-genre-graves') return genreRows;
@@ -88,8 +90,10 @@ describe('Evaluate Script story-element bounds', () => {
         expect(result.scoredTags).toBeNull();
     });
 
+    // Evaluate follows the Max Element Pool (owner ruling 2026-10-09); at pool 10
+    // both bounds are reachable.
     test.each([5, 10])('%i story elements reach scoring, with Genre and Setting alongside', async (count) => {
-        const result = await evaluate(script(count));
+        const result = await evaluate(script(count), 10);
 
         expect(result.feedback).toBe('');
         expect(result.scoredTags).toBe(count + 2);

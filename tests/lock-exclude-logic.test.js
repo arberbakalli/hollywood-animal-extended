@@ -63,8 +63,8 @@ describe('Generator lock and exclusion logic', () => {
     });
 
     test('target movie score maps to the required scoring-element count used by generation', () => {
-        expect(h.call('HACScriptGenerator.getRequiredElementCount', 6)).toBe(5);
-        expect(h.call('HACScriptGenerator.getRequiredElementCount', 7)).toBe(6);
+        expect(h.call('HACScriptGenerator.getRequiredElementCount', 6)).toBe(6);
+        expect(h.call('HACScriptGenerator.getRequiredElementCount', 7)).toBe(7);
         expect(h.call('HACScriptGenerator.getRequiredElementCount', 9)).toBe(9);
         expect(h.call('HACScriptGenerator.getRequiredElementCount', 10)).toBe(10);
     });

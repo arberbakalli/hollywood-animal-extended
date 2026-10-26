@@ -1,8 +1,9 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 // Every exclusion path below was covered only against a clean ban list, and
 // the fixture marks Starting Tags as already seeded, so most specs start with
-// zero bans. A real first visit starts with Starting Tags applied (193 bans),
+// zero bans. A real first visit starts with Starting Tags applied (STARTING_BAN_COUNT bans),
 // and that is the state in which single-select bans go stale
 // (docs/GAME_RULES.md section 5, CLAUDE.md section 4). Each test here applies
 // Starting Tags first, then exercises one rule from GAME_RULES.md section 5.
@@ -12,7 +13,7 @@ const applyStartingTags = async (steps) => {
   await steps.on('applyStartingTagsButton', 'ScriptLab').click();
   await expect
     .poll(async () => Number(await steps.on('excludedCountBadge', 'ScriptLab').getText()))
-    .toBe(193);
+    .toBe(STARTING_BAN_COUNT);
 };
 
 const optionDisabled = (page, selector, value) =>

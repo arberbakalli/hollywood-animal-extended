@@ -43,6 +43,10 @@
                         <option value="Ukrainian">🇺🇦 Ukrainian</option>
                     </select>
                 </div>
+
+                <a id="testingFeaturesLink" class="testing-features-link" href="testing-features.html" title="Open the experimental feature lab">
+                    Testing Features
+                </a>
             </div>
         </header>
 
@@ -98,13 +102,13 @@
                         <div id="generator-movie-score-control" class="score-control-group">
                             <div class="score-label-row">
                                 <label for="genScoreInput">Target Movie Score</label>
-                                <input type="number" id="genScoreInput" class="score-number-display" step="1" min="6" max="10" value="6">
+                                <input type="number" id="genScoreInput" class="score-number-display" step="1" min="5" max="10" value="5">
                             </div>
                             <div class="range-wrapper">
-                                <input type="range" id="genScoreSlider" class="styled-slider art-slider" min="6" max="10" step="1" value="6">
+                                <input type="range" id="genScoreSlider" class="styled-slider art-slider" min="5" max="10" step="1" value="5">
                             </div>
                             <p id="genTagsRequiredDisplay" class="subtitle score-help-text generator-required-tags">
-                                Requires 8 Story Elements (excluding Genre).
+                                Requires ~5 Story Elements (excluding Genre &amp; Setting).
                             </p>
                         </div>
 
@@ -165,10 +169,11 @@
 
                     <div id="generator-actions" class="action-area">
                         <div id="generatorFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
+                        <div id="generator-stale-notice" class="app-feedback app-feedback-accent hidden" role="status" aria-live="polite">Exclusions changed: a generated script used an element you banned. Generate again to update.</div>
                         <button id="generateScriptsButton" class="analyze-btn" type="button">Generate Scripts</button>
 
                         <div id="appeal-buttons-info" class="appeal-description">
-                            <p>These generate scripts optimized for a single appeal type, ignoring overall score. A script may have high commercial or artistic appeal individually while scoring lower on synergy—use these to find specialized options.</p>
+                            <p>These generate scripts optimized for a single appeal type, ignoring overall score. A script may have high commercial or artistic appeal individually while scoring lower on synergy—use these to find specialized options. They still aim for your Target Average Compatibility, and a card that falls short says so.</p>
                         </div>
 
                         <button id="generateBestArtisticScriptsButton" class="analyze-btn artistic-script-btn" type="button">Highest Artistic Appeal</button>
@@ -203,6 +208,7 @@
                         <h3>Generated Options</h3>
                     </div>
                     <div id="generatorFreshnessNotice" class="generator-freshness-notice hidden" role="status" aria-live="polite">Freshness changed. Generate again to update the suggestions.</div>
+                    <div id="generatorUniquenessNotice" class="generator-freshness-notice generator-uniqueness-notice hidden" role="status" aria-live="polite"></div>
                     <div id="generatorResultsList" class="script-list"></div>
                 </div>
 
@@ -234,10 +240,10 @@
 
                 <div id="graves-builder-panel" class="card builder-card">
                     <div id="graves-builder-header" class="card-header">
-                        <h3>Submit Script</h3>
+                        <h3>Locked Elements</h3>
                         <button id="resetGravesButton" class="reset-btn" type="button" data-reset-context="graves">Reset</button>
                     </div>
-                    <p class="subtitle">Select the script elements you want Colman Graves to judge.</p>
+                    <p class="subtitle">Select the story elements you want Colman Graves to judge.</p>
 
                     <div id="selectors-container-graves" class="tag-selector-grid"></div>
 
@@ -275,6 +281,7 @@
 
                     <div id="graves-actions" class="action-area">
                         <div id="gravesFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
+                        <div id="graves-stale-notice" class="app-feedback app-feedback-accent hidden" role="status" aria-live="polite">Script changed. Press Evaluate Script to update.</div>
                         <button id="evaluateGravesButton" class="analyze-btn" type="button">Evaluate Script</button>
                         <button id="generateBestMatchesButton" class="analyze-btn best-matches-btn" type="button">Generate Best Matches</button>
                         <button id="saveGravesScriptButton" class="analyze-btn save-script-btn" type="button" data-save-script="graves">&#9734; Save to Script Library</button>
@@ -418,13 +425,14 @@
 
                 <div id="advertisers-builder-panel" class="card builder-card">
                     <div id="advertisers-builder-header" class="card-header">
-                        <h3>Build Your Script</h3>
+                        <h3>Locked Elements</h3>
                         <button id="resetAdvertisersButton" class="reset-btn" type="button" data-reset-context="advertisers">Reset</button>
                     </div>
                     <p class="subtitle">Select tags manually or use the search bar above. Add multiple genres to adjust their influence.</p>
                     <div id="selectors-container-advertisers" class="tag-selector-grid"></div>
                     <div id="advertisers-actions" class="action-area">
                         <div id="advertisersFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
+                        <div id="advertisers-stale-notice" class="app-feedback app-feedback-accent hidden" role="status" aria-live="polite">Inputs changed. Press Analyze to update.</div>
                         <button id="analyzeMovieButton" class="analyze-btn" type="button">Analyze Script</button>
                         <button id="saveAdvertisersScriptButton" class="analyze-btn save-script-btn" type="button" data-save-script="advertisers">&#9734; Save to Script Library</button>
                     </div>
@@ -455,7 +463,7 @@
                                     </div>
                                 </div>
                                 <div class="toggle-wrapper">
-                                    <span class="toggle-label-text distribution-toggle-label--behemoth" title="Behemoth adds 25% to every week from week 1 through week 8 when the production budget is over $1,000,000. With it on, weeks 3 onward also fall more slowly when the commercial rating is above 9.">Behemoth <small>(budget over $1M)</small></span>
+                                    <span class="toggle-label-text distribution-toggle-label--behemoth" title="Behemoth adds 25% to every week from week 1 through week 8 when the production budget is over $1,000,000. With it on, weeks 3 onward also fall more slowly when the commercial rating is 9 or above.">Behemoth <small>(budget over $1M)</small></span>
                                     <div class="toggle-container distribution-toggle distribution-toggle--behemoth">
                                         <input type="checkbox" class="toggle-checkbox" id="behemothToggle" role="switch" aria-label="Behemoth studio policy distribution bonus">
                                         <div class="toggle-track" aria-hidden="true">
@@ -464,7 +472,7 @@
                                     </div>
                                 </div>
                                 <div class="toggle-wrapper">
-                                    <span class="toggle-label-text distribution-toggle-label--boutique" title="Boutique slows attendance decay. Requires artistic rating above 9.">Boutique</span>
+                                    <span class="toggle-label-text distribution-toggle-label--boutique" title="Boutique slows attendance decay. Requires an artistic rating of 9 or above.">Boutique</span>
                                     <div class="toggle-container distribution-toggle distribution-toggle--boutique">
                                         <input type="checkbox" class="toggle-checkbox" id="boutiqueToggle" role="switch" aria-label="Boutique studio policy distribution bonus">
                                         <div class="toggle-track" aria-hidden="true">
@@ -586,7 +594,7 @@
                     <!-- Story Elements Range -->
                     <!-- Tag Builder -->
                     <div class="targeted-tag-builder">
-                        <div class="targeted-field-label">Lock Elements (Optional)</div>
+                        <div class="targeted-field-label">Locked Elements (Optional)</div>
                         <p class="subtitle targeted-field-help">Anything you pick here appears in every combination. Leave it empty to let the search choose freely.</p>
                         <div id="selectors-container-targeted" class="tag-selector-grid"></div>
                     </div>
@@ -594,6 +602,7 @@
                     <!-- Search Button -->
                     <div class="targeted-action-row">
                         <div id="targetedFeedbackMessage" class="app-feedback app-feedback-danger hidden" role="status" aria-live="polite"></div>
+                        <div id="targeted-stale-notice" class="app-feedback app-feedback-accent hidden" role="status" aria-live="polite">Inputs changed. Press Find Top Combinations to update.</div>
                         <button id="findCombinationsButton" class="analyze-btn targeted-find-btn" type="button">Find Top Combinations</button>
                     </div>
 
@@ -609,11 +618,11 @@
                         <h3>Audience Compatibility</h3>
                     </div>
                     <div class="compatibility-legend">
-                        <span class="legend-item"><span class="legend-swatch excellent"></span> Excellent (+4.0 to +5.0)</span>
+                        <span class="legend-item"><span class="legend-swatch excellent"></span> Excellent (+4.0 or more)</span>
                         <span class="legend-item"><span class="legend-swatch good"></span> Good (+1.0 to +3.9)</span>
-                        <span class="legend-item"><span class="legend-swatch neutral"></span> Neutral (0.0)</span>
-                        <span class="legend-item"><span class="legend-swatch bad"></span> Bad (-1.0 to -3.9)</span>
-                        <span class="legend-item"><span class="legend-swatch disastrous"></span> Disastrous (-4.0 to -5.0)</span>
+                        <span class="legend-item"><span class="legend-swatch neutral"></span> Neutral (above -1.0, below +1.0)</span>
+                        <span class="legend-item"><span class="legend-swatch bad"></span> Bad (-1.0 to -3.0)</span>
+                        <span class="legend-item"><span class="legend-swatch disastrous"></span> Disastrous (below -3.0)</span>
                     </div>
                     <div id="compatibilityTableContainer" class="compatibility-table-scroll"></div>
                 </div>
@@ -646,6 +655,7 @@
     <script src="src/selectors/selectorExclusions.js"></script>
     <script src="src/selectors/storyElementSelector.js"></script>
     <script src="src/generator/availabilityFilter.js"></script>
+    <script src="src/rules/scriptCategories.js"></script>
     <script src="src/evaluation/compatibilityEngine.js"></script>
     <script src="src/evaluation/movieScoreEstimator.js"></script>
     <script src="src/generator/scriptGenerationEngine.js"></script>

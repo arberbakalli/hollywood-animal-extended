@@ -39,10 +39,19 @@
 
 ## Dropdown Styling Rules
 
-### When Item is Selected in Exclusion List
+### When a Dropdown Is Empty
+- **Text Color**: Full category palette color (`--category-color`), so
+  `-- Select Protagonist --`, `-- Select Setting --`, etc. match their section label.
+- **Border Color**: Full category palette color (`--category-color`), not a faint transparent mix
+- **Background**: Dark input background (`--input-bg`)
+
+### When Item is Selected
 1. **Text Color**: Use category color
 2. **Border Color**: Use category color  
 3. **Background**: Dark input background (`--input-bg`)
+4. **Genre exception**: A selected Genre dropdown uses the selected genre's own
+   documented color (`--cat-genre-action`, `--cat-genre-drama`, etc.) for text
+   and border, not the gold Genre category color.
 
 ### When Displaying in Dropdown Options
 - **Option text color**: Match category color (via `option.category` class)
@@ -58,16 +67,22 @@
 
 ### Dropdowns
 ```css
-/* Selected state - all categories */
-select[data-category="X"].has-selected-tag {
+/* Empty state - all categories */
+select.tag-selector:not(.has-selected-tag) {
     color: var(--category-color);
     border-color: var(--category-color);
 }
 
-/* Genre specifics */
-select[data-category="Genre"].has-selected-tag {
-    color: var(--category-color); /* per-genre color */
+/* Selected state - story element categories */
+select.tag-selector.has-selected-tag {
+    color: var(--category-color);
     border-color: var(--category-color);
+}
+
+/* Selected Genre uses the selected genre's own color */
+select.tag-selector[data-genre]:not([data-genre=""]) {
+    color: var(--tag-color);
+    border-color: var(--tag-color);
 }
 
 /* Setting specifics */
@@ -125,7 +140,38 @@ select[data-category="Finale"].has-selected-tag {
 - [x] Setting: blue (#8fa3d1) across all contexts
 - [x] Genre: per-genre colors in dropdowns and exclusion list
 - [x] Genre labels: gold (#d4af37)
+- [x] Empty dropdown placeholder text: full category palette color
+- [x] Empty dropdown borders: full category palette color, not faint transparent mix
+- [x] Selected Genre dropdown text and border: selected genre palette color
 - [x] High-synergy indicators: emerald green (#10b981), not neon green
 - [x] Boutique toggle and every other success/"good" state: `--success`, no neon anywhere (2026-09-28)
 - [x] All dropdowns: colored text + border when selected
 - [x] All exclusion items: category color applied
+
+## 2026-10-03 Dropdown Polish Notes
+
+Removed:
+- Faint placeholder borders using `color-mix(... 50%, transparent)`.
+- Muted gray placeholder text for category selectors.
+- Lifted/mixed dropdown option text such as
+  `color-mix(in srgb, var(--cat-protagonist) 42%, var(--text-main))`.
+- Selected Genre dropdowns using the generic gold Genre category color after a
+  specific genre was chosen.
+- The tried-and-rejected selected-state `font-weight: 600`.
+
+Added:
+- Empty dropdown placeholder text and border use the section's own
+  `--category-color`.
+- Non-Genre dropdown options use the same category palette color as their label.
+- Selected non-Genre dropdown text and border use the category palette color.
+- Genre options use each genre's documented color.
+- Selected Genre dropdown text and border use the selected genre's documented
+  color via `data-genre` and `--tag-color`.
+- Playwright coverage in `tests/e2e/readability-hardening.spec.js` verifies the
+  palette linkage without hardcoding individual hex values.
+
+Debugging note (from the removed `docs/LESSON_LEARNED_CSS_COLORS.md`): a CSS
+`color: ... !important` rule beats an inline `select.style.color`. When a
+colour does not show, set it by hand in DevTools first. If it works there,
+look for an `!important` override; if it does not, it is a native `<select>`
+limit, not a code bug.

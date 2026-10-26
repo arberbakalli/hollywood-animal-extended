@@ -50,12 +50,14 @@ header {
     margin-bottom: 30px;
 }
 
+/* Wraps when the controls do not fit beside the title (801-1100px), instead of
+   pushing the Testing Features link past the right edge. */
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 15px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 h1 {
@@ -99,6 +101,79 @@ h2 {
 
 .lang-dropdown:hover, .lang-dropdown:focus {
     border-color: var(--accent);
+}
+
+.testing-features-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.testing-features-link:hover,
+.testing-features-link:focus-visible {
+    background: var(--accent);
+    color: #111111;
+    outline: none;
+}
+
+.testing-features-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.testing-features-rule-grid,
+.testing-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.testing-rule-card,
+.testing-feature-card {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+}
+
+.testing-rule-kicker,
+.testing-feature-status {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: var(--accent);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.testing-rule-card strong,
+.testing-feature-card h4 {
+    display: block;
+    margin: 0 0 8px;
+    color: var(--text-main);
+    font-size: 1rem;
+}
+
+.testing-rule-card p,
+.testing-feature-card p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }
 
 /* --- GLOBAL ELEMENT POOL CONTROL --- */
@@ -214,12 +289,16 @@ h2 {
     margin-inline: auto;
 }
 
+/* Four tabs share one row, each as wide as its label: a fixed 210px minimum
+   wrapped the fourth tab alone, and equal shares wrapped the longest label. */
 .product-area-btn {
-    min-width: 210px;
-    padding: 12px 22px;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 12px 14px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 2px;
     border-radius: 8px;
     text-transform: none;
@@ -619,12 +698,14 @@ select:focus { outline: none; border-color: var(--accent); }
 .select-row.has-selected-tag > select.tag-selector,
 select.tag-selector.has-selected-tag {
     background: var(--input-bg);
+    color: var(--category-color);
+    border-color: var(--category-color);
 }
 
-/* Empty selects (placeholder "-- Select --") also show category color but more muted */
+/* Empty selects show the category palette for both placeholder text and border. */
 select.tag-selector:not(.has-selected-tag) {
-    color: var(--text-muted);
-    border-color: color-mix(in srgb, var(--category-color) 50%, transparent);
+    color: var(--category-color);
+    border-color: var(--category-color);
 }
 
 /* Genre selector - use per-genre color for text AND border when selected */
@@ -1086,6 +1167,12 @@ input[type="text"] {
     font-size: 0.9rem;
     color: #e0e0e0;
     border: 1px solid transparent;
+}
+
+/* A pinned script's element that is now banned (owner ruling 2026-10-01). */
+.gen-tag-chip.tag-banned {
+    text-decoration: line-through;
+    border-color: var(--danger);
 }
 
 .gen-tag-chip.tag-fixed {
@@ -1686,14 +1773,16 @@ footer { text-align: center; color: #555; font-size: 0.8rem; margin-top: 40px; }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+/* Too narrow for four labels on one line: two rows of two, not three and one. */
+@media (min-width: 601px) and (max-width: 720px) {
+    .product-area-btn { flex-basis: calc(50% - 5px); }
+}
+
 @media (max-width: 600px) {
     .main-wrapper { padding: 20px 10px; }
     .card { padding: 15px; }
     .product-area-nav { align-items: stretch; }
-    .product-area-btn {
-        flex: 1 1 100%;
-        min-width: 0;
-    }
+    .product-area-btn { flex: 1 1 100%; }
     .product-mode-nav {
         display: grid;
         grid-template-columns: 1fr;
@@ -3441,11 +3530,11 @@ option.genre-slapstick-comedy,
 option.genre-slapstick_comedy { color: var(--cat-genre-slapstick-comedy); }
 option.genre-thriller { color: var(--cat-genre-thriller); }
 option.setting { color: var(--cat-setting); }
-option.protagonist { color: color-mix(in srgb, var(--cat-protagonist) 42%, var(--text-main)); }
-option.antagonist { color: color-mix(in srgb, var(--cat-antagonist) 42%, var(--text-main)); }
-option.supporting-character { color: color-mix(in srgb, var(--cat-supporting) 42%, var(--text-main)); }
-option.theme-event { color: color-mix(in srgb, var(--cat-theme-event) 42%, var(--text-main)); }
-option.finale { color: color-mix(in srgb, var(--cat-finale) 42%, var(--text-main)); }
+option.protagonist { color: var(--cat-protagonist); }
+option.antagonist { color: var(--cat-antagonist); }
+option.supporting-character { color: var(--cat-supporting); }
+option.theme-event { color: var(--cat-theme-event); }
+option.finale { color: var(--cat-finale); }
 
 /* Apply category colors to selected dropdowns across ALL contexts */
 
@@ -3469,8 +3558,15 @@ option.finale { color: color-mix(in srgb, var(--cat-finale) 42%, var(--text-main
 :is(.genre-slapstick-comedy, .genre-slapstick_comedy, [data-genre="slapstick-comedy"]) { --tag-color: var(--cat-genre-slapstick-comedy); }
 :is(.genre-thriller, [data-genre="thriller"]) { --tag-color: var(--cat-genre-thriller); }
 
-select.tag-selector[data-genre]:not([data-genre=""]),
-select.tag-selector option[class*="genre-"],
+select.tag-selector[data-genre]:not([data-genre=""]) {
+    color: var(--tag-color);
+    border-color: var(--tag-color);
+}
+
+select.tag-selector option[class*="genre-"] {
+    color: var(--tag-color);
+}
+
 .element-name[class*="genre-"] {
     color: color-mix(in srgb, var(--tag-color) 42%, var(--text-main));
 }
@@ -3986,6 +4082,52 @@ option[data-selected-elsewhere="true"] {
     background: rgba(255, 95, 95, 0.26);
 }
 
+/* Trash element label (GAME_RULES section 11). Informative only: not a
+   button, not a freshness state, so it takes a neutral colour and sits on its
+   own line under the dropdown. The circle is a placeholder icon.
+   Pinned by tests/e2e/trash-badge.spec.js (TC39-000001..3). */
+.trash-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-muted) 12%, transparent);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.trash-badge[hidden] {
+    display: none;
+}
+
+.trash-badge-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+}
+
+.select-row > .trash-badge {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+}
+
+.gen-tag-chip .trash-badge {
+    margin-left: 6px;
+    padding: 1px 8px;
+    font-size: 0.68rem;
+    vertical-align: middle;
+}
+
 .gen-tag-chip .freshness-pill {
     min-width: 0;
     margin-left: 6px;
@@ -4017,3 +4159,105 @@ option[data-selected-elsewhere="true"] {
     color: var(--accent);
     font-size: 0.9rem;
 }
+
+/* --- POLLUX FIXER --- */
+.pollux-warning {
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--accent);
+    border-left-width: 4px;
+    border-radius: var(--radius);
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.pollux-warning strong {
+    display: block;
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
+.pollux-warning code {
+    overflow-wrap: anywhere;
+    color: var(--text-main);
+}
+
+.pollux-field,
+.pollux-category {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.pollux-field label,
+.pollux-category label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pollux-field input[type="file"] {
+    color: var(--text-main);
+    max-width: 100%;
+}
+
+.pollux-status:empty { display: none; }
+.pollux-status { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+.pollux-status[data-tone="ok"] { color: var(--success); }
+.pollux-status[data-tone="error"] { color: var(--danger); }
+
+.pollux-state-note {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0 0 20px;
+}
+
+/* One column: two columns left 344px, and a pick such as
+   "ROMANCE IN VALENTIMES (Farm Girl) - current winner" needs about 384px. */
+.pollux-category-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.pollux-category select { width: 100%; min-width: 0; }
+.pollux-pick-text {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+.pollux-empty { margin: 0; min-height: 42px; display: flex; align-items: center; }
+
+.pollux-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 44px;
+    margin: 4px 0 20px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.pollux-check input { margin-top: 3px; accent-color: var(--accent); }
+.pollux-check input:disabled + span { color: var(--text-muted); }
+
+#polluxGenerateButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.pollux-result {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.pollux-result-summary { margin: 0 0 8px; color: var(--success); font-weight: 700; }
+.pollux-result-list { margin: 0 0 12px; padding-left: 20px; color: var(--text-main); }
+.pollux-download { color: var(--accent); }
+
+

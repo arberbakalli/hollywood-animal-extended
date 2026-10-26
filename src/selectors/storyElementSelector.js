@@ -53,6 +53,10 @@
         return HACSelectorExclusions.filterTagsForContext(tags, context);
     }
 
+    function contextShowsFreshness(context) {
+        return ['generator', 'graves', 'advertisers', 'targeted'].includes(context);
+    }
+
     function clearExcludedSelectionsInCategory(category, context, excludedIds = getExcludedIdsForContext(context)) {
         return HACSelectorExclusions.clearExcludedSelectionsInCategory(category, context, excludedIds);
     }
@@ -193,9 +197,21 @@
     // Setting, Protagonist, Antagonist, Finale -- had no other path to a redraw,
     // so a banned Setting kept appearing in Script Lab until an unrelated
     // interaction happened to refresh it.
+    // A ban can clear a pick without firing change, and it changes the
+    // candidates every suggestion list draws from, so the result watchers are
+    // told directly (audit 2026-09-30).
+    function notifyExclusionChange() {
+        global.HACGravesAudience?.checkGravesResultsCurrent?.();
+        global.HACTargetedAds?.checkTargetedResultsCurrent?.();
+        global.HACScriptGenerator?.checkGeneratedAgainstBans?.();
+        global.HACMarketingPlanner?.checkAnalysisCurrent?.();
+        if (typeof pinnedScripts !== 'undefined' && pinnedScripts.length > 0) global.HACScriptLibrary?.renderPinnedScripts?.();
+    }
+
     function propagateExclusionChange(category) {
         HACSelectorExclusions.exclusionConsumerContexts().forEach(consumer =>
             refreshCategoryDropdowns(category, consumer));
+        notifyExclusionChange();
     }
 
     function refreshCategoryDropdowns(category, context) {
@@ -296,6 +312,7 @@
             }
             const freshnessPill = row.querySelector(':scope > .freshness-pill');
             if (freshnessPill) HACFreshness.renderPill(freshnessPill, select.value);
+            HACTrashElements.renderBadge(row.querySelector(':scope > .trash-badge'), select.value);
 
             select.querySelectorAll('option').forEach(option => {
                 option.classList.remove('strong-fit-option');
@@ -336,6 +353,14 @@
 
     /** Re-applies exclusion availability to every script-building dropdown. */
     function refreshScriptBuilderAvailability() {
+        try {
+            refreshScriptBuilderContexts();
+        } finally {
+            notifyExclusionChange();
+        }
+    }
+
+    function refreshScriptBuilderContexts() {
         HACSelectorExclusions.scriptBuilderContexts().forEach(context => {
             const cleared = allSelectorCategories()
                 .flatMap(category => refreshCategoryDropdowns(category, context) || []);
@@ -391,6 +416,7 @@
         selectElement.value = tagId;
         const freshnessPill = selectElement.parentElement?.querySelector(':scope > .freshness-pill');
         if (freshnessPill) HACFreshness.renderPill(freshnessPill, tagId);
+        HACTrashElements.renderBadge(selectElement.parentElement?.querySelector(':scope > .trash-badge'), tagId);
     }
 
     function populateSelectOptions(selectElement, category, tags) {
@@ -418,6 +444,24 @@
         refreshCategoryDropdowns(category, context);
     }
 
+    // A script holds at most 11 genres: 10 at the 5% floor plus one taking the
+    // rest (owner ruling 2026-09-30, GAME_RULES.md section 1). There are exactly
+    // 11 genres, so no context, the ban list included, needs a twelfth row.
+    const MAX_GENRE_ROWS = 11;
+
+    function genreRowCount(container) {
+        return container ? container.querySelectorAll('.select-row').length : 0;
+    }
+
+    function syncGenreAddButton(context) {
+        const container = document.getElementById(`inputs-${categoryToElementSlug('Genre')}-${context}`);
+        const button = document.getElementById(`add-${categoryToElementSlug('Genre')}-${context}-button`);
+        if (!container || !button) return;
+        const full = genreRowCount(container) >= MAX_GENRE_ROWS;
+        button.disabled = full;
+        button.title = full ? `A script holds at most ${MAX_GENRE_ROWS} genres.` : '';
+    }
+
     function addDropdown(category, selectedId = null, context = currentTab, deferOptions = false) {
         if (selectedId && !canUseTagInContext(selectedId, context)) {
             selectedId = null;
@@ -427,6 +471,25 @@
         const containerId = `inputs-${categorySlug}-${context}`;
         const container = document.getElementById(containerId);
         if (!container) return;
+
+        // An element is picked once per category: Load Profile and a search
+        // pick used to add a second row for the same element, which banned it
+        // twice (owner ruling 2026-10-01). The dropdowns already gray it out.
+        if (selectedId && Array.from(container.querySelectorAll('select.tag-selector')).some(select => select.value === selectedId)) {
+            return;
+        }
+
+        if (category === 'Genre' && genreRowCount(container) >= MAX_GENRE_ROWS) {
+            // At the cap a pick still lands in an empty row. A reset leaves one,
+            // and Load Profile / Apply Starting Tags add one row per ban, so
+            // an eleventh Genre ban was dropped without a word.
+            const emptySelect = selectedId
+                ? Array.from(container.querySelectorAll('select.tag-selector')).find(select => select.value === '')
+                : null;
+            if (emptySelect) selectTagOption(emptySelect, category, selectedId);
+            syncGenreAddButton(context);
+            return;
+        }
 
         // Logic for single-select categories in script-building contexts.
         if (context !== 'excluded' && !MULTI_SELECT_CATEGORIES.includes(category) && container.children.length > 0) {
@@ -470,19 +533,22 @@
         });
         row.appendChild(select);
 
-        // Freshness (GAME_RULES section 9): the locked story elements in Script
-        // Lab only, never Genre, Setting or an excluded row. The pill overlays
-        // the right end of the select, so clicking it cycles the state and
-        // clicking anywhere else on the box opens the dropdown as before. It
-        // follows the element, not the row: pick another element and the pill
-        // shows that element's own state.
-        const freshnessPill = context === 'generator' && HACFreshness.hasFreshness(category)
+        // Freshness (GAME_RULES section 9): story elements share one saved
+        // state across Script Lab, Colman Graves, and Marketing. Genre,
+        // Setting, and excluded rows never carry freshness.
+        const freshnessPill = contextShowsFreshness(context) && HACFreshness.hasFreshness(category)
             ? HACFreshness.createPill()
             : null;
         if (freshnessPill) {
             row.classList.add('has-freshness');
             row.appendChild(freshnessPill);
             HACFreshness.renderPill(freshnessPill, select.value);
+        }
+        // Trash label (GAME_RULES section 11): same rows as freshness, on its own line.
+        const trashBadge = freshnessPill ? HACTrashElements.createBadge() : null;
+        if (trashBadge) {
+            row.appendChild(trashBadge);
+            HACTrashElements.renderBadge(trashBadge, select.value);
         }
 
         function updateGenreColor() {
@@ -502,6 +568,7 @@
             refreshSelectorVisualHints(context);
             updateGenreColor();
             if (freshnessPill) HACFreshness.renderPill(freshnessPill, select.value);
+            if (trashBadge) HACTrashElements.renderBadge(trashBadge, select.value);
 
             if (context === 'excluded') {
                 updateExcludedCount();
@@ -509,7 +576,7 @@
             }
         });
         // Bulk exclusion/profile creation refreshes once after all rows exist.
-        // Scheduling a full category scan per inserted row makes a 193-ban batch
+        // Scheduling a full category scan per inserted row makes a Starting Tags batch
         // quadratic and blocks the main thread for several seconds.
         const selectorsContainer = document.getElementById(`selectors-container-${context}`);
         if (!selectorsContainer?.classList.contains('is-batching')) {
@@ -572,6 +639,7 @@
                 row.remove();
                 refreshCategoryDropdowns(category, context);
                 refreshSelectorVisualHints(context);
+                if (category === 'Genre') syncGenreAddButton(context);
                 if (category === 'Genre' && context !== 'excluded') updateGenreControls(context);
                 if (context === 'excluded') {
                     updateExcludedCount();
@@ -582,6 +650,7 @@
         }
         // Add new rows to the TOP (prepend) instead of bottom
         container.insertBefore(row, container.firstChild);
+        if (category === 'Genre') syncGenreAddButton(context);
         if (category === 'Genre' && context !== 'excluded') {
             updateGenreControls(context);
         }
@@ -602,6 +671,8 @@
         const container = document.getElementById(containerId);
         if (!container) return;
         const selects = container.querySelectorAll('select.tag-selector');
+        // Already picked in this category: nothing to add (owner ruling 2026-10-01).
+        if (Array.from(selects).some(select => select.value === tagObj.id)) return;
         let filled = false;
         for (let select of selects) {
             if (select.value === "") {
@@ -684,7 +755,12 @@
         }
 
         const target = selects.find(select => select.value === replacedTagId);
-        if (!target) return false;
+        if (!target) {
+            // A stale Swap row used to do nothing, without a word.
+            const replaced = GAME_DATA.tags[replacedTagId];
+            showFeedbackMessage(`${context}FeedbackMessage`, `${replaced ? replaced.name : replacedTagId} is no longer in this script.`, 'accent');
+            return false;
+        }
 
         selectTagOption(target, category, tagObj.id);
         target.dispatchEvent(new Event('change', { bubbles: true }));

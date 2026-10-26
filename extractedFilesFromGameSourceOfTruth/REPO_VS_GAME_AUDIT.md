@@ -272,7 +272,9 @@ Agencies list:
    - Check if 0.8 weekly decay rate matches game
    - Could do a quick 2-week game playthrough to measure
 
-3. **Phase 3 Decision:** Choose age groups integration option from PHASE_3_TODO.md
+3. **Phase 3 Decision:** done. The age groups ship in the Age & Gender Appeal
+   panel (`data/AgeRoleCompatibility.json` `ageGroups`); `PHASE_3_TODO.md` was
+   removed 2026-10-06.
 
 4. **Building Audit:** Cross-check sample buildings (costs, times) against game
    - Quick verification: 3-5 random buildings

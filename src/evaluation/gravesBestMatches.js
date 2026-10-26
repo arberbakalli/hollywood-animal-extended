@@ -284,11 +284,53 @@
         return `<div class="empty-state">${message}</div>`;
     }
 
-    function showMoreButton() {
-        return visibleRowCount < totalRowCount
+    /**
+     * An Unsuccessful pair that no available swap can clear. It is named rather
+     * than dropped, because Evaluate shows it red and a silent Swap panel reads
+     * as "nothing is wrong". A Match Category filter set to another category
+     * hides these replacements by choice, so it gets no notice.
+     */
+    function unresolvedClashMarkup(clashes) {
+        const categoryFilter = document.getElementById('gravesBestCategoryFilter')?.value || '';
+        const shown = clashes.filter(clash => !categoryFilter || clash.tag.category === categoryFilter);
+        if (shown.length === 0) return '';
+
+        const excludedCount = typeof getManuallyExcludedIds === 'function'
+            ? getManuallyExcludedIds('excluded').size
+            : 0;
+        const remedy = excludedCount
+            ? ` Remove it, or lift one of the ${excludedCount} exclusions in Script Lab.`
+            : ' Remove it to clear the clash.';
+
+        return shown.map(clash => `
+            <div class="best-match-slot-note best-match-clash-note" data-role="graves-unresolved-clash" data-tag-id="${clash.tag.id}">
+                <strong>${displayName(clash.tag)}</strong> (${clash.tag.category}) clashes with ${displayName(clash.against)} (${clash.score.toFixed(1)}). No available ${clash.tag.category} replacement clears the clash.${remedy}
+            </div>`).join('');
+    }
+
+    /**
+     * Best Additions lists only what clears Minimum Fit, and a Genre can be the
+     * only thing that does. With story-element slots still free, say so and
+     * name the control that shows more, or a short list reads as "this is all
+     * the script can take" (owner report 2026-09-30).
+     */
+    function additionsShortfallNote(selectedTags, rows, fit, categoryFilter = '') {
+        if (!(fit > 0)) return '';
+        // A Genre or Setting filter can never list a story element, at any fit.
+        if (categoryFilter && !HACGravesAnalysis.isStoryElement({ category: categoryFilter })) return '';
+        const room = maxElementPool() - HACGravesAnalysis.storyElementsOf(selectedTags).length;
+        if (room <= 0) return '';
+        const storyRows = rows.filter(row => HACGravesAnalysis.isStoryElement(row.candidate)).length;
+        if (storyRows >= room) return '';
+        return `Your script has room for ${room} more story element${room === 1 ? '' : 's'}, `
+            + `but only ${storyRows} clear${storyRows === 1 ? 's' : ''} the ${fit.toFixed(1)}+ Minimum Fit. Lower Minimum Fit to see more.`;
+    }
+
+    function showMoreButton(hiddenCount = totalRowCount - visibleRowCount) {
+        return hiddenCount > 0
             ? `<div class="best-match-show-more-wrapper">
                    <button id="graves-show-more-btn" class="best-match-show-more-btn">
-                       Show more suggestions (${totalRowCount - visibleRowCount} more available)
+                       Show more suggestions (${hiddenCount} more available)
                    </button>
                </div>`
             : '';
@@ -308,6 +350,12 @@
     }
 
     const FIT_VALUES = ['0', '3.0', '3.5', '4.0', '4.5', '5.0'];
+
+    // One step down the Minimum Fit list, or null at the bottom.
+    function nextLowerFit(fit) {
+        const index = FIT_VALUES.indexOf(fit);
+        return index > 0 ? FIT_VALUES[index - 1] : null;
+    }
 
     /**
      * Runs a search and, if the user's Minimum Fit yields nothing, walks the
@@ -352,8 +400,21 @@
             list.innerHTML = emptyMarkup(additionsEmptyReason(selectedTags));
             return;
         }
+        // At the budget only Genres can still be added; say so above them.
+        const budgetNote = atElementBudget(selectedTags)
+            ? `<div class="best-match-slot-note" data-role="graves-additions-budget-note">${elementBudgetMessage()} Only Genres can still be added here.</div>`
+            : '';
+        const shortfall = additionsShortfallNote(selectedTags, rows, minimumFit(),
+            document.getElementById('gravesBestCategoryFilter')?.value || '');
+        const lower = shortfall ? nextLowerFit(document.getElementById('gravesBestScoreFilter')?.value) : null;
+        const lowerButton = lower === null
+            ? ''
+            : ` <button type="button" class="best-match-add-btn best-match-lower-fit-btn" data-action="lower-minimum-fit" data-fit="${lower}">${lower === '0' ? 'Show any fit' : `Lower to ${lower}+`}</button>`;
+        const note = shortfall
+            ? `<div class="best-match-slot-note best-match-shortfall-note" data-role="graves-additions-shortfall">${shortfall}${lowerButton}</div>`
+            : '';
         const markup = groupedMarkup(rows, visibleRowCount);
-        list.innerHTML = markup + showMoreButton();
+        list.innerHTML = budgetNote + note + markup + showMoreButton();
         bindShowMoreButton(list);
     }
 
@@ -372,8 +433,10 @@
             return;
         }
 
+        const clashNotes = unresolvedClashMarkup(result.unresolvedClashes || []);
+
         if (result.allRows.length === 0) {
-            list.innerHTML = emptyMarkup('No replacement scores better than what you already have.');
+            list.innerHTML = clashNotes || emptyMarkup('No replacement scores better than what you already have.');
             return;
         }
 
@@ -381,10 +444,13 @@
         const slotMarkup = Object.entries(result.rowsBySlot).map(([slotIndex, { slot, rows }]) => {
             const slotName = displayName(slot.tag);
             const slotMarkup = groupedMarkup(rows, visibleRowCount, slot.tag.id);
+            const purpose = slot.clash
+                ? `clashes with ${displayName(slot.clash.against)} (${slot.clash.score.toFixed(1)}). Replacing it with any of these clears the clash.`
+                : 'Replacing it with any of these raises the script average.';
             return `
-                <div class="best-match-slot-group">
+                <div class="best-match-slot-group${slot.clash ? ' best-match-slot-clash' : ''}">
                     <div class="best-match-slot-note">
-                        <strong>${slotName}</strong> (${slot.tag.category}). Replacing it with any of these raises the script average.
+                        <strong>${slotName}</strong> (${slot.tag.category})${slot.clash ? ' ' : '. '}${purpose}
                         ${rows.length && rows.every(row => row.belowRequestedFit)
                             ? `<em class="best-match-slot-widened">Nothing here clears your ${minimumFit().toFixed(1)} minimum fit, so these are the best improvements below it.</em>`
                             : ''}
@@ -395,7 +461,12 @@
         }).join('');
 
         totalRowCount = result.allRows.length;
-        list.innerHTML = slotMarkup + showMoreButton();
+        // Each slot pages on its own, so the hidden rows are counted per slot.
+        // Counting every row minus one page offered rows that were all on
+        // screen already (audit 2026-09-30).
+        const hiddenCount = Object.values(result.rowsBySlot)
+            .reduce((sum, group) => sum + Math.max(0, group.rows.length - visibleRowCount), 0);
+        list.innerHTML = clashNotes + slotMarkup + showMoreButton(hiddenCount);
         bindShowMoreButton(list);
     }
 
@@ -436,6 +507,18 @@
     }
 
     function bindAddButtons(list) {
+        // The short-list note's button: the same as picking the next lower
+        // Minimum Fit by hand, then reading the list again.
+        list.querySelectorAll('[data-action="lower-minimum-fit"]').forEach(button => {
+            button.addEventListener('click', () => {
+                const fitSelect = document.getElementById('gravesBestScoreFilter');
+                if (!fitSelect) return;
+                fitSelect.value = button.dataset.fit;
+                visibleRowCount = ROWS_PER_PAGE;
+                renderBestMatches();
+            });
+        });
+
         // Handle Add action
         list.querySelectorAll('[data-action="add-graves-best-match"]').forEach(button => {
             button.addEventListener('click', () => {
@@ -502,6 +585,9 @@
         // the script as it is now: an element removed or banned since Generate
         // must not keep appearing as part of it.
         lastSelectedTags = collectTagInputs('graves');
+        // After collectTagInputs, which clears banned picks, so the snapshot
+        // is of the script this render reads.
+        global.HACGravesAudience?.markBestMatchesCurrent?.();
 
         if (lastSelectedTags.length === 0) {
             list.innerHTML = emptyMarkup('Select at least one element to find strong matches.');
@@ -571,7 +657,9 @@
         jumpToExclusionEditor,
         paginateRows,
         addButtonMarkup,
+        additionsShortfallNote,
         buttonLabelFor,
+        nextLowerFit,
         atElementBudget,
         BAND_ORDER,
         ROWS_PER_PAGE,

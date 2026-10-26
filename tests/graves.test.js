@@ -247,7 +247,10 @@ describe('Graves Evaluation', () => {
         [4.0, 'Success', 'success'],
         [3.5, 'Common', 'accent'],
         [3.0, 'Risky', 'danger'],
-        [2.99, 'Failed', 'danger'],
+        // Owner ruling 2026-10-01, edit approved: the verdict bands the shown
+        // tenth, so 2.99 (shown 3.0) is Risky and 2.94 (shown 2.9) is Failed.
+        [2.94, 'Failed', 'danger'],
+        [2.99, 'Risky', 'danger'],
     ])('Graves verdict for an average fit of %s is %s', (rawAverage, label, tone) => {
         const verdict = h.call('HACGravesAnalysis.getGravesVerdict', rawAverage);
 

@@ -79,8 +79,8 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     });
 
     // New tests for restructured JSON with metadata
-    test('age-role-compatibility.json has new metadata structure', async () => {
-        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+    test('AgeRoleCompatibility.json has new metadata structure', async () => {
+        const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
 
         // Check that roles have the new structure
         const protagonist = data.protagonists['PROTAGONIST_COP'];
@@ -90,7 +90,7 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     });
 
     test('ratings field contains age group compatibility', async () => {
-        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
         const protagonist = data.protagonists['PROTAGONIST_COP'];
 
         expect(protagonist.ratings).toHaveProperty('YOUNG');
@@ -100,26 +100,26 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     });
 
     test('gender-locked roles have locked_gender field set', async () => {
-        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
 
         // Check known gender-locked roles
         expect(data.protagonists['PROTAGONIST_AMBITIOUS_WOMAN'].locked_gender).toBe('F');
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_PATRIARCH'].locked_gender).toBe('M');
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_FEMME_FATALE'].locked_gender).toBe('F');
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_DAMSEL_IN_DISTRESS'].locked_gender).toBe('F');
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_PATRIARCH'].locked_gender).toBe('M');
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_FEMME_FATALE'].locked_gender).toBe('F');
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS'].locked_gender).toBe('F');
     });
 
     test('flexible-gender roles have locked_gender as null', async () => {
-        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
 
         // Check roles that allow both genders
         expect(data.protagonists['PROTAGONIST_COP'].locked_gender).toBeNull();
         expect(data.antagonists['ANTAGONIST_ALIEN'].locked_gender).toBeNull();
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_SIDEKICK'].locked_gender).toBeNull();
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_SIDEKICK'].locked_gender).toBeNull();
     });
 
     test('data_source field distinguishes verified from estimated data', async () => {
-        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
 
         // All roles should have a data_source field
         Object.entries(data.protagonists).forEach(([roleId, roleData]) => {
@@ -132,7 +132,7 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     });
 
     test('all protagonists have complete rating data', async () => {
-        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
 
         Object.entries(data.protagonists).forEach(([roleId, roleData]) => {
             expect(roleData.ratings.YOUNG).toBeDefined();
@@ -142,17 +142,17 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     });
 
     test('antagonists section exists with expected structure', async () => {
-        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
         expect(data.antagonists).toBeDefined();
         expect(Object.keys(data.antagonists).length).toBeGreaterThan(10);
     });
 
     test('supporting characters section has expected entries', async () => {
-        const data = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const data = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
         expect(data.supportingCharacters).toBeDefined();
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_PATRIARCH']).toBeDefined();
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_FEMME_FATALE']).toBeDefined();
-        expect(data.supportingCharacters['SUPPORTING_CHARACTER_DAMSEL_IN_DISTRESS']).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_PATRIARCH']).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_FEMME_FATALE']).toBeDefined();
+        expect(data.supportingCharacters['SUPPORTINGCHARACTER_DAMSEL_IN_DISTRESS']).toBeDefined();
     });
 
     test('stylesheet includes age/gender appeal row styling', async () => {
@@ -163,19 +163,19 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         expect(styles).toContain('.gender-btn');
     });
 
-    // --- Regression guard for the age-role-compatibility.json id-drift bug ---
+    // --- Regression guard for the AgeRoleCompatibility.json id-drift bug ---
     // Every row in this file claims "data_source": "verified", but a number of
     // Protagonist/Antagonist keys had drifted from the real ids in
     // data/TagData.json (typos, a Cyrillic/Latin homoglyph, swapped word
     // order, a dropped word). A drifted key means Script Lab's Age & Gender
     // Appeal panel silently renders "-" for a real, selectable role while the
     // file claims full verified coverage.
-    test('every real Protagonist and Antagonist tag id resolves in age-role-compatibility.json', async () => {
+    test('every real Protagonist and Antagonist tag id resolves in AgeRoleCompatibility.json', async () => {
         const tagData = JSON.parse(await readFile('data/TagData.json', 'utf8'));
-        const ageRole = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const ageRole = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
         const bucketForCategory = { Protagonist: 'protagonists', Antagonist: 'antagonists' };
 
-        // These real tags have NO row at all in age-role-compatibility.json,
+        // These real tags have NO row at all in AgeRoleCompatibility.json,
         // under any key -- not a drifted id, an absent one. Renaming a key
         // only helps when a (wrong-named) row already exists to rename;
         // inventing appeal ratings that exist nowhere in the current data is
@@ -213,16 +213,13 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         expect(unresolved.sort()).toEqual(KNOWN_MISSING_ENTRIES);
     });
 
-    // Same id-drift bug, one bucket over: the Supporting Character shim in
-    // src/analysis/ageRoleBreakdown.js:82 rewrites the real
-    // SUPPORTINGCHARACTER_ prefix to SUPPORTING_CHARACTER_ before lookup, but
-    // that only fixes the prefix -- it does not add back an underscore the
-    // real id never had (SUPPORTINGCHARACTER_STEPCHILD / STEPPARENT), so
-    // SUPPORTING_CHARACTER_STEP_CHILD / STEP_PARENT still failed to resolve
-    // even after the shim ran.
-    test('every real Supporting Character tag id resolves in age-role-compatibility.json after the id-shim', async () => {
+    // Same id-drift bug, one bucket over. The file once spelled these
+    // SUPPORTING_CHARACTER_* and the code rewrote every id before lookup; since
+    // 2026-10-05 the file uses the game's own SUPPORTINGCHARACTER_* ids
+    // (owner-approved; tests/age-data-ids.test.js guards the spelling).
+    test('every real Supporting Character tag id resolves in AgeRoleCompatibility.json', async () => {
         const tagData = JSON.parse(await readFile('data/TagData.json', 'utf8'));
-        const ageRole = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const ageRole = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
 
         const KNOWN_MISSING_ENTRIES = [
             'SUPPORTINGCHARACTER_FIRST_VICTIM',
@@ -235,8 +232,7 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
         const unresolved = [];
         Object.entries(tagData).forEach(([id, entry]) => {
             if (entry?.CategoryID !== 'SupportingCharacter') return;
-            const shimmedId = id.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_');
-            const roleData = ageRole.supportingCharacters?.[shimmedId];
+            const roleData = ageRole.supportingCharacters?.[id];
             if (!roleData || !roleData.ratings) {
                 unresolved.push(id);
             }
@@ -248,7 +244,7 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     // --- Regression guard for the gender-lock drift bug (docs/GAME_RULES.md §8) ---
     // data/TagData.json carries a `gender` field (M/F/U) sourced from the
     // extracted game file's SlotsMale/SlotsFemale/SlotsUnisex parameters -- the
-    // actual runtime gating mechanism. age-role-compatibility.json's
+    // actual runtime gating mechanism. AgeRoleCompatibility.json's
     // `locked_gender` must agree with it for every character tag, or the Age &
     // Gender Appeal panel silently shows a role as gender-flexible when the
     // game itself locks it. 37 entries carried this exact drift (all
@@ -257,7 +253,7 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     // of either file from re-drifting.
     test('gender lock matches TagData.json\'s Slots-derived source of truth', async () => {
         const tagData = JSON.parse(await readFile('data/TagData.json', 'utf8'));
-        const ageRole = JSON.parse(await readFile('data/age-role-compatibility.json', 'utf8'));
+        const ageRole = JSON.parse(await readFile('data/AgeRoleCompatibility.json', 'utf8'));
         const bucketForCategory = { Protagonist: 'protagonists', Antagonist: 'antagonists', SupportingCharacter: 'supportingCharacters' };
 
         // Both TRASH/UNETHICAL, RECIPE-gated, and unconfirmed in-game -- parked
@@ -275,9 +271,8 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
             const bucketName = bucketForCategory[entry.CategoryID];
             if (!bucketName) return;
 
-            const shimmedId = id.replace('SUPPORTINGCHARACTER_', 'SUPPORTING_CHARACTER_');
             const bucket = ageRole[bucketName] || {};
-            const roleData = bucket[id] || bucket[shimmedId];
+            const roleData = bucket[id];
             if (!roleData) return; // covered by the "unresolved" tests above
 
             if (roleData.locked_gender !== entry.gender) {
@@ -292,7 +287,7 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
     // This is the actual UI-facing consumer of the gender field: it decides
     // which gender button(s) render for a role in the Age & Gender Appeal
     // panel. It must read GAME_DATA.tags[rawId].gender (sourced from
-    // TagData.json), not data/age-role-compatibility.json's locked_gender copy,
+    // TagData.json), not data/AgeRoleCompatibility.json's locked_gender copy,
     // so a role missing from that second file (or a future drift in it) can
     // never wrongly show both buttons for a role the game actually locks.
     describe('getValidGenders (gender-button source of truth)', () => {
@@ -317,9 +312,9 @@ describe('Age-to-Role Breakdown (Feature 3a)', () => {
             expect(validGendersFor('SUPPORTINGCHARACTER_ANGRY_BOSS')).toEqual(['M', 'F']);
         });
 
-        test('a role absent from age-role-compatibility.json still resolves its real lock from TagData.json', () => {
+        test('a role absent from AgeRoleCompatibility.json still resolves its real lock from TagData.json', () => {
             // PROTAGONIST_LAST_SURVIVOR has no entry at all in
-            // age-role-compatibility.json's protagonists bucket (see the
+            // AgeRoleCompatibility.json's protagonists bucket (see the
             // "unresolved" test above) -- the old locked_gender-based lookup
             // silently fell back to ['M', 'F'] for any missing entry,
             // regardless of the role's real lock. TagData.json says this one

@@ -42,7 +42,7 @@
         const ownedInput = document.getElementById('ownedScreeningsInput');
         const scoreDisplay = document.getElementById('dist-com-score-display');
 
-        const score = parseFloat(comInput?.value) || 0;
+        const score = HACScoreFormatting.readMovieScoreInput('comScoreInput');
         const owned = parseInt(ownedInput?.value, 10) || 0;
 
         if(scoreDisplay) scoreDisplay.innerText = score.toFixed(1);
@@ -52,21 +52,22 @@
 
     // Each policy owns two independent gates, so the status line has to say which
     // half is live: Behemoth's boost rides on the budget the toggle stands for,
-    // its slower decay on commercial > 9. Boutique only ever carries slower decay,
-    // gated on artistic > 9. Pure so the wording can be pinned without a DOM.
+    // its slower decay on commercial >= 9. Boutique only ever carries slower
+    // decay, gated on artistic >= 9. Pure so the wording can be pinned without
+    // a DOM.
     function describeStudioPolicies({ behemoth, boutique, commercialScore, artisticScore } = {}) {
         const parts = [];
 
         if (behemoth) {
-            parts.push(commercialScore > BEHEMOTH_DECAY_MIN_SCORE
+            parts.push(commercialScore >= BEHEMOTH_DECAY_MIN_SCORE
                 ? 'Behemoth: +25% Boost + Slower Decay Active'
-                : 'Behemoth: +25% Boost Active (Slower decay at commercial 9+)');
+                : 'Behemoth: +25% Boost Active (Slower decay from commercial 9 and above)');
         }
 
         if (boutique) {
-            parts.push(artisticScore > BOUTIQUE_DECAY_MIN_SCORE
+            parts.push(artisticScore >= BOUTIQUE_DECAY_MIN_SCORE
                 ? 'Boutique: Slower Decay Active'
-                : 'Boutique: Slower Decay at artistic 9+');
+                : 'Boutique: Slower Decay from artistic 9 and above');
         }
 
         return parts.join(' | ');
@@ -80,7 +81,7 @@
 
         if (!statusEl) return;
 
-        const commercialScore = parseFloat(document.getElementById('comScoreInput')?.value) || 0;
+        const commercialScore = HACScoreFormatting.readMovieScoreInput('comScoreInput');
         const artisticScore = getArtisticScore();
         const boutique = isBoutiqueActive();
         const behemoth = isBehemothActive();
@@ -123,7 +124,7 @@
     }
 
     // Audience demand per week, in screenings, before any theatre capacity is
-    // considered. The extracted game-file grid uses Commercial only: week 1 is
+    // considered. The accepted community-model grid uses Commercial only: week 1 is
     // score * 2 * 1000, week 2 is score * 1 * 1000, then each later week keeps
     // 80% of the previous week (or slower, if a studio policy qualifies).
     //
@@ -264,7 +265,7 @@
     }
 
     function getArtisticScore() {
-        return parseFloat(document.getElementById('artScoreInput')?.value) || 0;
+        return HACScoreFormatting.readMovieScoreInput('artScoreInput');
     }
 
     // Both policies are quoted verbatim in the game's own string table:
@@ -272,11 +273,12 @@
     //     commercial rating above 9 will fall 25% more slowly."
     //   localization/English.json:12490  Boutique — "Attendance for films with an
     //     artistic rating above 9 will fall 25% more slowly."
-    // Both gates are strictly above 9, matching "above" in those strings.
+    // Owner ruling 2026-10-01: both gates open from 9 and above, although the
+    // strings say "above 9". Before that the gates were strictly above 9.
     function resolveDecayRate(commercialScore, artisticScore, behemothActive, boutiqueActive) {
         const modifiers =
-            (behemothActive && commercialScore > BEHEMOTH_DECAY_MIN_SCORE ? 1 : 0) +
-            (boutiqueActive && artisticScore > BOUTIQUE_DECAY_MIN_SCORE ? 1 : 0);
+            (behemothActive && commercialScore >= BEHEMOTH_DECAY_MIN_SCORE ? 1 : 0) +
+            (boutiqueActive && artisticScore >= BOUTIQUE_DECAY_MIN_SCORE ? 1 : 0);
 
         return DECAY_BY_ACTIVE_MODIFIERS[Math.min(modifiers, DECAY_BY_ACTIVE_MODIFIERS.length - 1)];
     }

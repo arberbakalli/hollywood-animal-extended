@@ -92,11 +92,10 @@ test.describe('Marketing Release — maximum score distribution (score 10)', () 
       expect(numValues[i]).toBeLessThan(numValues[i - 1]);
     }
 
-    // Check that decay is approximately 80% (allow for rounding variance)
-    for (let i = 1; i < 4; i++) {
-      const ratio = numValues[i] / numValues[i - 1];
-      expect(ratio).toBeCloseTo(0.8, 0);
-    }
+    // Week 2 is the separate baseline, not the first decayed week.
+    expect(numValues[1]).toBe(numValues[0] / 2);
+    // Decay starts at week 3; later weeks round down (GAME_RULES section 7).
+    expect(numValues.slice(2)).toEqual([8000, 6400, 5120, 4096, 3276, 2621]);
   });
 
   // Bonus interaction at max score: Striking Image

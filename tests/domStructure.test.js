@@ -172,6 +172,7 @@ describe('HTML structure', () => {
             'src/selectors/selectorExclusions.js',
             'src/selectors/storyElementSelector.js',
             'src/generator/availabilityFilter.js',
+            'src/rules/scriptCategories.js',
             'src/evaluation/compatibilityEngine.js',
             'src/evaluation/movieScoreEstimator.js',
             'src/generator/scriptGenerationEngine.js',

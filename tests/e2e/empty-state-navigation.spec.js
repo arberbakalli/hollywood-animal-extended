@@ -61,7 +61,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       await steps.on('lockedSectionToggle', 'ScriptLab').verifyState('visible');
     });
 
-    // Market tab navigation works
+    // Marketing tab navigation works
     test('TC08-000007 marketing tab remains accessible', async ({ steps }) => {
       await steps.on('buildTab', 'Navigation').click();
       await steps.on('marketTab', 'Navigation').click();
@@ -78,7 +78,7 @@ test.describe('Generator — Empty States, Navigation, Persistence (Phase 3)', (
       await steps.on('settingsPanel', 'ScriptLab').verifyState('visible');
 
       // The lowest legal movie score target is the default.
-      await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('6');
+      await steps.expect('movieScoreInput', 'ScriptLab').value.toBe('5');
 
       await steps.on('resetLocksButton', 'ScriptLab').click();
 

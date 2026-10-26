@@ -21,6 +21,43 @@ forbids a legal choice because it is a bad one; it shows why it is bad.
 
 ---
 
+## Names: one name per thing
+
+Docs, tests, scenarios and comments use the **screen name**, exactly as
+`index.html` shows it. Code keeps older internal names; the right column maps
+them, so nobody invents a third name. Owner ruling 2026-10-09. Guarded by
+`tests/ui-names.test.js`: every screen name below must appear in `index.html`,
+and the retired names listed under the table must not come back.
+
+| Screen name | Where on screen | Code name |
+|---|---|---|
+| Script Lab | tab "Build" | `generator` context, `src/generator/` |
+| Locked Elements | Script Lab, Colman Graves, Analyze Script | contexts `generator`, `graves`, `advertisers` |
+| Locked Elements (Optional) | Build for Target | context `targeted` |
+| Excluded Elements | Script Lab | context `excluded` |
+| Generate Scripts | Script Lab button | `generateScripts` |
+| Script Evaluation | tab "Evaluate" | `src/evaluation/` |
+| Colman Graves | Script Evaluation panel | `graves` |
+| Evaluate Script | Colman Graves button | `evaluateColmanGravesScript` |
+| Best Matches | Colman Graves panel | `gravesBestMatches.js` |
+| Best Additions | Best Matches mode | `additions` |
+| Swap Suggestions | Best Matches mode | `swaps` |
+| Pairwise | Best Matches mode | `pairwise` |
+| Marketing & Release | tab "Marketing" | `src/marketing/` |
+| Analyze Script | Marketing & Release mode and button | `advertisers` context, `analyzeMovie` |
+| Build for Target | Marketing & Release mode | `targeted` context, `targetedAds.js` |
+| Find Top Combinations | Build for Target button | `searchForTargetCombinations` |
+| Distribution Calculator | Analyze Script results | `distributionPlanner.js` |
+| Max Element Pool | header control | `globalElementPoolInput` |
+| Script Library | Script Lab panel | `scriptLibrary.js` |
+| Testing Features | header link | `testing-features.html`, `lab/` |
+
+Retired names (do not use): Submit Script, Build Your Script, Lock Elements
+(Optional), Market tab, Targeted Ads, Marketing Analyze. Quoting one in dated
+history is allowed when the line says "formerly".
+
+---
+
 ## 1. What a script is
 
 A script is:
@@ -29,12 +66,26 @@ A script is:
 - **exactly one Setting**
 - **5 to 10 story elements** — the Max Element Pool
 
+**Required in every script: Genre, Setting, Protagonist.**
+
+Antagonist and Finale are optional. A script with neither is a legal script;
+the game's own tutorial says "not every film needs an antagonist"
+(`TUTORIAL_NEED_FOR_ANTAGONIST`). The Protagonist is the only required story
+element, so it is the only one that reserves a slot against the locks.
+
+> Owner ruling 2026-10-08, from play. The sentence above is the one statement
+> of this rule. In code it lives once, in `src/rules/scriptCategories.js`
+> (`HACScriptRules`): Script Lab, the generation engine and Build for Target
+> read their lists from it and keep no copy. `tests/required-categories-rule.test.js`
+> fails if that file, a consumer, or any other sentence in this file disagrees.
+
 **Story elements are everything except Genre and Setting.** Genre and Setting are
 context: they occupy no budget. A script's total width is therefore the budget
 plus its context, never a fixed number.
 
 Colman Graves accepts a script only when Genre, Setting and Protagonist are all
-present *and* the story-element count is between 5 and 10.
+present *and* the story-element count is at least 5 and no more than the Max
+Element Pool (at most 10; section 2).
 
 > **The rule is one function:** `isStoryElement` / `storyElementsOf` in
 > `src/evaluation/gravesAnalysis.js`. Every caller delegates to it.
@@ -70,11 +121,34 @@ game's (owner ruling 2026-09-29):
 > `tests/invariant-lists.test.js`, TC01-000038 and
 > `tests/audience-compatibility-render.test.js`.
 
-### Genre is uncapped
+### Genre has no artificial one- or two-genre cap
 
 **Minimum one, maximum eleven.** A script can carry every genre, split by
 percentage, with one taking whatever remains up to 100%. Two is a common mix, not
 a limit.
+
+**Genre shares (owner rulings 2026-09-30 and 2026-10-08):**
+
+- One genre holds 100%.
+- Two to eleven genres each hold at least 5%, in steps of 5, and always sum to
+  100%. Two genres range from 5/95 to 95/5; eleven range from nine at 10% and
+  two at 5% to ten at 5% and one at 50%. Adding or removing a genre re-splits
+  the others to keep 100%.
+- The Genre + button stops at 11 rows in every context (there are exactly 11
+  genres), and works again when a row is removed.
+- Every builder uses the same split (`splitGenrePercent`). Build for Target
+  splits evenly in these steps: three genres score as 35/35/30, not 1/3 each.
+
+**Genre pairing (owner ruling 2026-10-08):** a genre counts in a pairing only
+at 35% or more, so at most two genres are in effect; a third or later genre
+cannot reach the threshold.
+
+> The extracted game file's `min_genre_fraction: 0.1` is **not** a minimum
+> share. What it controls is not mapped yet; disregard it until it is (owner,
+> 2026-10-08).
+> Floor: `GENRE_PERCENT_MIN` in `src/selectors/genreMix.js`. Row cap:
+> `MAX_GENRE_ROWS` in `src/selectors/storyElementSelector.js`, pinned by
+> TC06-000009. Before this ruling the + button added rows without limit.
 
 Uncapped does not mean generated: Build for Target seeds the single Genre a script
 requires and spends the rest of the budget on story elements. Additional genres
@@ -89,25 +163,38 @@ come from what the player chose.
 
 | Category | Holds |
 |---|---|
-| Genre | unlimited (minimum one) |
+| Genre | 1-11 distinct genres; no duplicate selections |
 | Supporting Character | unlimited |
 | Theme & Event | unlimited |
 | Setting, Protagonist, Antagonist, Finale | one each |
 
-Protagonist, Antagonist and Finale are mandatory and **do** spend the budget.
+The Protagonist spends the story-element budget like any other pick.
 
-**Script Lab reserves a slot for each of them.** Locked elements can never push
-one out. When the locks leave fewer free slots than the mandatory categories
-still missing, Generate refuses and says which are missing and how many locks
-to remove (or to raise the score target, when that adds a slot). A category the
-exclusions empty completely is refused the same way, before generating.
+**Script Lab reserves a slot for the Protagonist.** Locked elements can never
+push it out. When the locks fill every slot and none is a Protagonist, Generate
+refuses and says how many locks to remove (or to raise the score target, when
+that adds a slot). A required category the exclusions empty completely is
+refused the same way, before generating. Antagonist and Finale never cause a
+refusal.
 
-> Owner ruling 2026-09-28. The generator added them only while the count was
-> below target, so 3 locked Supporting Characters at a target of 5 produced
-> scripts with no Finale every time. Enforced in `prepareGenerationInputs`
-> (`src/generator/scriptGenerator.js`) and `runGenerationAlgorithm`
-> (`src/generator/scriptGenerationEngine.js`). Pinned by
-> `tests/generator-mandatory-categories.test.js` and TC01-000034.
+**Antagonist and Finale are normal picks** (owner ruling 2026-10-08). They are
+not reserved: Script Lab and Build for Target fill the free slots from
+Supporting Character, Theme & Event, Antagonist and Finale alike, one Antagonist
+and one Finale at most. A generated script may carry neither.
+
+> **Corrected 2026-10-08 (owner): Antagonist and Finale are not mandatory.**
+> This file wrongly said "Protagonist, Antagonist and Finale are mandatory" from
+> 2026-09-28 until 2026-10-08, labelled as an owner ruling. The real defect
+> then was locks pushing out the Protagonist (Graves rejects that script); the
+> fix over-reached and reserved Antagonist and Finale too, and that over-reach
+> was written here as the rule. It contradicted the Colman Graves sentence
+> above, and it refused five locked Theme & Event elements at pool 6 instead of
+> finding them a Protagonist. Enforced in `prepareGenerationInputs`
+> (`src/generator/scriptGenerator.js`), `runGenerationAlgorithm`
+> (`src/generator/scriptGenerationEngine.js`) and `fillWithinCategoryLimits`
+> (`src/marketing/targetedAds.js`). Pinned by
+> `tests/protagonist-only-required.test.js`,
+> `tests/required-categories-rule.test.js`, TC01-000034 and TC01-000055.
 
 This is **one rule in one place**: `isCategoryFull` in
 `src/evaluation/gravesBestMatchesEngine.js`, driven by `MULTI_SELECT_CATEGORIES`
@@ -128,17 +215,35 @@ This is the game's own Rating Limit table:
 | Story elements | Script limit | Movie limit |
 |---|---|---|
 | Under 5 | 5 | 6 |
-| 5–6 | 6 | 7 |
+| 5–6 | 5 | 6 |
 | 7–8 | 7 | 8 |
 | 9 | 8 | 9 |
 | 10 | 10 | 10 |
 
 **A movie score of 10 needs all ten story elements.** Nine top out at 9.
 
-The Script Lab target follows it: a target of 6–8 asks for N−1 story elements,
-9 asks for 9, and 10 asks for 10. The other direction: a Max Element Pool of 5–7
-targets pool + 1, and 8, 9 and 10 target themselves. Pool 8 targets 8, not 9,
-because 8 elements top out at 8.0, so pools 7 and 8 both target 8.
+> Owner reading of the game's Rating Limit tooltip, 2026-09-30. It corrects the
+> 5–6 row, recorded 2026-09-28 as Script 6 / Movie 7.
+
+**Max Element Pool and Target Movie Score are one to one, 5 to 10.** The pool is
+the story-element count; the target follows it (pool 7 = target 7), and moving
+either control moves the other. The "Requires ~N" help shows the same N, and
+Script Lab generates exactly N. The table above is a ceiling, not a requirement:
+the earlier mapping (target 6–8 asks for N−1, pool 5–7 targets pool + 1) read
+it as a requirement, which made 8 story elements unreachable.
+
+> Owner rulings 2026-09-30 ("you should always be able to select 5 to 10
+> elements"; "target movie with 5 elements is 5"). Enforced in
+> `HACAppShell.poolSizeToTargetScore` / `targetScoreToPoolSize`
+> (`src/app/appShell.js`), `getRequiredElementCount` and
+> `getGenerationElementCount` (`src/generator/scriptGenerator.js`). Pinned by
+> `tests/bug-hunt-2026-09-30.test.js`, TC26-000003 and TC01-000041..43.
+
+**One Generate Scripts click makes up to 15 unique scripts and shows 5**; Show
+more reveals the rest 5 at a time. Clicking again makes a new list. Same tag
+sets in a different display order count once. (Owner rulings 2026-09-30 and
+2026-10-03: page through one list rather than re-click to rotate; no shuffled
+duplicates. Pinned by TC01-000042 and `tests/generator-unique-results.test.js`.)
 
 > Owner rulings 2026-09-28, from a screenshot of the game's Rating Limit tooltip
 > (pool 8 → target 8 ruled the same day).
@@ -187,15 +292,162 @@ Slapstick Comedy's colour is a placeholder until the owner sees it in the game.
 
 | Feature | Budget applies? | Behaviour |
 |---|---|---|
-| Script Lab | Yes | Generates within the pool |
-| Best Additions | Yes | Engine returns no rows at the budget |
+| Script Lab | Yes | Generates the pool (section 1) |
+| Best Additions | Yes | At the budget, lists Genres only (they spend no budget) |
 | Pairwise | Yes, on the **Add button only** | Rows still list; Add is disabled |
 | Swap Suggestions | **No** | A swap trades within a category, so the count cannot change |
-| Build for Target | Yes | Combination = budget in story elements, plus context |
+| Build for Target | Yes | Combination = budget in story elements, plus context; never a pair below 2.0 |
+| Evaluate Script (Colman Graves) | Yes | Refuses more story elements than the pool; still needs at least 5 |
+| Analyze Script (Marketing & Release) | Yes | Refuses more story elements than the pool; one element is enough |
 
-A complete 5-element script sits at its budget, so Best Additions is correctly
-empty. That is intended: raise the pool, or swap. A test wanting additions from a
-complete script must raise the pool first.
+**Every builder follows the Max Element Pool** (owner ruling 2026-10-09):
+Evaluate Script and Analyze Script refuse a script with more story elements than
+the pool, with the same message as Build for Target ("Max Element Pool is set to
+N, but you selected M ..."). Raise the pool to evaluate or analyze a bigger
+script. One check: `poolLimitRefusal` in `src/generator/scriptGenerator.js`.
+Until 2026-10-09 Evaluate accepted any 5-10 regardless of the pool. Pinned by
+TC20-000008, TC20-000012 and TC20-000013.
+
+A complete 5-element script sits at its budget, so Best Additions lists no
+story element: raise the pool, or swap. It still lists Genres, which spend no
+budget, under a note that says so (owner ruling 2026-10-01; it used to be empty).
+A test wanting story-element additions from a complete script must raise the
+pool first.
+
+**Best Additions says when the list is short.** When fewer story elements clear
+Minimum Fit than the budget has free slots, a note names the free slots and the
+fit, with a button that lowers Minimum Fit one step (4.0 → 3.5) and redraws the
+list. A Genre row does not count, because it spends no slot. (Owner ruling 2026-09-30: a 6-element script at pool 8 listed
+only Action at 4.0+, with no reason given. `additionsShortfallNote` in
+`src/evaluation/gravesBestMatches.js`; TC03-000043.)
+
+### Build for Target never suggests a clash
+
+No suggested combination holds a pair below 2.0 (Graves' danger line). The
+search walks every starting point and drops the ones that clash; if fewer than
+20 clean ones remain, a note says how many were left out and why. A pair between
+two **locked** elements is the player's choice: it is named in a note ("Your
+locked Evil Monster and Long Journey clash (1.0)"), in game category order, and
+the results stay. When the pool, a lock, an audience or an advertiser changes
+after Find, the cards are hidden and a notice asks for a new Find.
+
+> Owner rulings 2026-09-30, after the Build for Target audit found 10-17 of every
+> 20 suggestions carrying a spoiler pair (ranking reads advertiser fit only).
+> `searchForTargetCombinations` and `watchTargetedInputs` in
+> `src/marketing/targetedAds.js`. Pinned by `tests/bug-hunt-2026-09-30.test.js`
+> (every pool 5-10 against every agency) and TC05-000021..23.
+
+### Evaluate results never outlive the script
+
+When the Colman Graves Locked Elements builder changes after Evaluate Script (a dropdown, a
+remove button, Reset, a Genre share, a search pick, a Library load, or a Best
+Matches Add or Swap), the five Evaluate panels are hidden and a notice says
+"Script changed. Press Evaluate Script to update." A change that leaves the
+script the same, such as adding an empty row, keeps the results. (Owner ruling
+2026-09-30: the old Pair Analysis and Conflicts named elements the script no
+longer held. `watchGravesBuilder` in `src/evaluation/gravesAudience.js`;
+TC03-000046..50.)
+
+### Results never outlive their inputs
+
+The same rule runs through every panel that computes from a script (audit
+2026-09-30):
+
+- **Evaluate** hides its five panels and asks for a new Evaluate (above).
+- **Best Matches** redraws from the current script and ban list instead of
+  hiding, because its mode tabs live in the panel and TC03-000038 pins that
+  switching mode after a change works.
+- **Build for Target** hides its cards and asks for a new Find when the pool, a
+  lock, an audience, an advertiser or the ban list changes.
+- **Analyze** (Marketing & Release) hides its results and asks for a new
+  Analyze when an element or either score changes (owner ruling 2026-10-01).
+  The distribution calculator, which Analyze moves into its results, goes back
+  to its own place and stays on screen.
+- **Script Lab** hides generated scripts when a ban hits one of them, and asks
+  for a new Generate. A pinned Library script is kept; its banned element is
+  struck through and the card says "Banned: X. Remove the pin or lift the
+  ban." (owner ruling 2026-10-01; TC01-000054).
+- **A refusal** (Evaluate, Generate, the Highest Appeal modes, Analyze) never
+  leaves the previous results beside its message.
+- A ban reaches every watcher directly: it clears a pick without firing change.
+
+### Script Lab cards name their clashes
+
+Script Lab shows every result it generates, in all three modes. A card whose
+script holds an Unsuccessful pair (< 2.0) names the worst one, in game category
+order, and counts the rest ("Clash: Evil Monster × Long Journey (1.0) and 1
+more"), so the player sees what a high score costs in coherence. (Owner ruling
+2026-10-01. `clashWarningText` in `src/generator/scriptGenerator.js`;
+TC01-000049/50.)
+
+### One result per element set
+
+Two generated results with the same element ids are the same result, whatever
+their genre percentages: "Drama 60% / Comedy 40%" and "Drama 50% / Comedy 50%"
+with the same story elements count once, and the better one is kept. Any other
+difference, even a single story element, keeps both. Only exact duplicates are
+removed; near-duplicates stay. (Owner ruling 2026-10-06. One key,
+`HACScriptGenerationEngine.scriptSignature`, used by Script Lab and Build for
+Target; `tests/near-duplicate-results.test.js`.)
+
+Today the generator gives a genre set one fixed split (one genre 100%, a pair
+50/50, locked genres the player's split), so same-id results never differed
+by percentage in practice. The near-duplicates measured on 2026-10-05 differ in
+a Genre or Setting id, and this rule keeps them (review 2026-10-06). That is
+intended: a different Genre or Setting is a different film (owner ruling
+2026-10-06).
+
+### Highest Appeal respects the compatibility target
+
+Highest Artistic and Highest Commercial keep Target Average Compatibility: per
+slot, freshness first, then a script at or above the target (on the tenth
+shown), then the higher bonus. Results rank the same way. A card that never
+reached the target says so ("Avg Fit 3.2 is below your 4.0 target."). (Owner
+ruling 2026-10-01; before it, 24 of 48 scripts at pool 10 fell below 4.0.
+TC01-000052/53.)
+
+### One audience model
+
+Colman Graves' Likely Audience and Marketing & Release's target audiences use
+the same model: affinity from the audience weights by share, lifted so the
+lowest is at least 1, each audience's share of the total times 3, clamped to
+0..1; a target above 0.33, high interest from 0.67. (Owner ruling 2026-10-01:
+Graves used its own scaling, so the same script named different audiences.
+`audienceShares` in `src/evaluation/gravesAnalysis.js`; TC03-000058.)
+
+### Score inputs
+
+A movie score typed into Marketing & Release is read as 0 to 10, and the box
+settles on the limit when it is left (`HACScoreFormatting.readMovieScoreInput`;
+TC04-000036). A stored movie score is the tenth the screen shows (TC24-000001).
+
+### Script Library files
+
+Import skips an entry with an unknown element, the same element twice, or two
+picks in a one-pick category; it splits Genre shares into 5% steps that sum to
+100, as every builder does; and the load message counts scripts already in the
+library (`src/library/scriptLibrary.js`; `tests/bug-hunt-2026-09-30.test.js`).
+
+### Swap Suggestions and Unsuccessful pairs
+
+Owner rulings 2026-09-30, enforced in `buildSwaps`
+(`src/evaluation/gravesBestMatchesEngine.js`), pinned by
+`tests/bug-hunt-2026-09-30.test.js`, TC03-000041 and TC03-000042:
+
+- **A swap never brings in an Unsuccessful pair** (< 2.0) with the rest of the
+  script. Such a candidate stays visible in Best Additions and Pairwise, with
+  its clash warning; Swap Suggestions does not offer it as an improvement.
+- **Every element in an Unsuccessful pair gets a slot**, which lists the
+  replacements that clear the clash, ranked by the resulting average, even when
+  the average stays level or falls. Outside a clash, a slot still lists only
+  swaps that raise the average.
+- **A clash that no available replacement clears is named**, not dropped, with
+  the exclusion count when Script Lab exclusions are hiding candidates.
+
+Why: the raw average cannot see a clash. Long Journey scored 1.0 against Evil
+Monster but fitted the rest of the owner's script well, so no swap raised the
+average and Evaluate's red pair had no Swap slot. After the owner removed it,
+Swap offered it back as "+0.11".
 
 Within Pairwise, Add is disabled only when it would actually grow the pool — a
 Swap, or a Genre/Setting candidate, stays live at the budget.
@@ -208,6 +460,14 @@ Swap, or a Genre/Setting candidate, stays live at the budget.
 ## 3. Scoring thresholds
 
 Pair compatibility is a raw score out of 5.
+
+**A pair has one score, whichever element comes first.** The data holds every
+pair in both directions. Where the two disagree and one is 3.0 (the extract's
+"no data" value), the other is the real entry and is used. 36 pairs disagree,
+all with Hardened Cynic's own row at 3.0 and the reverse at 4 or 5. (Owner
+ruling 2026-10-01: use the real entry. `pairScore` in
+`src/evaluation/compatibilityEngine.js`; every pair is checked in
+`tests/bug-hunt-2026-09-30.test.js`.)
 
 | Band | Range | Where shown |
 |---|---|---|
@@ -228,8 +488,12 @@ set:
 | Severity | Range |
 |---|---|
 | Mild | 1.5 – 2.0 |
-| Serious | 1.0 – 1.5 |
-| Severe | < 1.0 |
+| Serious | above 1.0 – 1.5 |
+| Severe | 1.0 or below |
+
+> Owner ruling 2026-10-01: Severe starts at 1.0, the scoring engine's spoiler
+> line. The data holds whole numbers, so with "< 1.0" every real conflict read
+> Serious. Mild and Serious stay for any fractional data.
 
 ### Verdict bands
 
@@ -272,7 +536,7 @@ The toggle stands for "this studio holds Behemoth and the film's production
 budget is over $1,000,000". Both effects follow it:
 
 1. **+25% boost on every week 1–8**. It rides on the budget, not on any score.
-2. **Slower decay**, weeks 3+, when the **commercial** score is also above 9.
+2. **Slower decay**, weeks 3+, when the **commercial** score is also **9 or above**.
 
 > Owner ruling 2026-09-28: the $1,000,000 budget is the condition, and it is
 > strictly *over* $1,000,000 (the game string says "exceeds"). The slower decay
@@ -286,7 +550,40 @@ budget is over $1,000,000". Both effects follow it:
 
 ### Boutique
 
-Slower decay only, weeks 3+, above **artistic** score 9.
+Slower decay only, weeks 3+, from **artistic** score **9 and above**.
+
+### The decay gates: 9 and above
+
+**Both slower-decay gates open at a score of 9 or higher (`>= 9`)**: Behemoth on
+the commercial score, Boutique on the artistic score. A score of exactly 9 gets
+the slower decay; 8.9 does not.
+
+| Score | Behemoth slower decay (commercial) | Boutique slower decay (artistic) |
+|---|---|---|
+| 8.9 or below | No | No |
+| **9.0** | **Yes** | **Yes** |
+| above 9 | Yes | Yes |
+
+> Owner ruling 2026-10-01. The game's strings say "above 9" for both
+> (`localization/English.json:12479`, `:12490`); the owner ruled `>= 9` against
+> that reading. Before this ruling both gates were strictly above 9 (`> 9`).
+> Enforced in `resolveDecayRate` and `describeStudioPolicies`
+> (`src/marketing/distributionPlanner.js`). Below the gate the status line reads
+> "Slower decay from commercial 9 and above" / "Slower Decay from artistic 9 and
+> above"; the toggle tooltips say "9 or above".
+>
+> Pinned at exactly 9, for both policies: `distribution-behemoth.test.js`
+> ("slower decay threshold (score >= 9)"), `distribution-boutique.test.js`
+> ("slows decay at exactly artistic 9"), `distribution-studio-policy-status.test.js`
+> (both "at exactly 9 the decay is active"), TC22-000001 (commercial 9 with
+> Behemoth: week 3 = 9563) and TC04-000014 (artistic 9 slows the decay, 8 does
+> not). Checked 2026-10-01: with the gate set back to `> 9`, all six fail.
+
+| Score | Behemoth slower decay | Boutique slower decay |
+|---|---|---|
+| 8.9 | No | No |
+| 9.0 | Yes | Yes |
+| 10.0 | Yes | Yes |
 
 ### Both together
 
@@ -301,10 +598,10 @@ Behemoth is off — that line describes the policy's decay gate, not the baselin
 
 > Enforced in: `src/marketing/distributionPlanner.js`.
 
-### Marketing Analyze needs one element, of any kind
+### Analyze Script needs one element, of any kind
 
-Analyze runs on whatever the player selects, from a single element to a full
-script (owner ruling 2026-09-29). It does not require a Genre: one element is
+Analyze runs on whatever the player selects, from a single element up to the
+Max Element Pool (owner rulings 2026-09-29 and 2026-10-09). It does not require a Genre: one element is
 enough to rank the Recommended Advertisers for it. With nothing selected it asks
 for at least one tag (`analyzeMovie`, `src/marketing/marketingPlanner.js`).
 
@@ -320,6 +617,10 @@ Colman Graves, Marketing & Release and Build for Target.
   and names it in a message. The app resolves the clash rather than warning about
   it, so no context ever holds a banned element.
 - A lifted ban restores the element everywhere immediately, with no reload.
+
+- An element can be banned **once**. The ban list grays out an element banned
+  in another row, as the builders do, and Load Profile or a search pick never
+  adds a second row for it (owner ruling 2026-10-01; TC09-000026..28).
 
 Exclusion refreshes must cover **every category**, derived from the data.
 Iterating `MULTI_SELECT_CATEGORIES` skips Setting, Protagonist, Antagonist and
@@ -337,17 +638,25 @@ place to go stale.
 A new game in Hollywood Animal does not give you every story element. You start
 with a small pool and unlock the rest as you play. The app models that as bans.
 
-- **250** elements in total, **57** in the starting pool
-  (`GAME_DATA.starterWhitelist`, `data.js`), so **193 bans**. Not 192, not 194.
-- On a player's first visit the app applies Starting Tags itself, so a fresh
-  exclusion list reads **193**. After that it restores the player's saved list
-  and never re-seeds it.
-- A count other than 193 on a fresh browser is a bug. On a browser that has
-  used the app before, it is that player's saved list; Apply Starting Tags
-  resets it to 193 and replaces any custom bans.
+**Starting deck: 58 of 250 elements, so 192 bans.**
+
+- The one source is the list `GAME_DATA.starterWhitelist` in `data.js`. The
+  counts follow from it: 250 elements in total, 58 in the starting pool, so a
+  fresh exclusion list reads 192. Never type the counts into code; derive them
+  from the list.
+- On a player's first visit the app applies Starting Tags itself. After that
+  it restores the player's saved list and never re-seeds it.
+- A different count on a fresh browser is a bug. On a browser that has used the
+  app before, it is that player's saved list; Apply Starting Tags resets it to
+  the starting deck and replaces any custom bans.
 
 Per category, starting / total: Genre 8/11, Setting 5/29, Protagonist 8/43,
-Antagonist 7/34, Supporting Character 8/22, Theme & Event 12/81, Finale 9/30.
+Antagonist 7/34, Supporting Character 8/22, Theme & Event 13/81, Finale 9/30.
+
+> Owner confirmed in a new game, 2026-10-08: Jousting Tournament
+> (`EVENTS_JOUSTING_TOURNAMENT`) is available from the start. The game extract
+> gives the same 58 elements the starting date. Until then the list had 57 and
+> the rule said 193 bans.
 
 **Bans are not script content.** A feature that reads "the selected roles" reads
 the script (Locked Elements, the `generator` context), never the excluded list.
@@ -384,10 +693,16 @@ correct if the source data diverges. A demographic the game omits scores zero.
 > extraction settled the amounts but not the duration — `Holidays.json` has no
 > week dimension at all. Weeks 1, 2 and 3+ are each asserted separately.
 
-Holidays are listed in **calendar order** (owner ruling 2026-09-29), sorted on
-the game file's own `month` and `day`: Valentine's Day, Memorial Day,
-Independence Day, Halloween, Thanksgiving, Christmas. Every averaged bonus in
-the current game file is a whole percent.
+The holiday **data** is kept in **calendar order** (owner ruling 2026-09-29),
+sorted on the game file's own `month` and `day`: Valentine's Day, Memorial Day,
+Independence Day, Halloween, Thanksgiving, Christmas. The **holiday panel**
+lists them best first, by the script's bonus (owner ruling 2026-10-01). Every
+averaged bonus in the current game file is a whole percent.
+
+A holiday's boost for a script is the mean of its bonuses over the script's
+target audiences, taken at the tenth the row shows: three audiences averaging
+18.333...% show "+18.3%", and week 1 is boosted by 18.3% (owner ruling
+2026-10-01; `holidayBonusFor`).
 
 ---
 
@@ -410,18 +725,32 @@ a review of the source.
   a pair missing from the data counts as 3.0, and each pair scores `(raw - 3) / 2`.
   Each row takes its worst pair, and a pair at or below 1.0 raises a spoiler. The
   total is multiplied by 0.9 when positive and by 1.25 when negative.
-  The code also weights a row's pairs by category (Genre 20 x share, Setting 5,
+  **Owner assumption 2026-10-01:** a genre's share does not weight its pair
+  scores; a 5% genre counts as much as a 95% one in Average Fit, the verdict and
+  Conflicts. It cannot be checked in the game, so it is assumed, as the code
+  already does. The code also weights a row's pairs by category (Genre 20 x share, Setting 5,
   others 3 on negative pairs), but the weights cannot change any result: the row
   then keeps the lower of that weighted average and its worst pair, and a
   weighted average is never below its own minimum. So every row scores its worst
   pair. Found by the 2026-09-29 audit; open question whether the game intends the
   weights to matter. The 3.0 default is pinned in `tests/scoring-rule-edges.test.js`.
-- **Genre-pair bonus** (same file): it applies only when the second genre holds
-  at least 35%. The code also checks that the top two make up 70%, but that is
-  implied: genres are sorted by share, so a second genre at 35% puts the top two
-  at 70% or more. Pinned at 35/35/30 in `tests/scoring-rule-edges.test.js`.
-- **Genre mix steps** (`src/selectors/genreMix.js`): shares move in 5% steps,
-  with 5% as the smallest share.
+  **The share does weight the total score:** each row adds `finalRowScore x share`
+  (`compatibilityEngine.js`), so a 5% genre adds less to the total (and the movie
+  score estimate) than a 95% one. Average Fit, the verdict and Conflicts are not
+  affected.
+  **Owner's expected model, 2026-10-08, unconfirmed:** a genre adds its pairing
+  value only at 35% or more (so at most two genres), and a single genre adds its
+  own artistic and commercial value. To be checked with the genre-pairing lab
+  feature against the extracted game data before the scoring changes.
+- **Genre tie-break** (same file, `genresByShare`): when two genres hold the
+  same share, the one earlier in the game's genre list (the data file order)
+  counts as the larger. Before 2026-09-30 the input order decided, so the same
+  script scored differently by row order (54 of 55 pairs at 50/50). The order
+  makes scores stable; whether the game breaks ties this way is not confirmed.
+- **Genre-pair bonus** (same file): the 35% threshold is now the owner's ruling
+  (section 1, "Genre pairing"). The code also checks that the top two make up
+  70%, which is implied by the 35% rule. Pinned at 35/35/30 in
+  `tests/scoring-rule-edges.test.js`.
 - **Striking Image / Artistic Ability** (`src/marketing/distributionPlanner.js`):
   ×2 on weeks 1–4 whenever either toggle is on. The game strings tie each to
   which rating is higher.
@@ -429,10 +758,16 @@ a review of the source.
   every multiplier (`rounding.ROUND_UP_UNTIL_INDEX` in `data.js`).
 - **Campaign timing** (`src/marketing/marketingPlanner.js`): 6 weeks
   pre-release, halved by Factory Policy; 4 weeks of release; 4 weeks
-  post-release only at commercial ≥ 9.0. The studio policies gate on strictly
-  above 9.
-- **Target audiences** (same file): high interest from 0.67, moderate above
-  0.33, normalised with a factor of 3.0 (`RELEASE_MAGIC_NUMBER`).
+  post-release only at commercial ≥ 9.0. The studio policies gate from 9 and
+  above too (owner ruling 2026-10-01, section 4).
+- **Target audience numbers** (`src/evaluation/gravesAnalysis.js`): high interest
+  from 0.67, a target above 0.33, normalised with a factor of 3.0
+  (`RELEASE_MAGIC_NUMBER`). That Graves and Marketing share one model is the
+  owner's ruling (section 2, "One audience model"); these numbers are not.
+- **Screenings demand** (owner hypothesis, 2026-10-08, unconfirmed): closer to
+  the average of the commercial and artistic scores x 2 than the current curve.
+  Being measured with the Distribution Calibration lab feature; not used by the
+  main app.
 - **Advertiser grades** (`src/marketing/advertiserMatcher.js`): A+ from 3.33,
   A 2.83, B+ 2.58, B 2.33, C+ 2.13, C 1.94, D 1.50, F below that, plus an
   adjustment for the movie's lean. Pinned in `tests/advertisers.test.js`.
@@ -503,11 +838,17 @@ groups scores into **5** visible bands, matching its legend exactly:
 
 | Band | Range | CSS class |
 |---|---|---|
-| Excellent | +4.0 to +5.0 | `excellent` |
-| Good | +1.0 to +3.9 | `good` |
-| Neutral | 0.0 | `neutral` |
-| Bad | -1.0 to -3.9 | `bad` |
-| Disastrous | -4.0 to -5.0 | `disastrous` |
+| Excellent | +4.0 or more | `excellent` |
+| Good | +1.0 to below +4.0 | `good` |
+| Neutral | above -1.0, below +1.0 | `neutral` |
+| Bad | -3.0 to -1.0 | `bad` |
+| Disastrous | below -3.0 | `disastrous` |
+
+> Owner ruling 2026-10-08: these ranges are the rule, with no gaps. Scores
+> blended by genre share are not whole numbers, so "Neutral 0.0" was not
+> enough. The one table is `AUDIENCE_BANDS` in
+> `src/marketing/audienceCompatibility.js`; the legend in `index.html` must
+> match it (`tests/audience-bands-rule.test.js`).
 
 `getScoreLabel` and `getScoreClass` (`src/marketing/audienceCompatibility.js`)
 both derive from one shared `getScoreBand` function using these exact 5
@@ -516,9 +857,8 @@ other or with the legend again. Neither function ever returns a label from
 the 11-point scale that has no matching band here: +3 "Very Good" shows as
 Good, and -3 "Very Bad" shows as Bad.
 
-For whole-number scores the code matches the table exactly. Between integers it
-cuts at -3.0, not -4.0: `getScoreBand` sends anything below -3.0 to Disastrous.
-Every weight is a whole number today, so the difference never shows.
+(Until 2026-10-08 this table said Neutral 0.0 and Disastrous -4.0 to -5.0,
+while the code cut at -1.0 and -3.0; the code's ranges are now the rule.)
 
 **This 5-band grouping is a coarser view of the 11-point scale above, not a
 contradiction of it.** The legend and CSS only define 5 colors today.
@@ -556,7 +896,7 @@ gender button(s) render in the Age & Gender Appeal panel.**
 `getValidGenders()` in `src/analysis/ageRoleBreakdown.js` reads
 `GAME_DATA.tags[rawId].gender` directly (surfaced there by
 `src/data/dataLoaders.js`) and nowhere else — it does not read
-`data/age-role-compatibility.json`'s `locked_gender` at all. That field
+`data/AgeRoleCompatibility.json`'s `locked_gender` at all. That field
 still exists as a second, independently-displayed copy (used for nothing but
 its own presence in that file) and is kept in sync only as a courtesy: a
 regression test cross-checks it against `TagData.json` and fails if the two
@@ -572,7 +912,7 @@ change: every `gender` value is exactly `"M"`, `"F"`, `"U"`, or absent
 `ANTAGONIST_CRIMINAL_GANG`) — no malformed values, no case that falls
 through `getValidGenders()`'s three-way branch unhandled.
 
-`data/age-role-compatibility.json`'s `locked_gender` field (`"M"`, `"F"`, or
+`data/AgeRoleCompatibility.json`'s `locked_gender` field (`"M"`, `"F"`, or
 `null` for unisex) previously disagreed with `TagData.json`'s `gender` field
 on 37 entries — all `locked_gender: null` while `TagData.json` said they
 were locked, silently under-reporting the lock back when the panel still
@@ -644,9 +984,14 @@ interest in films that carry it. The game's own words (`localization/English.jso
   counts. States persist per browser; an element with no recorded state is Fresh.
 - **One state per element, everywhere.** Changing it in one place changes every
   place that shows that element.
-- **Scope: Script Lab.** Pills appear on the locked story elements and on every
-  story element of a generated or pinned script card. Build for Target, the
-  Evaluate tab and Marketing do not show or read freshness.
+- **Scope: shared story-element UI.** Pills appear wherever the calculator lets
+  the player select or inspect story elements: Script Lab locked rows,
+  generated or pinned script cards, Colman Graves, Marketing & Release's Analyze Script,
+  and Build for Target. These all read and write the same saved state.
+- **Generation reads freshness; score tools display it.** Script generation uses
+  the state to fill free slots and rank results. Colman Graves and Marketing
+  show and update the same state, but do not alter compatibility, movie scores,
+  advertiser grades, or distribution math until the game formula is proven.
 - **Excluded elements have no freshness.** Excluding an element clears its
   state, so it comes back Fresh when the player makes it available again.
 - **Generation deprioritizes worn-out elements.** When Generate fills a slot the
@@ -665,5 +1010,97 @@ interest in films that carry it. The game's own words (`localization/English.jso
 > Enforced in: `src/generator/scriptGenerationEngine.js` (`HACFreshness` block:
 > states, store, script freshness, freshest-first picks), `src/generator/scriptGenerator.js`
 > (ranking, card pills, the out-of-date notice), `src/selectors/storyElementSelector.js`
-> (locked-row pills) and `src/library/exclusionStore.js` (excluding clears the state).
+> (shared builder-row pills) and `src/library/exclusionStore.js` (excluding clears the state).
 > Pinned by `tests/freshness.test.js` and `tests/e2e/script-lab-freshness.spec.js`.
+
+### Element Preservation (Factory policy; owner confirmed in play, 2026-10-06)
+
+- The Factory policy (`POLICY_CONVEYOR`) has a bonus: "Choose five story
+  elements that will remain fresh forever" (`POLICY_CONVEYOR_BONUS_3`). The game
+  calls it **Element Preservation**; a preserved element "will always remain
+  fresh thanks to the Factory policy" (`DEFENCE_TAG_TOOLTIP`).
+- **Five elements, and the choice is permanent.** The confirmation says the
+  player cannot replace them (`DEFENCE_*_TAG_CONFIRMATION`).
+- Only story elements can be preserved; Genre and Setting have no freshness.
+- All five story categories can be preserved: Protagonist, Antagonist,
+  Supporting Character, Theme & Event and Finale (owner, from play,
+  2026-10-08).
+- Not found in the game data: whether the milestone "Release thirteen films in a calendar year"
+  (`POLICY_CONVEYOR_BONUS_3_MILE`) is what unlocks it.
+
+**The lab's Element Preservation ranking is advice, not a game rule.** It
+weighs pair reach, conflicts, slots per script, age durability, cast gender and
+the direct score bonus; the weights are the calculator's judgement, shown on
+the page. Characters with no age data count as neutral (the average of the rated
+characters) and are flagged "No age data" (owner, 2026-10-06). Enforced in
+`lab/labModel.js` (`rankPreservation`).
+
+---
+
+## 10. Pollux awards in a save file
+
+**Draft from save evidence, 2026-10-05. The owner confirms the wording.** Measured
+on 55 real saves (game 0.8.72EA). Full field list: `docs/POLLUX_SAVE_EDITOR.md`.
+
+- **The game year** is 1 January 1929 plus `stateJson.timePassed` days. It matched
+  the date in the file name of all 55 saves.
+- **The ceremony is on 1 March and is stored under its own year.** The 1940
+  ceremony judged 1939 films and is stored as `polluxHistory[1940]`; the films'
+  `polluxes` entries carry 1940 too.
+- **`prevYearsPolluxPretenders` holds the candidates of this year's ceremony.**
+  The player's films join it only when the nominations are announced, between
+  15 January and 1 March. A 15 January save holds no player film there.
+- **Before the ceremony, only `forceWinning` is changed.** The game picks the
+  winner itself. Writing `polluxHistory` early would record a ceremony that has
+  not run.
+- **After the ceremony, the result is rewritten in three places that must agree:**
+  `polluxHistory[year].winners`, the films' `polluxes`/`nominations`, and the
+  winning talents' `characters[].polluxes`. Only the three recorded nominees can win.
+- **Forcing several candidates gives the game the choice.** With all 17 player
+  candidates forced in 1940, the game picked among them by the nominee `Key`
+  (lowest wins). So the Pollux Fixer forces only the player's pick by default.
+
+> Enforced in `lab/polluxSaveEditor.js`, UI in `lab/polluxSaveEditorView.js`
+> (a Testing Features tab since 2026-10-06, not a main-app tab).
+> Pinned by `tests/pollux-save-editor.test.js` and `tests/e2e/pollux-save-editor.spec.js`.
+> Not yet tested by loading a fixed save in the game, except the owner's 1940
+> `forceWinning` run.
+
+---
+
+## 11. Trash elements
+
+**Owner verified in play, 2026-10-09; the game file marks the same 15.** Every
+element whose `parameters.Rules` contains `TRASH` in
+`extractedFilesFromGameSourceOfTruth/TagData.json` is a trash element, and no
+other. All 15 are recipes created in the Trash Pit.
+
+| Category | Trash elements | Ids |
+|---|---|---|
+| Protagonist (7) | Toxic Revenger, Siamese Twin Sheriffs, Romantic with Popcorn Limbs, Parent in Invisible Clothes, Shit-Sucking Vampire, Girl with a Talking Vagina with Tourette Syndrome, Womanizer with Poisoned Balls | `PROTAGONIST_TOXIC_VIGILANTE`, `PROTAGONIST_SHERIFFS_CONJOINED_TWINS`, `PROTAGONIST_СORNLIMBED_ROMANTIC`, `PROTAGONIST_PARENT_IN_INVISIBLE_CLOTHES`, `PROTAGONIST_VAMPIRE_SHIT-SUCKER`, `PROTAGONIST_GIRL_WITH_A_SWEARING_VAGINA_WITH_TURRET_SYNDROME`, `PROTAGONIST_LOVELACE_WITH_POISONOUS_BALLS` |
+| Antagonist (6) | Killer Toaster, Rapist Robot, Robber with a Thousand Penises, Demon Possessed by a Schoolgirl, Headless Dwarven Hypnotists, Cannibal Women's Book Club | `ANTAGONIST_TOASTER_KILLER`, `ANTAGONIST_ROBOT_RAPIST`, `ANTAGONIST_ROBBER_WITH_A_HUNDRED_DICKS`, `ANTAGONIST_SCHOOLGIRL_POSSESSED_DEMON`, `ANTAGONIST_HEADLESS_MIDGETS_HYPNOTISTS`, `ANTAGONIST_WOMENS_BOOK_CLUB_OF_CANNIBALS` |
+| Theme & Event (2) | Wizard War, Survival Tournament | `THEME_WAR_WITH_SORCERERS`, `EVENTS_SURVIVAL_TOURNAMENT` |
+
+- **One source:** the game file's `TRASH` rule, not a typed list.
+  `data/TagData.json` copies that `rules` value verbatim onto the 15 elements;
+  the loader turns it into `GAME_DATA.tags[id].trash`.
+
+**The "Trash element" label (owner ruling 2026-10-09).** A trash element shows
+a small "Trash element" label wherever the freshness pill shows: Script Lab
+Locked Elements rows and generated or pinned script cards, Colman Graves,
+Analyze Script and Build for Target. In a dropdown row it sits on its own line
+under the box. It is **informative only**: no click action, no score effect, and
+not a freshness state. The dropdown text is unchanged (no "(Trash)" suffix:
+that would be a second name for the element). The circle is a placeholder icon.
+Enforced in `HACTrashElements` (`src/generator/scriptGenerationEngine.js`);
+pinned by `tests/trash-badge.test.js` and TC39-000001..3.
+- `PROTAGONIST_СORNLIMBED_ROMANTIC` starts with a Cyrillic "С" (U+0421) in the
+  game's own id; keep it exactly (see "One id, one spelling").
+
+**Not settled (owner to check on a Trash King playthrough):**
+- A trash film appears to change the movie's commercial and artistic score or
+  its cap. The game's Rating Limit tooltip has a row "One or more trash
+  elements" (`MARKS_CAP_TOOLTIP_TABLE_ROW_TRASHTAGS`); its numbers are not in
+  the text files.
+- The Trash King bonus "Use two trash elements per film"
+  (`POLICY_TRASH_BONUS_1_1`) implies one per film otherwise. Not observed yet.

@@ -19,11 +19,15 @@ file is the fast lookup for agents before editing tests or product code.
   `tests/e2e/exclusion-dropdown-refresh.spec.js`,
   `tests/exclusion-store.test.js`,
   `tests/scoringCore.test.js`
-- Exclusions in the first-run state (Starting Tags applied, exactly 193 bans):
+- Exclusions in the first-run state (Starting Tags applied, exactly 192 bans):
   `tests/e2e/exclusion-starting-tags.spec.js`
-- Mandatory Protagonist/Antagonist/Finale slots reserved against locks:
+- Required categories (Genre, Setting, Protagonist; Antagonist and Finale
+  optional normal picks), the Protagonist slot reserved against locks:
+  `tests/required-categories-rule.test.js`,
+  `tests/protagonist-only-required.test.js`,
   `tests/generator-mandatory-categories.test.js`,
-  `tests/e2e/script-lab.spec.js` (TC01-000034)
+  `tests/e2e/script-lab.spec.js` (TC01-000034),
+  `tests/e2e/protagonist-only-required.spec.js` (TC01-000055)
 - Max Element Pool clamped to 5-10:
   `tests/element-pool-clamp.test.js`,
   `tests/e2e/slider-syncing.spec.js` (TC10-000008, TC10-000009)
@@ -57,6 +61,10 @@ file is the fast lookup for agents before editing tests or product code.
   `tests/movie-score-cap.test.js`
 - Swap replaces only the suggested element; Best Matches reads the current script:
   `tests/e2e/colman-graves.spec.js` (TC03-000037, TC03-000038)
+- Swap slots for Unsuccessful pairs, no clash-creating swaps, the Best Additions
+  shortfall note, pool-sized generation and paged Generate Scripts:
+  `tests/bug-hunt-2026-09-30.test.js`,
+  `tests/e2e/bug-hunt-2026-09-30.spec.js` (TC03-000041..43, TC01-000041..42)
 
 ## Marketing And Release
 
@@ -88,15 +96,15 @@ file is the fast lookup for agents before editing tests or product code.
   freshness, freshest-first generation, freshness-first ranking
   (GAME_RULES section 9):
   `tests/freshness.test.js`
-- Script Lab pills (locked rows and result chips), one state everywhere,
-  exclusion reset, out-of-date notice, Generate and Highest Artistic
-  ranking, pill layout on desktop and phone:
+- Script Lab, Colman Graves, Analyze Script (Marketing & Release), and Build for Target
+  pills, one state everywhere, exclusion reset, out-of-date notice, Generate
+  and Highest Artistic ranking, pill layout on desktop and phone:
   `tests/e2e/script-lab-freshness.spec.js`,
   `tests/scenarios/script-lab-freshness.feature`
 
 ## Build For Target
 
-- Panel controls, no-filter search, audience/ad agency filters, optional tags,
+- Panel controls, no-filter search, audience/advertiser filters, optional tags,
   reset, rank order:
   `tests/e2e/marketing-release.spec.js`
 - Generator category cardinality, genre uncap, budget width, duplicate tags:
@@ -127,14 +135,15 @@ When adding or editing a scenario, update this file if the behavior belongs to
 one of these product areas. If no test protects it yet, keep the scenario
 `[verified]` or `[unverified]` until a real assertion exists.
 
-## Local Hardening Coverage Pending Integration
+## Integrated Hardening Coverage
 
 The owner approved the fifteen Script Lab scenario corrections and the Graves /
 Build for Target setup corrections on 2026-09-29, retaining separate scenarios
-for starting availability and combination width. Those edits are applied in
-`codex/hardening`; the executable backlog guard is unchanged. New confirmed
-cross-feature contracts live in `tests/scenarios/product-hardening.feature`.
-`.arber/HARDENING_BDD_REVIEW_PACKET.md` records the review and assertion evidence.
+for starting availability and combination width. The scenarios and tests listed
+below are present on `main` at audit baseline `9fb1cac`; they are not pending
+branch integration. Confirmed cross-feature contracts live in
+`tests/scenarios/product-hardening.feature`. The historical approval packet was
+`.arber/HARDENING_BDD_REVIEW_PACKET.md`; it is not a required current file.
 
 - Scoring-data readiness and retry, positive and legitimate-zero scores:
   `tests/scoring-readiness.test.js`, `tests/generation-score-integrity.test.js`,
@@ -144,7 +153,7 @@ cross-feature contracts live in `tests/scenarios/product-hardening.feature`.
   `tests/e2e/hardening-boundaries.spec.js` (TC22-000007),
   `tests/e2e/generation-score-transfers.spec.js` (TC24-000001, 002),
   `tests/e2e/product-hardening.spec.js` (TC20-000001, 002).
-- Insufficient available elements and mandatory-category slots:
+- Insufficient available elements and the required-category slots:
   `tests/generation-pool-hardening.test.js`, `tests/marketing-hardening.test.js`,
   TC20-000003 and TC22-000008/009.
 - Complete evaluation versus partial Best Matches seeds, swaps at a full pool,
@@ -154,12 +163,14 @@ cross-feature contracts live in `tests/scenarios/product-hardening.feature`.
   `tests/e2e/advertiser-fit-parity.spec.js` (TC25-000001) compares displayed fit and
   grades for all eight agencies using the same fully locked script in both views.
   Rendered movie-lean label and specialist fit: TC23-000001 in
-  `tests/e2e/marketing-score-contracts.spec.js`.
+  `tests/e2e/marketing-score-contracts.spec.js`. Displayed recommendation order:
+  TC30-000001 in `tests/e2e/marketing-profile-ranking.spec.js`.
+- An empty Genre percentage is normalized into finite 5% steps totaling 100 in
+  all four builders: `tests/genre-share-empty-input.test.js` and TC29-000001 in
+  `tests/e2e/genre-share-empty-input.spec.js`.
 - Rendered text contrast, focus color stability and suggestion bounds at 390px
   and 1280px: `tests/e2e/readability-hardening.spec.js`. This does not certify
   native operating-system dropdown popups or every responsive width.
 
-TC24-000001 currently fails before generation: changing the pool to nine leaves
-the required-story-element help text at five. Its downstream transfer assertions
-are not yet verified at this boundary; see `docs/KNOWN_ISSUES.md`. Do not count
-that case as passing coverage or promote a corresponding scenario until fixed.
+TC24-000001 now passes at pool nine, including its transfer assertions. The full
+Playwright run on 2026-10-01 passed all three mode cases.

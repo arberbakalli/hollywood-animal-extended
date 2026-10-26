@@ -5,7 +5,7 @@
 #
 # Rules: docs/GAME_RULES.md section 9 (owner rulings 2026-09-29).
 
-Feature: Element freshness in Script Lab
+Feature: Element freshness across script builders
   The game marks each story element Fresh, Stale or Rotten by how often the
   studio used it recently. The player copies that state in with one click,
   wherever the element is shown, and Generate prefers fresh stories.
@@ -96,3 +96,11 @@ Feature: Element freshness in Script Lab
   Scenario: Result chips keep the pill on the chip
     When the user generates scripts and opens them
     Then every pill sits within its element's chip
+
+  # [automated] TC28-000016. One store powers Script Lab, Colman Graves, Analyze Script and Build for Target.
+  Scenario: Changing freshness in one product area updates the others
+    Given Cowboy is selected in Script Lab, Colman Graves, Analyze Script and Build for Target
+    When the user marks Cowboy Stale in Colman Graves
+    Then Script Lab, Analyze Script and Build for Target show Cowboy as Stale
+    When the user marks Cowboy Rotten in Analyze Script
+    Then Script Lab, Colman Graves and Build for Target show Cowboy as Rotten

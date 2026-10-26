@@ -1,4 +1,5 @@
 import { test, expect, openHollywood } from '../fixtures/base.js';
+import { STARTING_BAN_COUNT } from '../fixtures/startingDeck.js';
 
 const MODES = [
   ['standard', '#generateScriptsButton'],
@@ -46,7 +47,7 @@ for (const [mode, button] of MODES) {
   test(`TC24-000001 ${mode}: pool nine preserves partial locks, bans and movie scores through both transfers`, async ({ steps, page }) => {
     await openHollywood(steps);
     await page.locator('#applyStartingTagsButton').click();
-    await expect(page.locator('#excluded-count')).toHaveText('193');
+    await expect(page.locator('#excluded-count')).toHaveText(String(STARTING_BAN_COUNT));
     for (const [category, id] of [
       ['genre', 'ACTION'], ['genre', 'COMEDY'], ['protagonist', 'PROTAGONIST_COWBOY'],
     ]) await lockTag(page, category, id);
@@ -60,7 +61,7 @@ for (const [mode, button] of MODES) {
     await expect(page.locator('#genTagsRequiredDisplay')).toContainText('9 Story Elements');
     await page.locator(button).click();
     const cards = page.locator('#generatorResultsList .gen-card');
-    await expect(cards).toHaveCount(mode === 'standard' ? 5 : 3);
+    await expect(cards).toHaveCount(mode === 'standard' ? 5 : 3, { timeout: 15000 });
     const scripts = await page.evaluate(() => generatedScriptsCache.map(script => ({
       tags: script.tags,
       scores: script.scores,
@@ -68,7 +69,7 @@ for (const [mode, button] of MODES) {
       banned: script.tags.filter(tag => getGeneratorExcludedIds().has(tag.id)),
       evaluated: HACScriptEvaluation.calculateScriptEvaluation(script.tags).movieScores,
     })));
-    expect(scripts).toHaveLength(mode === 'standard' ? 5 : 12);
+    expect(scripts).toHaveLength(mode === 'standard' ? 15 : 12);
     for (const script of scripts) {
       expect(script.storyCount).toBe(9);
       expect(script.evaluated.tagCap).toBe(9);
@@ -76,8 +77,11 @@ for (const [mode, button] of MODES) {
       expect(script.tags.find(tag => tag.id === 'ACTION').percent).toBe(0.8);
       expect(script.tags.find(tag => tag.id === 'COMEDY').percent).toBe(0.2);
       expect(script.tags.filter(tag => tag.id === 'PROTAGONIST_COWBOY')).toHaveLength(1);
-      for (const category of ['Setting', 'Protagonist', 'Antagonist', 'Finale']) {
+      for (const category of ['Setting', 'Protagonist']) {
         expect(script.tags.filter(tag => tag.category === category)).toHaveLength(1);
+      }
+      for (const category of ['Antagonist', 'Finale']) {
+        expect(script.tags.filter(tag => tag.category === category).length).toBeLessThanOrEqual(1);
       }
       for (const field of ['commercial', 'artistic']) {
         expect(Number.isFinite(script.scores[field])).toBe(true);
@@ -93,7 +97,7 @@ for (const [mode, button] of MODES) {
     await expect(page.locator('#gravesScoreCapLabel strong')).toHaveText('9.0');
   });
 
-  test(`TC24-000002 ${mode}: a known positive fully locked script keeps both 7.0 movie scores on transfer`, async ({ steps, page }) => {
+  test(`TC24-000002 ${mode}: a known positive fully locked script keeps both 6.0 movie scores on transfer`, async ({ steps, page }) => {
     await openHollywood(steps);
     for (const [category, id] of [
       ['genre', 'DRAMA'], ['genre', 'COMEDY'], ['setting', 'MODERN_EUROPEAN_CITY'],
@@ -104,12 +108,13 @@ for (const [mode, button] of MODES) {
     ]) await lockTag(page, category, id);
     await page.locator(button).click();
     const cards = page.locator('#generatorResultsList .gen-card');
-    await expect(cards).toHaveCount(mode === 'standard' ? 5 : 3);
+    await expect(cards).toHaveCount(1);
+    await expect(page.locator('#generatorUniquenessNotice')).toContainText('Only 1 unique option');
     const scripts = await page.evaluate(() => generatedScriptsCache.map(script => ({
       tags: script.tags, scores: script.scores,
     })));
-    expect(scripts).toHaveLength(mode === 'standard' ? 5 : 12);
-    for (const script of scripts) expect(script.scores).toEqual({ commercial: 7, artistic: 7 });
+    expect(scripts).toHaveLength(1);
+    for (const script of scripts) expect(script.scores).toEqual({ commercial: 6, artistic: 6 });
     // Bonus ranking and final movie scores are separate quantities in optimized modes.
     const primary = cards.first().locator('.gen-badge-group').first();
     if (mode === 'artistic') {
@@ -121,7 +126,7 @@ for (const [mode, button] of MODES) {
     } else {
       const movieScore = cards.first().locator('.gen-badge-group')
         .filter({ has: page.getByText('Movie Score', { exact: true }) });
-      await expect.poll(async () => Number(await movieScore.locator('.gen-badge-val').textContent())).toBe(7);
+      await expect.poll(async () => Number(await movieScore.locator('.gen-badge-val').textContent())).toBe(6);
     }
     await expectBothTransfers(page, scripts[0]);
   });

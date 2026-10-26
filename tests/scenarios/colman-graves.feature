@@ -181,11 +181,11 @@ Feature: Script Evaluation — Colman Graves
   # [automated] TC03-000031. The first page holds ten suggestions; pagination
   # pins the page size and the cap against the shipped paginateRows().
   Scenario: Only the first ten suggestions are listed
-    Given the user has evaluated a script
+    Given Action is selected as a seed and Minimum Fit is Any
     When the user generates best matches
     Then the first ten suggestions are listed
 
-  # [automated] TC03-000031. The page fills in band order, so a conflicted candidate can never
+  # [automated] TC03-000061. The page fills in band order, so a conflicted candidate can never
   # push a clean one onto page two. Band ordering is enforced by pagination logic.
   Scenario: Stronger suggestions fill the first page before weaker ones
     Given more than ten suggestions qualify
@@ -203,7 +203,7 @@ Feature: Script Evaluation — Colman Graves
   # [automated] TC03-000031. Watched in the app on 2026-09-19 with Action
   # seeded, then pinned by Playwright: the panel opens with 10 rows, the Show
   # more label names remaining suggestions, and the next page preserves the
-  # first ten rows.
+  # first ten rows. The test exhausts all pages and checks the control disappears.
   Scenario: The Show more control names how many suggestions remain
     Given more than ten suggestions qualify
     When the user generates best matches
@@ -300,36 +300,37 @@ Feature: Script Evaluation — Colman Graves
     When the user clicks it again
     Then the successful pair rows expand again
 
-  # [automated] Genre and Setting are exempt from the 5-10 story element budget,
-  # so a complete script sits at the budget when Max Element Pool is at its
-  # default of 5 and Best Additions has nothing it is allowed to offer. The
-  # empty state has to name that, because no fit threshold and no category will
-  # ever produce a row while the budget is full. TC03-000005/8/12/28 raise the
-  # pool first for this reason.
+  # [automated] TC03-000029. Genre and Setting are exempt from the 5-10 story
+  # element budget, so a complete script sits at the budget when Max Element
+  # Pool is at its default of 5. Best Additions then lists Genres only, which
+  # spend no budget (owner ruling 2026-10-01), under a note that names the
+  # budget. TC03-000005/8/12/28 raise the pool first for story-element rows.
   Scenario: Best Additions explains when the element budget is full
     Given the user has evaluated a complete script
     And the Max Element Pool is at its default
     When the user generates Best Additions
-    Then no suggestions are listed
-    And the message says the script already uses all the story elements it is allowed
-    And the message points to Max Element Pool and to Swap Suggestions
-    And the message states that Genre and Setting do not count toward the budget
+    Then only Genre suggestions are listed
+    And the note says the script already uses all the story elements it is allowed
+    And the note points to Max Element Pool and to Swap Suggestions
+    And the note states that Genre and Setting do not count toward the budget
 
   # [automated] TC03-000030. The auto-widening retry must not leave the control reading a
   # threshold the user never chose, or the next search silently runs under the
   # wrong filter.
   Scenario: A failed search restores the minimum fit the user chose
     Given the user has set the minimum fit to "4.0+"
+    And Match Category is a story category the full budget leaves empty
     When the user generates Best Additions and nothing is found at any threshold
     Then the minimum fit control still reads "4.0+"
 
-  # [automated] TC03-000031. Best Matches additions are not limited to the Starting Tags deck.
+  # [automated] TC03-000060. Best Matches additions are not limited to the Starting Tags deck.
   # Single source of truth is Script Lab exclusions.
   Scenario: All available tags are shown in Best Matches suggestions
-    Given the user has evaluated a script
+    Given Action is selected as a seed and Minimum Fit is Any
+    And Wild West is globally excluded in Script Lab
     When the user generates best matches
     Then no "Starting tags only" checkbox is visible
-    And all non-excluded tags from their categories are eligible for suggestion
+    And every other non-excluded tag is listed after revealing all suggestions
 
   # [automated] BUG-001 and BUG-003. Search fields must not disappear while the user is typing
   # or after a search has no matches.
@@ -340,3 +341,74 @@ Feature: Script Evaluation — Colman Graves
     When the user searches for text with no matching Finale
     Then the Finale search field remains visible
     And the Finale search wrapper remains visible
+
+  # [automated] TC03-000041, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: An element in an Unsuccessful pair gets a Swap slot that clears the clash
+    Given a script where Long Journey scores 1.0 with Evil Monster
+    And no swap for Long Journey raises the script average
+    When the user opens Swap Suggestions
+    Then Long Journey has a slot that names the clash with Evil Monster
+    And the slot lists replacements that clear the clash
+
+  # [automated] TC03-000042, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Swap Suggestions never brings a clashing element back
+    Given the user removed Long Journey because it clashed with Evil Monster
+    When the user generates Best Matches again and opens Swap Suggestions
+    Then Long Journey is not offered as a replacement
+    And no Swap Suggestion is in the Unsuccessful band
+
+  # [automated] TC03-000043, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Best Additions says why the list is short
+    Given a script with 6 story elements and a Max Element Pool of 8
+    And fewer than 2 story elements clear the Minimum Fit
+    When the user generates Best Matches
+    Then a note says the script has room for 2 more story elements
+    And the note says to lower Minimum Fit to see more
+
+  # [automated] TC03-000044, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner report 2026-09-30.
+  Scenario: Removing a clashing element with its remove button leaves no trace in Best Matches
+    Given Best Matches has run for a script with Long Journey
+    When the user removes Long Journey with its remove button
+    Then no Best Matches tab offers or mentions Long Journey, before or after generating again
+
+  # [automated] TC03-000045, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner request 2026-09-30.
+  Scenario: The short-list note lowers Minimum Fit in one click
+    Given Best Additions shows the short-list note at 4.0+
+    When the user clicks "Lower to 3.5+"
+    Then Minimum Fit is 3.5
+    And the list shows enough story elements to fill the free slots
+
+  # [automated] TC03-000046..49, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario Outline: Changing the script after Evaluate hides the old results
+    Given Evaluate shows the Long Journey x Evil Monster clash
+    When the user <change> without pressing Evaluate
+    Then the five Evaluate panels are hidden
+    And a notice says "Script changed. Press Evaluate Script to update."
+
+    Examples:
+      | change                                   |
+      | picks another Theme in a dropdown        |
+      | removes Long Journey with its remove button |
+      | presses Reset                            |
+      | changes a Genre share                    |
+
+  # [automated] TC03-000050, tests/e2e/bug-hunt-2026-09-30.spec.js. Owner ruling 2026-09-30.
+  Scenario: Adding an empty row after Evaluate keeps the results
+    Given Evaluate has shown its results
+    When the user adds an empty Theme & Event row
+    Then the results stay visible, because the script did not change
+
+  # [automated] TC03-000059, tests/e2e/best-matches-actions.spec.js. Owner request 2026-10-01,
+  # after Evil Transformation vanished from the builder on 2026-09-30.
+  Scenario Outline: No Best Matches action loses, duplicates or adds a stray element
+    Given a script with three <category> picks
+    When the user presses each Add and Swap button in every Best Matches tab, and one more after it
+    Then the incoming element is in the script
+    And no other element has vanished
+    And no element is in the script twice
+
+    Examples:
+      | category             |
+      | Theme & Event        |
+      | Supporting Character |
+      | Genre                |
